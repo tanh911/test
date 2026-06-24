@@ -69,8 +69,8 @@ for row in reader:
     img = row.get('image_paths', '').strip()
     vid = row.get('video_paths', '').strip()
     
-    image_url = f"https://raw.githubusercontent.com/yowmamasita/driving-theory/main/{img}" if img else None
-    video_url = f"https://raw.githubusercontent.com/yowmamasita/driving-theory/main/{vid}" if vid else None
+    image_url = f"/{img}" if img else None
+    video_url = f"/{vid}" if vid else None
     
     raw_questions.append({
         "id": q_id,
