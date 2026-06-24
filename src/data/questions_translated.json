@@ -1,0 +1,692 @@
+[
+  {
+    "id": 1,
+    "category": "Vorfahrt",
+    "points": 3,
+    "imageType": "svg-vorfahrt-rechts-links",
+    "textDe": "An einer Kreuzung gilt die Regel 'Rechts vor Links'. Welches Fahrzeug hat Vorfahrt?",
+    "textVi": "Tại ngã tư áp dụng quy tắc 'Bên phải trước bên trái'. Xe nào được đi trước?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Das Fahrzeug, das von links kommt",
+        "textVi": "Xe đi tới từ phía bên trái"
+      },
+      {
+        "id": "B",
+        "textDe": "Das Fahrzeug, das von rechts kommt",
+        "textVi": "Xe đi tới từ phía bên phải",
+        "isCorrect": true
+      },
+      {
+        "id": "C",
+        "textDe": "Das größere Fahrzeug hat immer Vorrang",
+        "textVi": "Xe lớn hơn luôn có quyền ưu tiên"
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "die Kreuzung",
+        "vi": "ngã tư, giao lộ"
+      },
+      {
+        "de": "Rechts vor Links",
+        "vi": "bên phải trước bên trái (quy tắc nhường đường)"
+      },
+      {
+        "de": "die Vorfahrt",
+        "vi": "quyền ưu tiên đi trước"
+      },
+      {
+        "de": "das Fahrzeug",
+        "vi": "phương tiện giao thông"
+      }
+    ],
+    "explanationDe": "An Kreuzungen und Einmündungen ohne vorfahrtregelnde Schilder gilt grundsätzlich die gesetzliche Regel 'Rechts vor Links'. Wer von rechts kommt, hat Vorfahrt.",
+    "explanationVi": "Tại các ngã tư và ngả rẽ không có biển báo quy định quyền ưu tiên, quy tắc luật định 'Bên phải trước bên trái' luôn được áp dụng. phương tiện đến từ phía bên phải tại giao lộ bạn có quyền đi trước.",
+    "aiExplanation": "Chào bạn! Đây là một câu hỏi rất cơ bản nhưng cực kỳ quan trọng trong luật giao thông Đức (StVO § 8).\n\n1. **Quy tắc cốt lõi**: 'Rechts vor Links' (Phải trước, trái sau) áp dụng tại mọi giao lộ KHÔNG có biển báo ưu tiên hoặc đèn tín hiệu.\n2. **Cách áp dụng thực tế**: Khi bạn đến ngã tư, hãy nhìn sang bên phải của bạn. Nếu có xe ở đường bên phải, bạn PHẢI nhường đường cho xe đó. Đồng thời, xe bên trái bạn phải nhường đường cho bạn.\n3. **Tại sao đáp án C sai**: Kích thước xe không quyết định quyền ưu tiên ở Đức. Xe bus hay xe tải cũng phải nhường đường cho xe con hoặc thậm chí xe đạp nếu xe đó đi từ phía bên phải tới.\n4. **Mẹo ghi nhớ**: Luôn giảm tốc độ khi đến ngã tư không biển báo để sẵn sàng nhường đường cho xe bên phải."
+  },
+  {
+    "id": 2,
+    "category": "Verkehrszeichen",
+    "points": 4,
+    "imageType": "svg-sign-stop",
+    "textDe": "Was müssen Sie an diesem Verkehrszeichen beachten?",
+    "textVi": "Bạn phải chú ý điều gì tại biển báo giao thông này (Biển STOP)?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Immer an der Haltlinie anhalten und Vorfahrt gewähren",
+        "textVi": "Luôn luôn dừng lại tại vạch dừng (Haltlinie) và nhường đường",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Wenn keine Haltlinie vorhanden ist, an der Sichtlinie anhalten",
+        "textVi": "Nếu không có vạch dừng, phải dừng tại vạch tầm nhìn (Sichtlinie)",
+        "isCorrect": true
+      },
+      {
+        "id": "C",
+        "textDe": "Nur anhalten, wenn Querverkehr kommt",
+        "textVi": "Chỉ dừng lại khi có phương tiện cắt ngang đi qua"
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "anhalten",
+        "vi": "dừng lại"
+      },
+      {
+        "de": "die Haltlinie",
+        "vi": "vạch dừng (vạch sơn liền ngang đường)"
+      },
+      {
+        "de": "die Sichtlinie",
+        "vi": "vạch tầm nhìn (nơi bắt đầu quan sát được đường cắt ngang)"
+      },
+      {
+        "de": "der Querverkehr",
+        "vi": "phương tiện giao thông cắt ngang"
+      }
+    ],
+    "explanationDe": "Am Stoppschild (Zeichen 206) ist das Anhalten Pflicht. Sie müssen an der Haltlinie stoppen. Gibt es keine, halten Sie an der Sichtlinie. Sie müssen Querverkehr Vorfahrt gewähren.",
+    "explanationVi": "Tại biển báo dừng lại (Biển 206), việc dừng xe là bắt buộc. Bạn phải dừng hẳn xe tại vạch dừng. Nếu không có vạch, hãy dừng tại vạch tầm nhìn. Bạn phải nhường đường cho tất cả xe trên đường cắt ngang.",
+    "aiExplanation": "Chào bạn, đây là câu hỏi lý thuyết lái xe Đức về Biển STOP (Zeichen 206) thường xuyên xuất hiện trong đề thi thực tế.\n\n* **Quy tắc dừng**: Bạn bắt buộc phải dừng xe hẳn (bánh xe ngừng quay hoàn toàn - thường khuyên nên dừng tối thiểu 3 giây). Chỉ giảm tốc độ đi chậm là bị đánh trượt trong bài thi thực hành!\n* **Dừng ở đâu?**:\n  1. Nếu có **vạch dừng (Haltlinie)** sơn trên đường: Phải dừng ngay trước vạch này.\n  2. Nếu **không có vạch**: Bạn phải tiến tới vị trí mà bạn có thể nhìn rõ cả hai hướng của đường cắt ngang (gọi là **Sichtlinie** - vạch tầm nhìn) và dừng lại ở đó.\n* **Tại sao đáp án C sai**: Dù đường có vắng tanh không một bóng xe, bạn vẫn BẮT BUỘC phải dừng xe hoàn toàn. Hành vi không dừng hẳn tại biển STOP sẽ bị phạt nặng và là lỗi trượt lập tức khi thi thực hành lái xe ở Đức."
+  },
+  {
+    "id": 3,
+    "category": "Autobahn",
+    "points": 2,
+    "imageType": "svg-autobahn",
+    "textDe": "Was ist die Richtgeschwindigkeit für Personenkraftwagen auf Autobahnen in Deutschland bei günstigen Straßenverhältnissen?",
+    "textVi": "Tốc độ khuyến nghị tối đa (Richtgeschwindigkeit) cho xe ô tô con trên đường cao tốc ở Đức trong điều kiện đường xá tốt là bao nhiêu?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "100 km/h",
+        "textVi": "100 km/h"
+      },
+      {
+        "id": "B",
+        "textDe": "120 km/h",
+        "textVi": "120 km/h"
+      },
+      {
+        "id": "C",
+        "textDe": "130 km/h",
+        "textVi": "130 km/h",
+        "isCorrect": true
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "die Richtgeschwindigkeit",
+        "vi": "tốc độ khuyến nghị (không bắt buộc nhưng khuyên dùng)"
+      },
+      {
+        "de": "der Personenkraftwagen (Pkw)",
+        "vi": "xe ô tô con, xe du lịch dưới 9 chỗ"
+      },
+      {
+        "de": "die Autobahn",
+        "vi": "đường cao tốc"
+      },
+      {
+        "de": "günstige Straßenverhältnisse",
+        "vi": "điều kiện đường xá thuận lợi (khô ráo, tầm nhìn tốt)"
+      }
+    ],
+    "explanationDe": "Die Richtgeschwindigkeit auf deutschen Autobahnen beträgt für Pkw und andere Kraftfahrzeuge bis 3,5 t zulässiger Gesamtmasse 130 km/h, sofern kein Tempolimit ausgeschildert ist.",
+    "explanationVi": "Tốc độ khuyến nghị trên đường cao tốc Đức đối với xe con và các phương tiện dưới 3.5 tấn là 130 km/h, miễn là không có biển giới hạn tốc độ cụ thể.",
+    "aiExplanation": "Chào bạn! Đây là câu hỏi về tốc độ trên Autobahn (Đường cao tốc Đức) rất nổi tiếng.\n\n* **Richtgeschwindigkeit (Tốc độ khuyến nghị)**: Ở Đức, trên các đoạn Autobahn không có biển hạn chế tốc độ (Free-way), chính phủ khuyến nghị tốc độ lái xe an toàn tối đa là **130 km/h**.\n* **Ý nghĩa pháp lý**: Tốc độ này không phải giới hạn bắt buộc (bạn có thể chạy nhanh hơn nếu xe và đường cho phép). Tuy nhiên, nếu xảy ra tai nạn khi bạn chạy quá 130 km/h ở đoạn đường không giới hạn, bạn có thể phải chịu một phần trách nhiệm liên đới (Mithaftung) dù bạn không trực tiếp gây ra lỗi lỗi lái xe, vì bảo hiểm coi việc chạy >130 km/h làm tăng nguy cơ rủi ro."
+  },
+  {
+    "id": 4,
+    "category": "Verhalten",
+    "points": 4,
+    "imageType": "svg-probezeit",
+    "textDe": "Welche Promillegrenze gilt für Fahranfänger in der Probezeit und für Fahrer unter 21 Jahren?",
+    "textVi": "Giới hạn nồng độ cồn (Promille) nào áp dụng cho tài xế mới trong thời gian thử thách và tài xế dưới 21 tuổi?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "0,0 Promille",
+        "textVi": "0,0 Promille (Cấm tuyệt đối)",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "0,3 Promille",
+        "textVi": "0,3 Promille"
+      },
+      {
+        "id": "C",
+        "textDe": "0,5 Promille",
+        "textVi": "0,5 Promille"
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "die Promillegrenze",
+        "vi": "giới hạn nồng độ cồn trong máu (tính bằng phần nghìn)"
+      },
+      {
+        "de": "der Fahranfänger",
+        "vi": "người mới lái xe (đang trong thời gian tập sự/thử thách)"
+      },
+      {
+        "de": "die Probezeit",
+        "vi": "thời gian thử thách (thường là 2 năm sau khi lấy bằng)"
+      }
+    ],
+    "explanationDe": "Für Fahranfänger in der Probezeit sowie für alle Fahrer unter 21 Jahren gilt eine strikte Alkoholgrenze von 0,0 Promille. Verstöße werden schwer sanktioniert.",
+    "explanationVi": "Đối với người mới lái xe trong thời gian thử thách (Probezeit) và tất cả lái xe dưới 21 tuổi, luật quy định giới hạn cồn tuyệt đối là 0,0 Promille. Vi phạm sẽ bị phạt rất nặng và kéo dài thời gian thử thách.",
+    "aiExplanation": "Chào bạn! Đây là câu hỏi pháp luật cực kỳ quan trọng đối với các học viên thi bằng lái xe ở Đức.\n\n* **Quy tắc Không cồn (Null-Promille-Grenze)**:\n  - Áp dụng cho **tất cả người lái xe dưới 21 tuổi**.\n  - Áp dụng cho **tất cả những người đang trong thời gian thử thách 2 năm (Probezeit)** bất kể độ tuổi.\n* **Hậu quả vi phạm**:\n  - Bị phạt tiền (từ 250 Euro).\n  - Bị cộng 1 điểm phạt ở Flensburg.\n  - **Bắt buộc tham gia khóa học đặc biệt bổ sung (Aufbauseminar - ASF)** trị giá khoảng 300-500 Euro.\n  - **Thời gian thử thách (Probezeit) sẽ bị kéo dài từ 2 năm lên thành 4 năm**.\n* Với tài xế thông thường (trên 21 tuổi và hết Probezeit), giới hạn phạt hành chính là **0,5 Promille**, tuy nhiên nếu lái xe loạng choạng hoặc tai nạn thì từ **0,3 Promille** đã có thể bị truy tố hình sự."
+  },
+  {
+    "id": 5,
+    "category": "Technik & Formeln",
+    "points": 3,
+    "imageType": null,
+    "textDe": "Wie lautet die Faustformel zur Berechnung des normalen Bremswegs in Metern?",
+    "textVi": "Công thức tính nhanh quãng đường phanh thông thường (Bremsweg) bằng mét là gì?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "(Geschwindigkeit / 10) x 3",
+        "textVi": "(Tốc độ / 10) x 3 (Đây là công thức tính quãng đường phản ứng - Reaktionsweg)"
+      },
+      {
+        "id": "B",
+        "textDe": "(Geschwindigkeit / 10) x (Geschwindigkeit / 10)",
+        "textVi": "(Tốc độ / 10) x (Tốc độ / 10)",
+        "isCorrect": true
+      },
+      {
+        "id": "C",
+        "textDe": "(Geschwindigkeit / 10) x 5",
+        "textVi": "(Tốc độ / 10) x 5"
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "die Faustformel",
+        "vi": "công thức tính nhẩm nhanh, công thức kinh nghiệm"
+      },
+      {
+        "de": "der Bremsweg",
+        "vi": "quãng đường phanh (từ lúc nhấn phanh đến khi xe dừng hẳn)"
+      },
+      {
+        "de": "die Geschwindigkeit",
+        "vi": "tốc độ di chuyển"
+      }
+    ],
+    "explanationDe": "Der normale Bremsweg in Metern wird mit der Faustformel (Geschwindigkeit / 10) x (Geschwindigkeit / 10) berechnet. Bei einer Gefahrbremsung wird das Ergebnis halbiert.",
+    "explanationVi": "Quãng đường phanh thông thường được tính bằng công thức: (Tốc độ / 10) x (Tốc độ / 10). Nếu là phanh khẩn cấp (Gefahrbremsung), quãng đường phanh sẽ giảm một nửa.",
+    "aiExplanation": "Chào bạn! Các công thức tính nhẩm toán học lái xe (Faustformeln) luôn xuất hiện trong phần thi lý thuyết và làm học viên đau đầu nhất. Hãy cùng phân tích nhé:\n\n1. **Ba công thức cơ bản cần nhớ**:\n   * **Reaktionsweg (Quãng đường phản ứng)**: Từ lúc phát hiện chướng ngại vật đến khi chân đạp vào phanh (mất khoảng 1 giây).\n     * Công thức: `(Tốc độ / 10) x 3`\n   * **Bremsweg (Quãng đường phanh)**: Từ lúc đạp phanh đến khi xe dừng hẳn.\n     * Công thức phanh thường: `(Tốc độ / 10) x (Tốc độ / 10)`\n     * Công thức phanh khẩn cấp (Gefahrbremsung): `((Tốc độ / 10) x (Tốc độ / 10)) / 2` (do lực phanh mạnh gấp đôi)\n   * **Anhalteweg (Tổng quãng đường dừng)**: Bằng quãng đường phản ứng cộng quãng đường phanh.\n     * Công thức: `Reaktionsweg + Bremsweg`\n\n* **Ví dụ thực tế**: Bạn đang chạy xe với tốc độ **50 km/h**:\n  - Quãng đường phản ứng = `(50 / 10) x 3 = 15 mét`.\n  - Quãng đường phanh thường = `(50 / 10) x (50 / 10) = 5 x 5 = 25 mét`.\n  - Tổng quãng đường dừng xe = `15 + 25 = 40 mét`."
+  },
+  {
+    "id": 6,
+    "category": "Vorfahrt",
+    "points": 5,
+    "imageType": "svg-sign-yield",
+    "textDe": "Sie nähern sich einer Kreuzung mit diesem Verkehrszeichen (Vorfahrt gewähren). Was müssen Sie tun?",
+    "textVi": "Bạn đang tiến gần đến ngã tư có biển báo này (Biển Nhường đường). Bạn phải làm gì?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Vorfahrt gewähren und die Geschwindigkeit anpassen, um bremsbereit zu sein",
+        "textVi": "Nhường quyền đi trước và điều chỉnh tốc độ để sẵn sàng phanh dừng",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Auf jeden Fall an der Kreuzung anhalten, auch wenn kein anderes Auto kommt",
+        "textVi": "Bắt buộc phải dừng lại ở ngã tư trong mọi trường hợp, ngay cả khi không có xe khác"
+      },
+      {
+        "id": "C",
+        "textDe": "Dem Querverkehr Vorfahrt gewähren",
+        "textVi": "Nhường quyền ưu tiên cho các phương tiện trên đường cắt ngang",
+        "isCorrect": true
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "sich nähern",
+        "vi": "tiến lại gần, tiếp cận"
+      },
+      {
+        "de": "Vorfahrt gewähren",
+        "vi": "nhường quyền ưu tiên đi trước"
+      },
+      {
+        "de": "bremsbereit sein",
+        "vi": "sẵn sàng phanh xe"
+      },
+      {
+        "de": "auf jeden Fall",
+        "vi": "trong mọi trường hợp, chắc chắn"
+      }
+    ],
+    "explanationDe": "Das Schild 'Vorfahrt gewähren!' (Zeichen 205) fordert Sie auf, dem Querverkehr Vorfahrt zu gewähren. Sie müssen nicht zwingend stoppen, wenn die Kreuzung frei ist, aber Sie müssen bremsbereit sein.",
+    "explanationVi": "Biển báo 'Nhường đường!' (Biển 205) yêu cầu bạn nhường ưu tiên cho phương tiện đường cắt ngang. Bạn không bắt buộc phải dừng hẳn xe nếu ngã tư hoàn toàn vắng, nhưng bạn phải đi chậm sẵn sàng phanh.",
+    "aiExplanation": "Chào bạn! Đây là câu hỏi phân biệt rất quan trọng giữa biển **Nhường đường (Vorfahrt gewähren - Biển tam giác ngược)** và biển **STOP (Biển bát giác)**.\n\n* **Khác biệt cốt lõi**:\n  - Với biển **STOP**: Bạn **phải dừng xe hẳn 100%** dù đường trống.\n  - Với biển **Nhường đường (Vorfahrt gewähren)**: Bạn **không bắt buộc phải dừng hẳn xe** nếu bạn quan sát thấy rõ đường cắt ngang không có xe nào đang đi tới. Bạn có thể tiếp tục lăn bánh chậm qua giao lộ.\n* **Tại sao đáp án A und C đúng**:\n  - Bạn phải nhường đường cho xe chạy trên đường cắt ngang (Querverkehr).\n  - Bạn phải đi chậm lại để đề phòng trường hợp có xe xuất hiện đột ngột và bạn sẵn sàng phanh kịp thời (bremsbereit).\n* **Mẹo thi lý thuyết**: Hãy cẩn thận đọc kỹ câu chữ. Các đáp án có chứa từ khóa mang tính tuyệt đối như 'Auf jeden Fall anhalten' (bắt buộc phải dừng trong mọi trường hợp) đối với biển tam giác ngược thường là đáp án sai."
+  },
+  {
+    "id": 7,
+    "category": "Verkehrszeichen",
+    "points": 3,
+    "imageType": "svg-sign-priority-road",
+    "textDe": "Was zeigt Ihnen dieses Verkehrszeichen (gelbe Raute)?",
+    "textVi": "Biển báo giao thông này (Hình thoi màu vàng) cho bạn biết điều gì?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Sie befinden sich auf einer Vorfahrtsstraße",
+        "textVi": "Bạn đang đi trên đường ưu tiên (được ưu tiên tại các ngã tư tiếp theo)",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Das Schild gilt ab der nächsten Kreuzung nicht mehr",
+        "textVi": "Biển báo này không còn giá trị hiệu lực kể từ ngã tư tiếp theo"
+      },
+      {
+        "id": "C",
+        "textDe": "Fahrzeuge, die auf diese Straße einbiegen möchten, müssen Ihnen Vorfahrt gewähren",
+        "textVi": "Các phương tiện muốn rẽ vào đường này phải nhường đường cho bạn",
+        "isCorrect": true
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "die Vorfahrtsstraße",
+        "vi": "đường ưu tiên"
+      },
+      {
+        "de": "einbiegen",
+        "vi": "rẽ vào (một con đường khác)"
+      },
+      {
+        "de": "gelbe Raute",
+        "vi": "hình thoi màu vàng"
+      }
+    ],
+    "explanationDe": "Das Zeichen 306 zeigt an, dass Sie sich auf einer Vorfahrtsstraße befinden. Sie haben Vorfahrt an den folgenden Kreuzungen, bis das Schild durch ein durchgestrichenes Zeichen aufgehoben wird.",
+    "explanationVi": "Biển báo 306 biểu thị bạn đang di chuyển trên đường ưu tiên. Bạn có quyền đi trước tại các ngã tư tiếp theo cho đến khi gặp biển báo hủy bỏ (hình thoi có gạch chéo màu đen).",
+    "aiExplanation": "Chào bạn, đây là biển báo **Vorfahrtsstraße (Biển đường ưu tiên - Zeichen 306)**.\n\n* **Đặc điểm của biển báo này**:\n  - Khi gặp biển này, bạn có quyền ưu tiên đi trước tại các ngã tư tiếp theo. Quyền ưu tiên này kéo dài liên tục cho đến khi bạn nhìn thấy biển báo hủy bỏ (hình thoi vàng có 3 vạch chéo màu đen).\n  - Xe từ các ngõ phụ hoặc đường nhánh rẽ vào (einbiegen) đường của bạn bắt buộc phải nhường đường cho bạn.\n* **Lưu ý đặc biệt khi thi thực hành**:\n  - Dù bạn đang trên đường ưu tiên, bạn vẫn phải quan sát kỹ xung quanh. Nếu có xe ưu tiên khẩn cấp (xe cứu thương, cứu hỏa hú còi), bạn vẫn phải nhường đường cho họ.\n  - Ở trong đô thị, biển này thường được đặt trước ngã tư. Ngoài đô thị (Landstraße), biển này thường được đặt sau ngã tư."
+  },
+  {
+    "id": 8,
+    "category": "Verhalten",
+    "points": 4,
+    "imageType": null,
+    "textDe": "Wie verhalten Sie sich bei einer 'Rettungsgasse' auf einer Autobahn mit drei Fahrstreifen?",
+    "textVi": "Bạn phải ứng xử như thế nào để tạo 'làn đường cứu hộ' (Rettungsgasse) trên đường cao tốc có 3 làn xe?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Zwischen dem linken und dem mittleren Fahrstreifen freihalten",
+        "textVi": "Tạo lối đi trống ở giữa làn ngoài cùng bên trái và làn ở giữa",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Zwischen dem mittleren und dem rechten Fahrstreifen freihalten",
+        "textVi": "Tạo lối đi trống ở giữa làn ở giữa và làn bên phải"
+      },
+      {
+        "id": "C",
+        "textDe": "Die Fahrzeuge auf der linken Spur weichen nach links aus, alle anderen nach rechts",
+        "textVi": "Các xe ở làn bên trái di chuyển sát về bên trái, tất cả các làn khác di chuyển sát về bên phải",
+        "isCorrect": true
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "die Rettungsgasse",
+        "vi": "làn đường cứu hộ khẩn cấp (cho xe cứu thương/cảnh sát)"
+      },
+      {
+        "de": "der Fahrstreifen",
+        "vi": "làn đường chạy xe"
+      },
+      {
+        "de": "ausweichen",
+        "vi": "tránh sang một bên, né tránh"
+      }
+    ],
+    "explanationDe": "Bei Stau auf Autobahnen muss eine Rettungsgasse gebildet werden. Diese liegt bei drei Spuren immer zwischen der linken Spur und der mittleren Spur. Die linke Spur weicht nach links aus, alle anderen nach rechts.",
+    "explanationVi": "Khi xảy ra tắc đường trên cao tốc, việc tạo làn cứu hộ là bắt buộc. Làn cứu hộ ở đường 3 làn nằm giữa làn bên trái ngoài cùng và làn giữa. Các xe ở làn trái né sang trái, các xe ở các làn còn lại né sang phải.",
+    "aiExplanation": "Chào bạn! Quy tắc tạo làn cứu hộ **Rettungsgasse** là nét văn hóa giao thông cực kỳ văn minh và bắt buộc tại Đức (StVO § 11 Abs. 2). Bạn rất dễ gặp câu hỏi này trong đề thi.\n\n* **Quy tắc vàng để nhớ** (Quy tắc bàn tay phải):\n  - Hãy xòe bàn tay phải của bạn ra, ngón cái đại diện cho làn ngoài cùng bên trái (Spur bên trái), các ngón còn lại đại diện cho các làn khác.\n  - Khoảng trống giữa ngón cái và ngón trỏ chính là **Rettungsgasse**. Nó luôn nằm giữa **làn ngoài cùng bên trái** và **làn bên cạnh nó**.\n* **Cách thực hiện**:\n  - Xe ở làn bên trái di chuyển sát mép trái đường (có thể đè lên vạch phân làn trái).\n  - Xe ở tất cả các làn còn lại (làn giữa, làn phải) di chuyển sát về bên phải đường.\n* **Khi nào phải tạo?**:\n  - Phải tạo ngay khi xe bắt đầu đi chậm lại hoặc tắc đường (Stau), chứ không phải chờ đến khi nghe thấy tiếng còi hú của xe cứu thương mới bắt đầu tránh!"
+  },
+  {
+    "id": 9,
+    "category": "Technik & Formeln",
+    "points": 3,
+    "imageType": null,
+    "textDe": "Welche Mindestprofiltiefe müssen die Reifen Ihres Fahrzeugs gesetzlich aufweisen?",
+    "textVi": "Độ sâu gai lốp tối thiểu (Mindestprofiltiefe) của lốp xe theo luật định là bao nhiêu?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "1,0 mm",
+        "textVi": "1,0 mm"
+      },
+      {
+        "id": "B",
+        "textDe": "1,6 mm",
+        "textVi": "1,6 mm (Giới hạn luật định tối thiểu)",
+        "isCorrect": true
+      },
+      {
+        "id": "C",
+        "textDe": "4,0 mm für Winterreifen empfohlen, aber nicht das gesetzliche Minimum",
+        "textVi": "4,0 mm (Khuyến nghị cho lốp mùa đông, nhưng không phải mức tối thiểu của luật)",
+        "isCorrect": true
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "die Profiltiefe",
+        "vi": "độ sâu rãnh lốp, gai lốp"
+      },
+      {
+        "de": "der Reifen",
+        "vi": "lốp xe"
+      },
+      {
+        "de": "gesetzlich",
+        "vi": "theo luật pháp quy định"
+      },
+      {
+        "de": "aufweisen",
+        "vi": "xuất trình, có, đạt được"
+      }
+    ],
+    "explanationDe": "Die gesetzlich vorgeschriebene Mindestprofiltiefe für Reifen beträgt in Deutschland 1,6 mm. Für Winterreifen empfehlen Experten aus Sicherheitsgründen jedoch mindestens 4 mm.",
+    "explanationVi": "Độ sâu rãnh lốp tối thiểu theo luật quy định tại Đức là 1,6 mm cho cả lốp mùa hè và mùa đông. Tuy nhiên, các chuyên gia khuyến nghị lốp mùa đông nên có ít nhất 4 mm để đảm bảo an toàn.",
+    "aiExplanation": "Chào bạn! Đây là câu hỏi về kỹ thuật xe và an toàn lốp rất phổ biến.\n\n* **Giới hạn tối thiểu theo luật (Gesetzliche Mindestprofiltiefe)**: Luật định bắt buộc lốp xe (chạy trên đường công cộng) phải có độ sâu gai lốp tối thiểu là **1,6 mm**. Nếu thấp hơn mức này, xe của bạn không đủ điều kiện an toàn, bạn sẽ bị phạt tiền, cộng điểm phạt và lốp xe không được thông qua kỳ đăng kiểm (TÜV).\n* **Khuyến nghị an toàn (Empfehlung)**:\n  - Lốp mùa hè: Nên thay khi độ sâu dưới **3,0 mm**.\n  - Lốp mùa đông (Winterreifen): Nên có độ sâu ít nhất **4,0 mm** để bám tuyết và nước tốt. Tuy nhiên cần lưu ý, con số 4,0 mm này là khuyến nghị an toàn, còn luật pháp thì vẫn phạt khi lốp dưới **1,6 mm**.\n* **Cách kiểm tra nhanh**: Bạn có thể dùng đồng xu 1 Euro. Viền vàng của đồng xu 1 Euro dày đúng 3 mm. Nếu bạn cắm đồng xu vào rãnh lốp mà vẫn nhìn thấy viền vàng thì lốp của bạn đã mòn quá mức khuyến nghị."
+  },
+  {
+    "id": 10,
+    "category": "Umwelt",
+    "points": 2,
+    "imageType": "svg-sign-umweltzone",
+    "textDe": "Sie möchten in eine Umweltzone einfahren. Was ist dafür zwingend erforderlich?",
+    "textVi": "Bạn muốn đi xe vào khu vực bảo vệ môi trường (Umweltzone). Điều gì là bắt buộc phải có?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Eine entsprechende Feinstaubplakette an der Windschutzscheibe",
+        "textVi": "Một nhãn dán bụi mịn tương ứng (Feinstaubplakette) dán trên kính chắn gió trước",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Ein Elektro- oder Hybridfahrzeug",
+        "textVi": "Bắt buộc phải là xe chạy điện hoặc xe Hybrid"
+      },
+      {
+        "id": "C",
+        "textDe": "Der Nachweis einer aktuellen Abgasuntersuchung im Handschuhfach",
+        "textVi": "Giấy tờ chứng nhận kiểm tra khí thải gần nhất để trong cốp xe phụ"
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "die Umweltzone",
+        "vi": "khu vực bảo vệ môi trường (trong thành phố)"
+      },
+      {
+        "de": "die Feinstaubplakette",
+        "vi": "nhãn dán màu phân loại khí thải/bụi mịn (xanh lá, vàng, đỏ)"
+      },
+      {
+        "de": "die Windschutzscheibe",
+        "vi": "kính chắn gió trước xe"
+      },
+      {
+        "de": "zwingend erforderlich",
+        "vi": "bắt buộc tuyệt đối cần thiết"
+      }
+    ],
+    "explanationDe": "Um in eine ausgeschilderte Umweltzone einzufahren, benötigt Ihr Fahrzeug eine gültige Feinstaubplakette (meistens grün), die gut sichtbar an der Innenseite der Windschutzscheibe angebracht sein muss.",
+    "explanationVi": "Để lái xe vào khu vực Umweltzone, phương tiện của bạn bắt buộc phải dán nhãn bụi mịn Feinstaubplakette hợp lệ (hầu hết là nhãn xanh lá cây - Green badge) ở phía trong kính chắn gió trước xe.",
+    "aiExplanation": "Chào bạn! Đây là câu hỏi liên quan đến bảo vệ môi trường và quy định đô thị tại Đức.\n\n* **Umweltzone (Khu vực xanh thành phố)**: Nhiều thành phố lớn của Đức (như Berlin, Munich, Frankfurt, v.v.) quy định khu vực trung tâm là vùng bảo vệ môi trường để giảm thiểu ô nhiễm bụi mịn.\n* **Feinstaubplakette (Nhãn bụi mịn)**:\n  - Xe muốn đi vào đây bắt buộc phải dán nhãn tròn Feinstaubplakette ở góc dưới bên phải kính chắn gió trước (nhìn từ trong xe ra).\n  - Nhãn này có 3 màu: Đỏ (Nhóm 2 - ô nhiễm nhiều), Vàng (Nhóm 3), Xanh lá (Nhóm 4 - sạch nhất). Hầu hết các khu vực trung tâm hiện nay chỉ cho phép nhãn **Xanh lá cây (Grüne Plakette)** đi vào.\n* **Lưu ý**: Kể cả xe điện (Elektroauto) cũng vẫn phải dán nhãn xanh lá cây này để chứng minh phân loại xe khi vào vùng Umweltzone. Nếu đi vào khu vực này mà không dán nhãn hợp lệ, bạn sẽ bị phạt hành chính 100 Euro."
+  },
+  {
+    "id": 11,
+    "category": "Verhalten",
+    "points": 5,
+    "imageType": null,
+    "textDe": "Ein Bus hält an einer Haltestelle mit Warnblinklicht eingeschaltet. Was müssen Sie beim Vorbeifahren beachten?",
+    "textVi": "Một chiếc xe buýt dừng ở trạm dừng và bật đèn nháy cảnh báo khẩn cấp (Warnblinklicht). Bạn phải lưu ý gì khi lái xe vượt qua?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Sie dürfen nur mit Schrittgeschwindigkeit (ca. 4-7 km/h) vorbeifahren",
+        "textVi": "Bạn chỉ được phép lái xe vượt qua với tốc độ đi bộ (khoảng 4-7 km/h)",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Das gilt auch für den Gegenverkehr auf derselben Fahrbahn",
+        "textVi": "Quy định này cũng áp dụng cho các phương tiện đi ngược chiều trên cùng phần đường đó",
+        "isCorrect": true
+      },
+      {
+        "id": "C",
+        "textDe": "Sie dürfen unter keinen Umständen an dem Bus vorbeifahren, bis er abfährt",
+        "textVi": "Bạn không được phép vượt qua xe buýt trong bất kỳ hoàn cảnh nào cho đến khi xe buýt chạy tiếp"
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "das Warnblinklicht",
+        "vi": "đèn xi-nhan nháy khẩn cấp (cả hai bên trái phải)"
+      },
+      {
+        "de": "die Haltestelle",
+        "vi": "trạm dừng (xe buýt, tàu điện)"
+      },
+      {
+        "de": "die Schrittgeschwindigkeit",
+        "vi": "tốc độ đi bộ (luật Đức ngầm hiểu khoảng 4 - 7 km/h)"
+      },
+      {
+        "de": "der Gegenverkehr",
+        "vi": "phương tiện đi ngược chiều"
+      }
+    ],
+    "explanationDe": "Wenn ein Bus mit Warnblinklicht an einer Haltestelle steht, darf man nur mit Schrittgeschwindigkeit vorbeifahren. Dies gilt auch für den Gegenverkehr, sofern die Fahrbahnen nicht baulich getrennt sind. Fahrgäste dürfen nicht behindert oder gefährdet werden.",
+    "explanationVi": "Khi xe buýt bật đèn cảnh báo khẩn cấp tại điểm dừng, bạn chỉ được phép vượt qua với tốc độ đi bộ. Quy tắc áp dụng cho cả xe đi ngược chiều cùng con đường. Không được làm cản trở hoặc nguy hiểm cho hành khách lên xuống xe.",
+    "aiExplanation": "Chào bạn! Đây là một câu hỏi cực kỳ dễ mất điểm trong kỳ thi lý thuyết lẫn thực hành lái xe ở Đức vì quy tắc rất nghiêm ngặt.\n\n* **Hai kịch bản xe buýt bật đèn cảnh báo (Warnblinklicht)**:\n  1. **Khi xe buýt đang tiến vào trạm dừng** và bật đèn cảnh báo: Bạn **tuyệt đối không được vượt qua/chạy sau vượt xe buýt** (Cấm vượt hoàn toàn khi xe buýt đang di chuyển vào trạm).\n  2. **Khi xe buýt đã dừng hẳn tại trạm** und bật đèn cảnh báo:\n     - Bạn được phép lái xe vượt qua, nhưng chỉ được chạy với **Schrittgeschwindigkeit (tốc độ đi bộ, từ 4 đến 7 km/h)**.\n     - **Đi ngược chiều**: Xe ở hướng ngược lại đi qua xe buýt này cũng phải giảm tốc độ về Schrittgeschwindigkeit (trừ khi giữa hai chiều đường có giải phân cách cứng như dải cỏ hoặc tường bê tông).\n* **Tại sao quy định khắt khe thế**: Hành khách xuống xe buýt thường có xu hướng băng qua đường ngay trước đầu xe buýt (tầm nhìn bị che khuất). Việc chạy chậm giúp tài xế kịp thời phanh đứng nếu có người đi bộ đột ngột lao ra."
+  },
+  {
+    "id": 12,
+    "category": "Technik & Formeln",
+    "points": 4,
+    "imageType": null,
+    "textDe": "Wie ändert sich der Bremsweg, wenn Sie Ihre Geschwindigkeit verdoppeln?",
+    "textVi": "Quãng đường phanh (Bremsweg) sẽ thay đổi như thế nào nếu bạn tăng tốc độ lên gấp đôi?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Der Bremsweg verdoppelt sich",
+        "textVi": "Quãng đường phanh tăng lên gấp đôi (2 lần)"
+      },
+      {
+        "id": "B",
+        "textDe": "Der Bremsweg verdreifacht sich",
+        "textVi": "Quãng đường phanh tăng lên gấp ba (3 lần)"
+      },
+      {
+        "id": "C",
+        "textDe": "Der Bremsweg vervierfacht sich",
+        "textVi": "Quãng đường phanh tăng lên gấp bốn (4 lần)",
+        "isCorrect": true
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "sich verdoppeln",
+        "vi": "tăng gấp đôi"
+      },
+      {
+        "de": "sich vervierfachen",
+        "vi": "tăng gấp bốn lần"
+      },
+      {
+        "de": "die Geschwindigkeit verdoppeln",
+        "vi": "tăng gấp đôi tốc độ di chuyển"
+      }
+    ],
+    "explanationDe": "Da die Geschwindigkeit quadratisch in die Bremswegberechnung eingeht ((v/10) * (v/10)), führt eine Verdoppelung der Geschwindigkeit zu einem viermal so langen Bremsweg.",
+    "explanationVi": "Vì tốc độ được tính theo lũy thừa bậc hai trong công thức tính quãng đường phanh ((v/10) * (v/10)), nên việc tăng gấp đôi tốc độ sẽ làm quãng đường phanh dài ra gấp 4 lần.",
+    "aiExplanation": "Chào bạn! Đây là câu hỏi vật lý lái xe rất quan trọng để giúp tài xế hiểu sự nguy hiểm của việc chạy quá tốc độ.\n\n* **Công thức Bremsweg**: `(Tốc độ / 10) x (Tốc độ / 10)`.\n* Hãy so sánh tốc độ **50 km/h** và **100 km/h** (tốc độ tăng gấp 2 lần):\n  - Ở **50 km/h**: Quãng đường phanh là `5 x 5 = 25 mét`.\n  - Ở **100 km/h**: Quãng đường phanh là `10 x 10 = 100 mét`.\n  - Tỷ lệ: `100 / 25 = 4`.\n  - Như vậy, tốc độ tăng gấp 2 lần làm quãng đường phanh tăng vọt lên **gấp 4 lần (vervierfacht sich)**!\n* **Ứng dụng thực tế**: Nếu xe phía trước phanh gấp và bạn chỉ tăng tốc thêm một chút, quãng đường cần để xe bạn dừng lại sẽ dài hơn bạn tưởng tượng rất nhiều. Hãy luôn giữ khoảng cách an toàn (Sicherheitsabstand)."
+  },
+  {
+    "id": 13,
+    "category": "Verkehrszeichen",
+    "points": 3,
+    "imageType": "svg-sign-kreisverkehr",
+    "textDe": "Was gilt an einer Kreuzung mit dem Schild 'Kreisverkehr'?",
+    "textVi": "Quy tắc nào được áp dụng tại ngã tư có biển báo 'Vòng xuyến' (Kreisverkehr)?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Fahrzeuge im Kreisverkehr haben Vorfahrt",
+        "textVi": "Các phương tiện đang đi trong vòng xuyến có quyền ưu tiên đi trước",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Beim Einfahren in den Kreisverkehr muss geblinkt werden",
+        "textVi": "Phải bật đèn xi-nhan báo rẽ khi lái xe đi VÀO vòng xuyến"
+      },
+      {
+        "id": "C",
+        "textDe": "Beim Ausfahren aus dem Kreisverkehr muss geblinkt werden",
+        "textVi": "Phải bật đèn xi-nhan báo rẽ khi lái xe đi RA khỏi vòng xuyến",
+        "isCorrect": true
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "der Kreisverkehr",
+        "vi": "vòng xuyến, bùng binh"
+      },
+      {
+        "de": "einfahren",
+        "vi": "lái xe đi vào"
+      },
+      {
+        "de": "ausfahren",
+        "vi": "lái xe đi ra"
+      },
+      {
+        "de": "blinken",
+        "vi": "bật đèn xi-nhan báo rẽ"
+      }
+    ],
+    "explanationDe": "Im Kreisverkehr (Schild 215 zusammen mit Vorfahrt gewähren) gilt: Fahrzeuge im Kreis haben Vorfahrt. Beim Einfahren darf nicht geblinkt werden (um Missverständnisse zu vermeiden), beim Ausfahren muss zwingend geblinkt werden.",
+    "explanationVi": "Tại vòng xuyến có biển báo kết hợp nhường đường: Xe trong vòng xuyến được ưu tiên. Khi đi vào KHÔNG bật xi-nhan (tránh hiểu lầm), khi đi ra BẮT BUỘC phải bật xi-nhan báo rẽ.",
+    "aiExplanation": "Chào bạn! Luật đi vòng xuyến (Kreisverkehr) ở Đức có một số quy tắc rất riêng biệt so với một số quốc gia khác để tối ưu hóa lưu lượng giao thông:\n\n1. **Quyền ưu tiên**: Thông thường trước lối vào vòng xuyến ở Đức sẽ có biển báo hiệu Vòng xuyến (vòng tròn xanh 3 mũi tên trắng) đi kèm biển Nhường đường (tam giác ngược). Điều này có nghĩa là **xe đang chạy bên trong vòng xuyến luôn có quyền ưu tiên đi trước**.\n2. **Bật xi-nhan khi nào?**:\n   * **Khi VÀO vòng xuyến: Cấm bật xi-nhan!** Nếu bạn bật xi-nhan lúc vào, xe đợi ở lối ra tiếp theo có thể tưởng bạn muốn rẽ ngay lập tức và họ sẽ di chuyển ra gây nguy hiểm.\n   * **Khi RA khỏi vòng xuyến: Bắt buộc phải bật xi-nhan phải!** Bạn phải bật xi-nhan ngay khi đi qua lối ra trước lối ra mong muốn của bạn để báo hiệu cho các xe khác biết bạn sắp thoát khỏi vòng xuyến."
+  },
+  {
+    "id": 14,
+    "category": "Verhalten",
+    "points": 4,
+    "imageType": null,
+    "textDe": "Sie fahren bei dichtem Nebel am Tag. Wann sollten Sie die Nebelschlussleuchte einschalten?",
+    "textVi": "Bạn lái xe trong điều kiện sương mù dày đặc vào ban ngày. Khi nào bạn nên bật đèn sương mù phía sau (Nebelschlussleuchte)?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Wenn die Sichtweite weniger als 50 Meter beträgt",
+        "textVi": "Khi tầm nhìn xa bị hạn chế dưới 50 mét",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Bei jeder Nebelfahrt, unabhängig von der Sichtweite",
+        "textVi": "Trong mọi chuyến đi có sương mù, bất kể tầm nhìn xa là bao nhiêu"
+      },
+      {
+        "id": "C",
+        "textDe": "Die maximale Geschwindigkeit beträgt dann 50 km/h",
+        "textVi": "Tốc độ di chuyển tối đa cho phép khi đó là 50 km/h",
+        "isCorrect": true
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "der Nebel",
+        "vi": "sương mù"
+      },
+      {
+        "de": "die Nebelschlussleuchte",
+        "vi": "đèn sương mù màu đỏ gắn phía sau xe (rất chói sáng)"
+      },
+      {
+        "de": "die Sichtweite",
+        "vi": "tầm nhìn xa, khoảng cách nhìn rõ"
+      }
+    ],
+    "explanationDe": "Die Nebelschlussleuchte darf nur bei Nebel mit einer Sichtweite von unter 50 Metern eingeschaltet werden (StVO § 17). Gleichzeitig gilt dann eine Geschwindigkeitsbegrenzung von maximal 50 km/h.",
+    "explanationVi": "Đèn sương mù phía sau chỉ được phép bật khi sương mù làm tầm nhìn giảm xuống dưới 50 mét. Đồng thời, khi bật đèn này bạn chỉ được phép chạy xe với tốc độ tối đa là 50 km/h.",
+    "aiExplanation": "Chào bạn! Đây là câu hỏi cực kỳ thực tế liên quan đến an toàn lái xe mùa đông/mùa thu ở Đức.\n\n* **Quy tắc Nebelschlussleuchte (Đèn sương mù đỏ phía sau)**:\n  - Đèn này rất sáng và chói. Nếu bật bừa bãi khi trời chỉ mưa nhẹ hoặc sương mù mỏng, nó sẽ làm lóa mắt người lái xe phía sau bạn.\n  - Luật Đức quy định **chỉ được bật đèn sương mù sau khi sương mù làm tầm nhìn giảm xuống dưới 50 mét (Sichtweite < 50m)**.\n* **Quy tắc liên đới tốc độ (Quy tắc 50 - 50)**:\n  - Nếu tầm nhìn dưới 50m (phải bật đèn sương mù sau), bạn **chỉ được phép lái xe với tốc độ tối đa là 50 km/h**.\n  - Mẹo nhớ: **Tầm nhìn dưới 50m = Tốc độ tối đa 50 km/h = Bật đèn sương mù sau**.\n* **Làm sao biết tầm nhìn dưới 50m trên đường cao tốc?**:\n  - Khoảng cách giữa hai cột mốc phản quang (Leitpfosten) màu đen trắng ở rìa đường cao tốc Đức được cắm cách đều nhau chính xác **50 mét**. Nếu bạn đứng ở cột này mà không nhìn thấy cột tiếp theo, tức là tầm nhìn dưới 50m."
+  },
+  {
+    "id": 15,
+    "category": "Technik & Formeln",
+    "points": 5,
+    "imageType": null,
+    "textDe": "Was kann dazu führen, dass das Lenkrad während der Fahrt flattert oder vibriert?",
+    "textVi": "Điều gì có thể dẫn tới việc vô lăng lái bị rung lắc hoặc dao động (flattert/vibriert) trong khi đang lái xe?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Unwucht an den Vorderrädern",
+        "textVi": "Sự mất cân bằng động (lệch tâm/Unwucht) ở các bánh xe phía trước",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Schadhafte Stoßdämpfer",
+        "textVi": "Bộ giảm chấn/giảm xóc (Stoßdämpfer) bị hư hỏng, bị mòn",
+        "isCorrect": true
+      },
+      {
+        "id": "C",
+        "textDe": "Zu geringer Druck im Scheibenwaschbehälter",
+        "textVi": "Áp suất quá thấp trong bình chứa nước rửa kính"
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "das Lenkrad",
+        "vi": "vô lăng lái xe"
+      },
+      {
+        "de": "flattern / vibrieren",
+        "vi": "rung lắc, dao động mạnh"
+      },
+      {
+        "de": "die Unwucht",
+        "vi": "sự lệch tâm cân bằng (của bánh xe quay tròn)"
+      },
+      {
+        "de": "der Stoßdämpfer",
+        "vi": "bộ phận giảm chấn, giảm xóc xe"
+      }
+    ],
+    "explanationDe": "Vibrationen am Lenkrad (Flattern) werden häufig durch eine Unwucht der Räder oder defekte Stoßdämpfer verursacht. Zu geringer Druck im Scheibenwaschbehälter hat keinen Einfluss auf das Fahrwerk.",
+    "explanationVi": "Hiện tượng rung vô lăng lái thường do bánh xe bị lệch tâm cân bằng động (cần đi cân vành bấm chì lại) hoặc bộ giảm xóc bị hỏng. Áp suất nước rửa kính thì không liên quan gì đến hệ thống lái.",
+    "aiExplanation": "Chào bạn! Đây là câu hỏi về lỗi kỹ thuật xe thường gặp.\n\n* **Tại sao vô lăng bị rung (Flattern/Vibrieren)**:\n  1. **Unwucht (Mất cân bằng bánh xe)**: Khi lốp xe mòn không đều hoặc bị rơi mất miếng chì cân bằng dán trên vành (lazang), ở tốc độ cao bánh xe quay sẽ tạo ra lực ly tâm không đều, truyền qua hệ thống treo làm rung vô lăng. Khắc phục bằng cách đem xe đi 'cân mâm bấm chì' (Auswuchten).\n  2. **Stoßdämpfer hỏng**: Giảm xóc hỏng khiến bánh xe không bám đều xuống mặt đường mà liên tục bị nảy, gây chấn động ngược lên vô lăng.\n* **Tại sao đáp án C sai**: Đáp án C là một ví dụ điển hình về những câu trả lời gây cười trong kỳ thi lái xe Đức. Áp suất nước rửa kính (Scheibenwaschwasser) hoàn toàn không ảnh hưởng gì đến sự vận hành của bánh xe hay vô lăng."
+  }
+]
