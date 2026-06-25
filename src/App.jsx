@@ -111,21 +111,71 @@ function App() {
   const navigate = useNavigate();
   const location = useLocation();
 
-  // Session restore
+  // Session restore & Firebase sync
   useEffect(() => {
     const restore = async () => {
-      const token = localStorage.getItem('fuhrerschein_token');
-      if (token) {
-        const claims = await verifyToken(token);
-        if (claims) {
-          const savedSession = localStorage.getItem('fuhrerschein_active_session');
-          if (savedSession) {
-            try { setUser(JSON.parse(savedSession)); setUserLoading(false); return; } catch {}
-          }
-        }
-        clearToken();
+      // 1. Check local session first
+      const savedSession = localStorage.getItem('fuhrerschein_active_session');
+      if (savedSession) {
+        try { setUser(JSON.parse(savedSession)); } catch {}
+      } else {
+        setUser({ username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true });
       }
-      setUser({ username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true });
+
+      // 2. Listen to Firebase Auth state
+      import('./lib/firebase').then(({ auth, db }) => {
+        import('firebase/auth').then(({ onAuthStateChanged }) => {
+          import('firebase/firestore').then(({ doc, getDoc, setDoc }) => {
+            onAuthStateChanged(auth, async (firebaseUser) => {
+              if (firebaseUser) {
+                // User is signed in via Firebase
+                const userRef = doc(db, 'users', firebaseUser.uid);
+                const docSnap = await getDoc(userRef);
+                
+                if (docSnap.exists()) {
+                  // Load progress from DB
+                  const dbData = docSnap.data();
+                  const updatedUser = {
+                    username: `firebase_${firebaseUser.uid}`,
+                    displayName: firebaseUser.displayName || 'Học viên',
+                    email: firebaseUser.email || '',
+                    savedQuestions: dbData.savedQuestions || [],
+                    examHistory: dbData.examHistory || [],
+                    progress: dbData.progress || {},
+                    isGuest: false,
+                    uid: firebaseUser.uid
+                  };
+                  setUser(updatedUser);
+                  localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updatedUser));
+                } else {
+                  // New user, create empty progress in DB
+                  const newUser = {
+                    username: `firebase_${firebaseUser.uid}`,
+                    displayName: firebaseUser.displayName || 'Học viên',
+                    email: firebaseUser.email || '',
+                    savedQuestions: [],
+                    examHistory: [],
+                    progress: {},
+                    isGuest: false,
+                    uid: firebaseUser.uid
+                  };
+                  await setDoc(userRef, {
+                    email: newUser.email,
+                    displayName: newUser.displayName,
+                    savedQuestions: newUser.savedQuestions,
+                    examHistory: newUser.examHistory,
+                    progress: newUser.progress,
+                    createdAt: new Date().toISOString()
+                  });
+                  setUser(newUser);
+                  localStorage.setItem('fuhrerschein_active_session', JSON.stringify(newUser));
+                }
+              }
+            });
+          });
+        });
+      });
+
       setUserLoading(false);
     };
     restore();
@@ -134,7 +184,22 @@ function App() {
   const handleUpdateUser = (updated) => {
     setUser(updated);
     localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updated));
-    if (updated.username !== 'guest') {
+    
+    // Sync to Firestore if logged in
+    if (updated.uid) {
+      import('./lib/firebase').then(({ db }) => {
+        import('firebase/firestore').then(({ doc, updateDoc }) => {
+          const userRef = doc(db, 'users', updated.uid);
+          updateDoc(userRef, {
+            savedQuestions: updated.savedQuestions,
+            examHistory: updated.examHistory,
+            progress: updated.progress
+          }).catch(console.error);
+        });
+      });
+    }
+
+    if (updated.username !== 'guest' && !updated.uid) {
       const users = JSON.parse(localStorage.getItem('fuhrerschein_users') || '{}');
       if (users[updated.username.toLowerCase()]) {
         users[updated.username.toLowerCase()] = { ...users[updated.username.toLowerCase()], ...updated };
@@ -187,13 +252,14 @@ function App() {
         <Routes>
           <Route path="/" element={
             <LandingPage
+              user={user}
               onNavigate={(p) => navigate(p)}
               onShowLogin={() => setShowLoginModal(true)}
               languageMode={languageMode}
               onLanguageChange={(mode) => { setLanguageMode(mode); localStorage.setItem('fuhrerschein_lang_mode', mode); }}
             />
           } />
-          <Route path="/training" element={<TrainingDashboard onNavigate={(p) => navigate(p)} onShowLogin={() => setShowLoginModal(true)} languageMode={languageMode} />} />
+          <Route path="/training" element={<TrainingDashboard user={user} onNavigate={(p) => navigate(p)} onShowLogin={() => setShowLoginModal(true)} languageMode={languageMode} />} />
           <Route path="/training/fragen" element={<Lernen user={user} onUpdateUser={handleUpdateUser} onTriggerLogin={() => setShowLoginModal(true)} onNavigate={(p) => navigate(p)} languageMode={languageMode} />} />
           <Route path="/pruefung" element={<Pruefung user={user} onUpdateUser={handleUpdateUser} languageMode={languageMode} />} />
           <Route path="/statistik" element={<Stats user={user} onUpdateUser={handleUpdateUser} />} />
