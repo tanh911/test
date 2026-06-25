@@ -6,6 +6,8 @@ import urllib.request
 import urllib.error
 import argparse
 
+sys.stdout.reconfigure(encoding='utf-8')
+
 # Parse arguments
 parser = argparse.ArgumentParser(description="Translate driving questions using Gemini API")
 parser.add_argument("--api-key", help="Gemini API Key (can also be set via GEMINI_API_KEY env var)")
@@ -23,7 +25,7 @@ if not api_key:
     sys.exit(1)
 
 # Files
-RAW_QUESTIONS_PATH = "scripts/raw_questions.json"
+RAW_QUESTIONS_PATH = "scripts/raw_questions_B.json"  # Chỉ câu Klasse B (lọc bởi filter_klasse_b.py)
 OUTPUT_QUESTIONS_PATH = "src/data/questions_translated.json"
 BACKUP_PATH = "src/data/questions_translated.bak.json"
 
@@ -64,48 +66,66 @@ if not to_translate:
     print("[+] All questions are already translated!")
     sys.exit(0)
 
-# Gemini API configuration
-API_URL = f"https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key={api_key}"
+# Gemini models - xoay vòng khi bị rate limit / 503
+GEMINI_MODELS = [
+    "gemini-2.5-flash",
+    "gemini-2.0-flash",
+    "gemini-1.5-flash",
+    "gemini-1.5-flash-8b",
+]
+current_model_idx = 0
+
+def get_api_url(model):
+    return f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={api_key}"
 
 def call_gemini(prompt):
+    global current_model_idx
     payload = {
-        "contents": [
-            {
-                "parts": [
-                    {"text": prompt}
-                ]
-            }
-        ],
-        "generationConfig": {
-            "responseMimeType": "application/json"
-        }
+        "contents": [{"parts": [{"text": prompt}]}],
+        "generationConfig": {"responseMimeType": "application/json"}
     }
-    
     data = json.dumps(payload).encode("utf-8")
-    req = urllib.request.Request(
-        API_URL,
-        data=data,
-        headers={"Content-Type": "application/json"}
-    )
-    
-    # Retry logic
-    for attempt in range(5):
+
+    # Thử tối đa 3 vòng xoay model × 2 lần retry mỗi model
+    total_attempts = len(GEMINI_MODELS) * 2
+    for attempt in range(total_attempts):
+        model = GEMINI_MODELS[current_model_idx % len(GEMINI_MODELS)]
+        url   = get_api_url(model)
+        req   = urllib.request.Request(url, data=data, headers={"Content-Type": "application/json"})
         try:
-            with urllib.request.urlopen(req) as response:
+            with urllib.request.urlopen(req, timeout=90) as response:
                 res_data = json.loads(response.read().decode("utf-8"))
                 return res_data["candidates"][0]["content"]["parts"][0]["text"]
+
         except urllib.error.HTTPError as e:
+            err_body = ""
+            try: err_body = e.read().decode("utf-8")[:200]
+            except: pass
+
             if e.code == 429:
-                wait_time = (attempt + 1) * 10
-                print(f"\n[!] Rate limit reached (429). Retrying in {wait_time}s...")
+                wait_time = 15 * (attempt % 2 + 1)
+                print(f"\n  [!] {model} → 429 Rate limit. Chờ {wait_time}s rồi thử model khác...")
                 time.sleep(wait_time)
+                current_model_idx += 1  # chuyển model
+                print(f"  [>] Chuyển sang: {GEMINI_MODELS[current_model_idx % len(GEMINI_MODELS)]}")
+
+            elif e.code == 503:
+                wait_time = 10
+                print(f"\n  [!] {model} → 503 Unavailable. Chờ {wait_time}s rồi thử model khác...")
+                time.sleep(wait_time)
+                current_model_idx += 1
+                print(f"  [>] Chuyển sang: {GEMINI_MODELS[current_model_idx % len(GEMINI_MODELS)]}")
+
             else:
-                print(f"\n[!] HTTP Error {e.code}: {e.read().decode('utf-8')}")
+                print(f"\n  [!] {model} → HTTP {e.code}: {err_body}")
                 raise e
+
         except Exception as e:
-            print(f"\n[!] Error during API request: {e}")
+            print(f"\n  [!] {model} → Lỗi kết nối: {type(e).__name__}. Thử lại sau 5s...")
             time.sleep(5)
-    raise Exception("API Request failed after multiple attempts")
+            current_model_idx += 1
+
+    raise Exception(f"Tất cả {len(GEMINI_MODELS)} models đều thất bại sau {total_attempts} lần thử.")
 
 def save_progress():
     # Save a backup first
@@ -122,13 +142,38 @@ def save_progress():
 # Batch processing
 batch_size = args.batch_size
 total_batches = (len(to_translate) + batch_size - 1) // batch_size
+total_to_do   = len(to_translate)
+already_done  = len(translated_questions)
+total_overall = already_done + total_to_do
 
-print(f"\n[*] Starting translation of {len(to_translate)} questions in {total_batches} batches...")
+def print_progress(done_so_far, total, elapsed_session, session_count):
+    pct = done_so_far / total * 100 if total > 0 else 0
+    bar_len = 30
+    filled = int(bar_len * done_so_far / total) if total > 0 else 0
+    bar = '█' * filled + '░' * (bar_len - filled)
+    speed = session_count / (elapsed_session / 60) if elapsed_session > 0 else 0
+    remaining = total_to_do - session_count
+    eta_min = remaining / speed if speed > 0 else 0
+    eta_h = int(eta_min // 60)
+    eta_m = int(eta_min % 60)
+    print(f"  [{bar}] {pct:.1f}%  |  {done_so_far}/{total} câu  |  {speed:.1f} câu/phút  |  ETA: {eta_h}h {eta_m}m")
+
+print(f"\n{'='*60}")
+print(f"  DỊCH TỰ ĐỘNG KLASSE B - FÜHRERSCHEIN")
+print(f"{'='*60}")
+print(f"  Đã có sẵn : {already_done} câu")
+print(f"  Cần dịch  : {total_to_do} câu")
+print(f"  Tổng      : {total_overall} câu")
+print(f"  Số batch  : {total_batches} (mỗi batch {batch_size} câu)")
+print(f"{'='*60}\n")
+
+session_start   = time.time()
+session_done    = 0
 
 for i in range(total_batches):
     batch = to_translate[i * batch_size : (i + 1) * batch_size]
-    print(f"\n[+] Batch {i+1}/{total_batches} (Translating {len(batch)} questions: {[q['id'] for q in batch]})")
-    
+    done_overall = already_done + session_done
+    print(f"\n[Batch {i+1}/{total_batches}] Đang dịch {len(batch)} câu: {batch[0]['id']} → {batch[-1]['id']}") 
     # Prepare batch data (strip unnecessary fields to save tokens)
     prompt_data = []
     for q in batch:
@@ -209,16 +254,27 @@ Hãy trả về kết quả dưới dạng một mảng JSON duy nhất chứa �
             
         save_progress()
         elapsed = time.time() - start_time
-        print(f"[+] Batch {i+1} completed successfully in {elapsed:.2f}s! Progress saved.")
-        
-        # Sleep to avoid rate limits (10 RPM safety buffer)
+        session_done += len(translated_batch)
+        elapsed_session = time.time() - session_start
+        done_overall = already_done + session_done
+
+        print(f"[+] Batch {i+1} xong trong {elapsed:.1f}s | Đã lưu {done_overall} câu")
+        print_progress(done_overall, total_overall, elapsed_session, session_done)
+
+        # Sleep to avoid rate limits
         sleep_time = max(1.0, 6.0 - elapsed)
+        print(f"    Chờ {sleep_time:.1f}s trước batch tiếp theo...")
         time.sleep(sleep_time)
-        
+
     except Exception as e:
-        print(f"[!] FAILED to translate batch {i+1}: {e}")
-        print("Skipping this batch to continue with others. You can rerun the script to translate missed items.")
+        print(f"[!] FAILED batch {i+1}: {e}")
+        print("    Bỏ qua batch này, tiếp tục. Chạy lại script để dịch bù.")
         time.sleep(10)
 
-print(f"\n[+] Translation process finished. Total translated questions: {len(translated_questions)}")
-print(f"Output saved to {OUTPUT_QUESTIONS_PATH}")
+total_elapsed = time.time() - session_start
+print(f"\n{'='*60}")
+print(f"  HOÀN THÀNH!")
+print(f"  Tổng câu đã dịch : {len(translated_questions)}")
+print(f"  Thời gian session: {int(total_elapsed//3600)}h {int((total_elapsed%3600)//60)}m {int(total_elapsed%60)}s")
+print(f"  File output      : {OUTPUT_QUESTIONS_PATH}")
+print(f"{'='*60}")

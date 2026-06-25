@@ -9,7 +9,7 @@ url = 'https://raw.githubusercontent.com/yowmamasita/driving-theory/main/driving
 print("Downloading driving theory questions CSV...")
 req = urllib.request.Request(url)
 response = urllib.request.urlopen(req)
-csv_data = response.read().decode('utf-8', errors='replace')
+csv_data = response.read().decode('latin-1')
 
 print("Parsing CSV...")
 reader = csv.DictReader(io.StringIO(csv_data))

@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Eye, EyeOff, Lock, User, Mail, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
 import { hashPassword, verifyPassword, createToken, checkPasswordStrength } from '../lib/auth';
+import { registerWithEmail, loginWithEmail, verifyEmail, updateUserProfile } from '../lib/firebase';
 
 const GoogleIcon = () => (
   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -49,38 +50,75 @@ export const Auth = ({ onLogin, onCancel }) => {
     setError('');
     setSuccess('');
 
-    if (!username.trim() || !password.trim()) {
-      setError('Vui lòng nhập đầy đủ tài khoản và mật khẩu.');
-      return;
-    }
-    if (username.trim().length < 3) {
-      setError('Tên tài khoản phải có ít nhất 3 ký tự.');
-      return;
-    }
-    if (!isLogin && (!email.trim() || !email.includes('@'))) {
-      setError('Vui lòng nhập email hợp lệ.');
-      return;
-    }
-    if (!isLogin && password.length < 8) {
-      setError('Mật khẩu phải có ít nhất 8 ký tự.');
-      return;
+    if (isLogin) {
+      if (!username.trim() || !password.trim()) {
+        setError('Vui lòng nhập đầy đủ tài khoản/email và mật khẩu.');
+        return;
+      }
+    } else {
+      if (!username.trim() || !email.trim() || !password.trim()) {
+        setError('Vui lòng nhập đầy đủ tên hiển thị, email và mật khẩu.');
+        return;
+      }
+      if (!email.trim().includes('@')) {
+        setError('Vui lòng nhập email hợp lệ.');
+        return;
+      }
+      if (password.length < 8) {
+        setError('Mật khẩu phải có ít nhất 8 ký tự.');
+        return;
+      }
     }
 
     setLoading(true);
     try {
-      const users = JSON.parse(localStorage.getItem('fuhrerschein_users') || '{}');
       const key = username.trim().toLowerCase();
 
       if (isLogin) {
+        // --- LOGIN FLOW ---
+        
+        // 1. Firebase Login (nếu nhập Email có chứa @)
+        if (key.includes('@')) {
+          try {
+            const userCredential = await loginWithEmail(key, password);
+            const user = userCredential.user;
+            
+            if (!user.emailVerified) {
+              setError('Tài khoản chưa được xác nhận. Vui lòng kiểm tra hộp thư email (hoặc Thư rác) và bấm vào link kích hoạt.');
+              setLoading(false);
+              return;
+            }
+            
+            setSuccess('Đăng nhập thành công!');
+            setTimeout(() => onLogin({
+              uid: user.uid,
+              username: user.email,
+              displayName: user.displayName || user.email.split('@')[0],
+              email: user.email,
+              apiKey: '', savedQuestions: [], examHistory: [], progress: {}
+            }), 500);
+            return;
+          } catch (firebaseErr) {
+            console.error(firebaseErr);
+            if (firebaseErr.code === 'auth/invalid-credential' || firebaseErr.code === 'auth/wrong-password' || firebaseErr.code === 'auth/user-not-found') {
+              setError('Email hoặc mật khẩu không chính xác.');
+            } else {
+              setError('Lỗi đăng nhập: ' + firebaseErr.message);
+            }
+            setLoading(false);
+            return;
+          }
+        }
+        
+        // 2. LocalStorage Login (tài khoản cũ không có @)
+        const users = JSON.parse(localStorage.getItem('fuhrerschein_users') || '{}');
         const stored = users[key];
         if (!stored) { setError('Tài khoản không tồn tại.'); setLoading(false); return; }
 
-        // Support legacy plaintext passwords (migrate on login)
         let valid = false;
         if (stored.passwordHash) {
           valid = await verifyPassword(password, stored.passwordHash);
         } else if (stored.password) {
-          // Legacy plaintext — verify then migrate
           valid = stored.password === password;
           if (valid) {
             stored.passwordHash = await hashPassword(password);
@@ -108,32 +146,34 @@ export const Auth = ({ onLogin, onCancel }) => {
         setTimeout(() => onLogin(sessionUser), 500);
 
       } else {
-        // Register
-        if (users[key]) { setError('Tên tài khoản này đã được sử dụng.'); setLoading(false); return; }
-
-        const passwordHash = await hashPassword(password);
-        const newUser = {
-          username: username.trim(),
-          passwordHash,
-          email: email.trim(),
-          displayName: username.trim(),
-          apiKey: '',
-          savedQuestions: [],
-          examHistory: [],
-          progress: {},
-          createdAt: Date.now(),
-        };
-
-        users[key] = newUser;
-        localStorage.setItem('fuhrerschein_users', JSON.stringify(users));
-
-        const sessionUser = { ...newUser };
-        delete sessionUser.passwordHash;
-
-        const token = await createToken(sessionUser);
-        localStorage.setItem('fuhrerschein_token', token);
-        setSuccess('Tạo tài khoản thành công!');
-        setTimeout(() => onLogin(sessionUser), 500);
+        // --- REGISTER FLOW (Firebase Only) ---
+        try {
+          const userCredential = await registerWithEmail(email.trim(), password);
+          const user = userCredential.user;
+          
+          await updateUserProfile(user, { displayName: username.trim() });
+          await verifyEmail(user);
+          
+          setSuccess('Tạo tài khoản thành công! Vui lòng kiểm tra email của bạn (bao gồm cả mục Thư Rác) và bấm vào link để kích hoạt.');
+          
+          // Chuyển form về tab Đăng Nhập sau 3 giây
+          setTimeout(() => {
+            setIsLogin(true);
+            setUsername(email.trim()); // Điền sẵn email cho người dùng
+            setPassword('');
+            setSuccess('');
+          }, 3500);
+          
+        } catch (firebaseErr) {
+          console.error(firebaseErr);
+          if (firebaseErr.code === 'auth/email-already-in-use') {
+            setError('Email này đã được đăng ký. Vui lòng chọn Đăng nhập hoặc dùng email khác.');
+          } else if (firebaseErr.code === 'auth/weak-password') {
+            setError('Mật khẩu quá yếu, vui lòng chọn mật khẩu khó hơn.');
+          } else {
+            setError('Lỗi tạo tài khoản: ' + firebaseErr.message);
+          }
+        }
       }
     } catch (err) {
       console.error(err);
@@ -216,11 +256,11 @@ export const Auth = ({ onLogin, onCancel }) => {
       <form onSubmit={handleSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
         {/* Username */}
         <div>
-          <label style={labelStyle}>Tên Đăng Nhập</label>
+          <label style={labelStyle}>{isLogin ? 'Email / Tên Tài Khoản' : 'Tên Hiển Thị'}</label>
           <div style={{ position: 'relative' }}>
             <User size={16} color="#9ca3af" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
             <input
-              type="text" placeholder="Nhập tên tài khoản"
+              type="text" placeholder={isLogin ? "Nhập Email hoặc Tài khoản" : "Ví dụ: Tuan Anh"}
               value={username} onChange={(e) => setUsername(e.target.value)}
               style={{ ...inputStyle, paddingLeft: '36px' }}
               onFocus={(e) => e.target.style.borderColor = '#2b6f8a'}

@@ -35,7 +35,7 @@ const LangPill = ({ languageMode, onChange }) => (
         title={opt.title}
       >
         {opt.src
-          ? <img src={opt.src} alt={opt.alt} style={{ width: '20px', height: '14px', objectFit: 'cover', borderRadius: '2px' }} />
+          ? <img src={opt.src} alt={opt.alt} style={{ width: '28px', height: '20px', objectFit: 'cover', borderRadius: '3px', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }} />
           : <span style={{ fontSize: '11px', fontWeight: '900' }}>{opt.label}</span>
         }
       </button>
@@ -65,7 +65,7 @@ const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onSho
       <div className="navbar-inner">
         {/* Brand */}
         <button className="navbar-brand" onClick={() => navigate('/')}>
-          <span style={{ fontSize: '22px', lineHeight: 1 }}>🚦</span>
+          <span style={{ fontSize: '30px', lineHeight: 1 }}>🚦</span>
           <div>
             <span className="navbar-brand-name">Führerschein</span>
             <span className="navbar-brand-sub"> Việt-Đức</span>

@@ -2,77 +2,105 @@ import React, { useState, useEffect, useRef } from 'react';
 import { questions } from '../data/questions';
 import { SVGGraphics } from './SVGGraphics';
 import {
-  Info, X, Check, Star, Sparkles, Send, Volume2, ChevronLeft, ChevronRight, SkipBack, SkipForward, FastForward, Rewind
+  Info, X, Check, Star, Sparkles, Volume2, ChevronLeft, ChevronRight, SkipBack, SkipForward, FastForward, Rewind
 } from 'lucide-react';
 
 export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languageMode = 'both' }) => {
-  const [currentIndex, setCurrentIndex] = useState(0);
+  const [currentIndex, setCurrentIndex] = useState(() => {
+    const savedSession = sessionStorage.getItem('fuhrerschein_learning_session_v2');
+    if (savedSession) {
+      try { return JSON.parse(savedSession).currentIndex || 0; } catch (e) { }
+    }
+    return 0;
+  });
+
+  const [sessionResults, setSessionResults] = useState(() => {
+    const savedSession = sessionStorage.getItem('fuhrerschein_learning_session_v2');
+    if (savedSession) {
+      try { return JSON.parse(savedSession).results || {}; } catch (e) { }
+    }
+    return {};
+  });
+
   const [selectedOptions, setSelectedOptions] = useState([]);
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [isAiOpen, setIsAiOpen] = useState(false);
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [isFullscreenMode, setIsFullscreenMode] = useState(false);
   const [aiMessages, setAiMessages] = useState([]);
-  const [userInput, setUserInput] = useState('');
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [videoPlayCount, setVideoPlayCount] = useState(0);
+  const [showQuestion, setShowQuestion] = useState(true);
+  const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
   const chatEndRef = useRef(null);
+  const videoRef = useRef(null);
 
   // Hàm trích xuất ID gốc
   const getBaseId = (qId) => {
     if (typeof qId === 'string' && qId.includes('_')) {
-      return parseInt(qId.split('_')[0], 10);
+      return qId.split('_')[0];
     }
-    return parseInt(qId, 10);
+    return qId;
+  };
+
+  const renderFormattedText = (text) => {
+    if (!text) return null;
+
+    // Remove all emojis / icons
+    let cleanText = text.replace(/[\u{1F300}-\u{1F9FF}]/gu, '')
+      .replace(/[\u{2600}-\u{26FF}]/gu, '')
+      .replace(/[\u{2700}-\u{27BF}]/gu, '');
+
+    const lines = cleanText.split('\n');
+    return lines.map((line, lineIdx) => {
+      // Split each line by bold markers **
+      const parts = line.split(/(\*\*[^*]+\*\*)/g);
+      const formattedParts = parts.map((part, partIdx) => {
+        if (part.startsWith('**') && part.endsWith('**')) {
+          return <strong key={partIdx} style={{ fontWeight: 'bold' }}>{part.slice(2, -2)}</strong>;
+        }
+        return <span key={partIdx}>{part.replace(/\*/g, '').replace(/`/g, '')}</span>;
+      });
+
+      return (
+        <div key={lineIdx} style={{ minHeight: '1.2em' }}>
+          {formattedParts}
+        </div>
+      );
+    });
   };
 
   // Tạo danh sách 30 câu hỏi cân bằng tỉ lệ chủ đề khi mở trang học tập
   const [filteredQuestions] = useState(() => {
-    const getQuestionTheme = (q) => {
-      if ([2, 3, 9, 10].includes(q.id)) return 1; // Verkehrsvorschriften
-      if ([11, 12].includes(q.id)) return 2;      // Gefahrenlehre
-      if ([7, 14].includes(q.id)) return 3;       // Verhalten im Straßenverkehr
-      if ([1, 4, 5, 6, 8].includes(q.id)) return 4; // Vorfahrt & Giao lộ
-      if ([13].includes(q.id)) return 5;          // Technik & Umwelt
-      if ([15].includes(q.id)) return 6;          // Zusatzstoff
-      return 1;
-    };
-
-    // Phân nhóm câu hỏi
-    const pools = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
-    questions.forEach(q => {
-      const theme = getQuestionTheme(q);
-      pools[theme].push(q);
-    });
-
-    // Chỉ số lượng mục tiêu cho từng nhóm (tổng = 30 câu)
-    const targets = {
-      1: 12, // ~40% (Verkehrsvorschriften)
-      2: 6,  // ~20% (Gefahrenlehre)
-      3: 5,  // ~17% (Verhalten im Straßenverkehr)
-      4: 3,  // ~10% (Vorfahrt & Giao lộ)
-      5: 3,  // ~10% (Technik & Umwelt)
-      6: 1   // ~3% (Zusatzstoff)
-    };
-
-    let selected = [];
-    Object.keys(targets).forEach(themeId => {
-      const pool = pools[themeId];
-      const targetCount = targets[themeId];
-      if (pool && pool.length > 0) {
-        // Trộn ngẫu nhiên câu hỏi gốc của nhóm đó
-        const shuffledPool = [...pool].sort(() => 0.5 - Math.random());
-        for (let i = 0; i < targetCount; i++) {
-          const baseQuestion = shuffledPool[i % shuffledPool.length];
-          selected.push({
-            ...baseQuestion,
-            id: `${baseQuestion.id}_${themeId}_${i}` // ID duy nhất để phân biệt tiến trình
-          });
+    const savedSession = sessionStorage.getItem('fuhrerschein_learning_session_v2');
+    if (savedSession) {
+      try {
+        const parsed = JSON.parse(savedSession);
+        if (parsed.questions && parsed.questions.length > 0) {
+          return parsed.questions;
         }
-      }
-    });
+      } catch (e) { }
+    }
 
-    // Trộn ngẫu nhiên danh sách cuối cùng
-    return selected.sort(() => 0.5 - Math.random());
+    // Chọn ngẫu nhiên 30 câu từ toàn bộ kho (1851 câu)
+    const shuffledPool = [...questions].sort(() => 0.5 - Math.random());
+    const selected = shuffledPool.slice(0, 30).map((q, i) => ({
+      ...q,
+      id: `${q.id}_rnd_${i}` // ID duy nhất để phân biệt tiến trình
+    }));
+
+    return selected;
   });
+
+  // Save session whenever it changes
+  useEffect(() => {
+    sessionStorage.setItem('fuhrerschein_learning_session_v2', JSON.stringify({
+      questions: filteredQuestions,
+      currentIndex: currentIndex,
+      results: sessionResults
+    }));
+  }, [currentIndex, filteredQuestions, sessionResults]);
 
   const currentQuestion = filteredQuestions[currentIndex] || filteredQuestions[0];
 
@@ -81,7 +109,16 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
     setIsSubmitted(false);
     setIsCorrect(false);
     setIsAiOpen(false);
-  }, [currentIndex]);
+
+    const currentQ = filteredQuestions[currentIndex] || filteredQuestions[0];
+    if (currentQ && currentQ.video) {
+      setShowQuestion(false);
+      setVideoPlayCount(0);
+      setHasPlayedOnce(false);
+    } else {
+      setShowQuestion(true);
+    }
+  }, [currentIndex, filteredQuestions]);
 
   useEffect(() => {
     if (chatEndRef.current) {
@@ -103,6 +140,19 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
     const correctMatch = selectedOptions.length === correctAnswers.length && selectedOptions.every(val => correctAnswers.includes(val));
     setIsCorrect(correctMatch);
     setIsSubmitted(true);
+
+    setSessionResults(prev => ({
+      ...prev,
+      [currentIndex]: correctMatch
+    }));
+
+    const updatedProgress = { ...(user.progress || {}) };
+    updatedProgress[currentBaseId] = {
+      answered: true,
+      isCorrect: correctMatch,
+      timestamp: new Date().toISOString()
+    };
+    onUpdateUser({ ...user, progress: updatedProgress });
   };
 
   const currentBaseId = getBaseId(currentQuestion.id);
@@ -118,7 +168,18 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
   };
 
   const handleNext = () => {
-    if (currentIndex < filteredQuestions.length - 1) setCurrentIndex(currentIndex + 1);
+    if (currentIndex < filteredQuestions.length - 1) {
+      setCurrentIndex(currentIndex + 1);
+    } else {
+      // Finished all questions
+      sessionStorage.removeItem('fuhrerschein_learning_session_v2');
+      if (languageMode === 'de') {
+        alert('Glückwunsch! Du hast alle Fragen dieser Übung abgeschlossen.');
+      } else {
+        alert('Chúc mừng! Bạn đã hoàn thành toàn bộ 30 câu hỏi trong bài tập này.');
+      }
+      onNavigate('/training');
+    }
   };
   const handlePrev = () => {
     if (currentIndex > 0) setCurrentIndex(currentIndex - 1);
@@ -136,34 +197,84 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
     }
   };
 
-  const handleSendMessage = async (e) => {
-    e.preventDefault();
-    if (!userInput.trim()) return;
-    const userMsg = { sender: 'user', text: userInput };
+  const handleSendMessage = async (textToSend) => {
+    if (!textToSend || typeof textToSend !== 'string') return;
+    const userMsg = { sender: 'user', text: textToSend };
     setAiMessages(prev => [...prev, userMsg]);
-    setUserInput('');
     setIsAiLoading(true);
 
     const apiKey = user.apiKey || localStorage.getItem('fuhrerschein_api_key') || '';
     if (apiKey) {
       try {
-        const prompt = `Câu hỏi: ${currentQuestion.textDe}\nHỏi: ${userInput}\nTrả lời ngắn gọn bằng tiếng Việt.`;
+        const systemPrompt = `Bạn là Trợ lý giảng dạy lý thuyết bằng lái xe Đức (Führerschein Klasse B).
+Câu hỏi hiện tại học viên đang học:
+- Tiếng Đức: "${currentQuestion.textDe}"
+- Tiếng Việt: "${currentQuestion.textVi}"
+- Giải thích ban đầu: "${currentQuestion.aiExplanation}"
+
+Yêu cầu giải đáp: "${textToSend}"
+Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung phân tích cho câu hỏi này.`;
+
         const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${apiKey}`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ contents: [{ parts: [{ text: prompt }] }] })
+          body: JSON.stringify({ contents: [{ parts: [{ text: systemPrompt }] }] })
         });
         const data = await response.json();
-        const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Lỗi API.';
+        const aiText = data.candidates?.[0]?.content?.parts?.[0]?.text || 'Rất tiếc, tôi gặp lỗi khi xử lý câu hỏi này. Vui lòng thử lại!';
         setAiMessages(prev => [...prev, { sender: 'ai', text: aiText }]);
       } catch (err) {
-        setAiMessages(prev => [...prev, { sender: 'ai', text: 'Lỗi mạng.' }]);
+        setAiMessages(prev => [...prev, { sender: 'ai', text: 'Lỗi mạng hoặc kết nối API. Vui lòng thử lại.' }]);
       } finally { setIsAiLoading(false); }
     } else {
+      // Mock offline responses based on clicked button
       setTimeout(() => {
-        setAiMessages(prev => [...prev, { sender: 'ai', text: 'Vui lòng nhập API Key để chat!' }]);
+        let responseText = '';
+        const isMemorize = textToSend.includes('Mẹo ghi nhớ') || textToSend.includes('Merkhilfe');
+        const isVocab = textToSend.includes('từ vựng') || textToSend.includes('Vokabeln');
+        const isWrong = textToSend.includes('phương án khác') || textToSend.includes('Falsche Optionen') || textToSend.includes('đáp án sai');
+
+        if (isMemorize) {
+          if (languageMode === 'de') {
+            responseText = `**Merkhilfe für diese Frage:**\n\n1. **Wichtiges Vokabel**: Merk dir den Begriff \`${currentQuestion.vocabulary?.[0]?.de || ''}\` bedeutet \`${currentQuestion.vocabulary?.[0]?.vi || ''}\`.\n2. **Hinweis**: ${currentQuestion.explanationDe || 'Achte auf das Bild und die Frage.'}`;
+          } else if (languageMode === 'vi') {
+            responseText = `**Mẹo ghi nhớ câu hỏi này:**\n\n1. **Từ khóa quan trọng**: Hãy nhớ cụm từ \`${currentQuestion.vocabulary?.[0]?.de || ''}\` có nghĩa là \`${currentQuestion.vocabulary?.[0]?.vi || ''}\`.\n2. **Điểm cần lưu ý**: ${currentQuestion.explanationVi || 'Chú ý đọc kỹ câu hỏi và xem hình ảnh đi kèm để tránh bẫy.'}`;
+          } else {
+            responseText = `**Mẹo ghi nhớ câu hỏi này / Merkhilfe:**\n\n1. **Từ khóa quan trọng / Vokabel**: \`${currentQuestion.vocabulary?.[0]?.de || ''}\` ➔ \`${currentQuestion.vocabulary?.[0]?.vi || ''}\`.\n2. **Điểm cần lưu ý / Hinweis**:\n- VN: ${currentQuestion.explanationVi || 'Chú ý đọc kỹ câu hỏi.'}\n- DE: ${currentQuestion.explanationDe || 'Achte auf die Frage.'}`;
+          }
+        } else if (isVocab) {
+          const vocabListDe = currentQuestion.vocabulary && currentQuestion.vocabulary.length > 0
+            ? currentQuestion.vocabulary.map(v => `- **${v.de}**: ${v.vi}`).join('\n')
+            : 'Keine Vokabelliste für diese Frage gefunden.';
+          const vocabListVi = currentQuestion.vocabulary && currentQuestion.vocabulary.length > 0
+            ? currentQuestion.vocabulary.map(v => `- **${v.de}**: ${v.vi}`).join('\n')
+            : 'Không tìm thấy danh sách từ vựng cụ thể cho câu hỏi này.';
+
+          if (languageMode === 'de') {
+            responseText = `**Wichtige deutsche Vokabeln in dieser Frage:**\n\n${vocabListDe}`;
+          } else if (languageMode === 'vi') {
+            responseText = `**Từ vựng tiếng Đức quan trọng trong câu này:**\n\n${vocabListVi}`;
+          } else {
+            responseText = `**Từ vựng tiếng Đức quan trọng / Wichtige Vokabeln:**\n\n${vocabListVi}`;
+          }
+        } else if (isWrong) {
+          const wrongOptions = currentQuestion.options.filter(o => !o.isCorrect);
+          const wrongListDe = wrongOptions.map(o => `- **Option ${o.id}** ("${o.textDe}"): Ist falsch laut StVO.`).join('\n');
+          const wrongListVi = wrongOptions.map(o => `- **Phương án ${o.id}** ("${o.textVi || o.textDe}"): Là phương án sai vì không đúng quy định StVO.`).join('\n');
+
+          if (languageMode === 'de') {
+            responseText = `**Analyse, warum die anderen Optionen falsch sind:**\n\n${wrongListDe}`;
+          } else if (languageMode === 'vi') {
+            responseText = `**Phân tích tại sao các phương án khác lại sai:**\n\n${wrongListVi}`;
+          } else {
+            responseText = `**Phân tích đáp án sai / Fehlerhafte Optionen:**\n\n${wrongListVi}`;
+          }
+        } else {
+          responseText = languageMode === 'de' ? 'Bitte wähle eine andere Schnellfrage.' : 'Vui lòng thử chọn một câu hỏi nhanh khác.';
+        }
+        setAiMessages(prev => [...prev, { sender: 'ai', text: responseText }]);
         setIsAiLoading(false);
-      }, 500);
+      }, 600);
     }
   };
 
@@ -180,15 +291,21 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
 
   const t = {
     punkte: languageMode === 'de' ? 'Punkte' : (languageMode === 'vi' ? 'Điểm' : 'Punkte / Điểm'),
-    abbrechen: languageMode === 'de' ? 'Abbrechen' : (languageMode === 'vi' ? 'Hủy bỏ' : 'Abbrechen / Hủy'),
+    abbrechen: languageMode === 'de' ? 'Abbrechen' : (languageMode === 'vi' ? 'Hủy' : 'Abbrechen / Hủy'),
+    nextQuestion: languageMode === 'de' ? 'Nächste Frage' : (languageMode === 'vi' ? 'Câu tiếp theo' : 'Nächste Frage / Tiếp theo'),
     aufloesung: languageMode === 'de' ? 'Auflösung' : (languageMode === 'vi' ? 'Đáp án' : 'Auflösung / Đáp án'),
     fragen: languageMode === 'de' ? 'Fragen' : (languageMode === 'vi' ? 'Câu hỏi' : 'Fragen / Câu hỏi'),
     aiExplanation: languageMode === 'de' ? 'Erklärung' : (languageMode === 'vi' ? 'Giải thích tại sao' : 'Giải thích / Erklärung'),
     askMore: languageMode === 'de' ? 'Mehr dazu fragen...' : (languageMode === 'vi' ? 'Hỏi thêm về câu này...' : 'Hỏi thêm / Fragen...'),
+    companion: languageMode === 'de' ? 'Bạn Đồng Hành' : (languageMode === 'vi' ? 'Bạn Đồng Hành' : 'Bạn Đồng Hành'),
+    quickQuestionsTitle: languageMode === 'de' ? 'Schnelle Frage zu dieser Aufgabe wählen:' : (languageMode === 'vi' ? 'Chọn câu hỏi nhanh về câu này:' : 'Chọn câu hỏi nhanh / Schnellfragen:'),
+    qMemorize: languageMode === 'de' ? 'Merkhilfe für diese Frage' : (languageMode === 'vi' ? 'Mẹo ghi nhớ câu này' : 'Mẹo ghi nhớ / Merkhilfe'),
+    qVocab: languageMode === 'de' ? 'Vokabeln erklären' : (languageMode === 'vi' ? 'Giải thích từ vựng' : 'Giải thích từ vựng / Vokabeln'),
+    qWrongOptions: languageMode === 'de' ? 'Falsche Optionen analysieren' : (languageMode === 'vi' ? 'Phân tích đáp án sai' : 'Phân tích đáp án sai / Falsche Optionen')
   };
 
   return (
-    <div className="flex-1 flex flex-col h-full w-full overflow-hidden relative" style={{ backgroundColor: theme.bg, fontFamily: 'Arial, Helvetica, sans-serif' }}>
+    <div className="flex flex-col w-full overflow-hidden relative" style={{ height: 'calc(100vh - 76px)', backgroundColor: theme.bg, fontFamily: 'Arial, Helvetica, sans-serif' }}>
 
       {/* Top Header */}
       <div className="flex items-center justify-between px-3 text-white z-10 flex-shrink-0" style={{ backgroundColor: theme.topBar, height: '48px' }}>
@@ -200,180 +317,273 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
         </div>
         <div className="flex items-center gap-4">
           <span className="font-bold text-sm">{t.punkte}: {currentQuestion.points}</span>
-          <button onClick={() => onNavigate('/training')} className="hover:opacity-80">
+          <button onClick={() => setShowExitConfirm(true)} className="hover:opacity-80">
             <X size={20} strokeWidth={3} />
           </button>
         </div>
       </div>
 
       <div className="flex-1 overflow-y-auto flex flex-col">
-        <div className="w-full px-4 py-4 flex flex-col flex-1">
+        <div className="w-full px-4 py-4 flex flex-col flex-1" style={{ maxWidth: '1400px', marginLeft: 'auto', marginRight: 'auto', width: '100%' }}>
 
           {/* Question Text */}
-          <div className="mb-6 text-left w-full">
-            {(languageMode === 'de' || languageMode === 'both') && (
-              <h2 style={{ fontSize: '18px', fontWeight: 700, color: theme.textDark }}>
-                {currentQuestion.textDe}
-              </h2>
-            )}
-            {(languageMode === 'vi' || languageMode === 'both') && (
-              <p style={{ fontSize: '15px', fontWeight: 700, color: theme.textDark, opacity: 0.85, marginTop: (languageMode === 'both') ? '4px' : '0px' }}>
-                {currentQuestion.textVi}
-              </p>
-            )}
-          </div>
+          {showQuestion && (
+            <div className="mb-6 text-left w-full">
+              {(languageMode === 'de' || languageMode === 'both') && (
+                <h2 style={{ fontSize: '18px', fontWeight: 700, color: theme.textDark }}>
+                  {currentQuestion.textDe}
+                </h2>
+              )}
+              {(languageMode === 'vi' || languageMode === 'both') && (
+                <p style={{ fontSize: '15px', fontWeight: 700, color: theme.textDark, opacity: 0.85, marginTop: (languageMode === 'both') ? '4px' : '0px' }}>
+                  {currentQuestion.textVi}
+                </p>
+              )}
+            </div>
+          )}
 
-          {/* Content Area: Image + Checkboxes */}
-          <div style={{ display: 'flex', flexDirection: 'row', gap: '32px', alignItems: 'flex-start', width: '100%' }}>
+          {/* Content Area - desktop: side-by-side filling available height */}
+          <div className="w-full flex flex-col md:flex-row md:gap-6 md:items-stretch flex-1">
 
-            {/* Left: Image / Media */}
-            <div style={{ width: '48%', flexShrink: 0 }}>
-              {currentQuestion.image ? (
-                <img src={currentQuestion.image} alt="Question" style={{ width: '100%', height: 'auto', border: '1px solid black' }} />
+            {/* Left: Image / Media – always rendered to keep layout stable */}
+            <div className="lernen-media-col group" onClick={() => (currentQuestion.video || currentQuestion.image || currentQuestion.imageType) && setIsFullscreenMode(true)}>
+              {currentQuestion.video ? (
+                <div className="relative w-full border border-black bg-black rounded-sm overflow-hidden shadow-sm">
+                  <video
+                    ref={videoRef}
+                    src={currentQuestion.video}
+                    controls={isSubmitted}
+                    onPlay={(e) => {
+                      if (!hasPlayedOnce) setHasPlayedOnce(true);
+                      if (videoPlayCount >= 5 && !isSubmitted) {
+                        e.preventDefault();
+                        if (videoRef.current) videoRef.current.pause();
+                        alert(languageMode === 'de' ? 'Maximale Anzahl an Wiederholungen (5) erreicht.' : 'Đã đạt giới hạn 5 lần xem video.');
+                      } else {
+                        if (window.innerWidth < 768) setIsFullscreenMode(true);
+                      }
+                    }}
+                    onEnded={() => {
+                      if (!showQuestion) {
+                        setVideoPlayCount(prev => prev + 1);
+                      }
+                      setIsFullscreenMode(false);
+                    }}
+                    className="lernen-media-video"
+                  />
+                  {!isSubmitted && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="bg-black bg-opacity-60 text-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-md">
+                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
+                      </div>
+                    </div>
+                  )}
+                  <div className="hidden md:block absolute bottom-2 right-2 bg-black bg-opacity-60 text-white p-1.5 rounded text-xs pointer-events-none">🔍 Phóng to</div>
+                </div>
+              ) : currentQuestion.image ? (
+                <div className="relative w-full border border-black bg-slate-50 rounded-sm overflow-hidden shadow-sm">
+                  <img src={currentQuestion.image} alt="Question" className="lernen-media-img" />
+                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white p-1.5 rounded text-[10px] md:text-xs pointer-events-none">🔍 Phóng to</div>
+                </div>
               ) : currentQuestion.imageType ? (
-                <div style={{ width: '100%', aspectRatio: '1.6', border: '1px solid black', position: 'relative', overflow: 'hidden' }}>
+                <div className="lernen-media-svg relative border border-black overflow-hidden bg-white rounded-sm shadow-sm">
                   <SVGGraphics type={currentQuestion.imageType} className="w-full h-full" />
+                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white p-1.5 rounded text-[10px] md:text-xs pointer-events-none">🔍 Phóng to</div>
                 </div>
               ) : (
-                /* Khung trong suốt để cố định layout UI */
-                <div style={{ width: '100%', aspectRatio: '1.6', border: '1px solid transparent', backgroundColor: 'transparent' }} />
+                /* No media – transparent placeholder to keep layout */
+                <div style={{ flex: 1, border: '1px solid transparent', background: 'transparent' }} />
               )}
             </div>
 
-            {/* Right: Checkboxes */}
-            <div style={{ flex: 1, display: 'flex', flexDirection: 'column', gap: '22px' }}>
-              {currentQuestion.options.map(option => {
-                const isSelected = selectedOptions.includes(option.id);
-                const hasMistake = isSubmitted && (
-                  (option.isCorrect && !isSelected) ||
-                  (!option.isCorrect && isSelected)
-                );
+            {/* Right: Checkboxes / Buttons */}
+            {showQuestion ? (
+              <div className="flex-1 flex flex-col gap-4 md:gap-[18px] w-full">
+                {currentQuestion.options.map(option => {
+                  const isSelected = selectedOptions.includes(option.id);
+                  const hasMistake = isSubmitted && (
+                    (option.isCorrect && !isSelected) ||
+                    (!option.isCorrect && isSelected)
+                  );
+                  const isCorrectOption = isSubmitted && option.isCorrect;
 
-                // Hộp chính (Primary checkbox)
-                let boxBg = isSelected ? "black" : "white";
-                let tickColor = "white";
-                let showTick = isSelected;
+                  let boxBg = isSelected ? "black" : "white";
+                  let tickColor = "white";
+                  let showTick = isSelected;
 
-                return (
-                  <div
-                    key={option.id}
-                    onClick={() => handleOptionClick(option.id)}
-                    style={{
-                      display: 'flex',
-                      flexDirection: 'row',
-                      alignItems: 'flex-start',
-                      gap: '20px',
-                      cursor: isSubmitted ? 'default' : 'pointer'
-                    }}
-                  >
-                    {/* Hộp checkbox và thanh đỏ chỉ thị sai */}
-                    <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start' }}>
-                      {/* Vạch đỏ chỉ thị lỗi sai */}
-                      {hasMistake ? (
-                        <div style={{
-                          width: '4px',
-                          height: '42px',
-                          backgroundColor: '#e50000',
-                          marginRight: '8px',
-                          borderRadius: '2px'
-                        }} />
-                      ) : (
-                        <div style={{ width: '4px', marginRight: '8px' }} />
-                      )}
+                  const barColor = hasMistake ? '#e50000' : isCorrectOption ? '#00995e' : null;
 
-                      {/* Checkbox chính & ô xanh lá chỉ thị đáp án đúng phía dưới */}
-                      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
-                        <div
-                          style={{
-                            width: '42px',
-                            height: '42px',
-                            border: '1px solid ' + theme.checkboxBorder,
-                            backgroundColor: boxBg,
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            flexShrink: 0
-                          }}
-                        >
-                          {showTick && (
-                            <Check size={32} strokeWidth={3} color={tickColor} />
-                          )}
-                        </div>
+                  return (
+                    <div
+                      key={option.id}
+                      onClick={() => handleOptionClick(option.id)}
+                      style={{
+                        display: 'flex',
+                        flexDirection: 'row',
+                        alignItems: 'stretch',
+                        gap: '20px',
+                        cursor: isSubmitted ? 'default' : 'pointer'
+                      }}
+                    >
+                      <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'flex-start', flexShrink: 0 }}>
+                        {barColor ? (
+                          <div style={{
+                            width: '4px',
+                            backgroundColor: barColor,
+                            marginRight: '8px',
+                            borderRadius: '2px',
+                            alignSelf: 'stretch'
+                          }} />
+                        ) : (
+                          <div style={{ width: '4px', marginRight: '8px' }} />
+                        )}
 
-                        {/* Ô nhỏ màu xanh lá chỉ thị đây là đáp án đúng (sau khi nộp bài) */}
-                        {isSubmitted && option.isCorrect && (
+                        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
                           <div
                             style={{
-                              width: '20px',
-                              height: '20px',
-                              backgroundColor: '#00995e',
+                              width: '42px',
+                              height: '42px',
+                              border: '1px solid ' + theme.checkboxBorder,
+                              backgroundColor: boxBg,
                               display: 'flex',
                               alignItems: 'center',
                               justifyContent: 'center',
-                              borderRadius: '2px'
+                              flexShrink: 0
                             }}
                           >
-                            <Check size={14} strokeWidth={4.5} color="white" />
+                            {showTick && (
+                              <Check size={32} strokeWidth={3} color={tickColor} />
+                            )}
                           </div>
+
+                          {isSubmitted && option.isCorrect && (
+                            <div
+                              style={{
+                                width: '20px',
+                                height: '20px',
+                                backgroundColor: '#00995e',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: '2px'
+                              }}
+                            >
+                              <Check size={14} strokeWidth={4.5} color="white" />
+                            </div>
+                          )}
+                        </div>
+                      </div>
+
+                      <div style={{ display: 'flex', flexDirection: 'column', flex: 1, paddingTop: '4px' }}>
+                        {(languageMode === 'de' || languageMode === 'both') && (
+                          <span style={{ fontSize: '16px', fontWeight: 700, color: theme.textDark, lineHeight: '1.3' }}>
+                            {option.textDe}
+                          </span>
+                        )}
+                        {(languageMode === 'vi' || languageMode === 'both') && option.textVi && (
+                          <span style={{ fontSize: '14px', fontWeight: 650, color: '#4b5563', fontStyle: 'italic', marginTop: (languageMode === 'both') ? '4px' : '0px' }}>
+                            {option.textVi}
+                          </span>
                         )}
                       </div>
                     </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="flex-1 flex flex-col gap-4 pt-2 w-full">
+                <button
+                  onClick={() => {
+                    if (videoPlayCount < 5) {
+                      if (videoRef.current) videoRef.current.play();
+                    }
+                  }}
+                  disabled={videoPlayCount >= 5}
+                  className={`transition-all ${videoPlayCount >= 5 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'}`}
+                  style={{ width: '100%', backgroundColor: videoPlayCount >= 5 ? '#6b7280' : '#0000a0', color: 'white', fontWeight: 'bold', fontSize: '18px', padding: '10px', borderRadius: '4px', border: '1px solid #000' }}
+                >
+                  {languageMode === 'de' ? 'Video starten' : languageMode === 'vi' ? 'Bắt đầu video' : 'Video starten / Bắt đầu video'}
+                </button>
 
-                    {/* Nội dung chữ của phương án */}
-                    <div style={{ display: 'flex', flexDirection: 'column', flex: 1, paddingTop: '4px' }}>
-                      {(languageMode === 'de' || languageMode === 'both') && (
-                        <span style={{ fontSize: '18px', fontWeight: 700, color: theme.textDark, lineHeight: '1.3' }}>
-                          {option.textDe}
-                        </span>
-                      )}
-                      {(languageMode === 'vi' || languageMode === 'both') && option.textVi && (
-                        <span style={{ fontSize: '15px', fontWeight: 650, color: '#4b5563', fontStyle: 'italic', marginTop: (languageMode === 'both') ? '6px' : '0px' }}>
-                          {option.textVi}
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                );
-              })}
-            </div>
+                {hasPlayedOnce && (
+                  <button
+                    onClick={() => {
+                      setShowQuestion(true);
+                      if (videoRef.current) videoRef.current.pause();
+                    }}
+                    className="hover:opacity-90"
+                    style={{ width: '100%', backgroundColor: '#0000a0', color: 'white', fontWeight: 'bold', fontSize: '18px', padding: '10px', borderRadius: '4px', border: '1px solid #000' }}
+                  >
+                    {languageMode === 'de' ? 'Zur Aufgabenstellung' : languageMode === 'vi' ? 'Vào câu hỏi' : 'Zur Aufgabenstellung / Vào câu hỏi'}
+                  </button>
+                )}
+
+                <div style={{ marginTop: '20px', fontSize: '15px', fontWeight: 'bold', textAlign: 'center', color: '#0a4c2f' }}>
+                  {!hasPlayedOnce && videoPlayCount === 0 ? (
+                    languageMode === 'de' ? (
+                      <span>Sie können das Video insgesamt <strong>5</strong> Mal ansehen.</span>
+                    ) : languageMode === 'vi' ? (
+                      <span>Bạn có thể xem video tối đa <strong>5</strong> lần.</span>
+                    ) : (
+                      <span>Sie können das Video insgesamt <strong>5</strong> Mal ansehen.<br /><span style={{ fontSize: '13px', color: '#4b5563', fontWeight: 'normal' }}>(Bạn có thể xem video tối đa 5 lần)</span></span>
+                    )
+                  ) : (
+                    languageMode === 'de' ? (
+                      <span>Sie können sich den Film noch <strong style={{ color: '#e50000' }}>{5 - videoPlayCount}</strong> mal ansehen.</span>
+                    ) : languageMode === 'vi' ? (
+                      <span>Bạn có thể xem video này thêm <strong style={{ color: '#e50000' }}>{5 - videoPlayCount}</strong> lần nữa.</span>
+                    ) : (
+                      <span>Sie können sich den Film noch <strong style={{ color: '#e50000' }}>{5 - videoPlayCount}</strong> mal ansehen.<br /><span style={{ fontSize: '13px', color: '#4b5563', fontWeight: 'normal' }}>(Bạn có thể xem video này thêm {5 - videoPlayCount} lần)</span></span>
+                    )
+                  )}
+                </div>
+              </div>
+            )}
           </div>
 
-          {/* Spacing for bottom */}
-          <div className="mt-auto pt-10" />
-
           {/* Action Buttons (Right aligned above bottom bar) */}
-          <div className="flex justify-end gap-2 mb-2 pr-2">
-            <button
-              onClick={() => onNavigate('/training')}
-              className="px-4 h-[31px] text-[14px] flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-              style={{ backgroundColor: theme.btnRed }}
-            >
-              {t.abbrechen}
-            </button>
+          <div className="flex flex-wrap justify-end gap-2 md:gap-3 mb-3 pr-2 mt-auto">
+            {!isSubmitted ? (
+              <button
+                onClick={() => setShowExitConfirm(true)}
+                className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: theme.btnRed, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+              >
+                {t.abbrechen}
+              </button>
+            ) : (
+              <button
+                onClick={handleOpenAi}
+                className="font-bold text-white shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
+                style={{ background: 'linear-gradient(to right, #6366f1, #a855f7)', height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+              >
+                {t.aiExplanation}
+              </button>
+            )}
 
             <button
               onClick={handleBookmarkToggle}
-              className="w-10 h-[31px] flex items-center justify-center hover:opacity-90"
-              style={{ backgroundColor: theme.btnYellow }}
+              className="flex items-center justify-center hover:opacity-90"
+              style={{ backgroundColor: theme.btnYellow, width: '44px', height: '44px', borderRadius: '8px', flexShrink: 0 }}
             >
-              <Star size={18} fill={isBookmarked ? "black" : "transparent"} color="black" strokeWidth={isBookmarked ? 1 : 2} />
+              <Star size={20} fill={isBookmarked ? "black" : "transparent"} color="black" strokeWidth={isBookmarked ? 1 : 2} />
             </button>
 
             {!isSubmitted ? (
               <button
                 onClick={handleSubmit}
-                className="px-4 h-[31px] text-[14px] flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: theme.btnGreen }}
+                className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: theme.btnGreen, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
               >
-                Auflösung
+                {t.aufloesung}
               </button>
             ) : (
               <button
-                onClick={handleOpenAi}
-                className="px-4 py-1.5 font-bold text-white shadow-sm hover:opacity-90 transition-opacity flex items-center gap-2 rounded-sm"
-                style={{ background: 'linear-gradient(to right, #6366f1, #a855f7)' }}
+                onClick={handleNext}
+                className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
+                style={{ backgroundColor: '#2b576b', height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
               >
-                {t.aiExplanation}
+                {t.nextQuestion}
               </button>
             )}
           </div>
@@ -433,19 +643,29 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
               const questionAtPage = filteredQuestions[pageNum - 1];
               const pageBaseId = questionAtPage ? getBaseId(questionAtPage.id) : null;
               const isPageBookmarked = pageBaseId && user.savedQuestions.includes(pageBaseId);
-              const hasVideo = pageBaseId ? [3, 5, 6, 8].includes(pageBaseId) : false;
+              const hasVideo = questionAtPage ? !!questionAtPage.video : false;
+
+              const hasResult = sessionResults[pageNum - 1] !== undefined;
+              const isPageCorrect = sessionResults[pageNum - 1];
+
+              let bgColor = '#ffffff';
+              let textColor = 'black';
+              if (hasResult) {
+                bgColor = isPageCorrect ? '#00995e' : '#e50000';
+                textColor = 'white';
+              }
 
               return (
                 <button
                   key={pageNum}
                   onClick={() => setCurrentIndex(pageNum - 1)}
-                  className="flex items-center justify-center font-bold relative hover:bg-gray-100"
+                  className="flex items-center justify-center font-bold relative hover:opacity-90"
                   style={{
                     width: '54px',
                     height: '38px',
                     minWidth: '54px',
-                    backgroundColor: currentIndex === pageNum - 1 ? '#ffffff' : '#ffffff',
-                    color: 'black',
+                    backgroundColor: bgColor,
+                    color: textColor,
                     border: currentIndex === pageNum - 1 ? '3px solid black' : '1px solid black',
                     fontSize: '16px',
                   }}
@@ -518,14 +738,89 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
         </div>
       </div>
 
+      {/* Exit Confirm Modal */}
+      {showExitConfirm && (
+        <div style={{ position: 'absolute', inset: 0, zIndex: 60, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div style={{ background: 'white', borderRadius: '14px', padding: '28px 24px', maxWidth: '360px', width: '100%', boxShadow: '0 20px 50px rgba(0,0,0,0.25)', textAlign: 'center' }}>
+            <div style={{ fontSize: '36px', marginBottom: '12px' }}>⚠️</div>
+            <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#111827', marginBottom: '8px' }}>
+              {languageMode === 'de' ? 'Training beenden?' : (languageMode === 'vi' ? 'Thoát khỏi bài học?' : 'Thoát bài học? / Training beenden?')}
+            </h3>
+            <p style={{ fontSize: '13px', color: '#6b7280', lineHeight: '1.5', marginBottom: '24px' }}>
+              {languageMode === 'de'
+                ? 'Dein Fortschritt in dieser Sitzung geht verloren.'
+                : (languageMode === 'vi'
+                  ? 'Tiến trình bài học hiện tại sẽ không được lưu.'
+                  : 'Tiến trình sẽ không được lưu. / Fortschritt geht verloren.')}
+            </p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => setShowExitConfirm(false)}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: '1.5px solid #e5e7eb', background: 'white', fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: '#374151' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+              >
+                {languageMode === 'de' ? 'Weiter lernen' : (languageMode === 'vi' ? 'Học tiếp' : 'Học tiếp / Weiter')}
+              </button>
+              <button
+                onClick={() => {
+                  sessionStorage.removeItem('fuhrerschein_learning_session_v2');
+                  setShowExitConfirm(false);
+                  onNavigate('/training');
+                }}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: 'none', background: theme.btnRed, fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: 'white' }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.88'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+              >
+                {languageMode === 'de' ? 'Beenden' : (languageMode === 'vi' ? 'Thoát' : 'Thoát / Beenden')}
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Fullscreen Media Modal */}
+      {isFullscreenMode && (currentQuestion.image || currentQuestion.video || currentQuestion.imageType) && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 100, backgroundColor: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <button
+            onClick={() => setIsFullscreenMode(false)}
+            style={{ position: 'absolute', top: '20px', right: '20px', backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', padding: '12px', borderRadius: '50%', border: 'none', zIndex: 110, cursor: 'pointer' }}
+          >
+            <X size={28} strokeWidth={3} />
+          </button>
+
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+            {currentQuestion.video ? (
+              <video
+                src={currentQuestion.video}
+                controls
+                autoPlay
+                onEnded={() => {
+                  if (!showQuestion) {
+                    setVideoPlayCount(prev => prev + 1);
+                  }
+                  setIsFullscreenMode(false);
+                }}
+                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+              />
+            ) : currentQuestion.image ? (
+              <img src={currentQuestion.image} alt="Fullscreen Question" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+            ) : currentQuestion.imageType ? (
+              <div style={{ width: '100vw', height: '100vw', maxHeight: '100vh', aspectRatio: '1.6', position: 'relative' }}>
+                <SVGGraphics type={currentQuestion.imageType} className="w-full h-full" />
+              </div>
+            ) : null}
+          </div>
+        </div>
+      )}
+
       {/* AI Chat Drawer Overlay */}
       {isAiOpen && (
         <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 50, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
           <div style={{ width: '100%', maxWidth: '600px', height: '75vh', maxHeight: '600px', backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid #f3f4f6', background: 'linear-gradient(135deg, #1a4a5e, #2b6f8a)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>
-                <Sparkles size={20} color="#fde047" />
-                <h3 style={{ fontWeight: 'bold', margin: 0 }}>Bạn Đồng Hành (Gemini)</h3>
+                <h3 style={{ fontWeight: 'bold', margin: 0 }}>{t.companion}</h3>
               </div>
               <button onClick={() => setIsAiOpen(false)} style={{ color: 'rgba(255,255,255,0.8)', padding: '8px', background: 'none', border: 'none', cursor: 'pointer' }}>
                 <X size={24} />
@@ -548,12 +843,11 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
                   }}>
                     {msg.sender === 'ai' && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                        <Sparkles size={14} color="#a855f7" />
                         <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280' }}>Bạn Đồng Hành</span>
                       </div>
                     )}
                     <div style={{ fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
-                      {msg.text}
+                      {renderFormattedText(msg.text)}
                     </div>
                   </div>
                 </div>
@@ -572,12 +866,37 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
               <div ref={chatEndRef} />
             </div>
 
-            <form onSubmit={handleSendMessage} style={{ padding: '12px', backgroundColor: '#ffffff', borderTop: '1px solid #f3f4f6', display: 'flex', gap: '8px' }}>
-              <input type="text" value={userInput} onChange={e => setUserInput(e.target.value)} placeholder="Hỏi thêm về câu này..." disabled={isAiLoading} style={{ flex: 1, padding: '8px 16px', backgroundColor: '#f3f4f6', border: 'none', borderRadius: '9999px', fontSize: '14px', outline: 'none' }} />
-              <button type="submit" disabled={isAiLoading || !userInput.trim()} style={{ width: '40px', height: '40px', borderRadius: '50%', backgroundColor: '#2b6f8a', color: 'white', display: 'flex', alignItems: 'center', justifyContent: 'center', border: 'none', cursor: (isAiLoading || !userInput.trim()) ? 'default' : 'pointer', opacity: (isAiLoading || !userInput.trim()) ? 0.5 : 1 }}>
-                <Send size={18} />
-              </button>
-            </form>
+            <div style={{ padding: '12px 16px 16px 16px', backgroundColor: '#ffffff', borderTop: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: '8px' }}>
+              <div style={{ fontSize: '10px', fontWeight: 'bold', color: '#1a4a5e', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                {t.quickQuestionsTitle}
+              </div>
+              <div className="flex flex-row flex-wrap gap-2">
+                <button
+                  type="button"
+                  disabled={isAiLoading}
+                  onClick={() => handleSendMessage(t.qMemorize)}
+                  className="flex-1 min-w-[120px] p-2.5 bg-slate-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 text-gray-700 hover:text-[#1a4a5e] rounded-xl text-xs font-bold text-left transition-all disabled:opacity-50"
+                >
+                  {t.qMemorize}
+                </button>
+                <button
+                  type="button"
+                  disabled={isAiLoading}
+                  onClick={() => handleSendMessage(t.qVocab)}
+                  className="flex-1 min-w-[120px] p-2.5 bg-slate-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 text-gray-700 hover:text-[#1a4a5e] rounded-xl text-xs font-bold text-left transition-all disabled:opacity-50"
+                >
+                  {t.qVocab}
+                </button>
+                <button
+                  type="button"
+                  disabled={isAiLoading}
+                  onClick={() => handleSendMessage(t.qWrongOptions)}
+                  className="flex-1 min-w-[120px] p-2.5 bg-slate-50 hover:bg-blue-50 border border-gray-200 hover:border-blue-200 text-gray-700 hover:text-[#1a4a5e] rounded-xl text-xs font-bold text-left transition-all disabled:opacity-50"
+                >
+                  {t.qWrongOptions}
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}

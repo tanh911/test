@@ -37,49 +37,97 @@ export const Stats = ({ user, onUpdateUser }) => {
     }
   };
 
-  return (
-    <div className="flex flex-col h-full max-h-[85vh] bg-[#F3F4F6] text-gray-900 font-sans overflow-y-auto px-4 py-4 pb-20 space-y-5 no-scrollbar">
-      
-      {/* User greeting */}
-      <div className="bg-white p-4 rounded-xl border border-gray-200 flex items-center justify-between shadow-xs">
-        <div>
-          <h2 className="text-xs font-extrabold uppercase tracking-wider text-[#15803D]">HỌC VIÊN: {user.displayName}</h2>
-          <p className="text-[10px] text-gray-500 mt-0.5 uppercase tracking-wide font-mono font-bold">Tình trạng: Đang học lý thuyết</p>
+  // 3 vòng tròn thống kê
+  const answeredPercent = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+  
+  const wrongCount = progressEntries.filter(p => !p.isCorrect).length;
+  const wrongPercent = totalQuestions > 0 ? (wrongCount / totalQuestions) * 100 : 0;
+
+  // Fit for exam can be based on success rate and answered percentage
+  const fitPercent = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+
+  const renderGauge = (percent, color, label, iconText) => {
+    const radius = 40;
+    const arcLength = Math.PI * radius; // 125.66
+    const strokeDashoffset = arcLength - (percent / 100) * arcLength;
+
+    return (
+      <div className="flex flex-col items-center">
+        <div className="relative w-28 h-16 flex items-end justify-center overflow-hidden">
+          <svg viewBox="0 0 100 55" className="w-full h-full overflow-visible">
+            {/* Background track */}
+            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e5e7eb" strokeWidth="12" strokeLinecap="butt" />
+            
+            {/* Progress track */}
+            <path 
+              d="M 10 50 A 40 40 0 0 1 90 50" 
+              fill="none" 
+              stroke={color} 
+              strokeWidth="12" 
+              strokeLinecap="butt"
+              strokeDasharray={arcLength}
+              strokeDashoffset={strokeDashoffset}
+              style={{ transition: 'stroke-dashoffset 1s ease-in-out' }}
+            />
+          </svg>
+          {/* Center text */}
+          <div className="absolute bottom-1 font-bold" style={{color: color, fontSize: '18px'}}>
+            {percent.toFixed(1)}%
+          </div>
         </div>
-        <div className="w-2.5 h-2.5 bg-[#15803D] rounded-full animate-pulse"></div>
+        <div className="flex items-center gap-1.5 mt-3">
+          <div className="w-3 h-3 rounded-[2px]" style={{ backgroundColor: color }}></div>
+          <span className="text-[11px] font-bold text-gray-700 whitespace-nowrap">{label}</span>
+        </div>
+      </div>
+    );
+  };
+
+  return (
+    <div className="flex flex-col h-full max-h-[85vh] bg-[#F3F4F6] text-gray-900 font-sans overflow-y-auto px-4 py-4 pb-20 space-y-6 no-scrollbar">
+      
+      {/* 3 Rings Statistics */}
+      <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center">
+        <h2 className="text-xl font-medium text-[#1e445a] mb-6">Übersicht</h2>
+        
+        <div className="flex flex-row items-center justify-between w-full max-w-sm px-2 gap-4">
+          {renderGauge(fitPercent, '#7cb342', 'Fit für die Prüfung')}
+          {renderGauge(answeredPercent, '#fbc02d', 'Mind. 1x geübt')}
+          {renderGauge(wrongPercent, '#e53935', 'Zuletzt falsch')}
+        </div>
       </div>
 
       {/* Stats Grid */}
       <div className="grid grid-cols-2 gap-3">
-        <div className="bg-white border-2 border-gray-200 p-4 rounded-xl flex flex-col justify-between space-y-2 shadow-sm">
-          <BookOpen className="w-4.5 h-4.5 text-[#15803D]" />
+        <div className="bg-white border border-gray-200 p-4 rounded-xl flex flex-col justify-between space-y-2 shadow-sm">
+          <BookOpen className="w-4.5 h-4.5 text-[#1e445a]" />
           <div>
             <span className="block text-xl font-extrabold font-mono text-gray-900">{answeredCount} / {totalQuestions}</span>
             <span className="text-[9px] uppercase tracking-wider text-gray-500 font-sans font-bold">CÂU HOÀN THÀNH</span>
           </div>
         </div>
 
-        <div className="bg-white border-2 border-gray-200 p-4 rounded-xl flex flex-col justify-between space-y-2 shadow-sm">
-          <CheckCircle2 className="w-4.5 h-4.5 text-[#15803D]" />
+        <div className="bg-white border border-gray-200 p-4 rounded-xl flex flex-col justify-between space-y-2 shadow-sm">
+          <CheckCircle2 className="w-4.5 h-4.5 text-[#1e445a]" />
           <div>
-            <span className="block text-xl font-extrabold font-mono text-[#15803D]">{successRate}%</span>
+            <span className="block text-xl font-extrabold font-mono text-[#7cb342]">{successRate}%</span>
             <span className="text-[9px] uppercase tracking-wider text-gray-500 font-sans font-bold">TỶ LỆ ĐÚNG</span>
           </div>
         </div>
 
-        <div className="bg-white border-2 border-gray-200 p-4 rounded-xl flex flex-col justify-between space-y-2 shadow-sm">
-          <Calendar className="w-4.5 h-4.5 text-[#15803D]" />
+        <div className="bg-white border border-gray-200 p-4 rounded-xl flex flex-col justify-between space-y-2 shadow-sm">
+          <Calendar className="w-4.5 h-4.5 text-[#1e445a]" />
           <div>
             <span className="block text-xl font-extrabold font-mono text-gray-900">{examsRun.length}</span>
             <span className="text-[9px] uppercase tracking-wider text-gray-500 font-sans font-bold">SỐ LẦN THI THỬ</span>
           </div>
         </div>
 
-        <div className="bg-white border-2 border-gray-200 p-4 rounded-xl flex flex-col justify-between space-y-2 shadow-sm">
-          <Trophy className="w-4.5 h-4.5 text-[#15803D]" />
+        <div className="bg-white border border-gray-200 p-4 rounded-xl flex flex-col justify-between space-y-2 shadow-sm">
+          <Trophy className="w-4.5 h-4.5 text-[#1e445a]" />
           <div>
             <span className={`block text-base font-extrabold font-sans uppercase ${
-              lastExam ? (lastExam.passed ? 'text-[#15803D]' : 'text-red-650') : 'text-gray-900'
+              lastExam ? (lastExam.passed ? 'text-[#7cb342]' : 'text-[#e53935]') : 'text-gray-900'
             }`}>
               {lastExam ? (lastExam.passed ? 'ĐÃ ĐỖ' : 'TRƯỢT') : 'CHƯA THI'}
             </span>

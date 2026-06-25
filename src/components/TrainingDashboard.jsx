@@ -1,12 +1,34 @@
 import React from 'react';
 import { ChevronLeft, ChevronRight, Menu, BarChart3, List, CheckCircle } from 'lucide-react';
+import { questions } from '../data/questions';
 
-export const TrainingDashboard = ({ onNavigate, onShowLogin }) => {
+export const TrainingDashboard = ({ user, onNavigate, onShowLogin, languageMode = 'both' }) => {
+  const t = {
+    fit: languageMode === 'de' ? 'Fit für Prüfung' : (languageMode === 'vi' ? 'Sẵn sàng thi' : 'Fit für Prüfung / Sẵn sàng thi'),
+    training: languageMode === 'de' ? 'Training' : (languageMode === 'vi' ? 'Luyện tập' : 'Training / Luyện tập'),
+    practice30: languageMode === 'de' ? '30 Fragen üben' : (languageMode === 'vi' ? 'Luyện 30 câu hỏi' : 'Luyện 30 câu hỏi / 30 Fragen'),
+    allThemes: languageMode === 'de' ? 'Alle Fragen & Themen' : (languageMode === 'vi' ? 'Tất cả chủ đề & câu hỏi' : 'Tất cả câu hỏi & chủ đề / Alle'),
+    focusAreas: languageMode === 'de' ? 'Schwerpunkte üben' : (languageMode === 'vi' ? 'Luyện câu hỏi trọng tâm' : 'Luyện trọng tâm / Schwerpunkte'),
+    searchQuestions: languageMode === 'de' ? 'Fragen suchen' : (languageMode === 'vi' ? 'Tìm kiếm câu hỏi' : 'Tìm kiếm câu hỏi / Suchen'),
+    lastErrors: languageMode === 'de' ? 'letzte Fehler' : (languageMode === 'vi' ? 'lỗi sai gần đây' : 'letzte Fehler / lỗi sai gần đây'),
+    markedQuestions: languageMode === 'de' ? 'markierte Fragen' : (languageMode === 'vi' ? 'câu hỏi đã đánh dấu' : 'câu hỏi đã đánh dấu / markiert'),
+  };
+
+  // Calculate real progress
+  const totalQuestions = questions.length;
+  const progressEntries = user?.progress ? Object.values(user.progress) : [];
+  const answeredCount = progressEntries.filter(p => p.answered).length;
+  const correctCount = progressEntries.filter(p => p.answered && p.isCorrect).length;
+  const wrongCount = progressEntries.filter(p => p.answered && !p.isCorrect).length;
+
+  // Tỉ lệ tính trên tổng số câu hỏi thực tế
+  const answeredPercent = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+  const fitPercent     = totalQuestions > 0 ? (correctCount  / totalQuestions) * 100 : 0;
+  const wrongPercent   = totalQuestions > 0 ? (wrongCount    / totalQuestions) * 100 : 0;
+
   return (
     <div className="flex flex-col min-h-full bg-[#f4f7f9]" style={{fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif"}}>
       
-      {/* Global Header is handled by App.jsx, so we don't need one here */}
-
       {/* Main Responsive Content */}
       <style>{`
         .home-container {
@@ -38,31 +60,65 @@ export const TrainingDashboard = ({ onNavigate, onShowLogin }) => {
       }}>
         <div className="home-container">
         
-        {/* Left Side: Large Progress Circle */}
-        <div className="relative flex-shrink-0" style={{width: 'min(100%, 420px)', aspectRatio: '1/1'}}>
-          <svg viewBox="0 0 200 200" style={{width: '100%', height: '100%'}}>
-            {/* Outer rings */}
-            <circle cx="100" cy="100" r="95" fill="#d9dedf" />
-            <circle cx="100" cy="100" r="70" fill="none" stroke="#f4f7f9" strokeWidth="1.5" />
-            <circle cx="100" cy="100" r="48" fill="none" stroke="#f4f7f9" strokeWidth="1.5" />
+        {/* Left Side: Progress Circle */}
+        <div className="relative flex justify-center items-center w-[240px] h-[240px] flex-shrink-0">
+          <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+            {/* Outer gray base */}
+            <circle cx="100" cy="100" r="95" fill="#e5ebf0" />
+            
+            {/* --- Track Backgrounds --- */}
+            <circle cx="100" cy="100" r="80" fill="none" stroke="#d9dedf" strokeWidth="12" />
+            <circle cx="100" cy="100" r="66" fill="none" stroke="#d9dedf" strokeWidth="12" />
+            <circle cx="100" cy="100" r="52" fill="none" stroke="#d9dedf" strokeWidth="12" />
+            
+            {/* --- Progress Tracks --- */}
+            {/* Outer Green Ring: Fit für Prüfung */}
+            <circle 
+              cx="100" cy="100" r="80" 
+              fill="none" 
+              stroke="#7cb342" 
+              strokeWidth="12" 
+              strokeLinecap="butt"
+              strokeDasharray={2 * Math.PI * 80}
+              strokeDashoffset={2 * Math.PI * 80 - (fitPercent / 100) * (2 * Math.PI * 80)}
+              style={{ transition: 'stroke-dashoffset 1s ease-in-out' }}
+            />
+            
+            {/* Middle Yellow Ring: Mind. 1x geübt */}
+            <circle 
+              cx="100" cy="100" r="66" 
+              fill="none" 
+              stroke="#fbc02d" 
+              strokeWidth="12" 
+              strokeLinecap="butt"
+              strokeDasharray={2 * Math.PI * 66}
+              strokeDashoffset={2 * Math.PI * 66 - (answeredPercent / 100) * (2 * Math.PI * 66)}
+              style={{ transition: 'stroke-dashoffset 1s ease-in-out' }}
+            />
+
+            {/* Inner Red Ring: Zuletzt falsch */}
+            <circle 
+              cx="100" cy="100" r="52" 
+              fill="none" 
+              stroke="#e53935" 
+              strokeWidth="12" 
+              strokeLinecap="butt"
+              strokeDasharray={2 * Math.PI * 52}
+              strokeDashoffset={2 * Math.PI * 52 - (wrongPercent / 100) * (2 * Math.PI * 52)}
+              style={{ transition: 'stroke-dashoffset 1s ease-in-out' }}
+            />
             
             {/* Inner White Center */}
-            <circle cx="100" cy="100" r="48" fill="white" />
-            
-            {/* Color Indicators at top */}
-            {/* Green */}
-            <path d="M 100 5 L 100 28" stroke="#7cb342" strokeWidth="5" strokeLinecap="square" />
-            {/* Yellow */}
-            <path d="M 100 30 L 100 48" stroke="#fbc02d" strokeWidth="5" strokeLinecap="square" />
-            {/* Red */}
-            <path d="M 100 50 L 100 70" stroke="#e53935" strokeWidth="3.5" strokeLinecap="square" />
+            <circle cx="100" cy="100" r="45" fill="white" />
           </svg>
           
           {/* Center Text overlay */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <div style={{fontSize: '48px', fontWeight: '500', color: '#7cb342', lineHeight: '1'}}>0.0%</div>
-            <div style={{fontSize: '16px', color: '#546e7a', marginTop: '8px'}}>Fit für Prüfung</div>
-            <BarChart3 size={20} color="#546e7a" className="mt-2 opacity-80" />
+            <div style={{fontSize: '32px', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px'}}>{fitPercent.toFixed(1)}%</div>
+            <div style={{fontSize: '11px', color: '#546e7a', marginTop: '6px', fontWeight: '500'}}>
+              {t.fit}
+            </div>
+            <BarChart3 size={16} color="#546e7a" className="mt-1" />
           </div>
         </div>
 
@@ -86,19 +142,19 @@ export const TrainingDashboard = ({ onNavigate, onShowLogin }) => {
               <ChevronLeft size={20} strokeWidth={2.5} />
             </button>
             <div style={{fontSize: '22px', color: '#546e7a', fontWeight: '400'}}>
-              Training
+              {t.training}
             </div>
           </div>
 
           {/* List Items */}
           <div className="flex flex-col gap-3">
             {[
-              { title: '30 Fragen üben', icon: <div className="font-bold text-[#2b576b] tracking-wider text-sm flex flex-col leading-none"><span>30</span><span className="text-[8px]">IIII</span></div>, path: '/training/fragen' },
-              { title: 'Alle Fragen & Themen', icon: <List size={22} className="text-[#2b576b]" />, path: '/training/fragen' },
-              { title: 'Schwerpunkte üben', icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
-              { title: 'Fragen suchen', icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
-              { title: '0 letzte Fehler', icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
-              { title: '0 markierte Fragen', icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
+              { title: t.practice30, icon: <div className="font-bold text-[#2b576b] tracking-wider text-sm flex flex-col leading-none"><span>30</span><span className="text-[8px]">IIII</span></div>, path: '/training/fragen' },
+              { title: t.allThemes, icon: <List size={22} className="text-[#2b576b]" />, path: '/training/fragen' },
+              { title: t.focusAreas, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
+              { title: t.searchQuestions, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
+              { title: `0 ${t.lastErrors}`, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
+              { title: `0 ${t.markedQuestions}`, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
             ].map((item, idx) => (
               <button 
                 key={idx}

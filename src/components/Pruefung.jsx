@@ -9,6 +9,42 @@ import {
 
 export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
   const navigate = useNavigate();
+  const t = {
+    // idle state
+    fit: languageMode === 'de' ? 'Fit für Prüfung' : (languageMode === 'vi' ? 'Sẵn sàng thi' : 'Fit für Prüfung / Sẵn sàng thi'),
+    pruefung: languageMode === 'de' ? 'Prüfung' : (languageMode === 'vi' ? 'Thi thử' : 'Prüfung / Thi thử'),
+    musterboegen: languageMode === 'de' ? 'Musterbögen' : (languageMode === 'vi' ? 'Bộ đề mẫu' : 'Musterbögen / Bộ đề mẫu'),
+    simulation: languageMode === 'de' ? 'Prüfungssimulation' : (languageMode === 'vi' ? 'Mô phỏng thi thật' : 'Prüfungssimulation / Thi thử'),
+    letzteFehler: languageMode === 'de' ? 'letzte Fehler' : (languageMode === 'vi' ? 'lỗi sai gần đây' : 'letzte Fehler / lỗi sai gần đây'),
+    markierteFragen: languageMode === 'de' ? 'markierte Fragen' : (languageMode === 'vi' ? 'câu hỏi đã đánh dấu' : 'markierte Fragen / câu hỏi đã đánh dấu'),
+
+    // running state
+    frage: languageMode === 'de' ? 'FRAGE' : (languageMode === 'vi' ? 'CÂU' : 'FRAGE / CÂU'),
+    abgeben: languageMode === 'de' ? 'Abgeben' : (languageMode === 'vi' ? 'Nộp bài' : 'Nộp bài / Abgeben'),
+    fehlerpunkte: languageMode === 'de' ? 'Fehlerpunkte' : (languageMode === 'vi' ? 'Điểm phạt' : 'Fehlerpunkte / Điểm phạt'),
+    weiter: languageMode === 'de' ? 'Weiter' : (languageMode === 'vi' ? 'Tiếp tục' : 'Weiter / Tiếp'),
+    zurueck: languageMode === 'de' ? 'Zurück' : (languageMode === 'vi' ? 'Quay lại' : 'Zurück / Quay lại'),
+
+    // submitted state
+    passed: languageMode === 'de' ? 'BESTANDEN' : (languageMode === 'vi' ? 'ĐÃ ĐỖ THI THỬ' : 'ĐÃ ĐỖ THI THỬ (BESTANDEN)'),
+    failed: languageMode === 'de' ? 'NICHT BESTANDEN' : (languageMode === 'vi' ? 'TRƯỢT THI THỬ' : 'TRƯỢT THI THỬ (NICHT BESTANDEN)'),
+    pointsTotal: languageMode === 'de' ? 'Gesamtfehlerpunkte' : (languageMode === 'vi' ? 'Tổng số điểm phạt' : 'Tổng số điểm phạt / Fehlerpunkte'),
+    failedRule5: languageMode === 'de' ? '* Sie haben wegen 2 oder mehr 5-Punkte-Fragen nicht bestanden!' : (languageMode === 'vi' ? '* Bạn trượt vì trả lời sai từ 2 câu 5 điểm phạt trở lên!' : '* Bạn trượt vì trả lời sai từ 2 câu 5 điểm phạt trở lên! (>=2 câu 5 điểm)'),
+    anotherExam: languageMode === 'de' ? 'NEUE PRÜFUNG' : (languageMode === 'vi' ? 'LÀM ĐỀ THI KHÁC' : 'LÀM ĐỀ THI KHÁC / NEUE PRÜFUNG'),
+    detailsTitle: languageMode === 'de' ? 'PRÜFUNGSDETAILS:' : (languageMode === 'vi' ? 'CHI TIẾT KẾT QUẢ TỪNG CÂU:' : 'CHI TIẾT KẾT QUẢ / PRÜFUNGSDETAILS:'),
+    richtig: languageMode === 'de' ? 'RICHTIG' : (languageMode === 'vi' ? 'ĐÚNG' : 'ĐÚNG / RICHTIG'),
+    falsch: languageMode === 'de' ? 'FALSCH' : (languageMode === 'vi' ? 'SAI' : 'SAI / FALSCH'),
+    explanationTitle: languageMode === 'de' ? 'Antwort-Erklärung:' : (languageMode === 'vi' ? 'Giải thích đáp án:' : 'Giải thích đáp án / Erklärung:'),
+    
+    // bogen specific
+    bogen: languageMode === 'de' ? 'Bogen' : (languageMode === 'vi' ? 'Bộ đề' : 'Bogen / Bộ đề'),
+    selectedBogenText: (b) => languageMode === 'de' ? `Sie haben Bogen ${b} (Klasse B) ausgewählt` : (languageMode === 'vi' ? `Bạn đã chọn bộ đề số ${b} (Hạng B)` : `Bạn đã chọn Bogen ${b} (Klasse B)`),
+    pleaseSelectBogen: languageMode === 'de' ? 'Bitte wählen Sie einen Prüfungsbogen aus...' : (languageMode === 'vi' ? 'Vui lòng chọn một bộ đề thi...' : 'Vui lòng chọn bộ đề / Bitte Bogen wählen...'),
+    readBogen: languageMode === 'de' ? 'Bogen lesen' : (languageMode === 'vi' ? 'Đọc đề' : 'Đọc đề / Bogen lesen'),
+    practiceBogen: languageMode === 'de' ? 'Bogen üben' : (languageMode === 'vi' ? 'Luyện đề' : 'Luyện đề / Bogen üben'),
+    examMode: languageMode === 'de' ? 'Prüfungsmodus' : (languageMode === 'vi' ? 'Chế độ thi' : 'Chế độ thi / Prüfungsmodus'),
+  };
+
   const [examState, setExamState] = useState('idle'); // 'idle', 'musterboegen', 'running', 'submitted'
   const [selectedBogen, setSelectedBogen] = useState(null);
   const [examQuestions, setExamQuestions] = useState([]);
@@ -253,7 +289,7 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
               {/* Center Text overlay */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
                 <div style={{fontSize: '48px', fontWeight: '500', color: '#7cb342', lineHeight: '1'}}>0.0%</div>
-                <div style={{fontSize: '16px', color: '#546e7a', marginTop: '8px'}}>Fit für Prüfung</div>
+                <div style={{fontSize: '16px', color: '#546e7a', marginTop: '8px'}}>{t.fit}</div>
                 <BarChart3 size={20} color="#546e7a" className="mt-2 opacity-80" />
               </div>
             </div>
@@ -278,7 +314,7 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
                   <ChevronLeft size={20} strokeWidth={2.5} />
                 </button>
                 <div style={{fontSize: '22px', color: '#546e7a', fontWeight: '400'}}>
-                  Prüfung
+                  {t.pruefung}
                 </div>
               </div>
 
@@ -294,7 +330,7 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
                 >
                   <div className="flex items-center gap-4">
                     <List size={22} className="text-[#2b576b]" />
-                    <span style={{fontSize: '15px', fontWeight: '400'}}>Musterbögen</span>
+                    <span style={{fontSize: '15px', fontWeight: '400'}}>{t.musterboegen}</span>
                   </div>
                   <ChevronRight size={18} opacity={0.5} />
                 </button>
@@ -309,13 +345,13 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
                 >
                   <div className="flex items-center gap-4">
                     <ShieldCheck size={22} className="text-[#7cb342]" />
-                    <span style={{fontSize: '15px', fontWeight: '400'}}>Prüfungssimulation</span>
+                    <span style={{fontSize: '15px', fontWeight: '400'}}> {t.simulation}</span>
                   </div>
                   <ChevronRight size={18} opacity={0.5} />
                 </button>
 
                 <button 
-                  onClick={() => alert('Chức năng "Lỗi sai gần đây" sẽ sớm ra mắt.')}
+                  onClick={() => alert('Chức năng sẽ sớm ra mắt.')}
                   style={{
                     display: 'flex', alignItems: 'center', justifyItems: 'space-between',
                     background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
@@ -324,13 +360,13 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
                 >
                   <div className="flex items-center gap-4">
                     <CheckCircle size={22} className="text-[#7cb342]" />
-                    <span style={{fontSize: '15px', fontWeight: '400'}}>1 letzte Fehler</span>
+                    <span style={{fontSize: '15px', fontWeight: '400'}}>1 {t.letzteFehler}</span>
                   </div>
                   <ChevronRight size={18} opacity={0.5} />
                 </button>
 
                 <button 
-                  onClick={() => alert('Chức năng "Câu hỏi đã đánh dấu" sẽ sớm ra mắt.')}
+                  onClick={() => alert('Chức năng sẽ sớm ra mắt.')}
                   style={{
                     display: 'flex', alignItems: 'center', justifyItems: 'space-between',
                     background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
@@ -339,7 +375,7 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
                 >
                   <div className="flex items-center gap-4">
                     <CheckCircle size={22} className="text-[#7cb342]" />
-                    <span style={{fontSize: '15px', fontWeight: '400'}}>0 markierte Fragen</span>
+                    <span style={{fontSize: '15px', fontWeight: '400'}}>0 {t.markierteFragen}</span>
                   </div>
                   <ChevronRight size={18} opacity={0.5} />
                 </button>
@@ -439,7 +475,7 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
             <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#2C8040] shadow-xs">
               <Info className="w-3 h-3" />
             </div>
-            <span>CÂU {currentIndex + 1} / {examQuestions.length}</span>
+            <span>{t.frage} {currentIndex + 1} / {examQuestions.length}</span>
           </div>
 
           <div className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-xs font-black rounded-md shadow-xs ${
@@ -451,18 +487,18 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
 
           <button
             onClick={() => {
-              if (window.confirm('Bạn có chắc chắn muốn nộp bài thi ngay bây giờ không?')) {
+              if (window.confirm(languageMode === 'de' ? 'Möchten Sie die Prüfung wirklich abgeben?' : (languageMode === 'vi' ? 'Bạn có chắc chắn muốn nộp bài thi ngay bây giờ không?' : 'Bạn có chắc chắn muốn nộp bài? / Möchten Sie die Prüfung abgeben?'))) {
                 submitExam();
               }
             }}
             className="px-3 py-1.5 bg-[#D71921] hover:bg-[#B91C1C] text-white font-black rounded-md text-[11px] uppercase tracking-wider transition-colors shadow-sm"
           >
-            Nộp Bài
+            {t.abgeben}
           </button>
         </div>
 
         {/* Question Navigator Grid */}
-        <div className="grid grid-cols-10 gap-1.5 p-3 bg-white/80 backdrop-blur-xs border-b border-[#BCDDC3] shrink-0">
+        <div className="grid gap-1.5 p-3 bg-white/80 backdrop-blur-xs border-b border-[#BCDDC3] shrink-0" style={{ gridTemplateColumns: 'repeat(10, minmax(0, 1fr))' }}>
           {examQuestions.map((q, i) => {
             const hasAnswer = (answers[q.id] || []).length > 0;
             const isActive = i === currentIndex;
@@ -492,12 +528,12 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
           
           <div className="flex justify-between items-center bg-white/60 p-3 rounded-xl border border-[#BCDDC3] text-xs shadow-2xs">
             <span className="font-black border-2 border-[#D71921] text-[#D71921] px-2.5 py-1 bg-white rounded-lg text-xs">
-              {currentQ.points} Điểm phạt
+              {currentQ.points} {t.fehlerpunkte}
             </span>
             <button 
               onClick={() => handleSpeak(currentQ.textDe)}
               className="p-1.5 border bg-white border-[#2C8040]/30 hover:border-[#2C8040] text-[#2C8040] rounded-md transition-colors"
-              title="Phát âm"
+              title={languageMode === 'de' ? 'Aussprache' : (languageMode === 'vi' ? 'Phát âm' : 'Phát âm / Aussprache')}
             >
               <Volume2 className="w-4 h-4" />
             </button>
@@ -600,7 +636,7 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
           </div>
           
           <div className="bg-[#D71921] border-2 border-white text-white font-mono text-[13px] font-black px-4.5 py-2.5 rounded-lg shadow-md uppercase tracking-wider">
-            {currentQ.points} Punkte
+            {currentQ.points} {t.fehlerpunkte}
           </div>
 
           <div className="flex gap-2">
@@ -609,7 +645,7 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
               disabled={currentIndex === examQuestions.length - 1}
               className="px-5 py-3 bg-white text-[#2C8040] hover:bg-neutral-50 font-black rounded-xl text-xs uppercase tracking-wider transition-colors disabled:opacity-30 border-2 border-gray-300 shadow-sm"
             >
-              Weiter
+              {t.weiter}
             </button>
             <button
               onClick={() => currentIndex < examQuestions.length - 1 && setCurrentIndex(currentIndex + 1)}
@@ -645,14 +681,14 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
 
           <div className="space-y-1">
             <h2 className="text-lg font-extrabold uppercase tracking-wider">
-              {results.passed ? 'ĐÃ ĐỖ THI THỬ (BESTANDEN)' : 'TRƯỢT THI THỬ (NICHT BESTANDEN)'}
+              {results.passed ? t.passed : t.failed}
             </h2>
             <p className="text-sm font-bold text-gray-850">
-              Tổng số điểm phạt: <span className="font-mono text-base font-extrabold text-gray-900">{results.fehlerpunkte}</span> / 10 Điểm phạt
+              {t.pointsTotal}: <span className="font-mono text-base font-extrabold text-gray-900">{results.fehlerpunkte}</span> / 10 {t.fehlerpunkte}
             </p>
             {results.failedDueToTwoFivePointQuestions && (
-              <p className="text-xs font-bold text-red-600 mt-1">
-                * Bạn trượt vì trả lời sai từ 2 câu 5 điểm phạt trở lên!
+              <p className="text-xs font-bold text-red-650 mt-1">
+                {t.failedRule5}
               </p>
             )}
           </div>
@@ -665,7 +701,7 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
                 : 'bg-red-600 text-white border-red-600 hover:bg-transparent hover:text-red-600'
             }`}
           >
-            LÀM ĐỀ THI KHÁC
+            {t.anotherExam}
           </button>
         </div>
 
@@ -673,7 +709,7 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
         <div className="space-y-4">
           <h3 className="text-xs font-black uppercase tracking-wider text-[#2C8040] flex items-center gap-1.5">
             <Eye className="w-4.5 h-4.5" />
-            CHI TIẾT KẾT QUẢ TỪNG CÂU:
+            {t.detailsTitle}
           </h3>
 
           <div className="space-y-4">
@@ -686,10 +722,10 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
                     <span className={`text-[13px] font-black uppercase ${
                       detail.isCorrect ? 'text-green-650' : 'text-red-650'
                     }`}>
-                      Câu {idx + 1}: {detail.isCorrect ? 'ĐÚNG' : `SAI (+${detail.fehler}đ)`}
+                      {t.frage} {idx + 1}: {detail.isCorrect ? t.richtig : `${t.falsch} (+${detail.fehler} ${t.fehlerpunkte.toLowerCase()})`}
                     </span>
                     <span className="text-[11px] font-black text-gray-500 bg-gray-100 px-2 py-0.5 rounded">
-                      {detail.question.points} Punkte
+                      {detail.question.points} {t.fehlerpunkte}
                     </span>
                   </div>
 
@@ -751,7 +787,7 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
                   {!detail.isCorrect && (
                     <div className="p-3.5 bg-green-50 border border-green-600 text-green-950 rounded-lg text-sm font-bold leading-relaxed shadow-3xs">
                       <p className="font-black text-green-700 uppercase text-xs tracking-wider mb-1">
-                        {languageMode === 'de' ? 'Antwort Erklärung:' : 'Giải thích đáp án:'}
+                        {t.explanationTitle}
                       </p>
                       {(languageMode === 'de' || languageMode === 'both') && detail.question.explanationDe && (
                         <p>{detail.question.explanationDe}</p>
