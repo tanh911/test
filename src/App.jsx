@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Routes, Route, useNavigate, useLocation, Navigate } from 'react-router-dom';
-import { MobileFrame } from './components/MobileFrame';
 import { LandingPage } from './components/LandingPage';
 import { TrainingDashboard } from './components/TrainingDashboard';
 import { Auth } from './components/Auth';
@@ -9,313 +8,239 @@ import { Pruefung } from './components/Pruefung';
 import { AIChat } from './components/AIChat';
 import { Stats } from './components/Stats';
 import { Settings } from './components/Settings';
-import { 
-  BookOpen, Award, MessageSquare, Bookmark, Settings as SettingsIcon
-} from 'lucide-react';
+import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { verifyToken, clearToken } from './lib/auth';
+import { LogIn, LogOut } from 'lucide-react';
+
+// ── Nav config ──────────────────────────────────────────────────────────────
+
+
+
+// ── Language toggle ──────────────────────────────────────────────────────────
+
+
+const LANG_OPTS = [
+  { mode: 'de',   src: '/german.svg',   alt: 'DE',    title: 'Nur Deutsch' },
+  { mode: 'both', src: '/germanvn.png', alt: 'DE/VI', title: 'Song ngữ Đức-Việt' },
+  { mode: 'vi',   src: '/vn.svg',       alt: 'VN',    title: 'Chỉ Tiếng Việt' },
+];
+
+const LangPill = ({ languageMode, onChange }) => (
+  <div className="navbar-lang-pill">
+    {LANG_OPTS.map((opt) => (
+      <button
+        key={opt.mode}
+        onClick={() => onChange(opt.mode)}
+        className={`navbar-lang-btn${languageMode === opt.mode ? ' active' : ''}`}
+        title={opt.title}
+      >
+        {opt.src
+          ? <img src={opt.src} alt={opt.alt} style={{ width: '20px', height: '14px', objectFit: 'cover', borderRadius: '2px' }} />
+          : <span style={{ fontSize: '11px', fontWeight: '900' }}>{opt.label}</span>
+        }
+      </button>
+    ))}
+  </div>
+);
+
+// ── Top Navbar ───────────────────────────────────────────────────────────────
+
+const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onShowLogin, onLogout }) => {
+  const menuRef = useRef(null);
+
+  const t = (vi, de) => {
+    if (languageMode === 'vi') return vi;
+    if (languageMode === 'de') return de;
+    return `${vi} / ${de}`;
+  };
+
+
+  const handleLang = (mode) => {
+    setLanguageMode(mode);
+    localStorage.setItem('fuhrerschein_lang_mode', mode);
+  };
+
+  return (
+    <nav className="site-navbar" ref={menuRef}>
+      <div className="navbar-inner">
+        {/* Brand */}
+        <button className="navbar-brand" onClick={() => navigate('/')}>
+          <span style={{ fontSize: '22px', lineHeight: 1 }}>🚦</span>
+          <div>
+            <span className="navbar-brand-name">Führerschein</span>
+            <span className="navbar-brand-sub"> Việt-Đức</span>
+          </div>
+        </button>
+
+        {/* Right side: lang + auth */}
+        <div className="navbar-right">
+          <LangPill languageMode={languageMode} onChange={handleLang} />
+
+          {user?.isGuest ? (
+            <button className="navbar-auth-btn primary" onClick={onShowLogin}>
+              <LogIn size={15} />
+              <span>{t('Đăng nhập', 'Anmelden')}</span>
+            </button>
+          ) : (
+            <div className="navbar-user">
+              <div className="navbar-user-avatar">
+                {user?.displayName?.[0]?.toUpperCase() || '?'}
+              </div>
+              <span className="navbar-user-name">{user?.displayName}</span>
+              <button className="navbar-auth-btn ghost" onClick={onLogout} title={t('Đăng xuất', 'Abmelden')}>
+                <LogOut size={15} />
+              </button>
+            </div>
+          )}
+        </div>
+      </div>
+    </nav>
+  );
+};
+
+// ── Main App ────────────────────────────────────────────────────────────────
 
 function App() {
-  const [user, setUser] = useState(() => {
-    const savedSession = localStorage.getItem('fuhrerschein_active_session');
-    if (savedSession) {
-      try {
-        return JSON.parse(savedSession);
-      } catch (e) {
-        // Handle parse error
-      }
-    }
-    return {
-      username: 'guest',
-      displayName: 'Khách Học Thử',
-      email: '',
-      apiKey: '',
-      savedQuestions: [],
-      examHistory: [],
-      progress: {},
-      isGuest: true
-    };
-  });
-  const [languageMode, setLanguageMode] = useState(() => {
-    return localStorage.getItem('fuhrerschein_lang_mode') || 'both'; // 'de', 'vi', 'both'
-  });
+  const [user, setUser] = useState(null);
+  const [userLoading, setUserLoading] = useState(true);
+  const [languageMode, setLanguageMode] = useState(() =>
+    localStorage.getItem('fuhrerschein_lang_mode') || 'both'
+  );
+  const [showLoginModal, setShowLoginModal] = useState(false);
+
   const navigate = useNavigate();
   const location = useLocation();
 
-  const [showAuthPage, setShowAuthPage] = useState(false);
-  const [showLoginModal, setShowLoginModal] = useState(false);
+  // Session restore
+  useEffect(() => {
+    const restore = async () => {
+      const token = localStorage.getItem('fuhrerschein_token');
+      if (token) {
+        const claims = await verifyToken(token);
+        if (claims) {
+          const savedSession = localStorage.getItem('fuhrerschein_active_session');
+          if (savedSession) {
+            try { setUser(JSON.parse(savedSession)); setUserLoading(false); return; } catch {}
+          }
+        }
+        clearToken();
+      }
+      setUser({ username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true });
+      setUserLoading(false);
+    };
+    restore();
+  }, []);
 
-  // Update user state and persist both in active session & user account list
-  const handleUpdateUser = (updatedUser) => {
-    setUser(updatedUser);
-    localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updatedUser));
-
-    // Update in central accounts database
-    if (updatedUser.username !== 'guest') {
+  const handleUpdateUser = (updated) => {
+    setUser(updated);
+    localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updated));
+    if (updated.username !== 'guest') {
       const users = JSON.parse(localStorage.getItem('fuhrerschein_users') || '{}');
-      if (users[updatedUser.username.toLowerCase()]) {
-        users[updatedUser.username.toLowerCase()] = {
-          ...users[updatedUser.username.toLowerCase()],
-          displayName: updatedUser.displayName,
-          email: updatedUser.email,
-          apiKey: updatedUser.apiKey,
-          savedQuestions: updatedUser.savedQuestions,
-          examHistory: updatedUser.examHistory,
-          progress: updatedUser.progress
-        };
+      if (users[updated.username.toLowerCase()]) {
+        users[updated.username.toLowerCase()] = { ...users[updated.username.toLowerCase()], ...updated };
         localStorage.setItem('fuhrerschein_users', JSON.stringify(users));
       }
     }
   };
 
-  const handleLogin = (loggedInUser) => {
-    setUser(loggedInUser);
-    localStorage.setItem('fuhrerschein_active_session', JSON.stringify(loggedInUser));
+  const handleLogin = (u) => {
+    setUser(u);
+    localStorage.setItem('fuhrerschein_active_session', JSON.stringify(u));
     navigate('/training');
   };
 
   const handleLogout = () => {
-    setUser(null);
-    localStorage.removeItem('fuhrerschein_active_session');
+    clearToken();
+    setUser({ username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true });
+    navigate('/');
   };
 
-  const handleStartLearning = () => {
-    const guestUser = {
-      username: 'guest',
-      displayName: 'Khách Học Thử',
-      email: '',
-      apiKey: '',
-      savedQuestions: [],
-      examHistory: [],
-      progress: {},
-      isGuest: true
-    };
-    handleLogin(guestUser);
+  const t = (vi, de) => {
+    if (languageMode === 'vi') return vi;
+    if (languageMode === 'de') return de;
+    return `${vi} / ${de}`;
   };
+
+  if (userLoading) return (
+    <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f4f8' }}>
+      <div style={{ textAlign: 'center' }}>
+        <div style={{ fontSize: '36px', marginBottom: '12px' }}>🚦</div>
+        <div style={{ fontSize: '14px', color: '#6b7280', fontWeight: '600' }}>Đang tải...</div>
+      </div>
+    </div>
+  );
 
   return (
-    <MobileFrame>
-      {/* Brand Header - only show if NOT on home page, because home page has its own header */}
-      {location.pathname !== '/' && (
-        <div className="shrink-0" style={{
-          background: 'linear-gradient(135deg, #1a4a5e 0%, #2b6f8a 50%, #1a4a5e 100%)',
-          padding: '12px 16px',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          boxShadow: '0 2px 8px rgba(0,0,0,0.15)'
-        }}>
-          <div style={{display: 'flex', alignItems: 'center', gap: '10px'}}>
-            <span style={{fontSize: '18px'}}>🚦</span>
-            <span style={{color: 'white', fontSize: '14px', fontWeight: '700', letterSpacing: '0.03em'}}>
-              Führerschein <span style={{fontWeight: '300', opacity: 0.85}}>Việt-Đức</span>
-            </span>
-          </div>
-          
-          <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-            {/* Language Switcher */}
-            <div style={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              gap: '6px', 
-              backgroundColor: 'rgba(255, 255, 255, 0.1)', 
-              padding: '3px 6px', 
-              borderRadius: '20px', 
-              border: '1px solid rgba(255,255,255,0.15)' 
-            }}>
-              <button
-                onClick={() => {
-                  setLanguageMode('de');
-                  localStorage.setItem('fuhrerschein_lang_mode', 'de');
-                }}
-                style={{
-                  fontSize: '15px',
-                  opacity: languageMode === 'de' ? 1 : 0.4,
-                  transform: languageMode === 'de' ? 'scale(1.15)' : 'scale(1)',
-                  transition: 'all 0.15s',
-                  cursor: 'pointer',
-                  border: 'none',
-                  background: 'none',
-                  padding: '2px 4px'
-                }}
-                title="Only German / Chỉ Tiếng Đức"
-              >
-                <img src="/german.svg" alt="DE" style={{ width: '20px', height: '15px', objectFit: 'cover', borderRadius: '2px' }} />
-              </button>
-              <button
-                onClick={() => {
-                  setLanguageMode('both');
-                  localStorage.setItem('fuhrerschein_lang_mode', 'both');
-                }}
-                style={{
-                  fontSize: '11px',
-                  fontWeight: '900',
-                  color: 'white',
-                  opacity: languageMode === 'both' ? 1 : 0.4,
-                  transform: languageMode === 'both' ? 'scale(1.15)' : 'scale(1)',
-                  transition: 'all 0.15s',
-                  cursor: 'pointer',
-                  border: 'none',
-                  background: 'none',
-                  padding: '2px 4px'
-                }}
-                title="Bilingual / Song ngữ Đức-Việt"
-              >
-                DE/VI
-              </button>
-              <button
-                onClick={() => {
-                  setLanguageMode('vi');
-                  localStorage.setItem('fuhrerschein_lang_mode', 'vi');
-                }}
-                style={{
-                  fontSize: '15px',
-                  opacity: languageMode === 'vi' ? 1 : 0.4,
-                  transform: languageMode === 'vi' ? 'scale(1.15)' : 'scale(1)',
-                  transition: 'all 0.15s',
-                  cursor: 'pointer',
-                  border: 'none',
-                  background: 'none',
-                  padding: '2px 4px'
-                }}
-                title="Only Vietnamese / Chỉ Tiếng Việt"
-              >
-                <img src="/vn.svg" alt="VN" style={{ width: '20px', height: '15px', objectFit: 'cover', borderRadius: '2px' }} />
-              </button>
-            </div>
+    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)' }}>
+      <Navbar
+        location={location}
+        navigate={navigate}
+        languageMode={languageMode}
+        setLanguageMode={setLanguageMode}
+        user={user}
+        onShowLogin={() => setShowLoginModal(true)}
+        onLogout={handleLogout}
+      />
 
-            {user.isGuest ? (
-              <button
-                onClick={() => setShowLoginModal(true)}
-                style={{
-                  background: 'rgba(255,255,255,0.15)',
-                  border: '1px solid rgba(255,255,255,0.3)',
-                  color: 'white',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  fontSize: '10px',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase'
-                }}
-              >
-                Đăng nhập
-              </button>
-            ) : (
-              <button
-                onClick={handleLogout}
-                style={{
-                  background: 'rgba(255,255,255,0.1)',
-                  border: '1px solid rgba(255,255,255,0.2)',
-                  color: 'rgba(255,255,255,0.8)',
-                  padding: '6px 12px',
-                  borderRadius: '6px',
-                  fontSize: '10px',
-                  fontWeight: '700',
-                  cursor: 'pointer',
-                  letterSpacing: '0.04em',
-                  textTransform: 'uppercase'
-                }}
-                title="Đăng xuất"
-              >
-                Thoát
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Main Tab Content */}
-      <div className="flex-1 flex flex-col overflow-hidden relative w-full h-full">
+      {/* Page content */}
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
         <Routes>
-          <Route path="/" element={<LandingPage onNavigate={(path) => navigate(path)} onShowLogin={() => setShowLoginModal(true)} />} />
-          <Route path="/training" element={<TrainingDashboard onNavigate={(path) => navigate(path)} onShowLogin={() => setShowLoginModal(true)} />} />
-          <Route path="/training/fragen" element={<Lernen user={user} onUpdateUser={handleUpdateUser} onTriggerLogin={() => setShowLoginModal(true)} onNavigate={(path) => navigate(path)} languageMode={languageMode} />} />
+          <Route path="/" element={
+            <LandingPage
+              onNavigate={(p) => navigate(p)}
+              onShowLogin={() => setShowLoginModal(true)}
+              languageMode={languageMode}
+              onLanguageChange={(mode) => { setLanguageMode(mode); localStorage.setItem('fuhrerschein_lang_mode', mode); }}
+            />
+          } />
+          <Route path="/training" element={<TrainingDashboard onNavigate={(p) => navigate(p)} onShowLogin={() => setShowLoginModal(true)} languageMode={languageMode} />} />
+          <Route path="/training/fragen" element={<Lernen user={user} onUpdateUser={handleUpdateUser} onTriggerLogin={() => setShowLoginModal(true)} onNavigate={(p) => navigate(p)} languageMode={languageMode} />} />
           <Route path="/pruefung" element={<Pruefung user={user} onUpdateUser={handleUpdateUser} languageMode={languageMode} />} />
           <Route path="/statistik" element={<Stats user={user} onUpdateUser={handleUpdateUser} />} />
           <Route path="/chat" element={
-            user.isGuest ? (
-              <div className="flex flex-col items-center justify-center h-full px-6 text-center space-y-4 bg-gray-50">
-                <span className="w-2 h-2 bg-[#15803D] rounded-full animate-pulse"></span>
-                <h3 className="text-sm font-extrabold uppercase font-sans tracking-wider text-gray-900">Yêu Cầu Đăng Nhập</h3>
-                <p className="text-[13px] font-sans font-bold text-gray-600 leading-relaxed max-w-[280px]">
-                  Tính năng Gia sư AI (Gemini Assistant) chỉ khả dụng với tài khoản học viên chính thức.
+            user?.isGuest ? (
+              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px 24px', textAlign: 'center' }}>
+                <div style={{ fontSize: '48px' }}>🤖</div>
+                <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#111827' }}>
+                  {t('Yêu Cầu Đăng Nhập', 'Anmeldung erforderlich')}
+                </h2>
+                <p style={{ fontSize: '14px', color: '#6b7280', maxWidth: '360px', lineHeight: '1.6' }}>
+                  {languageMode === 'de'
+                    ? 'Die Begleiter-Funktion ist nur für registrierte Fahrschüler verfügbar.'
+                    : 'Tính năng Bạn Đồng Hành chỉ khả dụng với tài khoản học viên chính thức.'}
                 </p>
                 <button
                   onClick={() => setShowLoginModal(true)}
-                  className="px-5 py-3 bg-[#15803D] hover:bg-[#166534] text-white font-sans font-extrabold text-xs uppercase tracking-widest transition-colors rounded-xl shadow-xs"
+                  style={{ padding: '12px 28px', background: '#1a4a5e', color: 'white', borderRadius: '8px', fontWeight: '700', fontSize: '14px', cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}
                 >
-                  Đăng nhập bằng Google / Facebook
+                  <LogIn size={16} />
+                  {t('Đăng nhập', 'Anmelden')}
                 </button>
               </div>
-            ) : (
-              <AIChat user={user} />
-            )
+            ) : <AIChat user={user} />
           } />
           <Route path="/settings" element={<Settings user={user} onUpdateUser={handleUpdateUser} onLogout={handleLogout} />} />
-          {/* Default fallback route */}
+          <Route path="/privacy" element={<PrivacyPolicy onNavigate={navigate} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
+      </main>
 
-        {/* Floating Auth Modal Overlay */}
-        {showLoginModal && (
-          <div className="absolute inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-            <div className="w-full max-w-sm max-h-[90vh] overflow-y-auto bg-card border border-border rounded-lg p-2 relative no-scrollbar shadow-lg">
-              <Auth 
-                onLogin={(u) => {
-                  handleLogin(u);
-                  setShowLoginModal(false);
-                }} 
-                onCancel={() => setShowLoginModal(false)} 
-                
-              />
-            </div>
+      {/* Login Modal */}
+      {showLoginModal && (
+        <div style={{
+          position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.5)',
+          backdropFilter: 'blur(4px)', zIndex: 1000,
+          display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px'
+        }}>
+          <div style={{ width: '100%', maxWidth: '400px', maxHeight: '90vh', overflowY: 'auto', borderRadius: '12px', boxShadow: '0 20px 60px rgba(0,0,0,0.3)' }}>
+            <Auth
+              onLogin={(u) => { handleLogin(u); setShowLoginModal(false); }}
+              onCancel={() => setShowLoginModal(false)}
+            />
           </div>
-        )}
-      </div>
-
-      {/* Bottom Navigation Bar */}
-      <div className="nav-tab-bar shrink-0 z-30 md:hidden">
-        <button 
-          onClick={() => navigate('/')} 
-          className={`nav-tab-btn ${location.pathname === '/' ? 'active' : ''}`}
-        >
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
-          <span>HOME</span>
-        </button>
-
-        <button 
-          onClick={() => navigate('/training')} 
-          className={`nav-tab-btn ${location.pathname.startsWith('/training') ? 'active' : ''}`}
-        >
-          <BookOpen />
-          <span>HỌC TẬP</span>
-        </button>
-
-        <button 
-          onClick={() => navigate('/pruefung')} 
-          className={`nav-tab-btn ${location.pathname === '/pruefung' ? 'active' : ''}`}
-        >
-          <Award />
-          <span>THI THỬ</span>
-        </button>
-
-        <button 
-          onClick={() => navigate('/chat')} 
-          className={`nav-tab-btn ${location.pathname === '/chat' ? 'active' : ''}`}
-        >
-          <MessageSquare />
-          <span>GIA SƯ AI</span>
-        </button>
-
-        <button 
-          onClick={() => navigate('/settings')} 
-          className={`nav-tab-btn ${location.pathname === '/settings' ? 'active' : ''}`}
-        >
-          <SettingsIcon />
-          <span>CÀI ĐẶT</span>
-        </button>
-      </div>
-    </MobileFrame>
+        </div>
+      )}
+    </div>
   );
 }
 
