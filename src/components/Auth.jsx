@@ -76,19 +76,19 @@ export const Auth = ({ onLogin, onCancel }) => {
 
       if (isLogin) {
         // --- LOGIN FLOW ---
-        
+
         // 1. Firebase Login (nếu nhập Email có chứa @)
         if (key.includes('@')) {
           try {
             const userCredential = await loginWithEmail(key, password);
             const user = userCredential.user;
-            
+
             if (!user.emailVerified) {
               setError('Tài khoản chưa được xác nhận. Vui lòng kiểm tra hộp thư email (hoặc Thư rác) và bấm vào link kích hoạt.');
               setLoading(false);
               return;
             }
-            
+
             setSuccess('Đăng nhập thành công!');
             setTimeout(() => onLogin({
               uid: user.uid,
@@ -109,7 +109,7 @@ export const Auth = ({ onLogin, onCancel }) => {
             return;
           }
         }
-        
+
         // 2. LocalStorage Login (tài khoản cũ không có @)
         const users = JSON.parse(localStorage.getItem('fuhrerschein_users') || '{}');
         const stored = users[key];
@@ -150,12 +150,12 @@ export const Auth = ({ onLogin, onCancel }) => {
         try {
           const userCredential = await registerWithEmail(email.trim(), password);
           const user = userCredential.user;
-          
+
           await updateUserProfile(user, { displayName: username.trim() });
           await verifyEmail(user);
-          
+
           setSuccess('Tạo tài khoản thành công! Vui lòng kiểm tra email của bạn (bao gồm cả mục Thư Rác) và bấm vào link để kích hoạt.');
-          
+
           // Chuyển form về tab Đăng Nhập sau 3 giây
           setTimeout(() => {
             setIsLogin(true);
@@ -163,7 +163,7 @@ export const Auth = ({ onLogin, onCancel }) => {
             setPassword('');
             setSuccess('');
           }, 3500);
-          
+
         } catch (firebaseErr) {
           console.error(firebaseErr);
           if (firebaseErr.code === 'auth/email-already-in-use') {
@@ -260,7 +260,7 @@ export const Auth = ({ onLogin, onCancel }) => {
           <div style={{ position: 'relative' }}>
             <User size={16} color="#9ca3af" style={{ position: 'absolute', left: '12px', top: '50%', transform: 'translateY(-50%)' }} />
             <input
-              type="text" placeholder={isLogin ? "Nhập Email hoặc Tài khoản" : "Ví dụ: Tuan Anh"}
+              type="text" placeholder={isLogin ? "Nhập Email hoặc Tài khoản" : "Ví dụ: Eden Thomas"}
               value={username} onChange={(e) => setUsername(e.target.value)}
               style={{ ...inputStyle, paddingLeft: '36px' }}
               onFocus={(e) => e.target.style.borderColor = '#2b6f8a'}
@@ -428,7 +428,7 @@ export const Auth = ({ onLogin, onCancel }) => {
             onMouseEnter={(e) => e.currentTarget.style.color = '#374151'}
             onMouseLeave={(e) => e.currentTarget.style.color = '#9ca3af'}
           >
-            ← Quay lại trang chủ
+            ← Trở lại
           </button>
         )}
       </div>

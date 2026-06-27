@@ -2,22 +2,33 @@ import React, { useState, useEffect, useRef } from 'react';
 import { questions } from '../data/questions';
 import { SVGGraphics } from './SVGGraphics';
 import {
-  Info, X, Check, Star, Sparkles, Volume2, ChevronLeft, ChevronRight, SkipBack, SkipForward, FastForward, Rewind
+  Info, X, Check, Star, Sparkles, Volume2, ChevronLeft, ChevronRight, SkipBack, SkipForward, FastForward, Rewind, Timer
 } from 'lucide-react';
 
-export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languageMode = 'both' }) => {
+export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languageMode = 'both', predefinedQuestions = null, mode = 'practice', onExamSubmit }) => {
+  const sessionKey = predefinedQuestions ? null : 'fuhrerschein_learning_session_v2';
   const [currentIndex, setCurrentIndex] = useState(() => {
-    const savedSession = sessionStorage.getItem('fuhrerschein_learning_session_v2');
-    if (savedSession) {
-      try { return JSON.parse(savedSession).currentIndex || 0; } catch (e) { }
+    if (sessionKey) {
+      const savedSession = sessionStorage.getItem(sessionKey);
+      if (savedSession) {
+        try { return JSON.parse(savedSession).currentIndex || 0; } catch (e) { }
+      }
     }
     return 0;
   });
 
   const [sessionResults, setSessionResults] = useState(() => {
-    const savedSession = sessionStorage.getItem('fuhrerschein_learning_session_v2');
-    if (savedSession) {
-      try { return JSON.parse(savedSession).results || {}; } catch (e) { }
+    if (mode === 'lesen') {
+      // In lesen mode, everything is pre-answered correctly for visual purposes
+      const fakeResults = {};
+      (predefinedQuestions || []).forEach((_, i) => fakeResults[i] = true);
+      return fakeResults;
+    }
+    if (sessionKey) {
+      const savedSession = sessionStorage.getItem(sessionKey);
+      if (savedSession) {
+        try { return JSON.parse(savedSession).results || {}; } catch (e) { }
+      }
     }
     return {};
   });
@@ -26,7 +37,7 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [isCorrect, setIsCorrect] = useState(false);
   const [isAiOpen, setIsAiOpen] = useState(false);
-  const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
   const [isFullscreenMode, setIsFullscreenMode] = useState(false);
   const [aiMessages, setAiMessages] = useState([]);
   const [isAiLoading, setIsAiLoading] = useState(false);
@@ -35,6 +46,43 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
   const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
   const chatEndRef = useRef(null);
   const videoRef = useRef(null);
+  const fullscreenVideoRef = useRef(null);
+  const mobileNavRef = useRef(null);
+  const [showVideoExitConfirm, setShowVideoExitConfirm] = useState(false);
+  const [examAnswers, setExamAnswers] = useState({});
+  const [timeLeft, setTimeLeft] = useState(2700);
+
+  const formatTime = (seconds) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+  };
+
+  useEffect(() => {
+    if (mode === 'exam') {
+      const interval = setInterval(() => {
+        setTimeLeft(prev => {
+          if (prev <= 1) {
+            clearInterval(interval);
+            if (onExamSubmit) onExamSubmit(examAnswers);
+            return 0;
+          }
+          return prev - 1;
+        });
+      }, 1000);
+      return () => clearInterval(interval);
+    }
+  }, [mode, onExamSubmit, examAnswers]);
+
+  // Auto-scroll mobile nav to keep current question in view
+  useEffect(() => {
+    if (mobileNavRef.current) {
+      const btnW = 48 + 4; // button width + gap
+      const containerW = mobileNavRef.current.offsetWidth;
+      const scrollTarget = currentIndex * btnW - containerW / 2 + btnW / 2;
+      mobileNavRef.current.scrollTo({ left: Math.max(0, scrollTarget), behavior: 'smooth' });
+    }
+  }, [currentIndex]);
 
   // Hàm trích xuất ID gốc
   const getBaseId = (qId) => {
@@ -73,14 +121,18 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
 
   // Tạo danh sách 30 câu hỏi cân bằng tỉ lệ chủ đề khi mở trang học tập
   const [filteredQuestions] = useState(() => {
-    const savedSession = sessionStorage.getItem('fuhrerschein_learning_session_v2');
-    if (savedSession) {
-      try {
-        const parsed = JSON.parse(savedSession);
-        if (parsed.questions && parsed.questions.length > 0) {
-          return parsed.questions;
-        }
-      } catch (e) { }
+    if (predefinedQuestions) return predefinedQuestions;
+
+    if (sessionKey) {
+      const savedSession = sessionStorage.getItem(sessionKey);
+      if (savedSession) {
+        try {
+          const parsed = JSON.parse(savedSession);
+          if (parsed.questions && parsed.questions.length > 0) {
+            return parsed.questions;
+          }
+        } catch (e) { }
+      }
     }
 
     // Chọn ngẫu nhiên 30 câu từ toàn bộ kho (1851 câu)
@@ -95,22 +147,57 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
 
   // Save session whenever it changes
   useEffect(() => {
-    sessionStorage.setItem('fuhrerschein_learning_session_v2', JSON.stringify({
-      questions: filteredQuestions,
-      currentIndex: currentIndex,
-      results: sessionResults
-    }));
-  }, [currentIndex, filteredQuestions, sessionResults]);
+    if (sessionKey) {
+      sessionStorage.setItem(sessionKey, JSON.stringify({
+        questions: filteredQuestions,
+        currentIndex: currentIndex,
+        results: sessionResults
+      }));
+    }
+  }, [currentIndex, filteredQuestions, sessionResults, sessionKey]);
 
   const currentQuestion = filteredQuestions[currentIndex] || filteredQuestions[0];
 
   useEffect(() => {
+    const currentQ = filteredQuestions[currentIndex] || filteredQuestions[0];
+    
+    if (mode === 'lesen') {
+      setSelectedOptions(currentQ.options.filter(o => o.isCorrect).map(o => o.id));
+      setIsSubmitted(true);
+      setIsCorrect(true);
+      setShowQuestion(true);
+      setIsAiOpen(false);
+      return;
+    }
+
+    if (mode === 'exam' || mode === 'review') {
+      const currentAns = examAnswers[currentQ?.id] || [];
+      setSelectedOptions(currentAns);
+      setIsSubmitted(mode === 'review');
+      
+      if (mode === 'review') {
+        const correctAnswers = currentQ?.options.filter(o => o.isCorrect).map(o => o.id) || [];
+        const isCorrectMatch = currentAns.length === correctAnswers.length && currentAns.every(val => correctAnswers.includes(val));
+        setIsCorrect(isCorrectMatch);
+      } else {
+        setIsCorrect(false);
+      }
+      
+      setShowQuestion(mode === 'review' || !currentQ?.video);
+      setIsAiOpen(false);
+      
+      if (currentQ?.video && mode !== 'review') {
+        setVideoPlayCount(0);
+        setHasPlayedOnce(false);
+      }
+      return;
+    }
+
     setSelectedOptions([]);
     setIsSubmitted(false);
     setIsCorrect(false);
     setIsAiOpen(false);
 
-    const currentQ = filteredQuestions[currentIndex] || filteredQuestions[0];
     if (currentQ && currentQ.video) {
       setShowQuestion(false);
       setVideoPlayCount(0);
@@ -118,7 +205,7 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
     } else {
       setShowQuestion(true);
     }
-  }, [currentIndex, filteredQuestions]);
+  }, [currentIndex, filteredQuestions, mode]);
 
   useEffect(() => {
     if (chatEndRef.current) {
@@ -127,6 +214,17 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
   }, [aiMessages, isAiOpen]);
 
   const handleOptionClick = (optionId) => {
+    if (mode === 'exam') {
+      setSelectedOptions(prev => {
+        const next = prev.includes(optionId) ? prev.filter(id => id !== optionId) : [...prev, optionId];
+        setExamAnswers(all => ({ ...all, [currentQuestion.id]: next }));
+        return next;
+      });
+      return;
+    }
+
+    if (isSubmitted && mode !== 'ueben') return; 
+    // In ueben mode, if they submitted, they shouldn't change it. Wait, standard Lernen doesn't let you change after submit anyway.
     if (isSubmitted) return;
     setSelectedOptions(prev => {
       if (prev.includes(optionId)) return prev.filter(id => id !== optionId);
@@ -172,13 +270,20 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
       setCurrentIndex(currentIndex + 1);
     } else {
       // Finished all questions
-      sessionStorage.removeItem('fuhrerschein_learning_session_v2');
+      if (sessionKey) sessionStorage.removeItem(sessionKey);
       if (languageMode === 'de') {
         alert('Glückwunsch! Du hast alle Fragen dieser Übung abgeschlossen.');
       } else {
         alert('Chúc mừng! Bạn đã hoàn thành toàn bộ 30 câu hỏi trong bài tập này.');
       }
-      onNavigate('/training');
+      
+      // If we are in predefined mode from Pruefung, maybe just go back to exam selection?
+      if (predefinedQuestions) {
+        // onNavigate will be handled by the parent
+        if (onNavigate) onNavigate('/pruefung');
+      } else {
+        onNavigate('/training');
+      }
     }
   };
   const handlePrev = () => {
@@ -316,8 +421,14 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
           <span className="font-bold text-sm tracking-wide">1.1.02-{121 + currentIndex}</span>
         </div>
         <div className="flex items-center gap-4">
+          {mode === 'exam' && (
+             <div className="flex items-center gap-2 font-mono font-bold px-2 py-1 rounded" style={{ backgroundColor: timeLeft < 300 ? '#e50000' : 'rgba(0,0,0,0.2)' }}>
+               <Timer size={16} />
+               <span>{formatTime(timeLeft)}</span>
+             </div>
+          )}
           <span className="font-bold text-sm">{t.punkte}: {currentQuestion.points}</span>
-          <button onClick={() => setShowExitConfirm(true)} className="hover:opacity-80">
+          <button onClick={() => setShowConfirmModal('abbrechen')} className="hover:opacity-80">
             <X size={20} strokeWidth={3} />
           </button>
         </div>
@@ -346,7 +457,16 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
           <div className="w-full flex flex-col md:flex-row md:gap-6 md:items-stretch flex-1">
 
             {/* Left: Image / Media – always rendered to keep layout stable */}
-            <div className="lernen-media-col group" onClick={() => (currentQuestion.video || currentQuestion.image || currentQuestion.imageType) && setIsFullscreenMode(true)}>
+            <div
+              className="lernen-media-col group"
+              onClick={() => {
+                // Videos: do nothing here - only 'Video starten' button can play
+                // Images/SVG: open fullscreen on click
+                if (currentQuestion.image || currentQuestion.imageType) {
+                  setIsFullscreenMode(true);
+                }
+              }}
+            >
               {currentQuestion.video ? (
                 <div className="relative w-full border border-black bg-black rounded-sm overflow-hidden shadow-sm">
                   <video
@@ -371,24 +491,18 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                     }}
                     className="lernen-media-video"
                   />
+                  {/* Block ALL direct tap/click on video - only button can play */}
                   {!isSubmitted && (
-                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                      <div className="bg-black bg-opacity-60 text-white rounded-full p-2 group-hover:scale-110 transition-transform shadow-md">
-                        <svg width="28" height="28" viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z" /></svg>
-                      </div>
-                    </div>
+                    <div style={{ position: 'absolute', inset: 0, cursor: 'default' }} onClick={(e) => e.stopPropagation()} />
                   )}
-                  <div className="hidden md:block absolute bottom-2 right-2 bg-black bg-opacity-60 text-white p-1.5 rounded text-xs pointer-events-none">🔍 Phóng to</div>
                 </div>
               ) : currentQuestion.image ? (
                 <div className="relative w-full border border-black bg-slate-50 rounded-sm overflow-hidden shadow-sm">
                   <img src={currentQuestion.image} alt="Question" className="lernen-media-img" />
-                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white p-1.5 rounded text-[10px] md:text-xs pointer-events-none">🔍 Phóng to</div>
                 </div>
               ) : currentQuestion.imageType ? (
                 <div className="lernen-media-svg relative border border-black overflow-hidden bg-white rounded-sm shadow-sm">
                   <SVGGraphics type={currentQuestion.imageType} className="w-full h-full" />
-                  <div className="absolute bottom-2 right-2 bg-black bg-opacity-60 text-white p-1.5 rounded text-[10px] md:text-xs pointer-events-none">🔍 Phóng to</div>
                 </div>
               ) : (
                 /* No media – transparent placeholder to keep layout */
@@ -543,9 +657,9 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
 
           {/* Action Buttons (Right aligned above bottom bar) */}
           <div className="flex flex-wrap justify-end gap-2 md:gap-3 mb-3 pr-2 mt-auto">
-            {!isSubmitted ? (
+            {!isSubmitted && mode !== 'review' ? (
               <button
-                onClick={() => setShowExitConfirm(true)}
+                onClick={() => setShowConfirmModal('abbrechen')}
                 className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
                 style={{ backgroundColor: theme.btnRed, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
               >
@@ -553,11 +667,11 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
               </button>
             ) : (
               <button
-                onClick={handleOpenAi}
+                onClick={mode === 'review' ? () => onNavigate('/pruefung') : handleOpenAi}
                 className="font-bold text-white shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                style={{ background: 'linear-gradient(to right, #6366f1, #a855f7)', height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+                style={{ background: mode === 'review' ? theme.btnRed : 'linear-gradient(to right, #6366f1, #a855f7)', height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
               >
-                {t.aiExplanation}
+                {mode === 'review' ? t.abbrechen : t.aiExplanation}
               </button>
             )}
 
@@ -569,14 +683,24 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
               <Star size={20} fill={isBookmarked ? "black" : "transparent"} color="black" strokeWidth={isBookmarked ? 1 : 2} />
             </button>
 
-            {!isSubmitted ? (
-              <button
-                onClick={handleSubmit}
-                className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: theme.btnGreen, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
-              >
-                {t.aufloesung}
-              </button>
+            {!isSubmitted && mode !== 'review' ? (
+              mode === 'exam' ? (
+                <button
+                  onClick={() => setShowConfirmModal('abgeben')}
+                  className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: theme.btnGreen, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+                >
+                  {languageMode === 'de' ? 'Abgeben' : 'Nộp bài'}
+                </button>
+              ) : (
+                <button
+                  onClick={handleSubmit}
+                  className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: theme.btnGreen, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+                >
+                  {t.aufloesung}
+                </button>
+              )
             ) : (
               <button
                 onClick={handleNext}
@@ -590,189 +714,203 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
         </div>
       </div>
 
-      {/* Bottom Nav Bar */}
-      <div style={{ display: 'flex', flexDirection: 'column', marginTop: 'auto', width: '100%' }}>
-        {/* Tab Label */}
-        <div style={{ alignSelf: 'flex-start', padding: '6px 24px', fontSize: '15px', fontWeight: 'bold', color: 'white', backgroundColor: theme.topBar, borderTopLeftRadius: '4px', borderTopRightRadius: '4px', marginLeft: '12px' }}>
-          30 {t.fragen}
-        </div>
+      {/* ── Bottom Nav Bar ── */}
+      <div style={{ marginTop: 'auto', width: '100%' }}>
 
-        {/* Bar Content */}
-        <div className="flex flex-row items-center justify-between" style={{ backgroundColor: theme.topBar, padding: '10px 12px' }}>
-
-          {/* Left Controls */}
-          <div className="flex flex-row items-center gap-[6px]">
-            <button
-              onClick={() => setCurrentIndex(0)}
-              className="bg-white flex items-center justify-center hover:bg-gray-100"
-              style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}
-            >
-              <svg width="14" height="14" viewBox="0 0 12 12">
-                <rect x="0" y="1" width="2" height="10" fill="black" />
-                <path d="M12 1 L4 6 L12 11 Z" fill="black" />
-              </svg>
-            </button>
-            <button
-              onClick={() => setCurrentIndex(Math.max(0, currentIndex - 10))}
-              className="bg-white flex items-center justify-center hover:bg-gray-100"
-              style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}
-            >
-              <svg width="18" height="14" viewBox="0 0 16 12">
-                <path d="M8 1 L0 6 L8 11 Z M16 1 L8 6 L16 11 Z" fill="black" />
-              </svg>
-            </button>
-            <button
-              onClick={handlePrev}
-              className="bg-white flex items-center justify-center hover:bg-gray-100"
-              style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}
-            >
-              <svg width="12" height="14" viewBox="0 0 10 12">
-                <path d="M10 1 L1 6 L10 11 Z" fill="black" />
-              </svg>
-            </button>
+        {/* MOBILE: Horizontal scrollable single row */}
+        <div className="mobile-only" style={{ backgroundColor: theme.topBar, padding: '8px 10px 10px' }}>
+          <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'rgba(255,255,255,0.8)', marginBottom: '6px' }}>
+            {t.fragen}: {currentIndex + 1} / {filteredQuestions.length}
           </div>
-
-          {/* Numbers (desktop) */}
-          <div className="flex flex-row items-center gap-[6px] flex-1 justify-center px-4 overflow-hidden">
-            {Array.from({ length: Math.min(10, filteredQuestions.length) }).map((_, i) => {
-              // Just show a window of 10 pages around the current index
-              let pageNum = i + 1;
-              if (currentIndex > 5) pageNum = currentIndex - 4 + i;
-              if (pageNum > filteredQuestions.length) return null;
-
-              const questionAtPage = filteredQuestions[pageNum - 1];
-              const pageBaseId = questionAtPage ? getBaseId(questionAtPage.id) : null;
-              const isPageBookmarked = pageBaseId && user.savedQuestions.includes(pageBaseId);
-              const hasVideo = questionAtPage ? !!questionAtPage.video : false;
-
-              const hasResult = sessionResults[pageNum - 1] !== undefined;
-              const isPageCorrect = sessionResults[pageNum - 1];
-
+          <div
+            ref={mobileNavRef}
+            style={{
+              display: 'flex',
+              flexDirection: 'row',
+              gap: '4px',
+              overflowX: 'auto',
+              WebkitOverflowScrolling: 'touch',
+              scrollbarWidth: 'none',         /* Firefox */
+              msOverflowStyle: 'none',        /* IE */
+              paddingBottom: '2px',
+            }}
+          >
+            {filteredQuestions.map((q, idx) => {
+              const baseId = getBaseId(q.id);
+              const isBookmarked = baseId && user.savedQuestions.includes(baseId);
+              const hasVideo = !!q.video;
+              const hasResult = (mode === 'exam' || mode === 'review') ? (examAnswers[q.id] && examAnswers[q.id].length > 0) : sessionResults[idx] !== undefined;
+              const isCorrect = mode === 'review' ? (q.options.filter(o => o.isCorrect).every(o => (examAnswers[q.id] || []).includes(o.id)) && (examAnswers[q.id] || []).every(id => q.options.find(o => o.id === id)?.isCorrect)) : sessionResults[idx];
               let bgColor = '#ffffff';
               let textColor = 'black';
               if (hasResult) {
-                bgColor = isPageCorrect ? '#00995e' : '#e50000';
-                textColor = 'white';
+                if (mode === 'exam') {
+                  bgColor = '#2b576b';
+                  textColor = 'white';
+                } else {
+                  bgColor = isCorrect ? '#00995e' : '#e50000';
+                  textColor = 'white';
+                }
               }
-
               return (
                 <button
-                  key={pageNum}
-                  onClick={() => setCurrentIndex(pageNum - 1)}
-                  className="flex items-center justify-center font-bold relative hover:opacity-90"
+                  key={idx}
+                  onClick={() => setCurrentIndex(idx)}
                   style={{
-                    width: '54px',
-                    height: '38px',
-                    minWidth: '54px',
+                    position: 'relative',
+                    flexShrink: 0,
+                    width: '44px',
+                    height: '44px',
                     backgroundColor: bgColor,
                     color: textColor,
-                    border: currentIndex === pageNum - 1 ? '3px solid black' : '1px solid black',
-                    fontSize: '16px',
+                    border: currentIndex === idx ? '2.5px solid white' : '1px solid rgba(255,255,255,0.3)',
+                    borderRadius: '4px',
+                    fontSize: '13px',
+                    fontWeight: 'bold',
+                    cursor: 'pointer',
+                    boxShadow: currentIndex === idx ? '0 0 0 2px rgba(0,0,0,0.5)' : 'none',
                   }}
                 >
-                  {/* Bookmark Indicator (top-right triangle) */}
-                  {isPageBookmarked && (
-                    <div style={{
-                      position: 'absolute',
-                      top: 0,
-                      right: 0,
-                      width: 0,
-                      height: 0,
-                      borderStyle: 'solid',
-                      borderWidth: '0 8px 8px 0',
-                      borderColor: 'transparent black transparent transparent'
-                    }} />
+                  {isBookmarked && (
+                    <div style={{ position: 'absolute', top: 0, right: 0, width: 0, height: 0, borderStyle: 'solid', borderWidth: '0 7px 7px 0', borderColor: 'transparent #fbbf24 transparent transparent' }} />
                   )}
-
-                  {/* Video Indicator (top-left play triangle) */}
                   {hasVideo && (
-                    <div style={{
-                      position: 'absolute',
-                      top: '3px',
-                      left: '3px',
-                      width: 0,
-                      height: 0,
-                      borderStyle: 'solid',
-                      borderWidth: '4px 0 4px 6px',
-                      borderColor: 'transparent transparent transparent black'
-                    }} />
+                    <div style={{ position: 'absolute', top: '3px', left: '3px', width: 0, height: 0, borderStyle: 'solid', borderWidth: '3px 0 3px 5px', borderColor: 'transparent transparent transparent rgba(0,0,0,0.5)' }} />
                   )}
-
-                  {pageNum}
+                  {idx + 1}
                 </button>
               );
             })}
           </div>
+        </div>
 
-          {/* Right Controls */}
-          <div className="flex flex-row items-center gap-[6px]">
-            <button
-              onClick={handleNext}
-              className="bg-white flex items-center justify-center hover:bg-gray-100"
-              style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}
-            >
-              <svg width="12" height="14" viewBox="0 0 10 12">
-                <path d="M0 1 L9 6 L0 11 Z" fill="black" />
-              </svg>
-            </button>
-            <button
-              onClick={() => setCurrentIndex(Math.min(filteredQuestions.length - 1, currentIndex + 10))}
-              className="bg-white flex items-center justify-center hover:bg-gray-100"
-              style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}
-            >
-              <svg width="18" height="14" viewBox="0 0 16 12">
-                <path d="M0 1 L8 6 L0 11 Z M8 1 L16 6 L8 11 Z" fill="black" />
-              </svg>
-            </button>
-            <button
-              onClick={() => setCurrentIndex(filteredQuestions.length - 1)}
-              className="bg-white flex items-center justify-center hover:bg-gray-100"
-              style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}
-            >
-              <svg width="14" height="14" viewBox="0 0 12 12">
-                <path d="M0 1 L8 6 L0 11 Z" fill="black" />
-                <rect x="10" y="1" width="2" height="10" fill="black" />
-              </svg>
-            </button>
+        {/* DESKTOP: Arrow navbar with sliding window */}
+        <div className="desktop-only" style={{ flexDirection: 'column', width: '100%' }}>
+          <div style={{ alignSelf: 'flex-start', padding: '6px 24px', fontSize: '15px', fontWeight: 'bold', color: 'white', backgroundColor: theme.topBar, borderTopLeftRadius: '4px', borderTopRightRadius: '4px', marginLeft: '12px' }}>
+            {filteredQuestions.length} {t.fragen}
+          </div>
+          <div style={{ backgroundColor: theme.topBar, padding: '10px 12px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
+            {/* Left Controls */}
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px' }}>
+              <button onClick={() => setCurrentIndex(0)} className="bg-white flex items-center justify-center hover:bg-gray-100" style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}>
+                <svg width="14" height="14" viewBox="0 0 12 12"><rect x="0" y="1" width="2" height="10" fill="black" /><path d="M12 1 L4 6 L12 11 Z" fill="black" /></svg>
+              </button>
+              <button onClick={() => setCurrentIndex(Math.max(0, currentIndex - 10))} className="bg-white flex items-center justify-center hover:bg-gray-100" style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}>
+                <svg width="18" height="14" viewBox="0 0 16 12"><path d="M8 1 L0 6 L8 11 Z M16 1 L8 6 L16 11 Z" fill="black" /></svg>
+              </button>
+              <button onClick={handlePrev} className="bg-white flex items-center justify-center hover:bg-gray-100" style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}>
+                <svg width="12" height="14" viewBox="0 0 10 12"><path d="M10 1 L1 6 L10 11 Z" fill="black" /></svg>
+              </button>
+            </div>
+
+            {/* Numbers */}
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px', flex: 1, justifyContent: 'center', padding: '0 16px', overflow: 'hidden' }}>
+              {Array.from({ length: Math.min(10, filteredQuestions.length) }).map((_, i) => {
+                let pageNum = i + 1;
+                if (currentIndex > 5) pageNum = currentIndex - 4 + i;
+                if (pageNum > filteredQuestions.length) return null;
+                const questionAtPage = filteredQuestions[pageNum - 1];
+                const pageBaseId = questionAtPage ? getBaseId(questionAtPage.id) : null;
+                const isPageBookmarked = pageBaseId && user.savedQuestions.includes(pageBaseId);
+                const hasVideo = questionAtPage ? !!questionAtPage.video : false;
+                const hasResult = (mode === 'exam' || mode === 'review') ? (questionAtPage && examAnswers[questionAtPage.id] && examAnswers[questionAtPage.id].length > 0) : sessionResults[pageNum - 1] !== undefined;
+                const isPageCorrect = mode === 'review' ? (questionAtPage.options.filter(o => o.isCorrect).every(o => (examAnswers[questionAtPage.id] || []).includes(o.id)) && (examAnswers[questionAtPage.id] || []).every(id => questionAtPage.options.find(o => o.id === id)?.isCorrect)) : sessionResults[pageNum - 1];
+                let bgColor = '#ffffff';
+                let textColor = 'black';
+                if (hasResult) { 
+                  if (mode === 'exam') {
+                    bgColor = '#2b576b'; 
+                    textColor = 'white'; 
+                  } else {
+                    bgColor = isPageCorrect ? '#00995e' : '#e50000'; 
+                    textColor = 'white'; 
+                  }
+                }
+                return (
+                  <button key={pageNum} onClick={() => setCurrentIndex(pageNum - 1)} className="flex items-center justify-center font-bold relative hover:opacity-90"
+                    style={{ width: '54px', height: '38px', minWidth: '54px', backgroundColor: bgColor, color: textColor, border: currentIndex === pageNum - 1 ? '3px solid black' : '1px solid black', fontSize: '16px' }}>
+                    {isPageBookmarked && <div style={{ position: 'absolute', top: 0, right: 0, width: 0, height: 0, borderStyle: 'solid', borderWidth: '0 8px 8px 0', borderColor: 'transparent black transparent transparent' }} />}
+                    {hasVideo && <div style={{ position: 'absolute', top: '3px', left: '3px', width: 0, height: 0, borderStyle: 'solid', borderWidth: '4px 0 4px 6px', borderColor: 'transparent transparent transparent black' }} />}
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Right Controls */}
+            <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px' }}>
+              <button onClick={handleNext} className="bg-white flex items-center justify-center hover:bg-gray-100" style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}>
+                <svg width="12" height="14" viewBox="0 0 10 12"><path d="M0 1 L9 6 L0 11 Z" fill="black" /></svg>
+              </button>
+              <button onClick={() => setCurrentIndex(Math.min(filteredQuestions.length - 1, currentIndex + 10))} className="bg-white flex items-center justify-center hover:bg-gray-100" style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}>
+                <svg width="18" height="14" viewBox="0 0 16 12"><path d="M0 1 L8 6 L0 11 Z M8 1 L16 6 L8 11 Z" fill="black" /></svg>
+              </button>
+              <button onClick={() => setCurrentIndex(filteredQuestions.length - 1)} className="bg-white flex items-center justify-center hover:bg-gray-100" style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}>
+                <svg width="14" height="14" viewBox="0 0 12 12"><path d="M0 1 L8 6 L0 11 Z" fill="black" /><rect x="10" y="1" width="2" height="10" fill="black" /></svg>
+              </button>
+            </div>
           </div>
         </div>
+
       </div>
 
-      {/* Exit Confirm Modal */}
-      {showExitConfirm && (
+      {/* Confirm Modal */}
+      {showConfirmModal && (
         <div style={{ position: 'absolute', inset: 0, zIndex: 60, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div style={{ background: 'white', borderRadius: '14px', padding: '28px 24px', maxWidth: '360px', width: '100%', boxShadow: '0 20px 50px rgba(0,0,0,0.25)', textAlign: 'center' }}>
             <div style={{ fontSize: '36px', marginBottom: '12px' }}>⚠️</div>
             <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#111827', marginBottom: '8px' }}>
-              {languageMode === 'de' ? 'Training beenden?' : (languageMode === 'vi' ? 'Thoát khỏi bài học?' : 'Thoát bài học? / Training beenden?')}
+              {showConfirmModal === 'abgeben'
+                ? (languageMode === 'de' ? 'Prüfung abgeben?' : (languageMode === 'vi' ? 'Nộp bài thi?' : 'Nộp bài thi? / Prüfung abgeben?'))
+                : (mode === 'exam' 
+                    ? (languageMode === 'de' ? 'Prüfung abbrechen?' : (languageMode === 'vi' ? 'Hủy bài thi?' : 'Hủy bài thi? / Prüfung abbrechen?'))
+                    : (languageMode === 'de' ? 'Übung beenden?' : (languageMode === 'vi' ? 'Thoát khỏi bài tập?' : 'Thoát bài tập? / Übung beenden?'))
+                  )
+              }
             </h3>
             <p style={{ fontSize: '13px', color: '#6b7280', lineHeight: '1.5', marginBottom: '24px' }}>
-              {languageMode === 'de'
-                ? 'Dein Fortschritt in dieser Sitzung geht verloren.'
-                : (languageMode === 'vi'
-                  ? 'Tiến trình bài học hiện tại sẽ không được lưu.'
-                  : 'Tiến trình sẽ không được lưu. / Fortschritt geht verloren.')}
+              {showConfirmModal === 'abgeben'
+                ? (languageMode === 'de' ? 'Möchten Sie die Prüfung wirklich abgeben? Danach können Sie keine Antworten mehr ändern.' : (languageMode === 'vi' ? 'Bạn có chắc chắn muốn nộp bài thi ngay bây giờ không? Bạn sẽ không thể thay đổi đáp án sau khi nộp.' : 'Bạn có chắc chắn muốn nộp bài? / Möchten Sie die Prüfung wirklich abgeben?'))
+                : (mode === 'exam'
+                    ? (languageMode === 'de' ? 'Möchten Sie die Prüfung wirklich abbrechen? Ihr Fortschritt geht verloren.' : (languageMode === 'vi' ? 'Bạn có chắc chắn muốn hủy bài thi không? Tiến trình của bạn sẽ bị mất.' : 'Bạn có chắc want hủy bài? / Möchten Sie wirklich abbrechen?'))
+                    : (languageMode === 'de' ? 'Möchtest du diese Ansicht wirklich verlassen?' : (languageMode === 'vi' ? 'Bạn có chắc chắn muốn thoát chế độ này không?' : 'Bạn có chắc chắn muốn thoát? / Wirklich verlassen?'))
+                  )
+              }
             </p>
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
-                onClick={() => setShowExitConfirm(false)}
+                onClick={() => setShowConfirmModal(false)}
                 style={{ flex: 1, padding: '11px', borderRadius: '8px', border: '1.5px solid #e5e7eb', background: 'white', fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: '#374151' }}
                 onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
               >
-                {languageMode === 'de' ? 'Weiter lernen' : (languageMode === 'vi' ? 'Học tiếp' : 'Học tiếp / Weiter')}
+                {languageMode === 'de' ? 'Zurück' : (languageMode === 'vi' ? 'Trở lại' : 'Trở lại / Zurück')}
               </button>
               <button
                 onClick={() => {
-                  sessionStorage.removeItem('fuhrerschein_learning_session_v2');
-                  setShowExitConfirm(false);
-                  onNavigate('/training');
+                  if (showConfirmModal === 'abgeben') {
+                    if (onExamSubmit) onExamSubmit(examAnswers);
+                  } else {
+                    if (sessionKey) sessionStorage.removeItem(sessionKey);
+                    if (predefinedQuestions) {
+                      if (onNavigate) onNavigate('/pruefung');
+                    } else {
+                      onNavigate('/training');
+                    }
+                  }
+                  setShowConfirmModal(false);
                 }}
-                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: 'none', background: theme.btnRed, fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: 'white' }}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: 'none', background: showConfirmModal === 'abgeben' ? theme.btnGreen : theme.btnRed, fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: 'white' }}
                 onMouseEnter={(e) => e.currentTarget.style.opacity = '0.88'}
                 onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
               >
-                {languageMode === 'de' ? 'Beenden' : (languageMode === 'vi' ? 'Thoát' : 'Thoát / Beenden')}
+                {showConfirmModal === 'abgeben'
+                  ? (languageMode === 'de' ? 'Ja, abgeben' : (languageMode === 'vi' ? 'Có, nộp bài' : 'Có, nộp / Ja, abgeben'))
+                  : (mode === 'exam'
+                      ? (languageMode === 'de' ? 'Ja, abbrechen' : (languageMode === 'vi' ? 'Có, hủy' : 'Có, hủy / Ja, abbrechen'))
+                      : (languageMode === 'de' ? 'Beenden' : (languageMode === 'vi' ? 'Thoát' : 'Thoát / Beenden'))
+                    )
+                }
               </button>
             </div>
           </div>
@@ -783,7 +921,17 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
       {isFullscreenMode && (currentQuestion.image || currentQuestion.video || currentQuestion.imageType) && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 100, backgroundColor: 'black', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <button
-            onClick={() => setIsFullscreenMode(false)}
+            onClick={() => {
+              if (currentQuestion.video && !isSubmitted) {
+                // Stop & reset BOTH the fullscreen video AND the inline background video
+                const fsVid = fullscreenVideoRef.current;
+                if (fsVid) { fsVid.pause(); fsVid.currentTime = 0; }
+                const inlineVid = videoRef.current;
+                if (inlineVid) { inlineVid.pause(); inlineVid.currentTime = 0; }
+                if (!showQuestion) setVideoPlayCount(prev => prev + 1);
+              }
+              setIsFullscreenMode(false);
+            }}
             style={{ position: 'absolute', top: '20px', right: '20px', backgroundColor: 'rgba(255,255,255,0.2)', color: 'white', padding: '12px', borderRadius: '50%', border: 'none', zIndex: 110, cursor: 'pointer' }}
           >
             <X size={28} strokeWidth={3} />
@@ -792,13 +940,20 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
           <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
             {currentQuestion.video ? (
               <video
+                ref={fullscreenVideoRef}
                 src={currentQuestion.video}
-                controls
+                controls={!(!isSubmitted && videoPlayCount >= 5)}
                 autoPlay
-                onEnded={() => {
-                  if (!showQuestion) {
-                    setVideoPlayCount(prev => prev + 1);
+                playsInline
+                onPlay={(e) => {
+                  if (!isSubmitted && videoPlayCount >= 5) {
+                    e.target.pause();
+                    setIsFullscreenMode(false);
+                    alert(languageMode === 'de' ? 'Maximale Anzahl an Wiederholungen (5) erreicht.' : 'Đã đạt giới hạn 5 lần xem video.');
                   }
+                }}
+                onEnded={() => {
+                  if (!showQuestion) setVideoPlayCount(prev => prev + 1);
                   setIsFullscreenMode(false);
                 }}
                 style={{ width: '100%', height: '100%', objectFit: 'contain' }}

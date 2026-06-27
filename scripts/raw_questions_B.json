@@ -12405,7 +12405,7 @@
         "isCorrect": false
       }
     ],
-    "explanationDe": "Falls ein Verkehrspolizist den Verkehr regelt, müssen die Anweisungen befolgt werden.  In dieser Situation steht der Verkehrspolizist, mit dem Gesicht zugewandt und mit ausgestreckten Armen vor dir. Das bedeutet, dass du an der Kreuzung warten musst und die Fahrzeuge von rechts und links Vorfahrt haben."
+    "explanationDe": "Falls ein Verkehrspolizist den Verkehr regelt, müssen die Anweisungen befolgt werden. In dieser Situation steht der Verkehrspolizist, mit dem Gesicht zugewandt und mit ausgestreckten Armen vor dir. Das bedeutet, dass du an der Kreuzung warten musst und die Fahrzeuge von rechts und links Vorfahrt haben."
   },
   {
     "id": "1.2.36-101-B",
@@ -13456,7 +13456,7 @@
         "isCorrect": false
       }
     ],
-    "explanationDe": "Du und der gelbe PKW befindet sich auf einer abknickenden Vorfahrtsstraße. Der rote PKW befindet sich auf einer untergeordneten Straße.  Dadurch das der gelbe PKW auf der abknickenden Vorfahrtsstraße bleibt, darf er als erstes fahren. Du darfst als zweites fahren und der rote PKW darf als letztes fahren."
+    "explanationDe": "Du und der gelbe PKW befindet sich auf einer abknickenden Vorfahrtsstraße. Der rote PKW befindet sich auf einer untergeordneten Straße. Dadurch das der gelbe PKW auf der abknickenden Vorfahrtsstraße bleibt, darf er als erstes fahren. Du darfst als zweites fahren und der rote PKW darf als letztes fahren."
   },
   {
     "id": "1.3.01-042-M",
@@ -35574,7 +35574,7 @@
         "isCorrect": true
       }
     ],
-    "explanationDe": "Bevor du losfährst, musst du den Schnee vom gesamten Fahrzeug entfernen, da dieser während der Fahrt herunterfallen und dadurch andere Verkehrsteilnehmer gefährden könnte. Außerdem könnte dir der Schnee bei Bremsmanövern auf die Frontscheibe rutschen, dir die Sicht nehmen und dich so komplett handlungsunfähig machen.  Entferne auch den Schnee von den Beleuchtungseinrichtungen, damit andere Verkehrsteilnehmer dich rechtzeitig erkennen können und du auch bei dunklen Lichtverhältnissen angemessene Sicht hast. \nAchte auch darauf, dass kein Schnee deine Nummernschilder verdeckt. Falls die Nummernschilder unleserlich sind, riskierst du eine Ordnungswidrigkeit mit Bußgeld."
+    "explanationDe": "Bevor du losfährst, musst du den Schnee vom gesamten Fahrzeug entfernen, da dieser während der Fahrt herunterfallen und dadurch andere Verkehrsteilnehmer gefährden könnte. Außerdem könnte dir der Schnee bei Bremsmanövern auf die Frontscheibe rutschen, dir die Sicht nehmen und dich so komplett handlungsunfähig machen. Entferne auch den Schnee von den Beleuchtungseinrichtungen, damit andere Verkehrsteilnehmer dich rechtzeitig erkennen können und du auch bei dunklen Lichtverhältnissen angemessene Sicht hast. \nAchte auch darauf, dass kein Schnee deine Nummernschilder verdeckt. Falls die Nummernschilder unleserlich sind, riskierst du eine Ordnungswidrigkeit mit Bußgeld."
   },
   {
     "id": "2.2.23-127",
@@ -38163,7 +38163,7 @@
         "isCorrect": true
       }
     ],
-    "explanationDe": "Rekuperation steht für „Rückgewinnung“ . So wie elektrische Energie in Bewegungsenergie umgewandelt wurde, wird beim Bremsen die Bewegungsenergie wieder in elektrische Energie verwandelt, die dann zurück in den Akku eingespeist wird. Dadurch erhöht sich die Reichweite des Elektrofahrzeugs."
+    "explanationDe": "Rekuperation steht für „Rückgewinnung“. So wie elektrische Energie in Bewegungsenergie umgewandelt wurde, wird beim Bremsen die Bewegungsenergie wieder in elektrische Energie verwandelt, die dann zurück in den Akku eingespeist wird. Dadurch erhöht sich die Reichweite des Elektrofahrzeugs."
   },
   {
     "id": "2.5.01-129",
@@ -42908,7 +42908,7 @@
         "isCorrect": false
       }
     ],
-    "explanationDe": "Durch die Rekuperation funktioniert der Motor des Elektrofahrzeugs beim Bremsen wie ein Generator. Das Bremsen erzeugt also Strom und lädt automatisch den Akku des Autos auf. Wenn also die Batterie des Elektrofahrzeugs bereits vollständig aufgeladen ist, kann das Fahrzeug die Energie nicht zurückgewinnen und die Bremswirkung durch Rekuperation ist möglicherweise nicht verfügbar. Stattdessen muss das Fahrzeug auf herkömmliche Bremsen zurückgreifen. Ebenso kann die Rekuperation reduziert oder deaktiviert werden, wenn die Batterie zu kalt ist. Dadurch kann sich die Bremswirkung durch Rekuperation verringern."
+    "explanationDe": "Durch die Rekuperation funktioniert der Motor des Elektrofahrzeugs beim Bremsen wie ein Generator. Das Bremsen erzeugt also Strom und lädt automatisch den Akku des Autos auf.Wenn also die Batterie des Elektrofahrzeugs bereits vollständig aufgeladen ist, kann das Fahrzeug die Energie nicht zurückgewinnen und die Bremswirkung durch Rekuperation ist möglicherweise nicht verfügbar. Stattdessen muss das Fahrzeug auf herkömmliche Bremsen zurückgreifen. Ebenso kann die Rekuperation reduziert oder deaktiviert werden, wenn die Batterie zu kalt ist. Dadurch kann sich die Bremswirkung durch Rekuperation verringern."
   },
   {
     "id": "2.7.01-166",

@@ -114,6 +114,7 @@ body {
 .grid { display: grid; }
 .grid-cols-2 { grid-template-columns: repeat(2, minmax(0, 1fr)); }
 .grid-cols-5 { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.grid-cols-6 { grid-template-columns: repeat(6, minmax(0, 1fr)); }
 .items-center { align-items: center; }
 .items-start { align-items: flex-start; }
 .justify-center { justify-content: center; }
@@ -703,6 +704,14 @@ input {
   .md\:hidden { display: none; }
   .md\:gap-\[18px\] { gap: 18px; }
 }
+
+/* Show only on mobile (<768px) */
+.mobile-only { display: block; }
+@media (min-width: 768px) { .mobile-only { display: none !important; } }
+
+/* Show only on desktop (≥768px) */
+.desktop-only { display: none; }
+@media (min-width: 768px) { .desktop-only { display: flex !important; } }
 
 /* ── Lernen Question Layout ───────────────────────────────────────────────── */
 /* Media column (image / video) */

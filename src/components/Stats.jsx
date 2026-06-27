@@ -1,11 +1,13 @@
 import React, { useState } from 'react';
 import { questions } from '../data/questions';
 import { SVGGraphics } from './SVGGraphics';
-import { 
+import {
   BookOpen, Calendar, CheckCircle2, Trophy, Trash2, Star, X
 } from 'lucide-react';
-
+import { ChevronLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 export const Stats = ({ user, onUpdateUser }) => {
+  const navigate = useNavigate();
   const [selectedSavedQ, setSelectedSavedQ] = useState(null);
 
   // Stats calculation
@@ -13,9 +15,9 @@ export const Stats = ({ user, onUpdateUser }) => {
   const progressEntries = Object.values(user.progress || {});
   const answeredCount = progressEntries.filter(p => p.answered).length;
   const correctCount = progressEntries.filter(p => p.isCorrect).length;
-  
-  const successRate = answeredCount > 0 
-    ? Math.round((correctCount / answeredCount) * 100) 
+
+  const successRate = answeredCount > 0
+    ? Math.round((correctCount / answeredCount) * 100)
     : 0;
 
   const examsRun = user.examHistory || [];
@@ -39,7 +41,7 @@ export const Stats = ({ user, onUpdateUser }) => {
 
   // 3 vòng tròn thống kê
   const answeredPercent = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
-  
+
   const wrongCount = progressEntries.filter(p => !p.isCorrect).length;
   const wrongPercent = totalQuestions > 0 ? (wrongCount / totalQuestions) * 100 : 0;
 
@@ -57,13 +59,13 @@ export const Stats = ({ user, onUpdateUser }) => {
           <svg viewBox="0 0 100 55" className="w-full h-full overflow-visible">
             {/* Background track */}
             <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e5e7eb" strokeWidth="12" strokeLinecap="butt" />
-            
+
             {/* Progress track */}
-            <path 
-              d="M 10 50 A 40 40 0 0 1 90 50" 
-              fill="none" 
-              stroke={color} 
-              strokeWidth="12" 
+            <path
+              d="M 10 50 A 40 40 0 0 1 90 50"
+              fill="none"
+              stroke={color}
+              strokeWidth="12"
               strokeLinecap="butt"
               strokeDasharray={arcLength}
               strokeDashoffset={strokeDashoffset}
@@ -71,7 +73,7 @@ export const Stats = ({ user, onUpdateUser }) => {
             />
           </svg>
           {/* Center text */}
-          <div className="absolute bottom-1 font-bold" style={{color: color, fontSize: '18px'}}>
+          <div className="absolute bottom-1 font-bold" style={{ color: color, fontSize: '18px' }}>
             {percent.toFixed(1)}%
           </div>
         </div>
@@ -85,11 +87,24 @@ export const Stats = ({ user, onUpdateUser }) => {
 
   return (
     <div className="flex flex-col h-full max-h-[85vh] bg-[#F3F4F6] text-gray-900 font-sans overflow-y-auto px-4 py-4 pb-20 space-y-6 no-scrollbar">
-      
+      <button
+        onClick={() => navigate('/home')}
+        style={{
+          width: '32px', height: '32px',
+          background: '#2b576b',
+          color: 'white',
+          border: 'none',
+          borderRadius: '6px',
+          display: 'flex', alignItems: 'center', justifyContent: 'center',
+          cursor: 'pointer'
+        }}
+      >
+        <ChevronLeft size={20} strokeWidth={2.5} />
+      </button>
       {/* 3 Rings Statistics */}
       <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm flex flex-col items-center">
         <h2 className="text-xl font-medium text-[#1e445a] mb-6">Übersicht</h2>
-        
+
         <div className="flex flex-row items-center justify-between w-full max-w-sm px-2 gap-4">
           {renderGauge(fitPercent, '#7cb342', 'Fit für die Prüfung')}
           {renderGauge(answeredPercent, '#fbc02d', 'Mind. 1x geübt')}
@@ -126,9 +141,8 @@ export const Stats = ({ user, onUpdateUser }) => {
         <div className="bg-white border border-gray-200 p-4 rounded-xl flex flex-col justify-between space-y-2 shadow-sm">
           <Trophy className="w-4.5 h-4.5 text-[#1e445a]" />
           <div>
-            <span className={`block text-base font-extrabold font-sans uppercase ${
-              lastExam ? (lastExam.passed ? 'text-[#7cb342]' : 'text-[#e53935]') : 'text-gray-900'
-            }`}>
+            <span className={`block text-base font-extrabold font-sans uppercase ${lastExam ? (lastExam.passed ? 'text-[#7cb342]' : 'text-[#e53935]') : 'text-gray-900'
+              }`}>
               {lastExam ? (lastExam.passed ? 'ĐÃ ĐỖ' : 'TRƯỢT') : 'CHƯA THI'}
             </span>
             <span className="text-[9px] uppercase tracking-wider text-gray-500 font-sans font-bold">ĐỀ THI GẦN NHẤT</span>
@@ -188,7 +202,7 @@ export const Stats = ({ user, onUpdateUser }) => {
         ) : (
           <div className="space-y-2">
             {examsRun.map((e, idx) => (
-              <div 
+              <div
                 key={e.id || idx}
                 className="bg-white border-2 border-gray-200 p-3.5 rounded-xl flex justify-between items-center text-left shadow-sm"
               >
@@ -196,9 +210,8 @@ export const Stats = ({ user, onUpdateUser }) => {
                   <p className="text-[13px] font-extrabold text-gray-900">Đề thi thử ngày {e.date}</p>
                   <p className="text-[11px] text-gray-600 font-bold">Bị phạt {e.fehlerpunkte} điểm (10 câu)</p>
                 </div>
-                <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 border-2 rounded-lg ${
-                  e.passed ? 'bg-green-50 border-green-600 text-green-700' : 'bg-red-50 border-red-605 text-red-650'
-                }`}>
+                <span className={`text-[10px] font-extrabold uppercase tracking-wider px-2.5 py-1 border-2 rounded-lg ${e.passed ? 'bg-green-50 border-green-600 text-green-700' : 'bg-red-50 border-red-605 text-red-650'
+                  }`}>
                   {e.passed ? 'ĐỖ' : 'TRƯỢT'}
                 </span>
               </div>
@@ -211,7 +224,7 @@ export const Stats = ({ user, onUpdateUser }) => {
       {selectedSavedQ && (
         <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white w-full max-w-[400px] max-h-[80vh] overflow-y-auto rounded-2xl border-2 border-gray-300 p-5 shadow-2xl space-y-4 relative no-scrollbar">
-            
+
             <button
               onClick={() => setSelectedSavedQ(null)}
               className="absolute right-4 top-4 p-1.5 border-2 border-gray-200 hover:border-[#15803D] text-gray-700 rounded-lg transition-colors bg-gray-50 hover:bg-green-50"
@@ -233,21 +246,21 @@ export const Stats = ({ user, onUpdateUser }) => {
             {/* Media Rendering */}
             {selectedSavedQ.video && (
               <div className="flex justify-center border-2 border-gray-200 bg-black p-1 rounded-xl overflow-hidden shadow-sm">
-                <video 
-                  src={selectedSavedQ.video} 
-                  controls 
-                  className="w-full h-auto max-h-[180px]" 
+                <video
+                  src={selectedSavedQ.video}
+                  controls
+                  className="w-full h-auto max-h-[180px]"
                   poster={selectedSavedQ.image || undefined}
                 />
               </div>
             )}
-            
+
             {selectedSavedQ.image && !selectedSavedQ.video && (
               <div className="flex justify-center border-2 border-gray-200 bg-black p-1 rounded-xl overflow-hidden shadow-sm">
-                <img 
-                  src={selectedSavedQ.image} 
-                  alt="Question Visual" 
-                  className="w-full h-auto max-h-[180px] object-contain" 
+                <img
+                  src={selectedSavedQ.image}
+                  alt="Question Visual"
+                  className="w-full h-auto max-h-[180px] object-contain"
                 />
               </div>
             )}
@@ -261,13 +274,12 @@ export const Stats = ({ user, onUpdateUser }) => {
             {/* Options display */}
             <div className="space-y-2.5 pt-1">
               {selectedSavedQ.options.map(opt => (
-                <div 
-                  key={opt.id} 
-                  className={`p-3 rounded-lg border-2 text-sm flex gap-2.5 items-start ${
-                    opt.isCorrect 
-                      ? 'border-green-600 bg-green-50 text-green-950 font-bold' 
-                      : 'border-gray-200 bg-gray-50 text-gray-650'
-                  }`}
+                <div
+                  key={opt.id}
+                  className={`p-3 rounded-lg border-2 text-sm flex gap-2.5 items-start ${opt.isCorrect
+                    ? 'border-green-600 bg-green-50 text-green-950 font-bold'
+                    : 'border-gray-200 bg-gray-50 text-gray-650'
+                    }`}
                 >
                   <span className="font-mono font-extrabold shrink-0 text-gray-900">{opt.id}.</span>
                   <div className="leading-snug">
@@ -283,7 +295,7 @@ export const Stats = ({ user, onUpdateUser }) => {
               <p className="font-extrabold text-green-700 uppercase text-xs tracking-wider mb-1">Giải thích:</p>
               <p>{selectedSavedQ.explanationVi}</p>
             </div>
-            
+
           </div>
         </div>
       )}

@@ -128,47 +128,52 @@ function App() {
           import('firebase/firestore').then(({ doc, getDoc, setDoc }) => {
             onAuthStateChanged(auth, async (firebaseUser) => {
               if (firebaseUser) {
-                // User is signed in via Firebase
-                const userRef = doc(db, 'users', firebaseUser.uid);
-                const docSnap = await getDoc(userRef);
-                
-                if (docSnap.exists()) {
-                  // Load progress from DB
-                  const dbData = docSnap.data();
-                  const updatedUser = {
-                    username: `firebase_${firebaseUser.uid}`,
-                    displayName: firebaseUser.displayName || 'Học viên',
-                    email: firebaseUser.email || '',
-                    savedQuestions: dbData.savedQuestions || [],
-                    examHistory: dbData.examHistory || [],
-                    progress: dbData.progress || {},
-                    isGuest: false,
-                    uid: firebaseUser.uid
-                  };
-                  setUser(updatedUser);
-                  localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updatedUser));
-                } else {
-                  // New user, create empty progress in DB
-                  const newUser = {
-                    username: `firebase_${firebaseUser.uid}`,
-                    displayName: firebaseUser.displayName || 'Học viên',
-                    email: firebaseUser.email || '',
-                    savedQuestions: [],
-                    examHistory: [],
-                    progress: {},
-                    isGuest: false,
-                    uid: firebaseUser.uid
-                  };
-                  await setDoc(userRef, {
-                    email: newUser.email,
-                    displayName: newUser.displayName,
-                    savedQuestions: newUser.savedQuestions,
-                    examHistory: newUser.examHistory,
-                    progress: newUser.progress,
-                    createdAt: new Date().toISOString()
-                  });
-                  setUser(newUser);
-                  localStorage.setItem('fuhrerschein_active_session', JSON.stringify(newUser));
+                try {
+                  // User is signed in via Firebase
+                  const userRef = doc(db, 'users', firebaseUser.uid);
+                  const docSnap = await getDoc(userRef);
+                  
+                  if (docSnap.exists()) {
+                    // Load progress from DB
+                    const dbData = docSnap.data();
+                    const updatedUser = {
+                      username: `firebase_${firebaseUser.uid}`,
+                      displayName: firebaseUser.displayName || 'Học viên',
+                      email: firebaseUser.email || '',
+                      savedQuestions: dbData.savedQuestions || [],
+                      examHistory: dbData.examHistory || [],
+                      progress: dbData.progress || {},
+                      isGuest: false,
+                      uid: firebaseUser.uid
+                    };
+                    setUser(updatedUser);
+                    localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updatedUser));
+                  } else {
+                    // New user, create empty progress in DB
+                    const newUser = {
+                      username: `firebase_${firebaseUser.uid}`,
+                      displayName: firebaseUser.displayName || 'Học viên',
+                      email: firebaseUser.email || '',
+                      savedQuestions: [],
+                      examHistory: [],
+                      progress: {},
+                      isGuest: false,
+                      uid: firebaseUser.uid
+                    };
+                    await setDoc(userRef, {
+                      email: newUser.email,
+                      displayName: newUser.displayName,
+                      savedQuestions: newUser.savedQuestions,
+                      examHistory: newUser.examHistory,
+                      progress: newUser.progress,
+                      createdAt: new Date().toISOString()
+                    });
+                    setUser(newUser);
+                    localStorage.setItem('fuhrerschein_active_session', JSON.stringify(newUser));
+                  }
+                } catch (err) {
+                  console.error("Firebase DB Error:", err);
+                  // Bỏ qua lỗi DB và fallback về local user session nếu không có quyền
                 }
               }
             });
@@ -261,7 +266,7 @@ function App() {
           } />
           <Route path="/training" element={<TrainingDashboard user={user} onNavigate={(p) => navigate(p)} onShowLogin={() => setShowLoginModal(true)} languageMode={languageMode} />} />
           <Route path="/training/fragen" element={<Lernen user={user} onUpdateUser={handleUpdateUser} onTriggerLogin={() => setShowLoginModal(true)} onNavigate={(p) => navigate(p)} languageMode={languageMode} />} />
-          <Route path="/pruefung" element={<Pruefung user={user} onUpdateUser={handleUpdateUser} languageMode={languageMode} />} />
+          <Route path="/pruefung/*" element={<Pruefung user={user} onUpdateUser={handleUpdateUser} languageMode={languageMode} />} />
           <Route path="/statistik" element={<Stats user={user} onUpdateUser={handleUpdateUser} />} />
           <Route path="/chat" element={
             user?.isGuest ? (
