@@ -465,7 +465,7 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
             {/* Grid Container */}
             <div className="flex-1 overflow-y-auto p-4 md:p-5 grid grid-cols-6 gap-x-3 md:gap-x-6 gap-y-1.5 md:gap-y-3.5 align-middle items-center">
               {boegen.map(b => {
-                const isLocked = b > 10;
+                const isLocked = false;
                 const attempts = getBogenAttempts(b);
 
                 return (
