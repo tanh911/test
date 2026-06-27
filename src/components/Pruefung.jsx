@@ -2,12 +2,83 @@ import React, { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { questions } from '../data/questions';
 import { SVGGraphics } from './SVGGraphics';
+import { Lernen } from './Lernen';
 import {
   Timer, AlertTriangle, ShieldCheck, ShieldAlert,
   Check, RefreshCw, Eye, Info, Volume2, List, CheckCircle, ChevronRight, ChevronLeft, BarChart3, X
 } from 'lucide-react';
 
-export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
+const seedRandom = (seed) => {
+  let x = Math.sin(seed++) * 10000;
+  return x - Math.floor(x);
+};
+
+const getQuestionTheme = (q) => {
+  // Extract base ID to handle random suffix if any
+  const baseId = typeof q.id === 'string' && q.id.includes('_') ? parseInt(q.id.split('_')[0]) : parseInt(q.id);
+  if ([2, 3, 9, 10].includes(baseId)) return 1; // Verkehrsvorschriften
+  if ([11, 12].includes(baseId)) return 2;      // Gefahrenlehre
+  if ([7, 14].includes(baseId)) return 3;       // Verhalten im Straßenverkehr
+  if ([1, 4, 5, 6, 8].includes(baseId)) return 4; // Vorfahrt & Giao lộ
+  if ([13].includes(baseId)) return 5;          // Technik & Umwelt
+  if ([15].includes(baseId)) return 6;          // Zusatzstoff
+  return 1;
+};
+
+const getBogenQuestions = (bogenId) => {
+  const pools = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+  questions.forEach(q => {
+    const theme = getQuestionTheme(q);
+    pools[theme].push(q);
+  });
+
+  const targets = {
+    1: 12, // ~40% (Verkehrsvorschriften)
+    2: 6,  // ~20% (Gefahrenlehre)
+    3: 5,  // ~17% (Verhalten im Straßenverkehr)
+    4: 3,  // ~10% (Vorfahrt & Giao lộ)
+    5: 3,  // ~10% (Technik & Umwelt)
+    6: 1   // ~3% (Zusatzstoff)
+  };
+
+  let selected = [];
+  let seed = bogenId * 100; // unique seed for this Bogen
+  
+  Object.keys(targets).forEach(themeId => {
+    const pool = pools[themeId];
+    const targetCount = targets[themeId];
+    if (pool && pool.length > 0) {
+      // Deterministic shuffle using seed
+      const shuffledPool = [...pool];
+      for (let i = shuffledPool.length - 1; i > 0; i--) {
+        const r = seedRandom(seed + i);
+        seed += 1;
+        const j = Math.floor(r * (i + 1));
+        [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
+      }
+      
+      for (let i = 0; i < targetCount; i++) {
+        const baseQuestion = shuffledPool[i % shuffledPool.length];
+        selected.push({
+          ...baseQuestion,
+          id: `${baseQuestion.id}_exam_${themeId}_${i}`
+        });
+      }
+    }
+  });
+
+  // Deterministic shuffle of the final list
+  for (let i = selected.length - 1; i > 0; i--) {
+    const r = seedRandom(seed + i);
+    seed += 1;
+    const j = Math.floor(r * (i + 1));
+    [selected[i], selected[j]] = [selected[j], selected[i]];
+  }
+
+  return selected;
+};
+
+export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'both' }) => {
   const navigate = useNavigate();
   const location = useLocation();
   const t = {
@@ -51,6 +122,8 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
   const [examQuestions, setExamQuestions] = useState([]);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [answers, setAnswers] = useState({}); // { questionId: [selectedOptionIds] }
+  const [lernenMode, setLernenMode] = useState('practice');
+  const [lernenQuestions, setLernenQuestions] = useState([]);
 
   // Timer state
   const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
@@ -73,12 +146,12 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
     const path = location.pathname;
     
     if (path === '/pruefung' || path === '/pruefung/') {
-      if (examState !== 'idle' && examState !== 'submitted') {
+      if (examState !== 'idle' && examState !== 'submitted' && examState !== 'lernen_active') {
         setExamState('idle');
       }
       if (selectedBogen !== null) setSelectedBogen(null);
     } else if (path === '/pruefung/musterboegen') {
-      if (examState !== 'musterboegen') {
+      if (examState !== 'musterboegen' && examState !== 'lernen_active') {
         setExamState('musterboegen');
       }
     } else if (path.startsWith('/pruefung/musterbogen-')) {
@@ -206,6 +279,8 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
   // Submit Exam
   const submitExam = (activeQuestions = examQuestions, activeAnswers = answers) => {
     if (timerRef.current) clearInterval(timerRef.current);
+    setExamQuestions(activeQuestions);
+    setAnswers(activeAnswers);
     setExamState('submitted');
 
     let totalFehlerpunkte = 0;
@@ -555,21 +630,34 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
           {selectedBogen && (
             <div className="flex gap-2 shrink-0">
               <button
-                onClick={() => alert('Chức năng "Bogen lesen" sẽ sớm ra mắt.')}
+                onClick={() => {
+                  setLernenQuestions(getBogenQuestions(selectedBogen));
+                  setLernenMode('lesen');
+                  setExamState('lernen_active');
+                }}
                 style={{ backgroundColor: '#E57A19' }}
                 className="text-white px-5 py-1.5 rounded-[3px] font-bold text-xs transition-colors cursor-pointer"
               >
                 Bogen lesen
               </button>
               <button
-                onClick={() => alert('Chức năng "Bogen üben" sẽ sớm ra mắt.')}
+                onClick={() => {
+                  setLernenQuestions(getBogenQuestions(selectedBogen));
+                  setLernenMode('practice');
+                  setExamState('lernen_active');
+                }}
                 style={{ backgroundColor: '#E57A19' }}
                 className="text-white px-5 py-1.5 rounded-[3px] font-bold text-xs transition-colors cursor-pointer"
               >
                 Bogen üben
               </button>
               <button
-                onClick={() => navigate(`/pruefung/musterbogen-${selectedBogen}`)}
+                onClick={() => {
+                  setLernenQuestions(getBogenQuestions(selectedBogen));
+                  setLernenMode('exam');
+                  setExamState('lernen_active');
+                  setExamType('bogen');
+                }}
                 style={{ backgroundColor: '#E57A19' }}
                 className="text-white px-5 py-1.5 rounded-[3px] font-bold text-xs transition-colors cursor-pointer"
               >
@@ -658,8 +746,10 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
               onClick={() => {
                 setShowResultPopup(false);
                 if (examType === 'bogen') {
+                  setExamState('musterboegen');
                   navigate('/pruefung/musterboegen');
                 } else {
+                  setExamState('idle');
                   navigate('/pruefung');
                 }
               }}
@@ -905,8 +995,10 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
                   onClick={() => {
                     setShowResultPopup(false);
                     if (examType === 'bogen') {
+                      setExamState('musterboegen');
                       navigate('/pruefung/musterboegen');
                     } else {
+                      setExamState('idle');
                       navigate('/pruefung');
                     }
                   }}
@@ -940,8 +1032,10 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
                     if (timerRef.current) clearInterval(timerRef.current);
                     timerRef.current = null;
                     if (examType === 'bogen') {
+                      setExamState('musterboegen');
                       navigate('/pruefung/musterboegen');
                     } else {
+                      setExamState('idle');
                       navigate('/pruefung');
                     }
                   }}
@@ -990,6 +1084,77 @@ export const Pruefung = ({ user, onUpdateUser, languageMode = 'both' }) => {
                   className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition-colors cursor-pointer"
                 >
                   {languageMode === 'vi' ? 'Không, làm tiếp' : 'Nein, weiter'}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
+      </div>
+    );
+  }
+
+  if (examState === 'lernen_active') {
+    return (
+      <div className="w-full h-full relative">
+        <Lernen
+          user={user}
+          onUpdateUser={onUpdateUser}
+          onTriggerLogin={onTriggerLogin}
+          onNavigate={(dest) => {
+            setExamState('musterboegen');
+          }}
+          languageMode={languageMode}
+          predefinedQuestions={lernenQuestions}
+          mode={lernenMode}
+          onExamSubmit={(examAnswers) => {
+            submitExam(lernenQuestions, examAnswers);
+          }}
+        />
+
+        {/* Result Popup Overlay */}
+        {showResultPopup && (
+          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+            <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
+              <div className={`p-6 text-center ${results.passed ? 'bg-green-50' : 'bg-red-50'}`}>
+                <div className="flex justify-center mb-4">
+                  {results.passed ? (
+                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600">
+                      <CheckCircle className="w-10 h-10" />
+                    </div>
+                  ) : (
+                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600">
+                      <X className="w-10 h-10" />
+                    </div>
+                  )}
+                </div>
+                <h2 className={`text-2xl font-black mb-1 ${results.passed ? 'text-green-700' : 'text-red-700'}`}>
+                  {results.passed ? t.passed : t.failed}
+                </h2>
+                <div className="text-4xl font-black text-gray-900 my-4">
+                  {results.fehlerpunkte} <span className="text-lg font-bold text-gray-500 uppercase">{t.fehlerpunkte}</span>
+                </div>
+                {results.failedDueToTwoFivePointQuestions && (
+                  <p className="text-sm font-bold text-red-600 mb-2">{t.failedRule5}</p>
+                )}
+              </div>
+              <div className="p-4 space-y-3 bg-white">
+                <button
+                  onClick={() => {
+                    setShowResultPopup(false);
+                    setLernenMode('review');
+                  }}
+                  className="w-full py-3.5 bg-[#2C8040] hover:bg-[#1E5E3A] text-white font-black rounded-xl text-sm uppercase tracking-wide transition-colors shadow-sm cursor-pointer"
+                >
+                  XEM ĐÁP ÁN CHI TIẾT
+                </button>
+                <button
+                  onClick={() => {
+                    setShowResultPopup(false);
+                    setExamState('musterboegen');
+                  }}
+                  className="w-full py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition-colors cursor-pointer"
+                >
+                  {t.zurueck}
                 </button>
               </div>
             </div>

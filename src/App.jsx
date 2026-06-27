@@ -266,7 +266,7 @@ function App() {
           } />
           <Route path="/training" element={<TrainingDashboard user={user} onNavigate={(p) => navigate(p)} onShowLogin={() => setShowLoginModal(true)} languageMode={languageMode} />} />
           <Route path="/training/fragen" element={<Lernen user={user} onUpdateUser={handleUpdateUser} onTriggerLogin={() => setShowLoginModal(true)} onNavigate={(p) => navigate(p)} languageMode={languageMode} />} />
-          <Route path="/pruefung/*" element={<Pruefung user={user} onUpdateUser={handleUpdateUser} languageMode={languageMode} />} />
+          <Route path="/pruefung/*" element={<Pruefung user={user} onUpdateUser={handleUpdateUser} onTriggerLogin={() => setShowLoginModal(true)} languageMode={languageMode} />} />
           <Route path="/statistik" element={<Stats user={user} onUpdateUser={handleUpdateUser} />} />
           <Route path="/chat" element={
             user?.isGuest ? (
