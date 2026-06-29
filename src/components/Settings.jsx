@@ -47,7 +47,13 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
         progress: {}
       };
 
-      // Update Database
+      // Xóa tất cả các phiên học/thi đang lưu trong cache (sessionStorage & localStorage)
+      sessionStorage.removeItem('fuhrerschein_learning_session_v2');
+      sessionStorage.removeItem('fuhrerschein_learning_session');
+      sessionStorage.removeItem('fuhrerschein_exam_session');
+      localStorage.removeItem('fuhrerschein_exam_session');
+
+      // Update Database local object if it's guest
       const users = JSON.parse(localStorage.getItem('fuhrerschein_users') || '{}');
       if (user.username !== 'guest' && users[user.username.toLowerCase()]) {
         users[user.username.toLowerCase()].savedQuestions = [];
