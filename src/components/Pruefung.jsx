@@ -3,10 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { questions } from '../data/questions';
 import { SVGGraphics } from './SVGGraphics';
 import { Lernen } from './Lernen';
+import { customAlert } from '../utils/customAlert';
 import {
   Timer, AlertTriangle, ShieldCheck, ShieldAlert,
   Check, RefreshCw, Eye, Info, Volume2, List, CheckCircle, ChevronRight, ChevronLeft, BarChart3, X
 } from 'lucide-react';
+import confetti from 'canvas-confetti';
 
 const seedRandom = (seed) => {
   let x = Math.sin(seed++) * 10000;
@@ -43,7 +45,7 @@ const getBogenQuestions = (bogenId) => {
 
   let selected = [];
   let seed = bogenId * 100; // unique seed for this Bogen
-  
+
   Object.keys(targets).forEach(themeId => {
     const pool = pools[themeId];
     const targetCount = targets[themeId];
@@ -56,7 +58,7 @@ const getBogenQuestions = (bogenId) => {
         const j = Math.floor(r * (i + 1));
         [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
       }
-      
+
       for (let i = 0; i < targetCount; i++) {
         const baseQuestion = shuffledPool[i % shuffledPool.length];
         selected.push({
@@ -142,9 +144,63 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
+  // Calculate real progress
+  const totalQuestions = questions.length;
+  const progressEntries = user?.progress ? Object.values(user.progress) : [];
+  const answeredCount = progressEntries.filter(p => p.answered).length;
+  const correctCount = progressEntries.filter(p => p.isCorrect).length;
+  const wrongCount = progressEntries.filter(p => p.answered && !p.isCorrect).length;
+
+  const answeredPercent = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
+  const fitPercent = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+  const wrongPercent = totalQuestions > 0 ? (wrongCount / totalQuestions) * 100 : 0;
+
+  const [animatedFit, setAnimatedFit] = useState(0);
+  const [animatedAnswered, setAnimatedAnswered] = useState(0);
+  const [animatedWrong, setAnimatedWrong] = useState(0);
+
+  useEffect(() => {
+    if (examState === 'idle') {
+      const timer = setTimeout(() => {
+        setAnimatedFit(fitPercent);
+        setAnimatedAnswered(answeredPercent);
+        setAnimatedWrong(wrongPercent);
+      }, 100);
+      return () => clearTimeout(timer);
+    } else {
+      setAnimatedFit(0);
+      setAnimatedAnswered(0);
+      setAnimatedWrong(0);
+    }
+  }, [fitPercent, answeredPercent, wrongPercent, examState]);
+
+  useEffect(() => {
+    if (showResultPopup && results.passed) {
+      const duration = 2500;
+      const animationEnd = Date.now() + duration;
+      const defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 100 };
+
+      const randomInRange = (min, max) => Math.random() * (max - min) + min;
+
+      const interval = setInterval(function() {
+        const timeLeft = animationEnd - Date.now();
+
+        if (timeLeft <= 0) {
+          return clearInterval(interval);
+        }
+
+        const particleCount = 50 * (timeLeft / duration);
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
+        confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
+      }, 250);
+      
+      return () => clearInterval(interval);
+    }
+  }, [showResultPopup, results.passed]);
+
   useEffect(() => {
     const path = location.pathname;
-    
+
     if (path === '/pruefung' || path === '/pruefung/') {
       if (examState !== 'idle' && examState !== 'submitted' && examState !== 'lernen_active') {
         setExamState('idle');
@@ -281,7 +337,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
     if (timerRef.current) clearInterval(timerRef.current);
     setExamQuestions(activeQuestions);
     setAnswers(activeAnswers);
-    setExamState('submitted');
+    setExamState(prev => prev === 'lernen_active' ? 'lernen_active' : 'submitted');
 
     let totalFehlerpunkte = 0;
     let countFivePointFails = 0;
@@ -390,27 +446,72 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
           <div className="home-container">
 
             {/* Left Side: Large Progress Circle */}
-            <div className="relative flex-shrink-0" style={{ width: 'min(100%, 420px)', aspectRatio: '1/1' }}>
-              <svg viewBox="0 0 200 200" style={{ width: '100%', height: '100%' }}>
-                {/* Outer rings */}
-                <circle cx="100" cy="100" r="95" fill="#d9dedf" />
-                <circle cx="100" cy="100" r="70" fill="none" stroke="#f4f7f9" strokeWidth="1.5" />
-                <circle cx="100" cy="100" r="48" fill="none" stroke="#f4f7f9" strokeWidth="1.5" />
+            <div className="relative flex justify-center items-center w-[280px] h-[280px] flex-shrink-0 animate-fade-in">
+              <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+                {/* Outer gray base */}
+                <circle cx="100" cy="100" r="95" fill="#e5ebf0" />
+
+                {/* Track Backgrounds */}
+                <circle cx="100" cy="100" r="80" fill="none" stroke="#d9dedf" strokeWidth="12" />
+                <circle cx="100" cy="100" r="66" fill="none" stroke="#d9dedf" strokeWidth="12" />
+                <circle cx="100" cy="100" r="52" fill="none" stroke="#d9dedf" strokeWidth="12" />
+
+                {/* Outer Green Ring: Fit für Prüfung */}
+                <circle
+                  cx="100" cy="100" r="80"
+                  fill="none"
+                  stroke="#7cb342"
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 80}
+                  strokeDashoffset={2 * Math.PI * 80 - (animatedFit / 100) * (2 * Math.PI * 80)}
+                  style={{
+                    transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    opacity: animatedFit > 0 ? 1 : 0
+                  }}
+                />
+
+                {/* Middle Yellow Ring: Mind. 1x geübt */}
+                <circle
+                  cx="100" cy="100" r="66"
+                  fill="none"
+                  stroke="#fbc02d"
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 66}
+                  strokeDashoffset={2 * Math.PI * 66 - (animatedAnswered / 100) * (2 * Math.PI * 66)}
+                  style={{
+                    transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    opacity: animatedAnswered > 0 ? 1 : 0
+                  }}
+                />
+
+                {/* Inner Red Ring: Zuletzt falsch */}
+                <circle
+                  cx="100" cy="100" r="52"
+                  fill="none"
+                  stroke="#e53935"
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 52}
+                  strokeDashoffset={2 * Math.PI * 52 - (animatedWrong / 100) * (2 * Math.PI * 52)}
+                  style={{
+                    transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    opacity: animatedWrong > 0 ? 1 : 0
+                  }}
+                />
 
                 {/* Inner White Center */}
-                <circle cx="100" cy="100" r="48" fill="white" />
-
-                {/* Color Indicators at top */}
-                <path d="M 100 5 L 100 28" stroke="#7cb342" strokeWidth="5" strokeLinecap="square" />
-                <path d="M 100 30 L 100 48" stroke="#fbc02d" strokeWidth="5" strokeLinecap="square" />
-                <path d="M 100 50 L 100 70" stroke="#e53935" strokeWidth="3.5" strokeLinecap="square" />
+                <circle cx="100" cy="100" r="45" fill="white" />
               </svg>
 
               {/* Center Text overlay */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <div style={{ fontSize: '48px', fontWeight: '500', color: '#7cb342', lineHeight: '1' }}>0.0%</div>
-                <div style={{ fontSize: '16px', color: '#546e7a', marginTop: '8px' }}>{t.fit}</div>
-                <BarChart3 size={20} color="#546e7a" className="mt-2 opacity-80" />
+                <div style={{fontSize: '36px', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px'}}>{fitPercent.toFixed(1)}%</div>
+                <div style={{fontSize: '12px', color: '#546e7a', marginTop: '6px', fontWeight: '500'}}>
+                  {t.fit}
+                </div>
+                <BarChart3 size={18} color="#546e7a" className="mt-1.5" />
               </div>
             </div>
 
@@ -420,7 +521,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
               {/* Header */}
               <div className="flex items-center gap-4 mb-2">
                 <button
-                  onClick={() => navigate('/training')}
+                  onClick={() => navigate('/')}
                   style={{
                     width: '32px', height: '32px',
                     background: '#2b576b',
@@ -471,7 +572,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 </button>
 
                 <button
-                  onClick={() => alert('Chức năng sẽ sớm ra mắt.')}
+                  onClick={() => customAlert('Chức năng sẽ sớm ra mắt.', 'info')}
                   style={{
                     display: 'flex', alignItems: 'center', justifyItems: 'space-between',
                     background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
@@ -486,7 +587,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 </button>
 
                 <button
-                  onClick={() => alert('Chức năng sẽ sớm ra mắt.')}
+                  onClick={() => customAlert('Chức năng sẽ sớm ra mắt.', 'info')}
                   style={{
                     display: 'flex', alignItems: 'center', justifyItems: 'space-between',
                     background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
@@ -525,11 +626,94 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
     return (
       <div className="flex flex-col h-[calc(100vh-70px)] bg-[#E9EFF4] relative font-sans overflow-hidden">
-        
+        <style>{`
+          .bogen-responsive-grid {
+            display: grid;
+            grid-template-columns: repeat(2, minmax(0, 1fr));
+          }
+          @media (min-width: 450px) {
+            .bogen-responsive-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+          }
+          @media (min-width: 768px) {
+            .bogen-responsive-grid { grid-template-columns: repeat(4, minmax(0, 1fr)); }
+          }
+          @media (min-width: 1024px) {
+            .bogen-responsive-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
+          }
+          .pruefung-footer {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            padding: 12px;
+            width: 100%;
+            background-color: #24405E;
+            z-index: 20;
+            box-sizing: border-box;
+          }
+          .pruefung-footer-btn-group {
+            display: grid;
+            grid-template-columns: repeat(3, minmax(0, 1fr));
+            gap: 8px;
+            width: 100%;
+          }
+          .pruefung-footer-orange-btn {
+            background-color: #E57A19;
+            color: white;
+            padding: 8px 4px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 11px;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            min-height: 40px;
+            cursor: pointer;
+            border: none;
+          }
+          .pruefung-footer-red-btn {
+            background-color: #E54B4B;
+            color: white;
+            padding: 10px 24px;
+            border-radius: 3px;
+            font-weight: bold;
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            cursor: pointer;
+            border: none;
+            text-align: center;
+            width: 100%;
+          }
+          @media (min-width: 640px) {
+            .pruefung-footer {
+              flex-direction: row;
+              justify-content: space-between;
+              align-items: center;
+              padding: 10px 16px;
+              min-height: 56px;
+            }
+            .pruefung-footer-btn-group {
+              display: flex;
+              gap: 8px;
+              width: auto;
+            }
+            .pruefung-footer-orange-btn {
+              padding: 6px 20px;
+              font-size: 12px;
+              min-height: auto;
+            }
+            .pruefung-footer-red-btn {
+              width: auto;
+              padding: 6px 24px;
+            }
+          }
+        `}</style>
+
         {/* Main Content Area */}
         <div className="flex-1 p-3 md:p-4 flex flex-col justify-start items-center overflow-hidden">
           <div className="w-full max-w-6xl h-full bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col overflow-hidden">
-            
+
             {/* Title Header */}
             <div className="text-center py-3 border-b border-gray-200 bg-white shrink-0">
               <h2 className="text-[18px] md:text-[20px] text-[#24425A] flex items-center justify-center gap-1.5 font-medium">
@@ -538,7 +722,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
             </div>
 
             {/* Grid Container */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-5 grid grid-cols-6 gap-x-3 md:gap-x-6 gap-y-1.5 md:gap-y-3.5 align-middle items-center">
+            <div className="flex-1 overflow-y-auto p-4 md:p-5 bogen-responsive-grid gap-x-3 md:gap-x-6 gap-y-1.5 md:gap-y-3.5 align-middle items-center">
               {boegen.map(b => {
                 const isLocked = false;
                 const attempts = getBogenAttempts(b);
@@ -553,17 +737,16 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                         setSelectedBogen(b);
                       }
                     }}
-                    className={`flex items-start gap-2.5 p-1 px-2 rounded transition-all text-left ${
-                      isLocked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer'
-                    }`}
+                    className={`flex items-start gap-2.5 p-1 px-2 rounded transition-all text-left ${isLocked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer'
+                      }`}
                   >
                     {/* Checkbox */}
-                    <div 
-                      style={{ 
-                        width: '17px', 
-                        height: '17px', 
-                        borderStyle: 'solid', 
-                        borderWidth: '1.5px', 
+                    <div
+                      style={{
+                        width: '17px',
+                        height: '17px',
+                        borderStyle: 'solid',
+                        borderWidth: '1.5px',
                         borderRadius: '2px',
                         backgroundColor: selectedBogen === b ? '#24425A' : 'white',
                         borderColor: isLocked ? '#e5e7eb' : selectedBogen === b ? '#24425A' : '#6b7280'
@@ -575,12 +758,11 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
                     {/* Bogen Name & Attempt Squares */}
                     <div className="flex flex-col items-start select-none">
-                      <span className={`text-xs md:text-sm font-semibold leading-tight ${
-                        isLocked ? 'text-gray-400' : 'text-gray-700'
-                      }`}>
+                      <span className={`text-xs md:text-sm font-semibold leading-tight ${isLocked ? 'text-gray-400' : 'text-gray-700'
+                        }`}>
                         Bogen {b}
                       </span>
-                      
+
                       {/* 3 Progress Squares */}
                       <div className="flex gap-1 mt-0.5">
                         {attempts.map((attempt, index) => {
@@ -589,8 +771,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                             bgClass = attempt.passed ? 'bg-green-500' : 'bg-red-500';
                           }
                           return (
-                            <div 
-                              key={index} 
+                            <div
+                              key={index}
                               style={{ width: '10px', height: '6px', borderRadius: '0.5px' }}
                               className={bgClass}
                             />
@@ -604,7 +786,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
             </div>
 
             {/* 3. Card Footer Status Message (Inside the Card at the Bottom) */}
-            <div 
+            <div
               style={{ backgroundColor: '#EBF0F5' }}
               className="text-center text-[#24425A] py-3.5 text-[15px] md:text-[17px] font-semibold border-t border-gray-200 shrink-0"
             >
@@ -615,30 +797,25 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
         </div>
 
         {/* Footer Blue Control Bar (Outside the Card) */}
-        <div 
-          style={{ backgroundColor: '#24405E' }}
-          className="w-full px-4 py-2.5 flex justify-between items-center whitespace-nowrap gap-4 min-h-[56px] shrink-0 z-20"
-        >
+        <div className="pruefung-footer">
           <button
             onClick={() => navigate('/pruefung')}
-            style={{ backgroundColor: '#E54B4B' }}
-            className="text-white px-6 py-1.5 rounded-[3px] font-bold text-xs uppercase tracking-wide transition-colors shrink-0 cursor-pointer animate-none"
+            className="pruefung-footer-red-btn"
           >
-            Zurück
+            {t.zurueck}
           </button>
 
           {selectedBogen && (
-            <div className="flex gap-2 shrink-0">
+            <div className="pruefung-footer-btn-group">
               <button
                 onClick={() => {
                   setLernenQuestions(getBogenQuestions(selectedBogen));
                   setLernenMode('lesen');
                   setExamState('lernen_active');
                 }}
-                style={{ backgroundColor: '#E57A19' }}
-                className="text-white px-5 py-1.5 rounded-[3px] font-bold text-xs transition-colors cursor-pointer"
+                className="pruefung-footer-orange-btn"
               >
-                Bogen lesen
+                {t.readBogen}
               </button>
               <button
                 onClick={() => {
@@ -646,10 +823,9 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                   setLernenMode('practice');
                   setExamState('lernen_active');
                 }}
-                style={{ backgroundColor: '#E57A19' }}
-                className="text-white px-5 py-1.5 rounded-[3px] font-bold text-xs transition-colors cursor-pointer"
+                className="pruefung-footer-orange-btn"
               >
-                Bogen üben
+                {t.practiceBogen}
               </button>
               <button
                 onClick={() => {
@@ -658,10 +834,9 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                   setExamState('lernen_active');
                   setExamType('bogen');
                 }}
-                style={{ backgroundColor: '#E57A19' }}
-                className="text-white px-5 py-1.5 rounded-[3px] font-bold text-xs transition-colors cursor-pointer"
+                className="pruefung-footer-orange-btn"
               >
-                Prüfungsmodus
+                {t.examMode}
               </button>
             </div>
           )}
@@ -678,13 +853,13 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 Premium Version
               </h3>
               <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-                {languageMode === 'vi' 
-                  ? 'Vui lòng nâng cấp tài khoản Premium để mở khóa toàn bộ 66 bộ đề thi thử mẫu.' 
+                {languageMode === 'vi'
+                  ? 'Vui lòng nâng cấp tài khoản Premium để mở khóa toàn bộ 66 bộ đề thi thử mẫu.'
                   : 'Bitte upgraden Sie auf Premium, um alle 66 Musterbögen freizuschalten.'}
               </p>
               <div className="space-y-2">
                 <button
-                  onClick={() => alert(languageMode === 'vi' ? 'Chức năng nâng cấp đang được phát triển.' : 'Upgrade-Funktion wird entwickelt.')}
+                  onClick={() => customAlert(languageMode === 'vi' ? 'Chức năng nâng cấp đang được phát triển.' : 'Upgrade-Funktion wird entwickelt.', 'info')}
                   className="w-full py-3 bg-[#F59E0B] hover:bg-yellow-650 text-white font-bold rounded-xl text-sm transition-colors uppercase tracking-wide"
                 >
                   {languageMode === 'vi' ? 'Nâng cấp ngay' : 'Jetzt upgraden'}
@@ -960,34 +1135,53 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
         </div>
         {/* Result Popup Overlay */}
         {examState === 'submitted' && showResultPopup && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-            <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-              <div className={`p-6 text-center ${results.passed ? 'bg-green-50' : 'bg-red-50'}`}>
-                <div className="flex justify-center mb-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm px-4 animate-in fade-in duration-300" style={{ backgroundColor: 'rgba(0,0,0,0.65)' }}>
+            <div className="w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300" style={{ backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '24px' }}>
+              <div className="px-5 pt-8 pb-6 text-center relative" style={{ backgroundColor: results.passed ? '#f0fdf4' : '#fef2f2' }}>
+                <div className="flex justify-center mb-5 relative z-10">
                   {results.passed ? (
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                      <CheckCircle className="w-10 h-10" />
+                    <div className="w-20 h-20 flex items-center justify-center shadow-sm" style={{ backgroundColor: '#dcfce7', color: '#16a34a', border: '4px solid white', borderRadius: '50%' }}>
+                      <CheckCircle className="w-10 h-10" strokeWidth={2.5} />
                     </div>
                   ) : (
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600">
-                      <X className="w-10 h-10" />
+                    <div className="w-20 h-20 flex items-center justify-center shadow-sm" style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '4px solid white', borderRadius: '50%' }}>
+                      <X className="w-10 h-10" strokeWidth={2.5} />
                     </div>
                   )}
                 </div>
-                <h2 className={`text-2xl font-black mb-1 ${results.passed ? 'text-green-700' : 'text-red-700'}`}>
+                <h2 className="text-[20px] font-black leading-tight mb-3 tracking-tight" style={{ color: results.passed ? '#16a34a' : '#dc2626' }}>
                   {results.passed ? t.passed : t.failed}
                 </h2>
-                <div className="text-4xl font-black text-gray-900 my-4">
-                  {results.fehlerpunkte} <span className="text-lg font-bold text-gray-500 uppercase">{t.fehlerpunkte}</span>
+                
+                <div className="flex flex-col items-center p-4 mt-2 shadow-sm border border-gray-100 w-full max-w-[280px] mx-auto" style={{ backgroundColor: 'white', borderRadius: '16px' }}>
+                  <div className="text-center pb-3 border-b border-gray-100 w-full">
+                    <div className="text-[48px] leading-none font-black tracking-tighter" style={{ color: '#111827' }}>
+                      {results.fehlerpunkte}
+                    </div>
+                    <div className="text-[11px] font-bold uppercase tracking-widest mt-1.5" style={{ color: '#6b7280' }}>
+                      {t.fehlerpunkte}
+                    </div>
+                  </div>
+                  <div className="pt-3 flex justify-between items-center w-full px-2">
+                    <span className="text-[12px] font-bold uppercase tracking-wide" style={{ color: '#6b7280' }}>
+                      {languageMode === 'de' ? 'Falsche Fragen:' : (languageMode === 'vi' ? 'Số câu sai:' : 'Số câu sai:')}
+                    </span>
+                    <span className="text-[16px] font-black" style={{ color: '#dc2626' }}>
+                       {results.details?.filter(d => !d.isCorrect).length || 0} 
+                       <span className="text-[13px] font-bold" style={{ color: '#9ca3af' }}> / {results.details?.length || 30}</span>
+                    </span>
+                  </div>
                 </div>
+
                 {results.failedDueToTwoFivePointQuestions && (
-                  <p className="text-sm font-bold text-red-600 mb-2">{t.failedRule5}</p>
+                  <p className="text-[13px] font-bold mt-5 px-2 leading-relaxed" style={{ color: '#ef4444' }}>{t.failedRule5}</p>
                 )}
               </div>
-              <div className="p-4 space-y-3 bg-white">
+              <div className="px-6 py-5 space-y-3" style={{ backgroundColor: 'white' }}>
                 <button
                   onClick={() => setShowResultPopup(false)}
-                  className="w-full py-3.5 bg-[#2C8040] hover:bg-[#1E5E3A] text-white font-black rounded-xl text-sm uppercase tracking-wide transition-colors shadow-sm"
+                  className="w-full py-4 font-black text-[13px] uppercase tracking-wider transition-all active:scale-[0.98] shadow-sm cursor-pointer"
+                  style={{ backgroundColor: '#2C8040', color: 'white', borderRadius: '12px' }}
                 >
                   XEM ĐÁP ÁN CHI TIẾT
                 </button>
@@ -1002,7 +1196,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                       navigate('/pruefung');
                     }
                   }}
-                  className="w-full py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition-colors"
+                  className="w-full py-3.5 font-bold text-[14px] transition-all active:scale-[0.98] cursor-pointer"
+                  style={{ backgroundColor: '#f3f4f6', color: '#4b5563', borderRadius: '12px' }}
                 >
                   {t.zurueck}
                 </button>
@@ -1012,7 +1207,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
         )}
         {/* Cancel Confirmation Modal */}
         {showCancelConfirm && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
             <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center animate-in fade-in zoom-in duration-200">
               <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600 mx-auto mb-4">
                 <Info className="w-10 h-10" />
@@ -1021,8 +1216,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 {languageMode === 'vi' ? 'Hủy kỳ thi thử?' : 'Prüfung abbrechen?'}
               </h2>
               <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-                {languageMode === 'vi' 
-                  ? 'Bạn có chắc chắn muốn hủy bài thi thử này? Tiến trình của bạn sẽ không được lưu.' 
+                {languageMode === 'vi'
+                  ? 'Bạn có chắc chắn muốn hủy bài thi thử này? Tiến trình của bạn sẽ không được lưu.'
                   : 'Möchten Sie die aktuelle Prüfung wirklich abbrechen? Ihr Fortschritt wird nicht gespeichert.'}
               </p>
               <div className="space-y-2">
@@ -1056,7 +1251,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
         {/* Submit Confirmation Modal */}
         {showSubmitConfirm && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
             <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center animate-in fade-in zoom-in duration-200">
               <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 mx-auto mb-4">
                 <CheckCircle className="w-10 h-10" />
@@ -1065,8 +1260,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 {languageMode === 'vi' ? 'Nộp bài thi thử?' : 'Prüfung abgeben?'}
               </h2>
               <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-                {languageMode === 'vi' 
-                  ? 'Bạn có chắc chắn muốn nộp bài thi ngay bây giờ để kiểm tra kết quả không?' 
+                {languageMode === 'vi'
+                  ? 'Bạn có chắc chắn muốn nộp bài thi ngay bây giờ để kiểm tra kết quả không?'
                   : 'Möchten Sie die Prüfung wirklich abgeben, um das Ergebnis zu sehen?'}
               </p>
               <div className="space-y-2">
@@ -1113,37 +1308,56 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
         {/* Result Popup Overlay */}
         {showResultPopup && (
-          <div className="absolute inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-            <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl overflow-hidden animate-in fade-in zoom-in duration-200">
-              <div className={`p-6 text-center ${results.passed ? 'bg-green-50' : 'bg-red-50'}`}>
-                <div className="flex justify-center mb-4">
+          <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm px-4 animate-in fade-in duration-300" style={{ backgroundColor: 'rgba(0,0,0,0.65)' }}>
+            <div className="w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300" style={{ backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '24px' }}>
+              <div className="px-5 pt-8 pb-6 text-center relative" style={{ backgroundColor: results.passed ? '#f0fdf4' : '#fef2f2' }}>
+                <div className="flex justify-center mb-5 relative z-10">
                   {results.passed ? (
-                    <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600">
-                      <CheckCircle className="w-10 h-10" />
+                    <div className="w-20 h-20 flex items-center justify-center shadow-sm" style={{ backgroundColor: '#dcfce7', color: '#16a34a', border: '4px solid white', borderRadius: '50%' }}>
+                      <CheckCircle className="w-10 h-10" strokeWidth={2.5} />
                     </div>
                   ) : (
-                    <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600">
-                      <X className="w-10 h-10" />
+                    <div className="w-20 h-20 flex items-center justify-center shadow-sm" style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '4px solid white', borderRadius: '50%' }}>
+                      <X className="w-10 h-10" strokeWidth={2.5} />
                     </div>
                   )}
                 </div>
-                <h2 className={`text-2xl font-black mb-1 ${results.passed ? 'text-green-700' : 'text-red-700'}`}>
+                <h2 className="text-[20px] font-black leading-tight mb-3 tracking-tight" style={{ color: results.passed ? '#16a34a' : '#dc2626' }}>
                   {results.passed ? t.passed : t.failed}
                 </h2>
-                <div className="text-4xl font-black text-gray-900 my-4">
-                  {results.fehlerpunkte} <span className="text-lg font-bold text-gray-500 uppercase">{t.fehlerpunkte}</span>
+                
+                <div className="flex flex-col items-center p-4 mt-2 shadow-sm border border-gray-100 w-full max-w-[280px] mx-auto" style={{ backgroundColor: 'white', borderRadius: '16px' }}>
+                  <div className="text-center pb-3 border-b border-gray-100 w-full">
+                    <div className="text-[48px] leading-none font-black tracking-tighter" style={{ color: '#111827' }}>
+                      {results.fehlerpunkte}
+                    </div>
+                    <div className="text-[11px] font-bold uppercase tracking-widest mt-1.5" style={{ color: '#6b7280' }}>
+                      {t.fehlerpunkte}
+                    </div>
+                  </div>
+                  <div className="pt-3 flex justify-between items-center w-full px-2">
+                    <span className="text-[12px] font-bold uppercase tracking-wide" style={{ color: '#6b7280' }}>
+                      {languageMode === 'de' ? 'Falsche Fragen:' : (languageMode === 'vi' ? 'Số câu sai:' : 'Số câu sai:')}
+                    </span>
+                    <span className="text-[16px] font-black" style={{ color: '#dc2626' }}>
+                       {results.details?.filter(d => !d.isCorrect).length || 0} 
+                       <span className="text-[13px] font-bold" style={{ color: '#9ca3af' }}> / {results.details?.length || 30}</span>
+                    </span>
+                  </div>
                 </div>
+
                 {results.failedDueToTwoFivePointQuestions && (
-                  <p className="text-sm font-bold text-red-600 mb-2">{t.failedRule5}</p>
+                  <p className="text-[13px] font-bold mt-5 px-2 leading-relaxed" style={{ color: '#ef4444' }}>{t.failedRule5}</p>
                 )}
               </div>
-              <div className="p-4 space-y-3 bg-white">
+              <div className="px-6 py-5 space-y-3" style={{ backgroundColor: 'white' }}>
                 <button
                   onClick={() => {
                     setShowResultPopup(false);
                     setLernenMode('review');
                   }}
-                  className="w-full py-3.5 bg-[#2C8040] hover:bg-[#1E5E3A] text-white font-black rounded-xl text-sm uppercase tracking-wide transition-colors shadow-sm cursor-pointer"
+                  className="w-full py-4 font-black text-[13px] uppercase tracking-wider transition-all active:scale-[0.98] shadow-sm cursor-pointer"
+                  style={{ backgroundColor: '#2C8040', color: 'white', borderRadius: '12px' }}
                 >
                   XEM ĐÁP ÁN CHI TIẾT
                 </button>
@@ -1152,7 +1366,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                     setShowResultPopup(false);
                     setExamState('musterboegen');
                   }}
-                  className="w-full py-3.5 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition-colors cursor-pointer"
+                  className="w-full py-3.5 font-bold text-[14px] transition-all active:scale-[0.98] cursor-pointer"
+                  style={{ backgroundColor: '#f3f4f6', color: '#4b5563', borderRadius: '12px' }}
                 >
                   {t.zurueck}
                 </button>

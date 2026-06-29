@@ -26,6 +26,19 @@ export const TrainingDashboard = ({ user, onNavigate, onShowLogin, languageMode 
   const fitPercent     = totalQuestions > 0 ? (correctCount  / totalQuestions) * 100 : 0;
   const wrongPercent   = totalQuestions > 0 ? (wrongCount    / totalQuestions) * 100 : 0;
 
+  const [animatedFit, setAnimatedFit] = React.useState(0);
+  const [animatedAnswered, setAnimatedAnswered] = React.useState(0);
+  const [animatedWrong, setAnimatedWrong] = React.useState(0);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimatedFit(fitPercent);
+      setAnimatedAnswered(answeredPercent);
+      setAnimatedWrong(wrongPercent);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [fitPercent, answeredPercent, wrongPercent]);
+
   return (
     <div className="flex flex-col min-h-full bg-[#f4f7f9]" style={{fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif"}}>
       
@@ -61,7 +74,7 @@ export const TrainingDashboard = ({ user, onNavigate, onShowLogin, languageMode 
         <div className="home-container">
         
         {/* Left Side: Progress Circle */}
-        <div className="relative flex justify-center items-center w-[240px] h-[240px] flex-shrink-0">
+        <div className="relative flex justify-center items-center w-[280px] h-[280px] flex-shrink-0">
           <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
             {/* Outer gray base */}
             <circle cx="100" cy="100" r="95" fill="#e5ebf0" />
@@ -78,10 +91,13 @@ export const TrainingDashboard = ({ user, onNavigate, onShowLogin, languageMode 
               fill="none" 
               stroke="#7cb342" 
               strokeWidth="12" 
-              strokeLinecap="butt"
+              strokeLinecap="round"
               strokeDasharray={2 * Math.PI * 80}
-              strokeDashoffset={2 * Math.PI * 80 - (fitPercent / 100) * (2 * Math.PI * 80)}
-              style={{ transition: 'stroke-dashoffset 1s ease-in-out' }}
+              strokeDashoffset={2 * Math.PI * 80 - (animatedFit / 100) * (2 * Math.PI * 80)}
+              style={{
+                transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                opacity: animatedFit > 0 ? 1 : 0
+              }}
             />
             
             {/* Middle Yellow Ring: Mind. 1x geübt */}
@@ -90,10 +106,13 @@ export const TrainingDashboard = ({ user, onNavigate, onShowLogin, languageMode 
               fill="none" 
               stroke="#fbc02d" 
               strokeWidth="12" 
-              strokeLinecap="butt"
+              strokeLinecap="round"
               strokeDasharray={2 * Math.PI * 66}
-              strokeDashoffset={2 * Math.PI * 66 - (answeredPercent / 100) * (2 * Math.PI * 66)}
-              style={{ transition: 'stroke-dashoffset 1s ease-in-out' }}
+              strokeDashoffset={2 * Math.PI * 66 - (animatedAnswered / 100) * (2 * Math.PI * 66)}
+              style={{
+                transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                opacity: animatedAnswered > 0 ? 1 : 0
+              }}
             />
 
             {/* Inner Red Ring: Zuletzt falsch */}
@@ -102,10 +121,13 @@ export const TrainingDashboard = ({ user, onNavigate, onShowLogin, languageMode 
               fill="none" 
               stroke="#e53935" 
               strokeWidth="12" 
-              strokeLinecap="butt"
+              strokeLinecap="round"
               strokeDasharray={2 * Math.PI * 52}
-              strokeDashoffset={2 * Math.PI * 52 - (wrongPercent / 100) * (2 * Math.PI * 52)}
-              style={{ transition: 'stroke-dashoffset 1s ease-in-out' }}
+              strokeDashoffset={2 * Math.PI * 52 - (animatedWrong / 100) * (2 * Math.PI * 52)}
+              style={{
+                transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                opacity: animatedWrong > 0 ? 1 : 0
+              }}
             />
             
             {/* Inner White Center */}
@@ -114,11 +136,11 @@ export const TrainingDashboard = ({ user, onNavigate, onShowLogin, languageMode 
           
           {/* Center Text overlay */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <div style={{fontSize: '32px', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px'}}>{fitPercent.toFixed(1)}%</div>
-            <div style={{fontSize: '11px', color: '#546e7a', marginTop: '6px', fontWeight: '500'}}>
+            <div style={{fontSize: '36px', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px'}}>{fitPercent.toFixed(1)}%</div>
+            <div style={{fontSize: '12px', color: '#546e7a', marginTop: '6px', fontWeight: '500'}}>
               {t.fit}
             </div>
-            <BarChart3 size={16} color="#546e7a" className="mt-1" />
+            <BarChart3 size={18} color="#546e7a" className="mt-1.5" />
           </div>
         </div>
 

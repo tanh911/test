@@ -24,7 +24,7 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
 
     // Save key in localStorage and update user object
     localStorage.setItem('fuhrerschein_api_key', apiKey.trim());
-    
+
     // Save account state in local storage accounts database
     const users = JSON.parse(localStorage.getItem('fuhrerschein_users') || '{}');
     if (user.username !== 'guest' && users[user.username.toLowerCase()]) {
@@ -71,25 +71,24 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
 
   return (
     <div className="flex flex-col h-full max-h-[85vh] bg-[#F3F4F6] text-gray-900 font-sans overflow-y-auto px-4 py-4 pb-20 space-y-5 no-scrollbar">
-      
+
       <div className="space-y-1">
         <h2 className="text-xs font-bold uppercase tracking-wider text-[#15803D]">CÀI ĐẶT ỨNG DỤNG</h2>
         <p className="text-[10px] text-gray-500 uppercase tracking-wide font-mono font-bold">Cấu hình hệ thống & thông tin tài khoản</p>
       </div>
 
       {message.text && (
-        <div className={`p-2.5 rounded-lg border-2 text-[11px] font-extrabold uppercase text-center ${
-          message.type === 'success' 
-            ? 'bg-green-50 border-green-600 text-green-700' 
-            : 'bg-red-50 border-red-600 text-red-700'
-        }`}>
+        <div className={`p-2.5 rounded-lg border-2 text-[11px] font-extrabold uppercase text-center ${message.type === 'success'
+          ? 'bg-green-50 border-green-600 text-green-700'
+          : 'bg-red-50 border-red-600 text-red-700'
+          }`}>
           {message.text}
         </div>
       )}
 
       {/* Profile & API Form */}
       <form onSubmit={handleSaveSettings} className="bg-white border-2 border-gray-200 p-5 rounded-2xl space-y-4 shadow-sm">
-        
+
         {/* Profile name */}
         <div className="space-y-1.5 text-left">
           <label className="text-[11px] font-sans font-extrabold uppercase tracking-wider text-gray-700">
@@ -124,23 +123,6 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
           <label className="text-[11px] font-sans font-extrabold uppercase tracking-wider text-gray-700">
             Google Gemini API Key
           </label>
-          
-          <div className="relative">
-            <input
-              type={showKey ? 'text' : 'password'}
-              value={apiKey}
-              onChange={(e) => setApiKey(e.target.value)}
-              placeholder="AIzaSy..."
-              className="w-full pl-3.5 pr-10 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:border-[#15803D] focus:bg-white focus:outline-none text-sm text-gray-900 font-mono font-bold"
-            />
-            <button
-              type="button"
-              onClick={() => setShowKey(!showKey)}
-              className="absolute right-3.5 top-3.5 text-gray-500 hover:text-gray-800"
-            >
-              {showKey ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-            </button>
-          </div>
 
           <p className="text-[10px] text-gray-550 leading-normal mt-1.5 uppercase font-bold">
             Chú ý: API Key của bạn chỉ được lưu nội bộ trên máy cá nhân, đảm bảo an toàn bảo mật thông tin.
@@ -148,22 +130,9 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
         </div>
 
         {/* Help Banner */}
-        <div className="p-3.5 bg-green-50 rounded-xl border-2 border-[#15803D]/30 flex items-start gap-2.5 text-left text-xs leading-relaxed">
-          <Info className="w-4 h-4 text-[#15803D] shrink-0 mt-0.5" />
-          <div className="text-green-950 font-bold">
-            <strong className="text-[#15803D] uppercase font-extrabold text-[10px] tracking-wider">Làm sao có Gemini API Key?</strong>
-            <p className="mt-1">
-              1. Truy cập <a href="https://aistudio.google.com/" target="_blank" rel="noopener noreferrer" className="text-[#15803D] font-extrabold hover:underline underline-offset-2">Google AI Studio</a>.<br />
-              2. Đăng nhập tài khoản Google của bạn.<br />
-              3. Nhấn nút <strong>Create API Key</strong> và sao chép mã khóa.<br />
-              4. API Key hoàn toàn miễn phí cho lưu lượng học tập bình thường!
-            </p>
-          </div>
-        </div>
-
         <button
           type="submit"
-          className="w-full py-3.5 bg-[#15803D] hover:bg-[#166534] text-white font-extrabold text-xs uppercase tracking-widest transition-colors rounded-xl shadow-md"
+          className="w-full py-3.5 bg-[#15803D] hover:bg-[#166534] text-black font-extrabold text-xs uppercase tracking-widest transition-colors rounded-xl shadow-md"
         >
           LƯU CẤU HÌNH CÀI ĐẶT
         </button>
@@ -186,10 +155,6 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
           )}
           <span>VAI TRÒ:</span>
           <span className="text-gray-900 text-right font-extrabold">HỌC VIÊN</span>
-          <span>TRẠNG THÁI AI:</span>
-          <span className={`text-right font-extrabold ${user.apiKey ? 'text-[#15803D]' : 'text-gray-500'}`}>
-            {user.apiKey ? 'ĐANG BẬT (REAL API)' : 'CHẾ ĐỘ OFFLINE'}
-          </span>
         </div>
       </div>
 

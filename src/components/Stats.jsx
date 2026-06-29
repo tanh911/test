@@ -48,17 +48,30 @@ export const Stats = ({ user, onUpdateUser }) => {
   // Fit for exam can be based on success rate and answered percentage
   const fitPercent = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
 
-  const renderGauge = (percent, color, label, iconText) => {
+  const [animatedFit, setAnimatedFit] = useState(0);
+  const [animatedAnswered, setAnimatedAnswered] = useState(0);
+  const [animatedWrong, setAnimatedWrong] = useState(0);
+
+  React.useEffect(() => {
+    const timer = setTimeout(() => {
+      setAnimatedFit(fitPercent);
+      setAnimatedAnswered(answeredPercent);
+      setAnimatedWrong(wrongPercent);
+    }, 100);
+    return () => clearTimeout(timer);
+  }, [fitPercent, answeredPercent, wrongPercent]);
+
+  const renderGauge = (percent, animatedPercent, color, label, iconText) => {
     const radius = 40;
     const arcLength = Math.PI * radius; // 125.66
-    const strokeDashoffset = arcLength - (percent / 100) * arcLength;
+    const strokeDashoffset = arcLength - (animatedPercent / 100) * arcLength;
 
     return (
       <div className="flex flex-col items-center">
         <div className="relative w-28 h-16 flex items-end justify-center overflow-hidden">
           <svg viewBox="0 0 100 55" className="w-full h-full overflow-visible">
             {/* Background track */}
-            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e5e7eb" strokeWidth="12" strokeLinecap="butt" />
+            <path d="M 10 50 A 40 40 0 0 1 90 50" fill="none" stroke="#e5e7eb" strokeWidth="12" strokeLinecap="round" />
 
             {/* Progress track */}
             <path
@@ -66,10 +79,13 @@ export const Stats = ({ user, onUpdateUser }) => {
               fill="none"
               stroke={color}
               strokeWidth="12"
-              strokeLinecap="butt"
+              strokeLinecap="round"
               strokeDasharray={arcLength}
               strokeDashoffset={strokeDashoffset}
-              style={{ transition: 'stroke-dashoffset 1s ease-in-out' }}
+              style={{
+                transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                opacity: animatedPercent > 0 ? 1 : 0
+              }}
             />
           </svg>
           {/* Center text */}
@@ -106,9 +122,9 @@ export const Stats = ({ user, onUpdateUser }) => {
         <h2 className="text-xl font-medium text-[#1e445a] mb-6">Übersicht</h2>
 
         <div className="flex flex-row items-center justify-between w-full max-w-sm px-2 gap-4">
-          {renderGauge(fitPercent, '#7cb342', 'Fit für die Prüfung')}
-          {renderGauge(answeredPercent, '#fbc02d', 'Mind. 1x geübt')}
-          {renderGauge(wrongPercent, '#e53935', 'Zuletzt falsch')}
+          {renderGauge(fitPercent, animatedFit, '#7cb342', 'Fit für die Prüfung')}
+          {renderGauge(answeredPercent, animatedAnswered, '#fbc02d', 'Mind. 1x geübt')}
+          {renderGauge(wrongPercent, animatedWrong, '#e53935', 'Zuletzt falsch')}
         </div>
       </div>
 

@@ -4,6 +4,7 @@ import { SVGGraphics } from './SVGGraphics';
 import {
   Info, X, Check, Star, Sparkles, Volume2, ChevronLeft, ChevronRight, SkipBack, SkipForward, FastForward, Rewind, Timer
 } from 'lucide-react';
+import { customAlert } from '../utils/customAlert';
 
 export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languageMode = 'both', predefinedQuestions = null, mode = 'practice', onExamSubmit }) => {
   const sessionKey = predefinedQuestions ? null : 'fuhrerschein_learning_session_v2';
@@ -272,9 +273,9 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
       // Finished all questions
       if (sessionKey) sessionStorage.removeItem(sessionKey);
       if (languageMode === 'de') {
-        alert('Glückwunsch! Du hast alle Fragen dieser Übung abgeschlossen.');
+        customAlert('Glückwunsch! Du hast alle Fragen dieser Übung abgeschlossen.', 'success');
       } else {
-        alert('Chúc mừng! Bạn đã hoàn thành toàn bộ 30 câu hỏi trong bài tập này.');
+        customAlert('Chúc mừng! Bạn đã hoàn thành toàn bộ 30 câu hỏi trong bài tập này.', 'success');
       }
       
       // If we are in predefined mode from Pruefung, maybe just go back to exam selection?
@@ -478,7 +479,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                       if (videoPlayCount >= 5 && !isSubmitted) {
                         e.preventDefault();
                         if (videoRef.current) videoRef.current.pause();
-                        alert(languageMode === 'de' ? 'Maximale Anzahl an Wiederholungen (5) erreicht.' : 'Đã đạt giới hạn 5 lần xem video.');
+                        customAlert(languageMode === 'de' ? 'Maximale Anzahl an Wiederholungen (5) erreicht.' : 'Đã đạt giới hạn 5 lần xem video.', 'warning');
                       } else {
                         if (window.innerWidth < 768) setIsFullscreenMode(true);
                       }
@@ -658,13 +659,23 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
           {/* Action Buttons (Right aligned above bottom bar) */}
           <div className="flex flex-wrap justify-end gap-2 md:gap-3 mb-3 pr-2 mt-auto">
             {!isSubmitted && mode !== 'review' ? (
-              <button
-                onClick={() => setShowConfirmModal('abbrechen')}
-                className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: theme.btnRed, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
-              >
-                {t.abbrechen}
-              </button>
+              mode === 'exam' ? (
+                <button
+                  onClick={() => setShowConfirmModal('abgeben')}
+                  className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: theme.btnRed, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+                >
+                  {languageMode === 'de' ? 'Abgeben' : (languageMode === 'vi' ? 'Đánh giá' : 'Đánh giá / Abgeben')}
+                </button>
+              ) : (
+                <button
+                  onClick={() => setShowConfirmModal('abbrechen')}
+                  className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: theme.btnRed, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+                >
+                  {t.abbrechen}
+                </button>
+              )
             ) : (
               <button
                 onClick={mode === 'review' ? () => onNavigate('/pruefung') : handleOpenAi}
@@ -685,13 +696,35 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
 
             {!isSubmitted && mode !== 'review' ? (
               mode === 'exam' ? (
-                <button
-                  onClick={() => setShowConfirmModal('abgeben')}
-                  className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: theme.btnGreen, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
-                >
-                  {languageMode === 'de' ? 'Abgeben' : 'Nộp bài'}
-                </button>
+                <div style={{ display: 'flex', gap: '8px' }}>
+                  <button
+                    onClick={() => {
+                      const perfectAnswers = {};
+                      filteredQuestions.forEach(q => {
+                        if (q.type === 'multiple-choice' || !q.type) {
+                          perfectAnswers[q.id] = [];
+                          q.options?.forEach(opt => {
+                            if (opt.isCorrect) perfectAnswers[q.id].push(opt.id);
+                          });
+                        } else if (q.type === 'input') {
+                          perfectAnswers[q.id] = q.correctAnswer || (q.correctAnswers && q.correctAnswers[0]);
+                        }
+                      });
+                      if (onExamSubmit) onExamSubmit(perfectAnswers);
+                    }}
+                    className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#3b82f6', height: '44px', borderRadius: '12px', fontSize: '13px', padding: '0 16px' }}
+                  >
+                    Auto Pass
+                  </button>
+                  <button
+                    onClick={handleNext}
+                    className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
+                    style={{ backgroundColor: '#2b576b', height: '44px', borderRadius: '12px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+                  >
+                    {t.nextQuestion}
+                  </button>
+                </div>
               ) : (
                 <button
                   onClick={handleSubmit}
@@ -856,7 +889,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
 
       {/* Confirm Modal */}
       {showConfirmModal && (
-        <div style={{ position: 'absolute', inset: 0, zIndex: 60, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+        <div style={{ position: 'fixed', inset: 0, zIndex: 60, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div style={{ background: 'white', borderRadius: '14px', padding: '28px 24px', maxWidth: '360px', width: '100%', boxShadow: '0 20px 50px rgba(0,0,0,0.25)', textAlign: 'center' }}>
             <div style={{ fontSize: '36px', marginBottom: '12px' }}>⚠️</div>
             <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#111827', marginBottom: '8px' }}>
@@ -949,7 +982,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                   if (!isSubmitted && videoPlayCount >= 5) {
                     e.target.pause();
                     setIsFullscreenMode(false);
-                    alert(languageMode === 'de' ? 'Maximale Anzahl an Wiederholungen (5) erreicht.' : 'Đã đạt giới hạn 5 lần xem video.');
+                    customAlert(languageMode === 'de' ? 'Maximale Anzahl an Wiederholungen (5) erreicht.' : 'Đã đạt giới hạn 5 lần xem video.', 'warning');
                   }
                 }}
                 onEnded={() => {
@@ -971,7 +1004,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
 
       {/* AI Chat Drawer Overlay */}
       {isAiOpen && (
-        <div style={{ position: 'absolute', top: 0, left: 0, right: 0, bottom: 0, zIndex: 50, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 50, backgroundColor: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
           <div style={{ width: '100%', maxWidth: '600px', height: '75vh', maxHeight: '600px', backgroundColor: '#ffffff', borderRadius: '16px', overflow: 'hidden', display: 'flex', flexDirection: 'column', boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.3)' }}>
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', padding: '16px', borderBottom: '1px solid #f3f4f6', background: 'linear-gradient(135deg, #1a4a5e, #2b6f8a)' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '8px', color: 'white' }}>

@@ -4,13 +4,13 @@ import { getFirestore } from 'firebase/firestore';
 
 // Cấu hình Firebase của ứng dụng vietfuhreschein
 const firebaseConfig = {
-  apiKey: "AIzaSyDrEDfBoouS1QP5B2drEO2ZSfGq7yeW4Ic",
-  authDomain: "vietfuhreschein.firebaseapp.com",
-  projectId: "vietfuhreschein",
-  storageBucket: "vietfuhreschein.firebasestorage.app",
-  messagingSenderId: "119449967025",
-  appId: "1:119449967025:web:47474a657efb89dc9fc590",
-  measurementId: "G-ESYVM93BGG"
+  apiKey: import.meta.env.VITE_FIREBASE_API_KEY,
+  authDomain: import.meta.env.VITE_FIREBASE_AUTH_DOMAIN,
+  projectId: import.meta.env.VITE_FIREBASE_PROJECT_ID,
+  storageBucket: import.meta.env.VITE_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: import.meta.env.VITE_FIREBASE_MESSAGING_SENDER_ID,
+  appId: import.meta.env.VITE_FIREBASE_APP_ID,
+  measurementId: import.meta.env.VITE_FIREBASE_MEASUREMENT_ID
 };
 
 // Khởi tạo Firebase

@@ -5,7 +5,7 @@ import { TrainingDashboard } from './components/TrainingDashboard';
 import { Auth } from './components/Auth';
 import { Lernen } from './components/Lernen';
 import { Pruefung } from './components/Pruefung';
-import { AIChat } from './components/AIChat';
+import { Help } from './components/Help';
 import { Stats } from './components/Stats';
 import { Settings } from './components/Settings';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
@@ -43,9 +43,33 @@ const LangPill = ({ languageMode, onChange }) => (
   </div>
 );
 
+const ZOOM_OPTS = [
+  { mode: 'normal', label: 'A', title: 'Cỡ chữ thường / Standard' },
+  { mode: 'large', label: 'A⁺', title: 'Cỡ chữ lớn / Groß' },
+  { mode: 'xlarge', label: 'A⁺⁺', title: 'Cỡ chữ rất lớn / Sehr groß' }
+];
+
+const ZoomPill = ({ fontSizeMode, onChange }) => (
+  <div className="navbar-zoom-pill">
+    {ZOOM_OPTS.map((opt) => (
+      <button
+        key={opt.mode}
+        onClick={() => onChange(opt.mode)}
+        className={`navbar-zoom-btn${fontSizeMode === opt.mode ? ' active' : ''}`}
+        title={opt.title}
+        style={{
+          fontSize: opt.mode === 'normal' ? '12px' : opt.mode === 'large' ? '14px' : '16px'
+        }}
+      >
+        {opt.label}
+      </button>
+    ))}
+  </div>
+);
+
 // ── Top Navbar ───────────────────────────────────────────────────────────────
 
-const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onShowLogin, onLogout }) => {
+const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onShowLogin, onLogout, fontSizeMode, onZoomChange }) => {
   const menuRef = useRef(null);
 
   const t = (vi, de) => {
@@ -74,6 +98,7 @@ const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onSho
 
         {/* Right side: lang + auth */}
         <div className="navbar-right">
+          <ZoomPill fontSizeMode={fontSizeMode} onChange={onZoomChange} />
           <LangPill languageMode={languageMode} onChange={handleLang} />
 
           {user?.isGuest ? (
@@ -107,6 +132,21 @@ function App() {
     localStorage.getItem('fuhrerschein_lang_mode') || 'both'
   );
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [fontSizeMode, setFontSizeMode] = useState(() =>
+    localStorage.getItem('fuhrerschein_font_size') || 'normal'
+  );
+
+  useEffect(() => {
+    const scale = fontSizeMode === 'large' ? '1.15' : fontSizeMode === 'xlarge' ? '1.3' : '1';
+    
+    // Toggle class names on documentElement
+    const root = document.documentElement;
+    root.classList.remove('zoom-normal', 'zoom-large', 'zoom-xlarge');
+    root.classList.add(`zoom-${fontSizeMode}`);
+    
+    // Set style property as fallback
+    root.style.setProperty('--text-scale', scale);
+  }, [fontSizeMode]);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -250,6 +290,11 @@ function App() {
         user={user}
         onShowLogin={() => setShowLoginModal(true)}
         onLogout={handleLogout}
+        fontSizeMode={fontSizeMode}
+        onZoomChange={(mode) => {
+          setFontSizeMode(mode);
+          localStorage.setItem('fuhrerschein_font_size', mode);
+        }}
       />
 
       {/* Page content */}
@@ -268,28 +313,7 @@ function App() {
           <Route path="/training/fragen" element={<Lernen user={user} onUpdateUser={handleUpdateUser} onTriggerLogin={() => setShowLoginModal(true)} onNavigate={(p) => navigate(p)} languageMode={languageMode} />} />
           <Route path="/pruefung/*" element={<Pruefung user={user} onUpdateUser={handleUpdateUser} onTriggerLogin={() => setShowLoginModal(true)} languageMode={languageMode} />} />
           <Route path="/statistik" element={<Stats user={user} onUpdateUser={handleUpdateUser} />} />
-          <Route path="/chat" element={
-            user?.isGuest ? (
-              <div style={{ flex: 1, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', gap: '16px', padding: '40px 24px', textAlign: 'center' }}>
-                <div style={{ fontSize: '48px' }}>🤖</div>
-                <h2 style={{ fontSize: '20px', fontWeight: '700', color: '#111827' }}>
-                  {t('Yêu Cầu Đăng Nhập', 'Anmeldung erforderlich')}
-                </h2>
-                <p style={{ fontSize: '14px', color: '#6b7280', maxWidth: '360px', lineHeight: '1.6' }}>
-                  {languageMode === 'de'
-                    ? 'Die Begleiter-Funktion ist nur für registrierte Fahrschüler verfügbar.'
-                    : 'Tính năng Bạn Đồng Hành chỉ khả dụng với tài khoản học viên chính thức.'}
-                </p>
-                <button
-                  onClick={() => setShowLoginModal(true)}
-                  style={{ padding: '12px 28px', background: '#1a4a5e', color: 'white', borderRadius: '8px', fontWeight: '700', fontSize: '14px', cursor: 'pointer', border: 'none', display: 'flex', alignItems: 'center', gap: '8px' }}
-                >
-                  <LogIn size={16} />
-                  {t('Đăng nhập', 'Anmelden')}
-                </button>
-              </div>
-            ) : <AIChat user={user} />
-          } />
+          <Route path="/help" element={<Help user={user} languageMode={languageMode} />} />
           <Route path="/settings" element={<Settings user={user} onUpdateUser={handleUpdateUser} onLogout={handleLogout} />} />
           <Route path="/privacy" element={<PrivacyPolicy onNavigate={navigate} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
