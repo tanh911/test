@@ -1,11 +1,9 @@
 import React, { useState } from 'react';
-import { Key, Eye, EyeOff, Info, ShieldCheck } from 'lucide-react';
+import { ShieldCheck, User, Mail, LogOut, Settings as SettingsIcon, AlertTriangle, Save } from 'lucide-react';
 
 export const Settings = ({ user, onUpdateUser, onLogout }) => {
   const [displayName, setDisplayName] = useState(user.displayName || '');
   const [email, setEmail] = useState(user.email || '');
-  const [apiKey, setApiKey] = useState(user.apiKey || localStorage.getItem('fuhrerschein_api_key') || '');
-  const [showKey, setShowKey] = useState(false);
   const [message, setMessage] = useState({ type: '', text: '' });
 
   const handleSaveSettings = (e) => {
@@ -22,23 +20,18 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
       return;
     }
 
-    // Save key in localStorage and update user object
-    localStorage.setItem('fuhrerschein_api_key', apiKey.trim());
-
     // Save account state in local storage accounts database
     const users = JSON.parse(localStorage.getItem('fuhrerschein_users') || '{}');
     if (user.username !== 'guest' && users[user.username.toLowerCase()]) {
       users[user.username.toLowerCase()].displayName = displayName.trim();
       users[user.username.toLowerCase()].email = email.trim();
-      users[user.username.toLowerCase()].apiKey = apiKey.trim();
       localStorage.setItem('fuhrerschein_users', JSON.stringify(users));
     }
 
     onUpdateUser({
       ...user,
       displayName: displayName.trim(),
-      email: email.trim(),
-      apiKey: apiKey.trim()
+      email: email.trim()
     });
 
     setMessage({ type: 'success', text: 'Cài đặt đã được lưu thành công!' });
@@ -70,121 +63,162 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
   };
 
   return (
-    <div className="flex flex-col h-full max-h-[85vh] bg-[#F3F4F6] text-gray-900 font-sans overflow-y-auto px-4 py-4 pb-20 space-y-5 no-scrollbar">
+    <div style={{ flex: 1, backgroundColor: '#f4f7f9', overflowY: 'auto', padding: '32px 16px', fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif" }} className="no-scrollbar">
+      <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
+        
+        {/* Header */}
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+          <div style={{ width: '48px', height: '48px', borderRadius: '14px', backgroundColor: '#1a4a5e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 12px rgba(26, 74, 94, 0.2)' }}>
+            <SettingsIcon size={24} />
+          </div>
+          <div>
+            <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1a4a5e', margin: 0, letterSpacing: '-0.02em' }}>Cài đặt ứng dụng</h1>
+            <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0 0', fontWeight: '500' }}>Cấu hình hệ thống & thông tin tài khoản của bạn</p>
+          </div>
+        </div>
 
-      <div className="space-y-1">
-        <h2 className="text-xs font-bold uppercase tracking-wider text-[#15803D]">CÀI ĐẶT ỨNG DỤNG</h2>
-        <p className="text-[10px] text-gray-500 uppercase tracking-wide font-mono font-bold">Cấu hình hệ thống & thông tin tài khoản</p>
+        {message.text && (
+          <div style={{ 
+            padding: '16px', 
+            borderRadius: '12px', 
+            display: 'flex', 
+            alignItems: 'center', 
+            gap: '12px',
+            backgroundColor: message.type === 'success' ? '#f0fdf4' : '#fef2f2',
+            border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
+            color: message.type === 'success' ? '#166534' : '#991b1b',
+            fontWeight: '600',
+            fontSize: '14px',
+            animation: 'fadeIn 0.3s ease-out'
+          }}>
+            {message.type === 'success' ? <ShieldCheck size={20} /> : <AlertTriangle size={20} />}
+            {message.text}
+          </div>
+        )}
+
+        {/* Profile Form */}
+        <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '32px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)', border: '1px solid #e2e8f0' }}>
+          <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <User size={20} color="#2b6f8a" /> Thông tin cá nhân
+          </h2>
+          
+          <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
+            
+            {/* Display Name */}
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#475569', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Tên hiển thị học viên
+              </label>
+              <div style={{ position: 'relative' }}>
+                <div style={{ position: 'absolute', top: '50%', left: '16px', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+                  <User size={18} />
+                </div>
+                <input
+                  type="text"
+                  value={displayName}
+                  onChange={(e) => setDisplayName(e.target.value)}
+                  placeholder="Nhập tên của bạn"
+                  style={{ width: '100%', padding: '14px 16px 14px 44px', backgroundColor: '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '15px', fontWeight: '600', color: '#0f172a', transition: 'all 0.2s', outline: 'none' }}
+                  onFocus={(e) => { e.target.style.borderColor = '#2b6f8a'; e.target.style.backgroundColor = 'white'; }}
+                  onBlur={(e) => { e.target.style.borderColor = '#e2e8f0'; e.target.style.backgroundColor = '#f8fafc'; }}
+                />
+              </div>
+            </div>
+
+            {/* Email */}
+            <div>
+              <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#475569', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                Địa chỉ Email
+              </label>
+              <div style={{ position: 'relative' }}>
+                <div style={{ position: 'absolute', top: '50%', left: '16px', transform: 'translateY(-50%)', color: '#94a3b8' }}>
+                  <Mail size={18} />
+                </div>
+                <input
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  placeholder="email@example.com"
+                  disabled={user.username === 'guest'}
+                  style={{ width: '100%', padding: '14px 16px 14px 44px', backgroundColor: user.username === 'guest' ? '#f1f5f9' : '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '15px', fontWeight: '600', color: '#0f172a', transition: 'all 0.2s', outline: 'none', opacity: user.username === 'guest' ? 0.6 : 1 }}
+                  onFocus={(e) => { if (user.username !== 'guest') { e.target.style.borderColor = '#2b6f8a'; e.target.style.backgroundColor = 'white'; } }}
+                  onBlur={(e) => { if (user.username !== 'guest') { e.target.style.borderColor = '#e2e8f0'; e.target.style.backgroundColor = '#f8fafc'; } }}
+                />
+              </div>
+            </div>
+
+            <button
+              type="submit"
+              style={{ marginTop: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '16px', backgroundColor: '#1a4a5e', color: 'white', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', boxShadow: '0 4px 12px rgba(26, 74, 94, 0.2)', transition: 'background-color 0.2s' }}
+              onMouseOver={(e) => e.target.style.backgroundColor = '#113240'}
+              onMouseOut={(e) => e.target.style.backgroundColor = '#1a4a5e'}
+            >
+              <Save size={18} /> Lưu cấu hình cài đặt
+            </button>
+          </form>
+        </div>
+
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
+          {/* Account Info Card */}
+          <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '32px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)', border: '1px solid #e2e8f0' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <ShieldCheck size={20} color="#10b981" /> Trạng thái tài khoản
+            </h3>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Tên đăng nhập (Username)</span>
+                <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: '700', backgroundColor: '#f1f5f9', padding: '4px 10px', borderRadius: '6px' }}>{user.username}</span>
+              </div>
+              
+              {user.username !== 'guest' && user.email && (
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
+                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Email đăng ký</span>
+                  <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: '700' }}>{user.email}</span>
+                </div>
+              )}
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Vai trò hệ thống</span>
+                <span style={{ fontSize: '12px', color: '#166534', fontWeight: '800', backgroundColor: '#dcfce7', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase' }}>Học viên</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Danger Zone */}
+          <div style={{ backgroundColor: '#fff1f2', borderRadius: '24px', padding: '32px', border: '1px solid #fecdd3' }}>
+            <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#be123c', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <AlertTriangle size={20} color="#e11d48" /> Vùng nguy hiểm
+            </h3>
+            <p style={{ fontSize: '13px', color: '#9f1239', lineHeight: '1.6', marginBottom: '24px', fontWeight: '500' }}>
+              Các hành động dưới đây sẽ xóa dữ liệu trên trình duyệt này hoặc yêu cầu đăng nhập lại. Vui lòng cân nhắc kỹ trước khi thực hiện.
+            </p>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <button
+                onClick={handleResetProgress}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', backgroundColor: 'white', color: '#e11d48', border: '2px solid #fda4af', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s' }}
+                onMouseOver={(e) => { e.target.style.backgroundColor = '#ffe4e6'; e.target.style.borderColor = '#fb7185'; }}
+                onMouseOut={(e) => { e.target.style.backgroundColor = 'white'; e.target.style.borderColor = '#fda4af'; }}
+              >
+                Xóa toàn bộ lịch sử học tập
+              </button>
+              
+              <button
+                onClick={onLogout}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', backgroundColor: '#e11d48', color: 'white', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(225, 29, 72, 0.2)' }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#be123c'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#e11d48'}
+              >
+                <LogOut size={16} /> Đăng xuất khỏi thiết bị
+              </button>
+            </div>
+          </div>
+        </div>
+
       </div>
-
-      {message.text && (
-        <div className={`p-2.5 rounded-lg border-2 text-[11px] font-extrabold uppercase text-center ${message.type === 'success'
-          ? 'bg-green-50 border-green-600 text-green-700'
-          : 'bg-red-50 border-red-600 text-red-700'
-          }`}>
-          {message.text}
-        </div>
-      )}
-
-      {/* Profile & API Form */}
-      <form onSubmit={handleSaveSettings} className="bg-white border-2 border-gray-200 p-5 rounded-2xl space-y-4 shadow-sm">
-
-        {/* Profile name */}
-        <div className="space-y-1.5 text-left">
-          <label className="text-[11px] font-sans font-extrabold uppercase tracking-wider text-gray-700">
-            Tên hiển thị học viên
-          </label>
-          <input
-            type="text"
-            value={displayName}
-            onChange={(e) => setDisplayName(e.target.value)}
-            placeholder="Tên học viên"
-            className="w-full px-3.5 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:border-[#15803D] focus:bg-white focus:outline-none text-sm text-gray-900 font-bold"
-          />
-        </div>
-
-        {/* Email address */}
-        <div className="space-y-1.5 text-left">
-          <label className="text-[11px] font-sans font-extrabold uppercase tracking-wider text-gray-700">
-            Địa chỉ Email
-          </label>
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="email@example.com"
-            disabled={user.username === 'guest'}
-            className="w-full px-3.5 py-3 bg-gray-50 border-2 border-gray-200 rounded-lg focus:border-[#15803D] focus:bg-white focus:outline-none text-sm text-gray-900 font-bold disabled:opacity-40"
-          />
-        </div>
-
-        {/* Gemini API Key */}
-        <div className="space-y-1.5 text-left">
-          <label className="text-[11px] font-sans font-extrabold uppercase tracking-wider text-gray-700">
-            Google Gemini API Key
-          </label>
-
-          <p className="text-[10px] text-gray-550 leading-normal mt-1.5 uppercase font-bold">
-            Chú ý: API Key của bạn chỉ được lưu nội bộ trên máy cá nhân, đảm bảo an toàn bảo mật thông tin.
-          </p>
-        </div>
-
-        {/* Help Banner */}
-        <button
-          type="submit"
-          className="w-full py-3.5 bg-[#15803D] hover:bg-[#166534] text-black font-extrabold text-xs uppercase tracking-widest transition-colors rounded-xl shadow-md"
-        >
-          LƯU CẤU HÌNH CÀI ĐẶT
-        </button>
-      </form>
-
-      {/* Account Info details */}
-      <div className="bg-white border-2 border-gray-200 p-4 rounded-xl text-left text-xs space-y-2 shadow-sm">
-        <h4 className="font-sans font-bold text-[10px] uppercase tracking-wider text-[#15803D] flex items-center gap-1.5">
-          <ShieldCheck className="w-3.5 h-3.5 text-[#15803D]" />
-          Thông tin tài khoản học viên:
-        </h4>
-        <div className="grid grid-cols-2 gap-2 text-gray-500 text-[10px] font-sans font-bold">
-          <span>USERNAME:</span>
-          <span className="text-gray-900 text-right">{user.username}</span>
-          {user.username !== 'guest' && user.email && (
-            <>
-              <span>EMAIL:</span>
-              <span className="text-gray-900 text-right">{user.email}</span>
-            </>
-          )}
-          <span>VAI TRÒ:</span>
-          <span className="text-gray-900 text-right font-extrabold">HỌC VIÊN</span>
-        </div>
-      </div>
-
-      {/* Danger Zone */}
-      <div className="bg-white border-2 border-red-600/30 p-5 rounded-xl text-left space-y-3 shadow-sm">
-        <h4 className="text-[11px] font-bold uppercase tracking-wider text-red-600">VÙNG CẢNH BÁO (DANGER ZONE)</h4>
-        <p className="text-[10px] text-gray-500 font-bold leading-normal uppercase">
-          Xóa vĩnh viễn dữ liệu học hoặc đăng xuất khỏi hệ thống thiết bị này.
-        </p>
-
-        <div className="flex gap-2.5">
-          <button
-            type="button"
-            onClick={handleResetProgress}
-            className="flex-1 py-2.5 bg-transparent border-2 border-red-600 text-red-650 hover:bg-red-600 hover:text-white font-extrabold text-xs uppercase tracking-wider transition-colors rounded-lg"
-          >
-            Xóa tiến trình
-          </button>
-
-          <button
-            type="button"
-            onClick={onLogout}
-            className="flex-1 py-2.5 bg-transparent border-2 border-gray-200 text-gray-700 hover:border-red-650 hover:text-red-650 font-extrabold text-xs uppercase tracking-wider transition-colors rounded-lg"
-          >
-            ĐĂNG XUẤT
-          </button>
-        </div>
-      </div>
-
     </div>
   );
 };
+
 export default Settings;
