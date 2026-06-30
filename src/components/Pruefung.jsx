@@ -184,7 +184,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
       const randomInRange = (min, max) => Math.random() * (max - min) + min;
 
-      const interval = setInterval(function() {
+      const interval = setInterval(function () {
         const timeLeft = animationEnd - Date.now();
 
         if (timeLeft <= 0) {
@@ -195,7 +195,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
         confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.1, 0.3), y: Math.random() - 0.2 } }));
         confetti(Object.assign({}, defaults, { particleCount, origin: { x: randomInRange(0.7, 0.9), y: Math.random() - 0.2 } }));
       }, 250);
-      
+
       return () => clearInterval(interval);
     }
   }, [showResultPopup, results.passed]);
@@ -520,8 +520,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
               {/* Center Text overlay */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <div style={{fontSize: 'calc(36px * var(--text-scale, 1))', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px'}}>{fitPercent.toFixed(1)}%</div>
-                <div style={{fontSize: 'calc(12px * var(--text-scale, 1))', color: '#546e7a', marginTop: '6px', fontWeight: '500'}}>
+                <div style={{ fontSize: 'calc(36px * var(--text-scale, 1))', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px' }}>{fitPercent.toFixed(1)}%</div>
+                <div style={{ fontSize: 'calc(12px * var(--text-scale, 1))', color: '#546e7a', marginTop: '6px', fontWeight: '500' }}>
                   {t.fit}
                 </div>
                 <BarChart3 size={18} color="#546e7a" className="mt-1.5" />
@@ -728,11 +728,6 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
           <div className="w-full max-w-6xl h-full bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col overflow-hidden">
 
             {/* Title Header */}
-            <div className="text-center py-3 border-b border-gray-200 bg-white shrink-0">
-              <h2 className="text-[18px] md:text-[20px] text-[#24425A] flex items-center justify-center gap-1.5 font-medium">
-                Prüfung ab 01.04.2025 <Info className="w-4 h-4 text-gray-400 cursor-pointer hover:text-gray-600 transition-colors" />
-              </h2>
-            </div>
 
             {/* Grid Container */}
             <div className="flex-1 overflow-y-auto p-4 md:p-5 bogen-responsive-grid gap-x-3 md:gap-x-6 gap-y-1.5 md:gap-y-3.5 align-middle items-center">
@@ -1171,7 +1166,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 <h2 className="text-[20px] font-black leading-tight mb-3 tracking-tight" style={{ color: results.passed ? '#16a34a' : '#dc2626' }}>
                   {results.passed ? t.passed : t.failed}
                 </h2>
-                
+
                 <div className="flex flex-col items-center p-4 mt-2 shadow-sm border border-gray-100 w-full max-w-[280px] mx-auto" style={{ backgroundColor: 'white', borderRadius: '16px' }}>
                   <div className="text-center pb-3 border-b border-gray-100 w-full">
                     <div className="text-[48px] leading-none font-black tracking-tighter" style={{ color: '#111827' }}>
@@ -1186,8 +1181,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                       {languageMode === 'de' ? 'Falsche Fragen:' : (languageMode === 'vi' ? 'Số câu sai:' : 'Số câu sai:')}
                     </span>
                     <span className="text-[16px] font-black" style={{ color: '#dc2626' }}>
-                       {results.details?.filter(d => !d.isCorrect).length || 0} 
-                       <span className="text-[13px] font-bold" style={{ color: '#9ca3af' }}> / {results.details?.length || 30}</span>
+                      {results.details?.filter(d => !d.isCorrect).length || 0}
+                      <span className="text-[13px] font-bold" style={{ color: '#9ca3af' }}> / {results.details?.length || 30}</span>
                     </span>
                   </div>
                 </div>
@@ -1344,7 +1339,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 <h2 className="text-[20px] font-black leading-tight mb-3 tracking-tight" style={{ color: results.passed ? '#16a34a' : '#dc2626' }}>
                   {results.passed ? t.passed : t.failed}
                 </h2>
-                
+
                 <div className="flex flex-col items-center p-4 mt-2 shadow-sm border border-gray-100 w-full max-w-[280px] mx-auto" style={{ backgroundColor: 'white', borderRadius: '16px' }}>
                   <div className="text-center pb-3 border-b border-gray-100 w-full">
                     <div className="text-[48px] leading-none font-black tracking-tighter" style={{ color: '#111827' }}>
@@ -1359,8 +1354,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                       {languageMode === 'de' ? 'Falsche Fragen:' : (languageMode === 'vi' ? 'Số câu sai:' : 'Số câu sai:')}
                     </span>
                     <span className="text-[16px] font-black" style={{ color: '#dc2626' }}>
-                       {results.details?.filter(d => !d.isCorrect).length || 0} 
-                       <span className="text-[13px] font-bold" style={{ color: '#9ca3af' }}> / {results.details?.length || 30}</span>
+                      {results.details?.filter(d => !d.isCorrect).length || 0}
+                      <span className="text-[13px] font-bold" style={{ color: '#9ca3af' }}> / {results.details?.length || 30}</span>
                     </span>
                   </div>
                 </div>

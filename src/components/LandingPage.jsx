@@ -1,8 +1,10 @@
 import React, { useState } from 'react';
-import { BookOpen, Award, BarChart3, Settings, ChevronRight, HelpCircle, X, MessageCircle, Sparkles } from 'lucide-react';
+import { BookOpen, Award, BarChart3, Settings, ChevronRight, HelpCircle, X, MessageCircle, Sparkles, Video, Lightbulb } from 'lucide-react';
 import { questions } from '../data/questions';
 import { SupportModal } from './SupportModal';
 import { AIChat } from './AIChat';
+import { PraxisVideos } from './PraxisVideos';
+import { TheoryTips } from './TheoryTips';
 
 export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'both', onLanguageChange }) => {
   const t = (vi, de) => {
@@ -13,6 +15,8 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
 
   const [showSupportModal, setShowSupportModal] = useState(false);
   const [showAIChatModal, setShowAIChatModal] = useState(false);
+  const [showPraxisModal, setShowPraxisModal] = useState(false);
+  const [showTheoryTipsModal, setShowTheoryTipsModal] = useState(false);
 
   // Calculate real progress
   const totalQuestions = questions.length;
@@ -39,7 +43,7 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
   }, [fitPercent, answeredPercent, wrongPercent]);
 
   React.useEffect(() => {
-    if (showAIChatModal || showSupportModal) {
+    if (showAIChatModal || showSupportModal || showPraxisModal || showTheoryTipsModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -47,7 +51,7 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
     return () => {
       document.body.style.overflow = '';
     };
-  }, [showAIChatModal, showSupportModal]);
+  }, [showAIChatModal, showSupportModal, showPraxisModal, showTheoryTipsModal]);
 
   return (
     <div className="flex flex-col min-h-full bg-[#f4f7f9]" style={{ fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif" }}>
@@ -84,6 +88,80 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
 
             <div style={{ flex: 1, overflowY: 'auto' }}>
               <AIChat user={user} />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Praxis Videos Modal */}
+      {showPraxisModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '500px', height: '85vh',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', display: 'flex', flexDirection: 'column'
+          }}>
+            {/* Header */}
+            <div style={{
+              position: 'relative', padding: '16px', textAlign: 'center', borderBottom: '1px solid #f3f4f6',
+              background: 'linear-gradient(to bottom right, #f8fafc, #e2e8f0)'
+            }}>
+              <button
+                onClick={() => setShowPraxisModal(false)}
+                style={{
+                  position: 'absolute', top: '12px', right: '12px', padding: '8px', color: '#6b7280',
+                  backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '9999px', border: 'none', cursor: 'pointer'
+                }}
+              >
+                <X size={20} />
+              </button>
+              <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#334155', margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <Video size={20} />
+                {t('VIDEO THỰC HÀNH', 'Praxisvideos')}
+              </h2>
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+              <PraxisVideos />
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Theory Tips Modal */}
+      {showTheoryTipsModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '500px', height: '85vh',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', display: 'flex', flexDirection: 'column'
+          }}>
+            {/* Header */}
+            <div style={{
+              position: 'relative', padding: '16px', textAlign: 'center', borderBottom: '1px solid #f3f4f6',
+              background: 'linear-gradient(to bottom right, #f8fafc, #e2e8f0)'
+            }}>
+              <button
+                onClick={() => setShowTheoryTipsModal(false)}
+                style={{
+                  position: 'absolute', top: '12px', right: '12px', padding: '8px', color: '#6b7280',
+                  backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '9999px', border: 'none', cursor: 'pointer'
+                }}
+              >
+                <X size={20} />
+              </button>
+              <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#0d9488', margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <Lightbulb size={20} />
+                {t('MẸO HỌC LÝ THUYẾT', 'Theorie-Tricks')}
+              </h2>
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
+              <TheoryTips />
             </div>
           </div>
         </div>
@@ -190,9 +268,11 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
 
           {/* Info Text */}
           <div className="text-center">
-            <div style={{ fontSize: 'calc(20px * var(--text-scale, 1))', color: '#7cb342', fontWeight: '400', marginBottom: '8px' }}>Klasse B</div>
+            <div style={{ fontSize: 'calc(20px * var(--text-scale, 1))', color: '#7cb342', fontWeight: '400', marginBottom: '8px' }}>
+              {t('Chào mừng bạn đến', 'Willkommen beim')}
+            </div>
             <div style={{ fontSize: 'calc(15px * var(--text-scale, 1))', color: '#2b576b', fontWeight: '500' }}>
-              {t('Kỳ thi từ 01.04.2025', 'Prüfung ab 01.04.2025')}
+              {t('Lớp luyện thi lý thuyết online', 'Online-Theorietraining')}
             </div>
           </div>
 
@@ -293,6 +373,38 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
                 </div>
                 <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
                   {t('TRỢ LÝ HỌC TẬP', 'KI-Tutor')}
+                </span>
+              </div>
+              <ChevronRight size={18} opacity={0.5} />
+            </button>
+
+            <button onClick={() => setShowPraxisModal(true)} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
+              cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
+            }}>
+              <div className="flex items-center gap-4">
+                <div style={{ width: '20px', height: '20px', background: '#eab308', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Video size={12} color="white" strokeWidth={3} />
+                </div>
+                <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
+                  {t('VIDEO THỰC HÀNH', 'Praxis-Tipps')}
+                </span>
+              </div>
+              <ChevronRight size={18} opacity={0.5} />
+            </button>
+
+            <button onClick={() => setShowTheoryTipsModal(true)} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
+              cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
+            }}>
+              <div className="flex items-center gap-4">
+                <div style={{ width: '20px', height: '20px', background: '#0d9488', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Lightbulb size={12} color="white" strokeWidth={3} />
+                </div>
+                <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
+                  {t('MẸO HỌC LÝ THUYẾT', 'Theorie-Tricks')}
                 </span>
               </div>
               <ChevronRight size={18} opacity={0.5} />

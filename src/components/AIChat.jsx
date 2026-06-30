@@ -10,7 +10,9 @@ const questionCategories = [
       { id: 'bremsweg', label: 'Quãng đường phanh thường (Bremsweg)', text: 'Giải thích công thức tính Quãng đường phanh thông thường (Bremsweg) và cho ví dụ.' },
       { id: 'gefahrbremsung', label: 'Quãng đường phanh khẩn cấp (Gefahrbremsung)', text: 'Giải thích công thức tính Quãng đường phanh khẩn cấp (Gefahrbremsung) và cho ví dụ.' },
       { id: 'anhalteweg', label: 'Quãng đường dừng xe (Anhalteweg)', text: 'Giải thích công thức tính Tổng quãng đường dừng xe (Anhalteweg) và cho ví dụ.' },
-      { id: 'safety_distance', label: 'Quy tắc khoảng cách an toàn (Sicherheitsabstand)', text: 'Quy tắc tính khoảng cách an toàn tối thiểu với xe đi trước là gì?' }
+      { id: 'safety_distance', label: 'Quy tắc khoảng cách an toàn (Sicherheitsabstand)', text: 'Quy tắc tính khoảng cách an toàn tối thiểu với xe đi trước là gì?' },
+      { id: 'faustformel_ueberholen', label: 'Quãng đường vượt xe (Überholweg)', text: 'Giải thích quy tắc tính quãng đường vượt xe an toàn.' },
+      { id: 'anhaengelast', label: 'Tải trọng rơ-moóc (Anhängelast)', text: 'Quy định về tải trọng rơ-moóc được phép kéo theo với bằng B.' }
     ]
   },
   {
@@ -21,7 +23,9 @@ const questionCategories = [
       { id: 'kreisverkehr', label: 'Thứ tự đi tại bùng binh (Kreisverkehr)', text: 'Giải thích quy tắc ưu tiên và xi nhan khi đi vào và đi ra khỏi bùng binh (Kreisverkehr) ở Đức?' },
       { id: 'left_turn', label: 'Quy tắc rẽ trái nhường đường', text: 'Khi rẽ trái tại ngã tư, tôi phải nhường đường cho những đối tượng nào?' },
       { id: 'abknickende_vorfahrt', label: 'Đường ưu tiên rẽ cong', text: 'Giải thích cách đi và bật xi nhan tại biển báo đường ưu tiên rẽ cong (abknickende Vorfahrtsstraße).' },
-      { id: 'bus_stop', label: 'Xe buýt đang đỗ tại bến', text: 'Cách xử lý khi gặp xe buýt đang đỗ ở trạm và đang bật đèn cảnh báo nguy hiểm (Warnblinkanlage).' }
+      { id: 'bus_stop', label: 'Xe buýt đang đỗ tại bến', text: 'Cách xử lý khi gặp xe buýt đang đỗ ở trạm và đang bật đèn cảnh báo nguy hiểm (Warnblinkanlage).' },
+      { id: 'gruener_pfeil', label: 'Biển mũi tên xanh (Grüner Pfeil)', text: 'Khi gặp biển mũi tên xanh bên cạnh đèn đỏ, tôi phải làm gì?' },
+      { id: 'reissverschluss', label: 'Quy tắc khóa kéo (Reißverschluss)', text: 'Giải thích quy tắc khóa kéo (Reißverschlussverfahren) khi đường bị hẹp lại.' }
     ]
   },
   {
@@ -31,7 +35,9 @@ const questionCategories = [
       { id: 'probezeit_rules', label: 'Thời gian thử thách Probezeit', text: 'Thời gian thử thách Probezeit kéo dài bao lâu và có quy định gì về nồng độ cồn?' },
       { id: 'a_b_verstoss', label: 'Vi phạm Nhóm A và Nhóm B', text: 'Sự khác nhau giữa lỗi vi phạm nặng nhóm A (A-Verstoß) và lỗi nhẹ nhóm B (B-Verstoß) là gì?' },
       { id: 'asf_seminar', label: 'Khóa học ASF là gì?', text: 'Khi nào tài xế phải học khóa tập huấn bắt buộc ASF (Aufbauseminar) và hậu quả là gì?' },
-      { id: 'alcohol_drugs', label: 'Quy định Rượu bia & Ma túy', text: 'Quy định về nồng độ cồn và chất kích thích khi tham gia giao thông ở Đức.' }
+      { id: 'alcohol_drugs', label: 'Quy định Rượu bia & Ma túy', text: 'Quy định về nồng độ cồn và chất kích thích khi tham gia giao thông ở Đức.' },
+      { id: 'begleitetes_fahren', label: 'Lái xe từ 17 tuổi (BF17)', text: 'Quy định về việc lái xe có người giám sát từ 17 tuổi (Begleitetes Fahren).' },
+      { id: 'handyverbot', label: 'Quy định cấm điện thoại', text: 'Hình phạt cho việc sử dụng điện thoại khi lái xe trong Probezeit là gì?' }
     ]
   },
   {
@@ -40,7 +46,10 @@ const questionCategories = [
     questions: [
       { id: 'stop_vs_vorfahrt', label: 'Biển STOP vs Nhường đường', text: 'Sự khác biệt về cách hành xử giữa biển dừng lại (Stop-Schild) và biển nhường đường (Vorfahrt gewähren) là gì?' },
       { id: 'ueberholverbot', label: 'Hiệu lực biển cấm vượt', text: 'Biển cấm vượt (Überholverbot) có hiệu lực đến khi nào và cấm những loại xe nào vượt?' },
-      { id: 'tempo_zone', label: 'Khu vực giới hạn tốc độ (Zone)', text: 'Biển giới hạn tốc độ theo khu vực (ví dụ Tempo-30-Zone) khác gì so với biển giới hạn tốc độ thông thường?' }
+      { id: 'tempo_zone', label: 'Khu vực giới hạn tốc độ (Zone)', text: 'Biển giới hạn tốc độ theo khu vực (ví dụ Tempo-30-Zone) khác gì so với biển giới hạn tốc độ thông thường?' },
+      { id: 'halteverbot', label: 'Cấm đỗ vs Cấm dừng', text: 'Sự khác biệt giữa biển cấm dừng (Halteverbot) và cấm đỗ (Parkverbot).' },
+      { id: 'richtgeschwindigkeit', label: 'Tốc độ khuyến nghị Autobahn', text: 'Biển tốc độ khuyến nghị (Richtgeschwindigkeit) 130 km/h có ý nghĩa gì?' },
+      { id: 'spielstrasse', label: 'Khu vực ưu tiên (Spielstraße)', text: 'Quy định về tốc độ và nhường đường trong khu vực ưu tiên người đi bộ (Verkehrsberuhigter Bereich).' }
     ]
   },
   {
@@ -49,7 +58,9 @@ const questionCategories = [
     questions: [
       { id: 'vocab_vorfahrt', label: 'Từ vựng chủ đề Quyền ưu tiên', text: 'Tổng hợp các từ vựng tiếng Đức chuyên ngành quan trọng nhất về chủ đề Quyền ưu tiên (Vorfahrt).' },
       { id: 'vocab_vehicle', label: 'Từ vựng chủ đề Bộ phận xe', text: 'Tổng hợp các từ vựng tiếng Đức về các bộ phận của xe (lốp, phanh, đèn, động cơ,...) phục vụ thi lý thuyết.' },
-      { id: 'vocab_behavior', label: 'Từ vựng chủ đề Hành vi lái xe', text: 'Tổng hợp các từ vựng tiếng Đức mô tả hành vi lái xe (vượt, nhường đường, rẽ, phanh gấp,...).' }
+      { id: 'vocab_behavior', label: 'Từ vựng chủ đề Hành vi lái xe', text: 'Tổng hợp các từ vựng tiếng Đức mô tả hành vi lái xe (vượt, nhường đường, rẽ, phanh gấp,...).' },
+      { id: 'vocab_signs', label: 'Từ vựng: Phân loại biển báo', text: 'Các từ vựng tiếng Đức để phân loại biển báo (nguy hiểm, cấm, chỉ dẫn...).' },
+      { id: 'vocab_dashboard', label: 'Từ vựng: Bảng điều khiển xe', text: 'Từ vựng các đèn báo lỗi và ký hiệu trên bảng điều khiển.' }
     ]
   },
   {
@@ -57,7 +68,9 @@ const questionCategories = [
     title: 'Môi trường',
     questions: [
       { id: 'eco_driving', label: 'Lái xe tiết kiệm nhiên liệu', text: 'Cách lái xe thân thiện với môi trường và tiết kiệm nhiên liệu (Umweltschonendes Fahren).' },
-      { id: 'noise_pollution', label: 'Giảm ô nhiễm tiếng ồn', text: 'Những hành vi nào gây ô nhiễm tiếng ồn và bị cấm khi lái xe trong khu dân cư?' }
+      { id: 'noise_pollution', label: 'Giảm ô nhiễm tiếng ồn', text: 'Những hành vi nào gây ô nhiễm tiếng ồn và bị cấm khi lái xe trong khu dân cư?' },
+      { id: 'katalysator', label: 'Bộ lọc khí thải (Katalysator)', text: 'Chức năng của bộ lọc khí thải (Katalysator) và những lưu ý để không làm hỏng nó.' },
+      { id: 'carpooling', label: 'Đi chung xe (Fahrgemeinschaften)', text: 'Lợi ích của việc đi chung xe đối với môi trường và giao thông.' }
     ]
   }
 ];
@@ -105,7 +118,33 @@ const mockResponses = {
 
   eco_driving: `**Lái xe tiết kiệm nhiên liệu (Umweltschonendes Fahren):**\n\nĐể tiết kiệm nhiên liệu và giảm khí thải, bạn cần:\n1. **Chuyển số sớm:** Lên số cao ngay khi có thể (ở khoảng 2000 vòng/phút).\n2. **Dự đoán tình huống:** Quan sát xa, thả chân ga sớm khi thấy đèn đỏ từ xa thay vì đạp ga rồi phanh gấp.\n3. **Tắt động cơ:** Khi phải dừng lâu hơn 10-20 giây (ví dụ chờ đèn đỏ lâu, tàu hỏa đi qua, tắc đường), hãy tắt máy.\n4. **Giảm lực cản:** Tháo giá nóc (Dachgepäckträger) khi không dùng.\n5. **Áp suất lốp:** Đảm bảo áp suất lốp chuẩn theo khuyến cáo của nhà sản xuất. Lốp non hơi sẽ hao tốn nhiên liệu.`,
 
-  noise_pollution: `**Giảm ô nhiễm tiếng ồn (Lärmschutz):**\n\nBạn KHÔNG được phép gây ra tiếng ồn không cần thiết, đặc biệt trong khu dân cư:\n1. **Không nẹt pô (Röhren lassen des Motors):** Bấm ga mạnh khi xe đứng yên hoặc dùng hệ thống ống xả quá ồn.\n2. **Không đóng cửa xe quá mạnh:** Thường xuyên đóng rầm cửa xe vào ban đêm.\n3. **Không bóp còi bừa bãi:** Chỉ dùng còi báo hiệu nguy hiểm ngoài đô thị, không dùng để gọi bạn bè hay chào nhau.\n4. **Không lái xe vòng vèo không có lý do (Sinnloses Hin- und Herfahren):** Chạy lượn lờ trong khu dân cư gây phiền toái cho người dân xung quanh.`
+  noise_pollution: `**Giảm ô nhiễm tiếng ồn (Lärmschutz):**\n\nBạn KHÔNG được phép gây ra tiếng ồn không cần thiết, đặc biệt trong khu dân cư:\n1. **Không nẹt pô (Röhren lassen des Motors):** Bấm ga mạnh khi xe đứng yên hoặc dùng hệ thống ống xả quá ồn.\n2. **Không đóng cửa xe quá mạnh:** Thường xuyên đóng rầm cửa xe vào ban đêm.\n3. **Không bóp còi bừa bãi:** Chỉ dùng còi báo hiệu nguy hiểm ngoài đô thị, không dùng để gọi bạn bè hay chào nhau.\n4. **Không lái xe vòng vèo không có lý do (Sinnloses Hin- und Herfahren):** Chạy lượn lờ trong khu dân cư gây phiền toái cho người dân xung quanh.`,
+
+  faustformel_ueberholen: `**Quãng đường vượt xe (Überholweg):**\n\nĐể vượt một xe khác an toàn, quãng đường vượt của bạn phải **lớn hơn đáng kể** so với khoảng cách bạn nhìn thấy.\n- Vận tốc của bạn phải lớn hơn xe bị vượt một khoảng đáng kể (nhưng không được vượt quá giới hạn tốc độ cho phép).\n- Bạn cần tính toán khoảng cách với xe đi ngược chiều. Nếu có xe ngược chiều, quãng đường an toàn cần thiết phải **gấp đôi** quãng đường vượt dự tính.`,
+
+  anhaengelast: `**Tải trọng rơ-moóc (Anhängelast) với bằng Klasse B:**\n\nBằng lái hạng B cho phép bạn lái ô tô tối đa 3.5 tấn. Bạn được phép kéo rơ-moóc trong các trường hợp:\n1. Rơ-moóc nhỏ: Tổng trọng lượng (zGM) của rơ-moóc tối đa **750 kg**.\n2. Rơ-moóc lớn (trên 750 kg): Tổng trọng lượng của cả xe kéo VÀ rơ-moóc cộng lại **không vượt quá 3.500 kg (3.5 tấn)**.`,
+
+  gruener_pfeil: `**Biển mũi tên xanh (Grüner Pfeil) cạnh đèn đỏ:**\n\nĐây là một tấm biển nhỏ bằng kim loại (không phải đèn tín hiệu sáng). Khi đèn giao thông đang ĐỎ:\n1. BẠN ĐƯỢC PHÉP rẽ phải.\n2. **ĐIỀU KIỆN BẮT BUỘC:** Bạn phải **DỪNG HẲN (với 4 bánh xe đứng im)** tại vạch dừng như gặp biển STOP.\n3. Sau khi quan sát không gây nguy hiểm hoặc cản trở người đi bộ, xe đạp và xe đi từ hướng khác, bạn mới được rẽ phải.`,
+
+  reissverschluss: `**Quy tắc khóa kéo (Reißverschlussverfahren):**\n\nKhi một làn đường bị thu hẹp hoặc đóng lại (ví dụ do công trường), các xe ở làn bị đóng không được chuyển làn ngay lập tức.\n1. Bạn phải lái xe đi **tận đến điểm cuối cùng** (điểm bắt đầu hẹp lại).\n2. Xe ở làn bên cạnh bắt buộc phải nhường cho 1 xe của làn bị đóng xen vào trước mình, luân phiên từng xe một như răng của khóa kéo quần áo.\n3. Mục đích: Giúp tận dụng tối đa không gian đường và giảm tắc nghẽn.`,
+
+  begleitetes_fahren: `**Lái xe từ 17 tuổi (Begleitetes Fahren - BF17):**\n\n1. Bạn có thể thi và lấy giấy phép lái xe đặc biệt từ 17 tuổi.\n2. **Bắt buộc:** Luôn phải có người giám sát (Begleitperson) ngồi trong xe khi bạn lái.\n3. Người giám sát phải được đăng ký trước, đủ 30 tuổi, có bằng lái B ít nhất 5 năm và không có quá 1 điểm phạt ở Flensburg.\n4. Người giám sát không được có nồng độ cồn từ 0.5 Promille trở lên.\n5. Ngay khi bạn tròn 18 tuổi, bạn sẽ nhận bằng cứng và được tự lái một mình.`,
+
+  handyverbot: `**Quy định cấm điện thoại khi lái xe (Handyverbot):**\n\n1. Bạn TUYỆT ĐỐI KHÔNG ĐƯỢC cầm thiết bị điện tử (điện thoại, tablet, smartwatch...) trên tay để nghe gọi, nhắn tin hoặc đọc bản đồ khi động cơ đang chạy.\n2. Lỗi này là một lỗi đặc biệt nghiêm trọng (**A-Verstoß**).\n3. Nếu vi phạm trong thời gian Probezeit, bạn sẽ bị phạt tiền nặng, cộng 1 điểm ở Flensburg, **kéo dài Probezeit thêm 2 năm** và bắt buộc phải đi học lại **khóa ASF** (tốn kém khoảng 400 Euro).`,
+
+  halteverbot: `**Phân biệt Cấm dừng (Halteverbot) và Cấm đỗ (Parkverbot):**\n\n1. **Biển Cấm Dừng Tuyệt Đối (Absolutes Haltverbot - Biển tròn viền đỏ chữ X đỏ nền xanh):** CẤM DỪNG XÊ. Bạn không được phép đỗ xe và cũng không được phép dừng lại dù chỉ 1 giây (ngoại trừ phải dừng do tắc đường hoặc đèn đỏ).\n2. **Biển Cấm Đỗ (Eingeschränktes Haltverbot - Biển tròn viền đỏ 1 gạch chéo đỏ nền xanh):** Thường gọi là Cấm Đỗ. Bạn ĐƯỢC PHÉP DỪNG XE tối đa 3 phút (ví dụ để bốc dỡ hàng hóa hoặc đón trả khách), nhưng nếu bạn rời khỏi xe quá tầm mắt, hoặc dừng quá 3 phút, nó sẽ bị coi là ĐỖ XE (Parken) và bạn sẽ bị phạt.`,
+
+  richtgeschwindigkeit: `**Tốc độ khuyến nghị (Richtgeschwindigkeit):**\n\nBiển vuông màu xanh có số 130 màu trắng áp dụng chủ yếu trên đường cao tốc (Autobahn) của Đức.\n1. Đây KHÔNG phải là giới hạn tốc độ tối đa.\n2. Nó khuyến nghị tốc độ an toàn lý tưởng nhất là 130 km/h ngay cả khi thời tiết đẹp và đường vắng.\n3. Mặc dù bạn được phép lái nhanh hơn (nếu không có biển cấm khác), nhưng nếu xảy ra tai nạn khi chạy trên 130 km/h, bạn có thể phải **chịu một phần trách nhiệm đền bù pháp lý** ngay cả khi lỗi ban đầu không thuộc về bạn.`,
+
+  spielstrasse: `**Khu vực ưu tiên người đi bộ (Verkehrsberuhigter Bereich):**\n\nĐây là biển báo hình chữ nhật màu xanh vẽ cảnh người đi bộ, nhà cửa và ô tô đang chơi đùa. (Dân gian thường gọi là Spielstraße).\n1. **Tốc độ:** Bạn chỉ được phép lái xe với tốc độ bước bộ (**Schrittgeschwindigkeit**, khoảng 4 - 7 km/h).\n2. **Ưu tiên:** Người đi bộ và trẻ em có quyền ưu tiên tuyệt đối, được phép sử dụng toàn bộ mặt đường. Trẻ em được phép chơi dưới lòng đường.\n3. **Đỗ xe:** Chỉ được đỗ xe ở những khu vực được kẻ vạch cho phép đỗ.`,
+
+  vocab_signs: `**Từ vựng về Phân loại Biển báo (Verkehrszeichen):**\n\n- **das Gefahrenzeichen:** Biển báo nguy hiểm (hình tam giác viền đỏ).\n- **das Vorschriftzeichen:** Biển báo hiệu lệnh/cấm (hình tròn viền đỏ).\n- **das Richtzeichen:** Biển chỉ dẫn (thường hình vuông/chữ nhật màu xanh).\n- **das Zusatzzeichen:** Biển phụ (biển nhỏ màu trắng ở bên dưới giải thích thêm).\n- **die Geschwindigkeitsbeschränkung:** Giới hạn tốc độ.\n- **das Überholverbot:** Lệnh cấm vượt.`,
+
+  vocab_dashboard: `**Từ vựng về Bảng điều khiển (Armaturenbrett) & Đèn báo:**\n\n- **die Kontrollleuchte:** Đèn cảnh báo trên bảng điều khiển.\n- **der Motoröldruck (Đèn hình can dầu):** Áp suất dầu động cơ (Đỏ: Dừng xe lập tức, tắt máy).\n- **die Kühlmitteltemperatur (Đèn hình nhiệt kế):** Nhiệt độ nước làm mát (Đỏ: Quá nhiệt, cần dừng nghỉ).\n- **die Batterieladung (Đèn hình ắc quy):** Máy phát điện/Ắc quy có vấn đề.\n- **die Motorkontrollleuchte (Đèn hình động cơ màu vàng):** Lỗi hệ thống điều khiển động cơ/khí thải (Cần mang xe ra xưởng kiểm tra sớm).\n- **der Drehzahlmesser:** Đồng hồ đo vòng tua máy.`,
+
+  katalysator: `**Bộ lọc khí thải (Katalysator):**\n\n1. **Chức năng:** Làm giảm lượng chất độc hại trong khí thải trước khi thải ra môi trường.\n2. **Lưu ý bảo vệ:** Katalysator rất dễ bị hỏng nếu có xăng chưa cháy hết lọt vào hệ thống xả.\n3. **Hành động cấm:** Không nên khởi động xe bằng cách đẩy (Anschieben) xe kéo (Anschleppen) liên tục nhiều lần. Tránh để xe chạy cạn kiệt bình xăng hoàn toàn vì xe giật cục có thể làm xăng lọt vào hỏng bộ lọc.`,
+
+  carpooling: `**Đi chung xe (Fahrgemeinschaften):**\n\n1. **Lợi ích môi trường:** Đi chung xe giúp giảm số lượng xe cá nhân tham gia giao thông, từ đó giảm kẹt xe, giảm ô nhiễm tiếng ồn và khí thải (CO2).\n2. **Tiết kiệm:** Giúp chia sẻ chi phí nhiên liệu, phí gửi xe.\n3. Nhấn mạnh trong bài thi lý thuyết: Mọi câu hỏi có đáp án liên quan đến việc "Lập nhóm đi chung xe" hoặc "Sử dụng phương tiện công cộng" đều là những đáp án ĐÚNG.`
 };
 
 export const AIChat = ({ user }) => {
