@@ -26,7 +26,7 @@ export const TrainingDashboard = ({ user, onUpdateUser, onNavigate, onShowLogin,
 
   const getDaysUntilExam = () => {
     if (!user?.examDate) return null;
-    const diff = new Date(user.examDate).setHours(0,0,0,0) - new Date().setHours(0,0,0,0);
+    const diff = new Date(user.examDate).setHours(0, 0, 0, 0) - new Date().setHours(0, 0, 0, 0);
     const days = Math.ceil(diff / (1000 * 3600 * 24));
     return days;
   };
@@ -42,8 +42,8 @@ export const TrainingDashboard = ({ user, onUpdateUser, onNavigate, onShowLogin,
 
   // Tỉ lệ tính trên tổng số câu hỏi thực tế
   const answeredPercent = totalQuestions > 0 ? (answeredCount / totalQuestions) * 100 : 0;
-  const fitPercent     = totalQuestions > 0 ? (correctCount  / totalQuestions) * 100 : 0;
-  const wrongPercent   = totalQuestions > 0 ? (wrongCount    / totalQuestions) * 100 : 0;
+  const fitPercent = totalQuestions > 0 ? (correctCount / totalQuestions) * 100 : 0;
+  const wrongPercent = totalQuestions > 0 ? (wrongCount / totalQuestions) * 100 : 0;
 
   const [animatedFit, setAnimatedFit] = React.useState(0);
   const [animatedAnswered, setAnimatedAnswered] = React.useState(0);
@@ -59,8 +59,8 @@ export const TrainingDashboard = ({ user, onUpdateUser, onNavigate, onShowLogin,
   }, [fitPercent, answeredPercent, wrongPercent]);
 
   return (
-    <div className="flex flex-col min-h-full bg-[#f4f7f9]" style={{fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif"}}>
-      
+    <div className="flex flex-col min-h-full bg-[#f4f7f9]" style={{ fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif" }}>
+
       {/* Main Responsive Content */}
       <style>{`
         .home-container {
@@ -91,181 +91,183 @@ export const TrainingDashboard = ({ user, onUpdateUser, onNavigate, onShowLogin,
         backgroundSize: '300px'
       }}>
         <div className="home-container">
-        
-        {/* Left Side: Progress Circle */}
-        <div className="relative flex justify-center items-center w-[280px] h-[280px] flex-shrink-0">
-          <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
-            {/* Outer gray base */}
-            <circle cx="100" cy="100" r="95" fill="#e5ebf0" />
-            
-            {/* --- Track Backgrounds --- */}
-            <circle cx="100" cy="100" r="80" fill="none" stroke="#d9dedf" strokeWidth="12" />
-            <circle cx="100" cy="100" r="66" fill="none" stroke="#d9dedf" strokeWidth="12" />
-            <circle cx="100" cy="100" r="52" fill="none" stroke="#d9dedf" strokeWidth="12" />
-            
-            {/* --- Progress Tracks --- */}
-            {/* Outer Green Ring: Fit für Prüfung */}
-            <circle 
-              cx="100" cy="100" r="80" 
-              fill="none" 
-              stroke="#7cb342" 
-              strokeWidth="12" 
-              strokeLinecap="round"
-              strokeDasharray={2 * Math.PI * 80}
-              strokeDashoffset={2 * Math.PI * 80 - (animatedFit / 100) * (2 * Math.PI * 80)}
-              style={{
-                transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                opacity: animatedFit > 0 ? 1 : 0
-              }}
-            />
-            
-            {/* Middle Yellow Ring: Mind. 1x geübt */}
-            <circle 
-              cx="100" cy="100" r="66" 
-              fill="none" 
-              stroke="#fbc02d" 
-              strokeWidth="12" 
-              strokeLinecap="round"
-              strokeDasharray={2 * Math.PI * 66}
-              strokeDashoffset={2 * Math.PI * 66 - (animatedAnswered / 100) * (2 * Math.PI * 66)}
-              style={{
-                transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                opacity: animatedAnswered > 0 ? 1 : 0
-              }}
-            />
 
-            {/* Inner Red Ring: Zuletzt falsch */}
-            <circle 
-              cx="100" cy="100" r="52" 
-              fill="none" 
-              stroke="#e53935" 
-              strokeWidth="12" 
-              strokeLinecap="round"
-              strokeDasharray={2 * Math.PI * 52}
-              strokeDashoffset={2 * Math.PI * 52 - (animatedWrong / 100) * (2 * Math.PI * 52)}
-              style={{
-                transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                opacity: animatedWrong > 0 ? 1 : 0
-              }}
-            />
-            
-            {/* Inner White Center */}
-            <circle cx="100" cy="100" r="45" fill="white" />
-          </svg>
-          
-          {/* Center Text overlay */}
-          <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <div style={{fontSize: 'calc(36px * var(--text-scale, 1))', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px'}}>{fitPercent.toFixed(1)}%</div>
-            <div style={{fontSize: 'calc(12px * var(--text-scale, 1))', color: '#546e7a', marginTop: '6px', fontWeight: '500'}}>
-              {t.fit}
-            </div>
-            <BarChart3 size={18} color="#546e7a" className="mt-1.5" />
-          </div>
-        </div>
+          {/* Left Side: Progress Circle + Legend */}
+          <div className="flex flex-col items-center gap-6">
+            <div className="relative flex justify-center items-center w-[280px] h-[280px] flex-shrink-0">
+              <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+                {/* Outer gray base */}
+                <circle cx="100" cy="100" r="95" fill="#e5ebf0" />
 
-        {/* Right Side: Training List */}
-        <div className="flex flex-col w-full max-w-sm gap-4 z-10">
-          
-          {/* Header */}
-          <div className="flex items-center gap-4 mb-2">
-            <button 
-              onClick={() => onNavigate('/')}
-              style={{
-                width: '32px', height: '32px',
-                background: '#2b576b',
-                color: 'white',
-                border: 'none',
-                borderRadius: '6px',
-                display: 'flex', alignItems: 'center', justifyContent: 'center',
-                cursor: 'pointer'
-              }}
-            >
-              <ChevronLeft size={20} strokeWidth={2.5} />
-            </button>
-            <div style={{fontSize: 'calc(22px * var(--text-scale, 1))', color: '#546e7a', fontWeight: '400'}}>
-              {t.training}
-            </div>
-          </div>
+                {/* --- Track Backgrounds --- */}
+                <circle cx="100" cy="100" r="80" fill="none" stroke="#d9dedf" strokeWidth="12" />
+                <circle cx="100" cy="100" r="66" fill="none" stroke="#d9dedf" strokeWidth="12" />
+                <circle cx="100" cy="100" r="52" fill="none" stroke="#d9dedf" strokeWidth="12" />
 
-          {/* Exam Date Widget */}
-          {!user?.isGuest && (
-            <div style={{ background: 'white', padding: '16px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', marginBottom: '8px', borderLeft: '4px solid #fbc02d' }}>
-              {!showDatePicker ? (
-                <>
-                  {daysLeft !== null && daysLeft >= 0 ? (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div style={{ background: '#fef9c3', padding: '10px', borderRadius: '50%' }}>
-                          <Clock size={24} color="#ca8a04" />
-                        </div>
-                        <div>
-                          <div style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#713f12', fontWeight: 'bold' }}>Ngày thi đang đến gần!</div>
-                          <div style={{ fontSize: 'calc(20px * var(--text-scale, 1))', color: '#ca8a04', fontWeight: '800' }}>{daysLeft} <span style={{fontSize:'12px', fontWeight:'600'}}>ngày</span></div>
-                        </div>
-                      </div>
-                      <button onClick={() => setShowDatePicker(true)} style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px' }}>
-                        <Calendar size={18} />
-                      </button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-between">
-                      <div className="flex items-center gap-3">
-                        <div style={{ background: '#f0f9ff', padding: '10px', borderRadius: '50%' }}>
-                          <Calendar size={24} color="#0284c7" />
-                        </div>
-                        <div>
-                          <div style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#0c4a6e', fontWeight: 'bold' }}>Mục tiêu thi lý thuyết</div>
-                          <div style={{ fontSize: 'calc(11px * var(--text-scale, 1))', color: '#0284c7', marginTop: '2px' }}>{daysLeft < 0 ? 'Ngày thi đã qua, cập nhật lại?' : 'Đặt ngày dự kiến để đốc thúc học tập'}</div>
-                        </div>
-                      </div>
-                      <button onClick={() => setShowDatePicker(true)} style={{ background: '#0284c7', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>
-                        Thiết lập
-                      </button>
-                    </div>
-                  )}
-                </>
-              ) : (
-                <div className="flex flex-col gap-2">
-                  <div style={{ fontSize: 'calc(13px * var(--text-scale, 1))', fontWeight: 'bold', color: '#374151' }}>Chọn ngày thi dự kiến:</div>
-                  <input type="date" value={examDateStr} onChange={(e) => setExamDateStr(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
-                  <div className="flex gap-2 mt-1">
-                    <button onClick={handleSaveExamDate} style={{ flex: 1, padding: '8px', background: '#2b576b', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>Lưu</button>
-                    <button onClick={() => setShowDatePicker(false)} style={{ flex: 1, padding: '8px', background: '#f3f4f6', color: '#4b5563', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>Hủy</button>
-                  </div>
+                {/* --- Progress Tracks --- */}
+                {/* Outer Green Ring: Fit für Prüfung */}
+                <circle
+                  cx="100" cy="100" r="80"
+                  fill="none"
+                  stroke="#7cb342"
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 80}
+                  strokeDashoffset={2 * Math.PI * 80 - (animatedFit / 100) * (2 * Math.PI * 80)}
+                  style={{
+                    transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    opacity: animatedFit > 0 ? 1 : 0
+                  }}
+                />
+
+                {/* Middle Yellow Ring: Mind. 1x geübt */}
+                <circle
+                  cx="100" cy="100" r="66"
+                  fill="none"
+                  stroke="#fbc02d"
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 66}
+                  strokeDashoffset={2 * Math.PI * 66 - (animatedAnswered / 100) * (2 * Math.PI * 66)}
+                  style={{
+                    transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    opacity: animatedAnswered > 0 ? 1 : 0
+                  }}
+                />
+
+                {/* Inner Red Ring: Zuletzt falsch */}
+                <circle
+                  cx="100" cy="100" r="52"
+                  fill="none"
+                  stroke="#e53935"
+                  strokeWidth="12"
+                  strokeLinecap="round"
+                  strokeDasharray={2 * Math.PI * 52}
+                  strokeDashoffset={2 * Math.PI * 52 - (animatedWrong / 100) * (2 * Math.PI * 52)}
+                  style={{
+                    transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                    opacity: animatedWrong > 0 ? 1 : 0
+                  }}
+                />
+
+                {/* Inner White Center */}
+                <circle cx="100" cy="100" r="45" fill="white" />
+              </svg>
+
+              {/* Center Text overlay */}
+              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                <div style={{ fontSize: 'calc(36px * var(--text-scale, 1))', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px' }}>{fitPercent.toFixed(1)}%</div>
+                <div style={{ fontSize: 'calc(12px * var(--text-scale, 1))', color: '#546e7a', marginTop: '6px', fontWeight: '500' }}>
+                  {t.fit}
                 </div>
-              )}
+                <BarChart3 size={18} color="#546e7a" className="mt-1.5" />
+              </div>
             </div>
-          )}
+          </div>
 
-          {/* List Items */}
-          <div className="flex flex-col gap-3">
-            {[
-              { title: t.practice30, icon: <div className="font-bold text-[#2b576b] tracking-wider text-sm flex flex-col leading-none"><span>30</span><span className="text-[8px]">IIII</span></div>, path: '/training/fragen' },
-              { title: t.allThemes, icon: <List size={22} className="text-[#2b576b]" />, path: '/training/fragen?filter=all' },
-              { title: t.focusAreas, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen?filter=focus' },
-              { title: t.searchQuestions, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
-              { title: `${wrongCount} ${t.lastErrors}`, icon: <CheckCircle size={22} className="text-[#e53935]" />, path: '/training/fragen?filter=errors' },
-              { title: `${user?.savedQuestions?.length || 0} ${t.markedQuestions}`, icon: <Star size={22} className="text-[#fbc02d]" />, path: '/training/fragen?filter=marked' },
-            ].map((item, idx) => (
-              <button 
-                key={idx}
-                onClick={() => onNavigate(item.path)}
+          {/* Right Side: Training List */}
+          <div className="flex flex-col w-full max-w-sm gap-4 z-10">
+
+            {/* Header */}
+            <div className="flex items-center gap-4 mb-2">
+              <button
+                onClick={() => onNavigate('/')}
                 style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-                  background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
-                  cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
+                  width: '32px', height: '32px',
+                  background: '#2b576b',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  cursor: 'pointer'
                 }}
               >
-                <div className="flex items-center gap-4">
-                  {item.icon}
-                  <span style={{fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '400'}}>{item.title}</span>
-                </div>
-                <ChevronRight size={18} opacity={0.5} />
+                <ChevronLeft size={20} strokeWidth={2.5} />
               </button>
-            ))}
-          </div>
+              <div style={{ fontSize: 'calc(22px * var(--text-scale, 1))', color: '#546e7a', fontWeight: '400' }}>
+                {t.training}
+              </div>
+            </div>
 
-        </div>
+            {/* Exam Date Widget */}
+            {!user?.isGuest && (
+              <div style={{ background: 'white', padding: '16px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', marginBottom: '8px', borderLeft: '4px solid #fbc02d' }}>
+                {!showDatePicker ? (
+                  <>
+                    {daysLeft !== null && daysLeft >= 0 ? (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div style={{ background: '#fef9c3', padding: '10px', borderRadius: '50%' }}>
+                            <Clock size={24} color="#ca8a04" />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#713f12', fontWeight: 'bold' }}>Ngày thi đang đến gần!</div>
+                            <div style={{ fontSize: 'calc(20px * var(--text-scale, 1))', color: '#ca8a04', fontWeight: '800' }}>{daysLeft} <span style={{ fontSize: '12px', fontWeight: '600' }}>ngày</span></div>
+                          </div>
+                        </div>
+                        <button onClick={() => setShowDatePicker(true)} style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px' }}>
+                          <Calendar size={18} />
+                        </button>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-between">
+                        <div className="flex items-center gap-3">
+                          <div style={{ background: '#f0f9ff', padding: '10px', borderRadius: '50%' }}>
+                            <Calendar size={24} color="#0284c7" />
+                          </div>
+                          <div>
+                            <div style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#0c4a6e', fontWeight: 'bold' }}>Mục tiêu thi lý thuyết</div>
+                            <div style={{ fontSize: 'calc(11px * var(--text-scale, 1))', color: '#0284c7', marginTop: '2px' }}>{daysLeft < 0 ? 'Ngày thi đã qua, cập nhật lại?' : 'Đặt ngày dự kiến để đốc thúc học tập'}</div>
+                          </div>
+                        </div>
+                        <button onClick={() => setShowDatePicker(true)} style={{ background: '#0284c7', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>
+                          Thiết lập
+                        </button>
+                      </div>
+                    )}
+                  </>
+                ) : (
+                  <div className="flex flex-col gap-2">
+                    <div style={{ fontSize: 'calc(13px * var(--text-scale, 1))', fontWeight: 'bold', color: '#374151' }}>Chọn ngày thi dự kiến:</div>
+                    <input type="date" value={examDateStr} onChange={(e) => setExamDateStr(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
+                    <div className="flex gap-2 mt-1">
+                      <button onClick={handleSaveExamDate} style={{ flex: 1, padding: '8px', background: '#2b576b', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>Lưu</button>
+                      <button onClick={() => setShowDatePicker(false)} style={{ flex: 1, padding: '8px', background: '#f3f4f6', color: '#4b5563', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>Hủy</button>
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+
+            {/* List Items */}
+            <div className="flex flex-col gap-3">
+              {[
+                { title: t.practice30, icon: <div className="font-bold text-[#2b576b] tracking-wider text-sm flex flex-col leading-none"><span>30</span><span className="text-[8px]">IIII</span></div>, path: '/training/fragen?filter=practice30' },
+                { title: t.allThemes, icon: <List size={22} className="text-[#2b576b]" />, path: '/training/fragen?filter=all' },
+                { title: t.focusAreas, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen?filter=focus' },
+                { title: t.searchQuestions, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen?filter=search' },
+                { title: `${wrongCount} ${t.lastErrors}`, icon: <CheckCircle size={22} className="text-[#e53935]" />, path: '/training/fragen?filter=errors' },
+                { title: `${user?.savedQuestions?.length || 0} ${t.markedQuestions}`, icon: <Star size={22} className="text-[#fbc02d]" />, path: '/training/fragen?filter=marked' },
+              ].map((item, idx) => (
+                <button
+                  key={idx}
+                  onClick={() => onNavigate(item.path)}
+                  style={{
+                    display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+                    background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
+                    cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
+                  }}
+                >
+                  <div className="flex items-center gap-4">
+                    {item.icon}
+                    <span style={{ fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '400' }}>{item.title}</span>
+                  </div>
+                  <ChevronRight size={18} opacity={0.5} />
+                </button>
+              ))}
+            </div>
+
+          </div>
         </div>
       </div>
     </div>

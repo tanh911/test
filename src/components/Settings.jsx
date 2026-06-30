@@ -9,6 +9,20 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
   const [message, setMessage] = useState({ type: '', text: '' });
 
   const [showConfirmReset, setShowConfirmReset] = useState(false);
+  const [showVerifyEmail, setShowVerifyEmail] = useState(false);
+  const [verifyPassword, setVerifyPassword] = useState('');
+  const [isVerifying, setIsVerifying] = useState(false);
+  const [countdown, setCountdown] = useState(0);
+
+  React.useEffect(() => {
+    let timer;
+    if (countdown > 0) {
+      timer = setInterval(() => {
+        setCountdown((prev) => prev - 1);
+      }, 1000);
+    }
+    return () => clearInterval(timer);
+  }, [countdown]);
 
   const handleSaveSettings = (e) => {
     e.preventDefault();
@@ -21,6 +35,11 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
 
     if (user.username !== 'guest' && email.trim() && !email.includes('@')) {
       setMessage({ type: 'error', text: 'Địa chỉ Email không hợp lệ!' });
+      return;
+    }
+
+    if (email.trim() !== (user.email || '').trim()) {
+      setShowVerifyEmail(true);
       return;
     }
 
@@ -40,6 +59,68 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
 
     setMessage({ type: 'success', text: 'Cài đặt đã được lưu thành công!' });
     setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+  };
+
+  const handleVerifyAndChangeEmail = async () => {
+    if (!verifyPassword) {
+      setMessage({ type: 'error', text: 'Vui lòng nhập mật khẩu xác thực.' });
+      return;
+    }
+    setIsVerifying(true);
+    try {
+      let emailUpdatePending = false;
+
+      if (user.uid) {
+        const { auth } = await import('../lib/firebase');
+        const { EmailAuthProvider, reauthenticateWithCredential, verifyBeforeUpdateEmail } = await import('firebase/auth');
+        
+        const currentUser = auth.currentUser;
+        if (currentUser && currentUser.email) {
+          const credential = EmailAuthProvider.credential(currentUser.email, verifyPassword);
+          await reauthenticateWithCredential(currentUser, credential);
+          
+          await verifyBeforeUpdateEmail(currentUser, email.trim());
+          emailUpdatePending = true;
+          setCountdown(300);
+          setMessage({ type: 'success', text: 'Thành công! Vui lòng kiểm tra hộp thư của email mới để xác nhận thay đổi.' });
+        }
+      }
+      
+      const users = JSON.parse(localStorage.getItem('fuhrerschein_users') || '{}');
+      if (user.username !== 'guest' && users[user.username.toLowerCase()]) {
+        if (users[user.username.toLowerCase()].password && users[user.username.toLowerCase()].password !== verifyPassword) {
+           throw new Error('Mật khẩu không chính xác!');
+        }
+        users[user.username.toLowerCase()].displayName = displayName.trim();
+        // Chỉ cập nhật email local nếu không phải user Firebase
+        if (!user.uid) {
+          users[user.username.toLowerCase()].email = email.trim();
+        }
+        localStorage.setItem('fuhrerschein_users', JSON.stringify(users));
+      }
+
+      onUpdateUser({
+        ...user,
+        displayName: displayName.trim(),
+        // Nếu là Firebase user, ta KHÔNG cập nhật email ngay lập tức để tránh lỗi bất đồng bộ.
+        // Chờ họ xác thực qua mail rồi đăng nhập lại.
+        email: user.uid ? user.email : email.trim()
+      });
+
+      // Nếu không có bước gửi mail, thông báo lưu bình thường
+      if (!emailUpdatePending) {
+        setMessage({ type: 'success', text: 'Cập nhật thông tin thành công!' });
+      } else {
+        // Reset trường email hiển thị về lại email gốc để không gây hiểu nhầm
+        setEmail(user.email);
+      }
+      
+      setShowVerifyEmail(false);
+      setVerifyPassword('');
+    } catch (err) {
+      setMessage({ type: 'error', text: 'Xác thực thất bại: ' + (err.message || 'Mật khẩu không đúng.') });
+    }
+    setIsVerifying(false);
   };
 
   const executeResetProgress = () => {
@@ -101,6 +182,45 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
                 onMouseOut={(e) => e.target.style.backgroundColor = '#e11d48'}
               >
                 Đồng ý xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Cửa sổ xác thực đổi Email */}
+      {showVerifyEmail && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', animation: 'fadeIn 0.2s ease-out' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#e0f2fe', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <ShieldCheck size={24} color="#0284c7" />
+            </div>
+            <h3 style={{ fontSize: 'calc(18px * var(--text-scale, 1))', fontWeight: '800', color: '#0f172a', textAlign: 'center', marginBottom: '12px' }}>Xác thực bảo mật</h3>
+            <p style={{ fontSize: 'calc(14px * var(--text-scale, 1))', color: '#475569', textAlign: 'center', lineHeight: '1.6', marginBottom: '20px' }}>
+              Bạn đang yêu cầu thay đổi địa chỉ email thành <b style={{color: '#0284c7'}}>{email}</b>. Vui lòng nhập mật khẩu hiện tại để xác nhận.
+            </p>
+            <input
+              type="password"
+              value={verifyPassword}
+              onChange={(e) => setVerifyPassword(e.target.value)}
+              placeholder="Nhập mật khẩu của bạn"
+              style={{ width: '100%', padding: '12px 16px', backgroundColor: '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: 'calc(15px * var(--text-scale, 1))', color: '#0f172a', outline: 'none', marginBottom: '24px' }}
+            />
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                onClick={() => { setShowVerifyEmail(false); setVerifyPassword(''); }}
+                style={{ flex: 1, padding: '12px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '12px', fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '700', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#e2e8f0'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#f1f5f9'}
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                onClick={handleVerifyAndChangeEmail}
+                disabled={isVerifying}
+                style={{ flex: 1, padding: '12px', backgroundColor: '#0284c7', color: 'white', border: 'none', borderRadius: '12px', fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '700', cursor: isVerifying ? 'not-allowed' : 'pointer', transition: 'background-color 0.2s', boxShadow: '0 4px 12px rgba(2, 132, 199, 0.2)', opacity: isVerifying ? 0.7 : 1 }}
+              >
+                {isVerifying ? 'Đang xác thực...' : 'Xác thực'}
               </button>
             </div>
           </div>
@@ -206,6 +326,22 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
                   onBlur={(e) => { if (user.username !== 'guest') { e.target.style.borderColor = '#e2e8f0'; e.target.style.backgroundColor = '#f8fafc'; } }}
                 />
               </div>
+
+              {countdown > 0 && (
+                <div style={{ marginTop: '8px', padding: '12px 14px', backgroundColor: '#fffbeb', border: '1px solid #fde68a', borderRadius: '12px', display: 'flex', alignItems: 'flex-start', gap: '10px', animation: 'fadeIn 0.3s ease-out' }}>
+                  <div style={{ color: '#d97706', marginTop: '2px', backgroundColor: '#fef3c7', padding: '6px', borderRadius: '50%' }}>
+                    <Mail size={16} />
+                  </div>
+                  <div>
+                    <div style={{ fontSize: 'calc(13px * var(--text-scale, 1))', fontWeight: '700', color: '#92400e' }}>
+                      Đang chờ xác nhận đổi Email
+                    </div>
+                    <div style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#b45309', marginTop: '4px', lineHeight: '1.5' }}>
+                      Vui lòng kiểm tra hộp thư của email mới để hoàn tất. Bạn nên xác nhận ngay trong vòng <b style={{ fontFeatureSettings: '"tnum"', color: '#ea580c', fontWeight: '800' }}>{Math.floor(countdown / 60).toString().padStart(2, '0')}:{(countdown % 60).toString().padStart(2, '0')}</b> phút tới.
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
 
             <button

@@ -4,8 +4,16 @@ import { Mail, Send, CheckCircle, HelpCircle, ArrowLeft, Clock } from 'lucide-re
 export const Help = ({ user, onNavigate, languageMode = 'both' }) => {
   const [bugCategory, setBugCategory] = useState('app');
   const [bugDescription, setBugDescription] = useState('');
+  const [userEmailInput, setUserEmailInput] = useState(user?.email || '');
   const [bugSubmitted, setBugSubmitted] = useState(false);
   const [bugSubmitting, setBugSubmitting] = useState(false);
+
+  // Update email input if user logs in
+  React.useEffect(() => {
+    if (user?.email && !userEmailInput) {
+      setUserEmailInput(user.email);
+    }
+  }, [user]);
 
   const t = (vi, de) => {
     if (languageMode === 'vi') return vi;
@@ -32,7 +40,7 @@ export const Help = ({ user, onNavigate, languageMode = 'both' }) => {
           category: bugCategory,
           description: bugDescription,
           userName: user?.displayName || 'Anonymous',
-          userEmail: user?.email || 'Not provided',
+          userEmail: userEmailInput || 'Not provided',
           timestamp: new Date().toISOString()
         })
       });
@@ -137,6 +145,20 @@ export const Help = ({ user, onNavigate, languageMode = 'both' }) => {
             </div>
           ) : (
             <form onSubmit={handleSubmitBug} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
+                <label style={{ fontSize: 'calc(12px * var(--text-scale, 1))', fontWeight: '700', color: '#475569' }}>
+                  {t('Email liên hệ', 'Kontakt E-Mail')} <span style={{ color: '#e53935' }}>*</span>
+                </label>
+                <input
+                  type="email"
+                  value={userEmailInput}
+                  onChange={(e) => setUserEmailInput(e.target.value)}
+                  placeholder="your-email@example.com"
+                  required
+                  style={{ width: '100%', padding: '12px', borderRadius: '8px', border: '1px solid #cbd5e1', outline: 'none', background: '#f8fafc', color: '#1e293b', fontSize: 'calc(14px * var(--text-scale, 1))' }}
+                />
+              </div>
+
               <div style={{ display: 'flex', flexDirection: 'column', gap: '8px' }}>
                 <label style={{ fontSize: 'calc(12px * var(--text-scale, 1))', fontWeight: '700', color: '#475569' }}>{t('Chủ đề', 'Thema')}</label>
                 <select

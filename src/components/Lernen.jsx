@@ -3,10 +3,10 @@ import { useLocation } from 'react-router-dom';
 import { questions } from '../data/questions';
 import { SVGGraphics } from './SVGGraphics';
 import {
-  Info, X, Check, Star, Sparkles, Volume2, ChevronLeft, ChevronRight, SkipBack, SkipForward, FastForward, Rewind, Timer
+  Info, X, Check, Star, Sparkles, Volume2, ChevronLeft, ChevronRight, SkipBack, SkipForward, FastForward, Rewind, Timer, Search
 } from 'lucide-react';
 import { customAlert } from '../utils/customAlert';
-
+import { categoryGroups, getCategoryLabel } from '../utils/categoryHelpers';
 export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languageMode = 'both', predefinedQuestions = null, mode = 'practice', onExamSubmit }) => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -125,8 +125,14 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
     });
   };
 
-  // Tạo danh sách 30 câu hỏi cân bằng tỉ lệ chủ đề khi mở trang học tập
-  const [filteredQuestions] = useState(() => {
+  const [searchQuery, setSearchQuery] = useState('');
+  const [searchResults, setSearchResults] = useState([]);
+  const [hasSearched, setHasSearched] = useState(false);
+
+  const isDashboardMode = (filterType === 'all' || filterType === 'focus' || filterType === 'search') && !predefinedQuestions;
+
+  // Tạo danh sách câu hỏi hoạt động
+  const [activeQuestions, setActiveQuestions] = useState(() => {
     if (predefinedQuestions) return predefinedQuestions;
 
     if (sessionKey) {
@@ -141,23 +147,30 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
       }
     }
 
+    if (isDashboardMode) {
+      return []; // Trống để hiển thị Dashboard chọn/tìm kiếm trước
+    }
+
     let pool = questions;
     if (filterType === 'errors') {
-      const progressEntries = user?.progress ? Object.entries(user.progress).filter(([k,v]) => v.answered && !v.isCorrect).map(([k,v]) => k) : [];
+      const progressEntries = user?.progress ? Object.entries(user.progress).filter(([k, v]) => v.answered && !v.isCorrect).map(([k, v]) => k) : [];
       pool = questions.filter(q => progressEntries.includes(getBaseId(q.id)));
     } else if (filterType === 'marked') {
       const savedIds = user?.savedQuestions || [];
       pool = questions.filter(q => savedIds.includes(getBaseId(q.id)));
     }
-    
-    // Nếu pool rỗng (vd: không có lỗi sai nào), fallback về toàn bộ câu hỏi (hoặc có thể hiển thị rỗng, nhưng code hiện tại luôn cần câu hỏi)
-    if (pool.length === 0) pool = questions;
 
-    // Chọn ngẫu nhiên tối đa 30 câu từ pool
+    if (pool.length === 0 && filterType !== 'errors' && filterType !== 'marked') {
+      pool = questions;
+    }
+
+    if (pool.length === 0) return [];
+
+
     const shuffledPool = [...pool].sort(() => 0.5 - Math.random());
     const selected = shuffledPool.slice(0, 30).map((q, i) => ({
       ...q,
-      id: `${q.id}_rnd_${i}` // ID duy nhất để phân biệt tiến trình
+      id: `${q.id}_rnd_${i}`
     }));
 
     return selected;
@@ -165,20 +178,21 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
 
   // Save session whenever it changes
   useEffect(() => {
-    if (sessionKey) {
+    if (sessionKey && activeQuestions.length > 0) {
       sessionStorage.setItem(sessionKey, JSON.stringify({
-        questions: filteredQuestions,
+        questions: activeQuestions,
         currentIndex: currentIndex,
         results: sessionResults
       }));
     }
-  }, [currentIndex, filteredQuestions, sessionResults, sessionKey]);
+  }, [currentIndex, activeQuestions, sessionResults, sessionKey]);
 
-  const currentQuestion = filteredQuestions[currentIndex] || filteredQuestions[0];
+  const currentQuestion = activeQuestions[currentIndex] || activeQuestions[0] || {};
 
   useEffect(() => {
-    const currentQ = filteredQuestions[currentIndex] || filteredQuestions[0];
-    
+    const currentQ = activeQuestions[currentIndex] || activeQuestions[0];
+    if (!currentQ) return;
+
     if (mode === 'lesen') {
       setSelectedOptions(currentQ.options.filter(o => o.isCorrect).map(o => o.id));
       setIsSubmitted(true);
@@ -192,7 +206,7 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
       const currentAns = examAnswers[currentQ?.id] || [];
       setSelectedOptions(currentAns);
       setIsSubmitted(mode === 'review');
-      
+
       if (mode === 'review') {
         const correctAnswers = currentQ?.options.filter(o => o.isCorrect).map(o => o.id) || [];
         const isCorrectMatch = currentAns.length === correctAnswers.length && currentAns.every(val => correctAnswers.includes(val));
@@ -200,10 +214,10 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
       } else {
         setIsCorrect(false);
       }
-      
+
       setShowQuestion(mode === 'review' || !currentQ?.video);
       setIsAiOpen(false);
-      
+
       if (currentQ?.video && mode !== 'review') {
         setVideoPlayCount(0);
         setHasPlayedOnce(false);
@@ -223,7 +237,7 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
     } else {
       setShowQuestion(true);
     }
-  }, [currentIndex, filteredQuestions, mode]);
+  }, [currentIndex, activeQuestions, mode]);
 
   useEffect(() => {
     if (chatEndRef.current) {
@@ -241,7 +255,7 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
       return;
     }
 
-    if (isSubmitted && mode !== 'ueben') return; 
+    if (isSubmitted && mode !== 'ueben') return;
     // In ueben mode, if they submitted, they shouldn't change it. Wait, standard Lernen doesn't let you change after submit anyway.
     if (isSubmitted) return;
     setSelectedOptions(prev => {
@@ -284,7 +298,7 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
   };
 
   const handleNext = () => {
-    if (currentIndex < filteredQuestions.length - 1) {
+    if (currentIndex < activeQuestions.length - 1) {
       setCurrentIndex(currentIndex + 1);
     } else {
       // Finished all questions
@@ -294,13 +308,13 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
       } else {
         customAlert('Chúc mừng! Bạn đã hoàn thành toàn bộ 30 câu hỏi trong bài tập này.', 'success');
       }
-      
+
       // If we are in predefined mode from Pruefung, maybe just go back to exam selection?
       if (predefinedQuestions) {
         // onNavigate will be handled by the parent
         if (onNavigate) onNavigate('/pruefung');
       } else {
-        onNavigate('/training');
+        if (onNavigate) onNavigate(-1);
       }
     }
   };
@@ -427,8 +441,552 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
     qWrongOptions: languageMode === 'de' ? 'Falsche Optionen analysieren' : (languageMode === 'vi' ? 'Phân tích đáp án sai' : 'Phân tích đáp án sai / Falsche Optionen')
   };
 
+  const handleSearch = () => {
+    if (!searchQuery.trim()) {
+      setSearchResults([]);
+      setHasSearched(false);
+      return;
+    }
+    const q = searchQuery.toLowerCase().trim();
+    const isMediaSearch = q === 'video' || q === 'ảnh' || q === 'bild' || q === 'ảnh/video' || q === 'bild/video';
+
+    const matches = questions.filter(item => {
+      if (isMediaSearch) {
+        if (q === 'video') return !!item.video;
+        if (q === 'ảnh' || q === 'bild') return !!item.image || !!item.imageType;
+        return !!item.video || !!item.image || !!item.imageType;
+      }
+      const matchDe = item.textDe && item.textDe.toLowerCase().includes(q);
+      const matchVi = item.textVi && item.textVi.toLowerCase().includes(q);
+      const matchId = item.id && String(item.id).toLowerCase().includes(q);
+      return matchDe || matchVi || matchId;
+    });
+    setSearchResults(matches);
+    setHasSearched(true);
+  };
+
+  const handleKeywordClick = (keyword) => {
+    setSearchQuery(keyword);
+    const q = keyword.toLowerCase().trim();
+    const isMediaSearch = q === 'video' || q === 'ảnh' || q === 'bild' || q === 'ảnh/video' || q === 'bild/video';
+
+    const matches = questions.filter(item => {
+      if (isMediaSearch) {
+        if (q === 'video') return !!item.video;
+        if (q === 'ảnh' || q === 'bild') return !!item.image || !!item.imageType;
+        return !!item.video || !!item.image || !!item.imageType;
+      }
+      const matchDe = item.textDe && item.textDe.toLowerCase().includes(q);
+      const matchVi = item.textVi && item.textVi.toLowerCase().includes(q);
+      const matchId = item.id && String(item.id).toLowerCase().includes(q);
+      return matchDe || matchVi || matchId;
+    });
+    setSearchResults(matches);
+    setHasSearched(true);
+  };
+
+  const renderCategorySelection = () => {
+    const rawCategories = Array.from(new Set(questions.map(q => q.category))).filter(Boolean);
+    const displayGroups = [];
+    let processedKeys = new Set();
+
+    categoryGroups.forEach(group => {
+      const pool = questions.filter(q => group.keys.includes(q.category));
+      if (pool.length > 0) {
+        displayGroups.push({ ...group, pool });
+      }
+      group.keys.forEach(k => processedKeys.add(k));
+    });
+
+    rawCategories.forEach(cat => {
+      if (!processedKeys.has(cat)) {
+        const pool = questions.filter(q => q.category === cat);
+        displayGroups.push({ id: cat, de: cat, vi: cat, pool, keys: [cat] });
+      }
+    });
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <p style={{ fontSize: 'calc(14px * var(--text-scale, 1))', color: '#5a6a7a', fontWeight: '600', marginBottom: '8px' }}>
+          {languageMode === 'de' ? 'Wählen Sie ein Thema aus, um mit dem Lernen zu beginnen:' : 'Chọn một chủ đề dưới đây để bắt đầu ôn tập:'}
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+          {displayGroups.map((group, idx) => {
+            return (
+              <button
+                key={idx}
+                onClick={() => {
+                  const shuffled = [...group.pool].sort(() => 0.5 - Math.random());
+                  const selected = shuffled.slice(0, 30).map((q, i) => ({
+                    ...q,
+                    id: `${q.id}_cat_${i}`
+                  }));
+                  setActiveQuestions(selected);
+                  setCurrentIndex(0);
+                  setSessionResults({});
+                }}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  padding: '16px 20px',
+                  backgroundColor: '#ffffff',
+                  border: '1.5px solid #d4dbe3',
+                  borderRadius: '16px',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                  cursor: 'pointer',
+                  textAlign: 'left',
+                  transition: 'all 0.2s ease',
+                  fontFamily: 'inherit'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.borderColor = '#1a4a5e';
+                  e.currentTarget.style.transform = 'translateY(-1px)';
+                  e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.borderColor = '#d4dbe3';
+                  e.currentTarget.style.transform = 'translateY(0)';
+                  e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
+                }}
+              >
+                <div>
+                  <div style={{ fontWeight: '800', color: '#111827', fontSize: 'calc(15px * var(--text-scale, 1))', fontFamily: 'inherit' }}>
+                    {languageMode === 'de' ? group.de : `${group.vi} / ${group.de}`}
+                  </div>
+                  <div style={{ fontSize: 'calc(12px * var(--text-scale, 1))', color: '#8899a8', fontWeight: '700', marginTop: '4px', fontFamily: 'inherit' }}>
+                    {languageMode === 'de' ? 'ca. ' : (languageMode === 'vi' ? 'Khoảng ' : 'Khoảng / ca. ')}{group.pool.length} {languageMode === 'de' ? 'Fragen' : 'câu hỏi'}
+                  </div>
+                </div>
+                <ChevronRight size={18} style={{ color: '#8899a8' }} />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  };
+
+  const renderFocusSelection = () => {
+    const focusItems = [
+      {
+        titleVi: 'Câu hỏi Video',
+        titleDe: 'Video-Fragen',
+        descVi: 'Các câu hỏi mô phỏng tình huống giao thông qua video',
+        descDe: 'Fragen mit Video-Situationen',
+        pool: questions.filter(q => q.video),
+        iconBg: '#eff6ff',
+        iconColor: '#3b82f6',
+        borderColor: '#dbeafe'
+      },
+      {
+        titleVi: 'Câu hỏi Sa hình & Hình ảnh',
+        titleDe: 'Bild- & SVG-Fragen',
+        descVi: 'Câu hỏi đi kèm hình ảnh sa hình hoặc đồ họa giao lộ',
+        descDe: 'Fragen mit Bildern oder Grafiken',
+        pool: questions.filter(q => q.image || q.imageType),
+        iconBg: '#ecfdf5',
+        iconColor: '#10b981',
+        borderColor: '#d1fae5'
+      },
+      {
+        titleVi: 'Câu hỏi Điểm cao (5 Điểm)',
+        titleDe: '5-Punkte-Fragen',
+        descVi: 'Câu hỏi điểm tối đa, làm sai quá 2 câu này sẽ trượt trực tiếp',
+        descDe: 'Sehr wichtige Fragen, Fehlertoleranz max. 2',
+        pool: questions.filter(q => q.points === 5),
+        iconBg: '#fff1f2',
+        iconColor: '#f43f5e',
+        borderColor: '#ffe4e6'
+      },
+      {
+        titleVi: 'Câu hỏi Công thức & Tính toán',
+        titleDe: 'Formelfragen (Zahlen)',
+        descVi: 'Các câu hỏi điền số liên quan đến công thức tính quãng đường phanh, khoảng cách an toàn',
+        descDe: 'Fragen mit numerischer Eingabe (Formeln)',
+        pool: questions.filter(q => q.type === 'input' || (typeof q.correctAnswer === 'number' || typeof q.correctAnswer === 'string' && /^\d+$/.test(q.correctAnswer))),
+        iconBg: '#fffbeb',
+        iconColor: '#d97706',
+        borderColor: '#fef3c7'
+      }
+    ];
+
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <p style={{ fontSize: 'calc(14px * var(--text-scale, 1))', color: '#5a6a7a', fontWeight: '600', marginBottom: '8px' }}>
+          {languageMode === 'de' ? 'Wählen Sie einen Schwerpunkt zum gezielten Üben:' : 'Chọn một nhóm câu hỏi trọng tâm để ôn luyện mục tiêu:'}
+        </p>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+          {focusItems.map((item, idx) => (
+            <button
+              key={idx}
+              onClick={() => {
+                const shuffled = [...item.pool].sort(() => 0.5 - Math.random());
+                const selected = shuffled.slice(0, 30).map((q, i) => ({
+                  ...q,
+                  id: `${q.id}_focus_${i}`
+                }));
+                setActiveQuestions(selected);
+                setCurrentIndex(0);
+                setSessionResults({});
+              }}
+              style={{
+                display: 'flex',
+                alignItems: 'start',
+                gap: '16px',
+                padding: '16px 20px',
+                backgroundColor: '#ffffff',
+                border: '1.5px solid #d4dbe3',
+                borderRadius: '16px',
+                boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
+                cursor: 'pointer',
+                textAlign: 'left',
+                transition: 'all 0.2s ease',
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#1a4a5e';
+                e.currentTarget.style.transform = 'translateY(-1px)';
+                e.currentTarget.style.boxShadow = '0 4px 12px rgba(0,0,0,0.05)';
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#d4dbe3';
+                e.currentTarget.style.transform = 'translateY(0)';
+                e.currentTarget.style.boxShadow = '0 2px 4px rgba(0,0,0,0.02)';
+              }}
+            >
+              <div style={{
+                width: '44px',
+                height: '44px',
+                borderRadius: '50%',
+                backgroundColor: item.iconBg,
+                color: item.iconColor,
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                fontWeight: 'bold',
+                fontSize: 'calc(16px * var(--text-scale, 1))',
+                flexShrink: 0
+              }}>
+                {idx + 1}
+              </div>
+              <div style={{ flex: 1, minWidth: 0 }}>
+                <div style={{ fontWeight: '800', color: '#111827', fontSize: 'calc(15px * var(--text-scale, 1))' }}>
+                  {languageMode === 'de' ? item.titleDe : item.titleVi}
+                </div>
+                <div style={{ fontSize: 'calc(12px * var(--text-scale, 1))', color: '#5a6a7a', marginTop: '4px', lineHeight: '1.4' }}>
+                  {languageMode === 'de' ? item.descDe : item.descVi}
+                </div>
+                <div style={{ fontSize: 'calc(10px * var(--text-scale, 1))', color: '#8899a8', fontWeight: '800', marginTop: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                  {languageMode === 'de' ? 'ca. ' : (languageMode === 'vi' ? 'Khoảng ' : 'Khoảng / ca. ')}{item.pool.length} {languageMode === 'de' ? 'Fragen' : 'câu hỏi'}
+                </div>
+              </div>
+              <ChevronRight size={18} style={{ color: '#8899a8', alignSelf: 'center' }} />
+            </button>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderSearchConsole = () => {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '20px', fontFamily: 'inherit' }}>
+        <p style={{ fontSize: 'calc(14px * var(--text-scale, 1))', color: '#5a6a7a', fontWeight: '600' }}>
+          {languageMode === 'de' ? 'Geben Sie Stichworte (Deutsch/Vietnamesisch) oder Fragenummern ein:' : 'Nhập từ khóa (tiếng Đức/tiếng Việt) hoặc mã số câu hỏi để tìm kiếm:'}
+        </p>
+        <div style={{ display: 'flex', gap: '8px' }}>
+          <input
+            type="text"
+            placeholder={languageMode === 'de' ? 'z.B. Vorfahrt, Ampel, 1.1.01...' : 'Ví dụ: nhường đường, đèn tín hiệu, 1.1.01...'}
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            onKeyDown={(e) => { if (e.key === 'Enter') handleSearch(); }}
+            style={{
+              flex: 1,
+              padding: '12px 16px',
+              backgroundColor: '#ffffff',
+              border: '1.5px solid #d4dbe3',
+              borderRadius: '12px',
+              fontSize: 'calc(14px * var(--text-scale, 1))',
+              color: '#111827',
+              fontFamily: 'inherit',
+              outline: 'none',
+            }}
+          />
+          <button
+            onClick={handleSearch}
+            style={{
+              padding: '0 24px',
+              backgroundColor: '#1a4a5e',
+              color: '#ffffff',
+              fontWeight: 'bold',
+              border: 'none',
+              borderRadius: '12px',
+              fontSize: 'calc(14px * var(--text-scale, 1))',
+              fontFamily: 'inherit',
+              cursor: 'pointer',
+            }}
+          >
+            {languageMode === 'de' ? 'Suchen' : 'Tìm kiếm'}
+          </button>
+        </div>
+
+        {/* Suggestion keywords */}
+        <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px', marginTop: '-4px' }}>
+          <span style={{ fontSize: 'calc(12px * var(--text-scale, 1))', color: '#8899a8', alignSelf: 'center', fontWeight: 'bold' }}>
+            {languageMode === 'de' ? 'Vorschläge:' : 'Gợi ý:'}
+          </span>
+          {[
+            { de: 'Vorfahrt', vi: 'Nhường đường' },
+            { de: 'Überholen', vi: 'Vượt xe' },
+            { de: 'Parken', vi: 'Đỗ xe' },
+            { de: 'Ampel', vi: 'Đèn đỏ' },
+            { de: 'Formel', vi: 'Công thức' },
+            { de: 'Bild/Video', vi: 'Ảnh/Video' }
+          ].map((item, idx) => {
+            const displayLabel = languageMode === 'de' ? item.de : `${item.vi} / ${item.de}`;
+            return (
+              <button
+                key={idx}
+                onClick={() => handleKeywordClick(item.de)}
+                style={{
+                  padding: '6px 12px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #d4dbe3',
+                  borderRadius: '20px',
+                  fontSize: 'calc(12px * var(--text-scale, 1))',
+                  fontWeight: '600',
+                  color: '#1a4a5e',
+                  fontFamily: 'inherit',
+                  cursor: 'pointer',
+                  transition: 'all 0.15s ease'
+                }}
+                onMouseEnter={(e) => {
+                  e.currentTarget.style.backgroundColor = '#1a4a5e';
+                  e.currentTarget.style.color = '#ffffff';
+                  e.currentTarget.style.borderColor = '#1a4a5e';
+                }}
+                onMouseLeave={(e) => {
+                  e.currentTarget.style.backgroundColor = '#ffffff';
+                  e.currentTarget.style.color = '#1a4a5e';
+                  e.currentTarget.style.borderColor = '#d4dbe3';
+                }}
+              >
+                {displayLabel}
+              </button>
+            );
+          })}
+        </div>
+
+        {hasSearched && (
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            <div style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '700', color: '#111827' }}>
+              {languageMode === 'de'
+                ? `Gefunden: ${searchResults.length} Fragen`
+                : `Tìm thấy: ${searchResults.length} câu hỏi`}
+            </div>
+
+            {searchResults.length > 0 ? (
+              <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                <button
+                  onClick={() => {
+                    const selected = searchResults.slice(0, 50).map((q, i) => ({
+                      ...q,
+                      id: `${q.id}_search_${i}`
+                    }));
+                    setActiveQuestions(selected);
+                    setCurrentIndex(0);
+                    setSessionResults({});
+                  }}
+                  style={{
+                    width: '100%',
+                    padding: '16px',
+                    backgroundColor: '#00995e',
+                    color: '#ffffff',
+                    fontWeight: '800',
+                    border: 'none',
+                    borderRadius: '16px',
+                    cursor: 'pointer',
+                    textTransform: 'uppercase',
+                    letterSpacing: '0.05em',
+                    fontSize: 'calc(14px * var(--text-scale, 1))',
+                    fontFamily: 'inherit',
+                    boxShadow: '0 4px 12px rgba(0, 153, 94, 0.2)'
+                  }}
+                >
+                  {languageMode === 'de'
+                    ? `Lernen starten (max. 50 Fragen)`
+                    : `Bắt đầu ôn luyện (tối đa 50 câu)`}
+                </button>
+
+                <div style={{
+                  border: '1.5px solid #d4dbe3',
+                  borderRadius: '16px',
+                  backgroundColor: '#ffffff',
+                  maxHeight: '300px',
+                  overflowY: 'auto',
+                }}>
+                  {searchResults.slice(0, 10).map((item, idx) => (
+                    <button
+                      key={idx}
+                      onClick={() => {
+                        const selected = searchResults.slice(0, 50).map((q, i) => ({
+                          ...q,
+                          id: `${q.id}_search_${i}`
+                        }));
+                        setActiveQuestions(selected);
+                        setCurrentIndex(idx);
+                        setSessionResults({});
+                      }}
+                      style={{
+                        display: 'block',
+                        width: '100%',
+                        textAlign: 'left',
+                        padding: '12px 16px',
+                        border: 'none',
+                        borderBottom: idx === Math.min(10, searchResults.length) - 1 ? 'none' : '1px solid #f0f4f8',
+                        backgroundColor: '#ffffff',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.15s ease'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#f8fafc'}
+                      onMouseLeave={(e) => e.currentTarget.style.backgroundColor = '#ffffff'}
+                    >
+                      <div style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: '700', color: '#8899a8', marginBottom: '4px' }}>
+                        {item.id} - {getCategoryLabel(item.category, languageMode)}
+                      </div>
+                      <div style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '700', color: '#111827', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                        {item.textDe}
+                      </div>
+                      {item.textVi && (
+                        <div style={{ fontSize: 'calc(12px * var(--text-scale, 1))', color: '#5a6a7a', marginTop: '4px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                          {item.textVi}
+                        </div>
+                      )}
+                    </button>
+                  ))}
+                  {searchResults.length > 10 && (
+                    <div style={{ padding: '12px', textAlign: 'center', fontSize: 'calc(12px * var(--text-scale, 1))', color: '#8899a8', fontWeight: 'bold', backgroundColor: '#f9fafb', borderTop: '1px solid #f0f4f8' }}>
+                      {languageMode === 'de' ? `Und ${searchResults.length - 10} weitere Fragen...` : `Và ${searchResults.length - 10} câu hỏi khác...`}
+                    </div>
+                  )}
+                </div>
+              </div>
+            ) : (
+              <div style={{
+                textAlign: 'center',
+                padding: '40px 20px',
+                backgroundColor: '#f9fafb',
+                borderRadius: '16px',
+                border: '1.5px dashed #d4dbe3'
+              }}>
+                <span style={{ fontSize: '32px' }}>🔍</span>
+                <p style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#8899a8', marginTop: '8px', fontWeight: 'bold' }}>
+                  {languageMode === 'de' ? 'Keine passenden Fragen gefunden.' : 'Không tìm thấy câu hỏi nào trùng khớp.'}
+                </p>
+              </div>
+            )}
+          </div>
+        )}
+      </div>
+    );
+  };
+
+  if (activeQuestions.length === 0) {
+    return (
+      <div style={{
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        flex: 1,
+        width: '100%',
+        backgroundColor: '#dfeecf', // Match the rest of the learning page background
+        padding: '16px',
+        minHeight: 'calc(100vh - 76px)',
+        fontFamily: 'system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif'
+      }}>
+        <div style={{
+          display: 'flex',
+          flexDirection: 'column',
+          width: '100%',
+          maxWidth: '600px',
+          height: '80vh',
+          backgroundColor: '#f8f9fa',
+          borderRadius: '24px',
+          boxShadow: '0 10px 30px rgba(0,0,0,0.06)',
+          border: '1.5px solid #d4dbe3',
+          overflow: 'hidden',
+        }}>
+          {/* Header */}
+          <div style={{
+            position: 'sticky',
+            top: 0,
+            zIndex: 10,
+            backgroundColor: 'rgba(248, 249, 250, 0.95)',
+            backdropFilter: 'blur(8px)',
+            borderBottom: '1.5px solid #d4dbe3',
+            padding: '16px 20px',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '16px'
+          }}>
+            <button
+              onClick={() => onNavigate(-1)}
+              className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-all border border-gray-200 shrink-0"
+            >
+              <ChevronLeft size={24} strokeWidth={2} />
+            </button>
+            <h1 style={{ fontSize: 'calc(18px * var(--text-scale, 1))', fontWeight: '800', color: '#1a4a5e', margin: 0 }}>
+              {filterType === 'all' && (languageMode === 'de' ? 'Themenauswahl' : 'Chọn chủ đề ôn tập')}
+              {filterType === 'focus' && (languageMode === 'de' ? 'Schwerpunkte' : 'Luyện câu hỏi trọng tâm')}
+              {filterType === 'search' && (languageMode === 'de' ? 'Fragen suchen' : 'Tìm kiếm câu hỏi')}
+            </h1>
+          </div>
+
+          <div style={{
+            padding: '24px',
+            overflowY: 'auto',
+            flex: 1
+          }}>
+            {filterType === 'all' && renderCategorySelection()}
+            {filterType === 'focus' && renderFocusSelection()}
+            {filterType === 'search' && renderSearchConsole()}
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (isDashboardMode && filterType === 'search') {
+    return renderSearchConsole();
+  }
+
+  if (activeQuestions.length === 0) {
+    return (
+      <div className="flex flex-col h-full bg-[#f4f7f9] items-center justify-center p-6 text-center">
+        <div className="w-20 h-20 bg-gray-200 rounded-full flex items-center justify-center mb-4 shadow-sm">
+          {filterType === 'errors' ? <CheckCircle size={40} className="text-gray-400" /> : <Star size={40} className="text-gray-400" />}
+        </div>
+        <h2 className="text-xl font-bold text-gray-700 mb-2">
+          {languageMode === 'vi' ? 'Không có câu hỏi nào' : 'Keine Fragen vorhanden'}
+        </h2>
+        <p className="text-gray-500 mb-6 max-w-sm">
+          {languageMode === 'vi'
+            ? (filterType === 'errors' ? 'Bạn chưa có câu hỏi nào trả lời sai gần đây.' : 'Bạn chưa đánh dấu câu hỏi nào.')
+            : (filterType === 'errors' ? 'Sie haben in letzter Zeit keine Fragen falsch beantwortet.' : 'Sie haben keine Fragen markiert.')}
+        </p>
+        <button
+          onClick={() => onNavigate(-1)}
+          className="px-6 py-3 bg-[#2b576b] text-white rounded-xl font-bold hover:bg-[#1a3a4a] shadow-md transition-colors"
+        >
+          {languageMode === 'vi' ? 'Quay lại' : 'Zurück'}
+        </button>
+      </div>
+    );
+  }
+
   return (
-    <div className="flex flex-col w-full overflow-hidden relative" style={{ height: 'calc(100vh - 76px)', backgroundColor: theme.bg, fontFamily: 'Arial, Helvetica, sans-serif' }}>
+    <div className={`flex flex-col h-full overflow-hidden ${mode === 'exam' ? 'bg-[#E2F5E6]' : 'bg-[#E9EFF4]'} relative font-sans`} style={{ height: 'calc(100vh - 76px)', backgroundColor: theme.bg, fontFamily: 'Arial, Helvetica, sans-serif' }}>
 
       {/* Top Header */}
       <div className="flex items-center justify-between px-3 text-white z-10 flex-shrink-0" style={{ backgroundColor: theme.topBar, height: '48px' }}>
@@ -440,10 +998,10 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
         </div>
         <div className="flex items-center gap-4">
           {mode === 'exam' && (
-             <div className="flex items-center gap-2 font-mono font-bold px-2 py-1 rounded" style={{ backgroundColor: timeLeft < 300 ? '#e50000' : 'rgba(0,0,0,0.2)' }}>
-               <Timer size={16} />
-               <span>{formatTime(timeLeft)}</span>
-             </div>
+            <div className="flex items-center gap-2 font-mono font-bold px-2 py-1 rounded" style={{ backgroundColor: timeLeft < 300 ? '#e50000' : 'rgba(0,0,0,0.2)' }}>
+              <Timer size={16} />
+              <span>{formatTime(timeLeft)}</span>
+            </div>
           )}
           <span className="font-bold text-sm">{t.punkte}: {currentQuestion.points}</span>
           <button onClick={() => setShowConfirmModal('abbrechen')} className="hover:opacity-80">
@@ -674,13 +1232,13 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
           </div>
 
           {/* Action Buttons (Right aligned above bottom bar) */}
-          <div className="flex flex-wrap justify-end gap-2 md:gap-3 mb-3 pr-2 mt-auto">
+          <div className="flex flex-wrap items-stretch justify-end gap-2 md:gap-3 mb-3 pr-2 mt-auto">
             {!isSubmitted && mode !== 'review' ? (
               mode === 'exam' ? (
                 <button
                   onClick={() => setShowConfirmModal('abgeben')}
                   className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: theme.btnRed, height: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '0 20px' }}
+                  style={{ backgroundColor: theme.btnRed, minHeight: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '8px 20px', textAlign: 'center' }}
                 >
                   {languageMode === 'de' ? 'Abgeben' : (languageMode === 'vi' ? 'Đánh giá' : 'Đánh giá / Abgeben')}
                 </button>
@@ -688,7 +1246,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 <button
                   onClick={() => setShowConfirmModal('abbrechen')}
                   className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: theme.btnRed, height: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '0 20px' }}
+                  style={{ backgroundColor: theme.btnRed, minHeight: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '8px 20px', textAlign: 'center' }}
                 >
                   {t.abbrechen}
                 </button>
@@ -697,7 +1255,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
               <button
                 onClick={mode === 'review' ? () => onNavigate('/pruefung') : handleOpenAi}
                 className="font-bold text-white shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                style={{ background: mode === 'review' ? theme.btnRed : 'linear-gradient(to right, #6366f1, #a855f7)', height: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '0 20px' }}
+                style={{ background: mode === 'review' ? theme.btnRed : 'linear-gradient(to right, #6366f1, #a855f7)', minHeight: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '8px 20px', textAlign: 'center' }}
               >
                 {mode === 'review' ? t.abbrechen : t.aiExplanation}
               </button>
@@ -706,38 +1264,18 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
             <button
               onClick={handleBookmarkToggle}
               className="flex items-center justify-center hover:opacity-90"
-              style={{ backgroundColor: theme.btnYellow, width: '44px', height: '44px', borderRadius: '8px', flexShrink: 0 }}
+              style={{ backgroundColor: theme.btnYellow, width: '44px', minHeight: '44px', borderRadius: '8px', flexShrink: 0 }}
             >
               <Star size={20} fill={isBookmarked ? "black" : "transparent"} color="black" strokeWidth={isBookmarked ? 1 : 2} />
             </button>
 
             {!isSubmitted && mode !== 'review' ? (
               mode === 'exam' ? (
-                <div style={{ display: 'flex', gap: '8px' }}>
-                  <button
-                    onClick={() => {
-                      const perfectAnswers = {};
-                      filteredQuestions.forEach(q => {
-                        if (q.type === 'multiple-choice' || !q.type) {
-                          perfectAnswers[q.id] = [];
-                          q.options?.forEach(opt => {
-                            if (opt.isCorrect) perfectAnswers[q.id].push(opt.id);
-                          });
-                        } else if (q.type === 'input') {
-                          perfectAnswers[q.id] = q.correctAnswer || (q.correctAnswers && q.correctAnswers[0]);
-                        }
-                      });
-                      if (onExamSubmit) onExamSubmit(perfectAnswers);
-                    }}
-                    className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#3b82f6', height: '44px', borderRadius: '12px', fontSize: 'calc(13px * var(--text-scale, 1))', padding: '0 16px' }}
-                  >
-                    Auto Pass
-                  </button>
+                <div className="flex items-stretch gap-2 md:gap-3">
                   <button
                     onClick={handleNext}
-                    className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#2b576b', height: '44px', borderRadius: '12px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '0 20px' }}
+                    className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity w-full"
+                    style={{ backgroundColor: '#2b576b', minHeight: '44px', borderRadius: '12px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '8px 20px', textAlign: 'center' }}
                   >
                     {t.nextQuestion}
                   </button>
@@ -746,7 +1284,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 <button
                   onClick={handleSubmit}
                   className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: theme.btnGreen, height: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '0 20px' }}
+                  style={{ backgroundColor: theme.btnGreen, minHeight: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '8px 20px', textAlign: 'center' }}
                 >
                   {t.aufloesung}
                 </button>
@@ -755,7 +1293,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
               <button
                 onClick={handleNext}
                 className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#2b576b', height: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '0 20px' }}
+                style={{ backgroundColor: '#2b576b', minHeight: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '8px 20px', textAlign: 'center' }}
               >
                 {t.nextQuestion}
               </button>
@@ -770,7 +1308,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
         {/* MOBILE: Horizontal scrollable single row */}
         <div className="mobile-only" style={{ backgroundColor: theme.topBar, padding: '8px 10px 10px' }}>
           <div style={{ fontSize: 'calc(12px * var(--text-scale, 1))', fontWeight: 'bold', color: 'rgba(255,255,255,0.8)', marginBottom: '6px' }}>
-            {t.fragen}: {currentIndex + 1} / {filteredQuestions.length}
+            {t.fragen}: {currentIndex + 1} / {activeQuestions.length}
           </div>
           <div
             ref={mobileNavRef}
@@ -785,7 +1323,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
               paddingBottom: '2px',
             }}
           >
-            {filteredQuestions.map((q, idx) => {
+            {activeQuestions.map((q, idx) => {
               const baseId = getBaseId(q.id);
               const isBookmarked = baseId && user.savedQuestions.includes(baseId);
               const hasVideo = !!q.video;
@@ -837,7 +1375,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
         {/* DESKTOP: Arrow navbar with sliding window */}
         <div className="desktop-only" style={{ flexDirection: 'column', width: '100%' }}>
           <div style={{ alignSelf: 'flex-start', padding: '6px 24px', fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: 'bold', color: 'white', backgroundColor: theme.topBar, borderTopLeftRadius: '4px', borderTopRightRadius: '4px', marginLeft: '12px' }}>
-            {filteredQuestions.length} {t.fragen}
+            {activeQuestions.length} {t.fragen}
           </div>
           <div style={{ backgroundColor: theme.topBar, padding: '10px 12px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
             {/* Left Controls */}
@@ -855,11 +1393,11 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
 
             {/* Numbers */}
             <div style={{ display: 'flex', flexDirection: 'row', alignItems: 'center', gap: '6px', flex: 1, justifyContent: 'center', padding: '0 16px', overflow: 'hidden' }}>
-              {Array.from({ length: Math.min(10, filteredQuestions.length) }).map((_, i) => {
+              {Array.from({ length: Math.min(10, activeQuestions.length) }).map((_, i) => {
                 let pageNum = i + 1;
                 if (currentIndex > 5) pageNum = currentIndex - 4 + i;
-                if (pageNum > filteredQuestions.length) return null;
-                const questionAtPage = filteredQuestions[pageNum - 1];
+                if (pageNum > activeQuestions.length) return null;
+                const questionAtPage = activeQuestions[pageNum - 1];
                 const pageBaseId = questionAtPage ? getBaseId(questionAtPage.id) : null;
                 const isPageBookmarked = pageBaseId && user.savedQuestions.includes(pageBaseId);
                 const hasVideo = questionAtPage ? !!questionAtPage.video : false;
@@ -867,13 +1405,13 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 const isPageCorrect = mode === 'review' ? (questionAtPage.options.filter(o => o.isCorrect).every(o => (examAnswers[questionAtPage.id] || []).includes(o.id)) && (examAnswers[questionAtPage.id] || []).every(id => questionAtPage.options.find(o => o.id === id)?.isCorrect)) : sessionResults[pageNum - 1];
                 let bgColor = '#ffffff';
                 let textColor = 'black';
-                if (hasResult) { 
+                if (hasResult) {
                   if (mode === 'exam') {
-                    bgColor = '#2b576b'; 
-                    textColor = 'white'; 
+                    bgColor = '#2b576b';
+                    textColor = 'white';
                   } else {
-                    bgColor = isPageCorrect ? '#00995e' : '#e50000'; 
-                    textColor = 'white'; 
+                    bgColor = isPageCorrect ? '#00995e' : '#e50000';
+                    textColor = 'white';
                   }
                 }
                 return (
@@ -892,10 +1430,10 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
               <button onClick={handleNext} className="bg-white flex items-center justify-center hover:bg-gray-100" style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}>
                 <svg width="12" height="14" viewBox="0 0 10 12"><path d="M0 1 L9 6 L0 11 Z" fill="black" /></svg>
               </button>
-              <button onClick={() => setCurrentIndex(Math.min(filteredQuestions.length - 1, currentIndex + 10))} className="bg-white flex items-center justify-center hover:bg-gray-100" style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}>
+              <button onClick={() => setCurrentIndex(Math.min(activeQuestions.length - 1, currentIndex + 10))} className="bg-white flex items-center justify-center hover:bg-gray-100" style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}>
                 <svg width="18" height="14" viewBox="0 0 16 12"><path d="M0 1 L8 6 L0 11 Z M8 1 L16 6 L8 11 Z" fill="black" /></svg>
               </button>
-              <button onClick={() => setCurrentIndex(filteredQuestions.length - 1)} className="bg-white flex items-center justify-center hover:bg-gray-100" style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}>
+              <button onClick={() => setCurrentIndex(activeQuestions.length - 1)} className="bg-white flex items-center justify-center hover:bg-gray-100" style={{ border: '1px solid black', width: '54px', height: '38px', flexShrink: 0 }}>
                 <svg width="14" height="14" viewBox="0 0 12 12"><path d="M0 1 L8 6 L0 11 Z" fill="black" /><rect x="10" y="1" width="2" height="10" fill="black" /></svg>
               </button>
             </div>
@@ -912,19 +1450,19 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
             <h3 style={{ fontSize: 'calc(17px * var(--text-scale, 1))', fontWeight: '700', color: '#111827', marginBottom: '8px' }}>
               {showConfirmModal === 'abgeben'
                 ? (languageMode === 'de' ? 'Prüfung abgeben?' : (languageMode === 'vi' ? 'Nộp bài thi?' : 'Nộp bài thi? / Prüfung abgeben?'))
-                : (mode === 'exam' 
-                    ? (languageMode === 'de' ? 'Prüfung abbrechen?' : (languageMode === 'vi' ? 'Hủy bài thi?' : 'Hủy bài thi? / Prüfung abbrechen?'))
-                    : (languageMode === 'de' ? 'Übung beenden?' : (languageMode === 'vi' ? 'Thoát khỏi bài tập?' : 'Thoát bài tập? / Übung beenden?'))
-                  )
+                : (mode === 'exam'
+                  ? (languageMode === 'de' ? 'Prüfung abbrechen?' : (languageMode === 'vi' ? 'Hủy bài thi?' : 'Hủy bài thi? / Prüfung abbrechen?'))
+                  : (languageMode === 'de' ? 'Übung beenden?' : (languageMode === 'vi' ? 'Thoát khỏi bài tập?' : 'Thoát bài tập? / Übung beenden?'))
+                )
               }
             </h3>
             <p style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#6b7280', lineHeight: '1.5', marginBottom: '24px' }}>
               {showConfirmModal === 'abgeben'
                 ? (languageMode === 'de' ? 'Möchten Sie die Prüfung wirklich abgeben? Danach können Sie keine Antworten mehr ändern.' : (languageMode === 'vi' ? 'Bạn có chắc chắn muốn nộp bài thi ngay bây giờ không? Bạn sẽ không thể thay đổi đáp án sau khi nộp.' : 'Bạn có chắc chắn muốn nộp bài? / Möchten Sie die Prüfung wirklich abgeben?'))
                 : (mode === 'exam'
-                    ? (languageMode === 'de' ? 'Möchten Sie die Prüfung wirklich abbrechen? Ihr Fortschritt geht verloren.' : (languageMode === 'vi' ? 'Bạn có chắc chắn muốn hủy bài thi không? Tiến trình của bạn sẽ bị mất.' : 'Bạn có chắc want hủy bài? / Möchten Sie wirklich abbrechen?'))
-                    : (languageMode === 'de' ? 'Möchtest du diese Ansicht wirklich verlassen?' : (languageMode === 'vi' ? 'Bạn có chắc chắn muốn thoát chế độ này không?' : 'Bạn có chắc chắn muốn thoát? / Wirklich verlassen?'))
-                  )
+                  ? (languageMode === 'de' ? 'Möchten Sie die Prüfung wirklich abbrechen? Ihr Fortschritt geht verloren.' : (languageMode === 'vi' ? 'Bạn có chắc chắn muốn hủy bài thi không? Tiến trình của bạn sẽ bị mất.' : 'Bạn có chắc muốn hủy bài? / Möchten Sie wirklich abbrechen?'))
+                  : (languageMode === 'de' ? 'Möchtest du diese Ansicht wirklich verlassen?' : (languageMode === 'vi' ? 'Bạn có chắc chắn muốn thoát chế độ này không?' : 'Bạn có chắc chắn muốn thoát? / Wirklich verlassen?'))
+                )
               }
             </p>
             <div style={{ display: 'flex', gap: '10px' }}>
@@ -945,7 +1483,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                     if (predefinedQuestions) {
                       if (onNavigate) onNavigate('/pruefung');
                     } else {
-                      onNavigate('/training');
+                      if (onNavigate) onNavigate(-1);
                     }
                   }
                   setShowConfirmModal(false);
@@ -957,9 +1495,9 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 {showConfirmModal === 'abgeben'
                   ? (languageMode === 'de' ? 'Ja, abgeben' : (languageMode === 'vi' ? 'Có, nộp bài' : 'Có, nộp / Ja, abgeben'))
                   : (mode === 'exam'
-                      ? (languageMode === 'de' ? 'Ja, abbrechen' : (languageMode === 'vi' ? 'Có, hủy' : 'Có, hủy / Ja, abbrechen'))
-                      : (languageMode === 'de' ? 'Beenden' : (languageMode === 'vi' ? 'Thoát' : 'Thoát / Beenden'))
-                    )
+                    ? (languageMode === 'de' ? 'Ja, abbrechen' : (languageMode === 'vi' ? 'Có, hủy' : 'Có, hủy / Ja, abbrechen'))
+                    : (languageMode === 'de' ? 'Beenden' : (languageMode === 'vi' ? 'Thoát' : 'Thoát / Beenden'))
+                  )
                 }
               </button>
             </div>

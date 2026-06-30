@@ -27102,32 +27102,6 @@
     "explanationDe": "Wenn Sie in dieser Situation nach links abbiegen, fahren Sie zur Mitte der Straße (das ist die linke Seite Ihrer Fahrbahn)."
   },
   {
-    "id": "2.2.02-002",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Dürfen Sie mit Ihrem Mofa einen Gehweg benutzen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ja, wenn das Mofa vorsichtig geschoben wird",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Ja, wenn das Mofa wie ein Fahrrad benutzt wird",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "Ja, auch mit Motor, wenn auf der Fahrbahn zu dichter Verkehr herrscht",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Ja, aber nur, wenn man es schiebt, es kann nicht auf dem Bürgersteig gefahren werden."
-  },
-  {
     "id": "2.2.02-003",
     "category": "Verhalten Im Strassenverkehr",
     "points": 3,
@@ -27253,32 +27227,6 @@
     "explanationDe": "Ein Motorrad sollte sich ähnlich wie ein Auto verhalten und hinter dem blauen Auto warten."
   },
   {
-    "id": "2.2.02-010",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Radwege dürfen Sie mit Ihrem Mofa befahren?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Radwege außerorts",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Radwege innerorts, wenn ein Zusatzzeichen dies erlaubt",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Radwege innerorts, wenn auf der Straße zu viel Verkehr ist",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Mit deinem Mofa darfst du Radwege außerorts befahren und Radwege innerorts, wenn ein Zusatzzeichen dies erlaubt."
-  },
-  {
     "id": "2.2.02-101-M",
     "category": "Verhalten Im Strassenverkehr",
     "points": 3,
@@ -27329,16 +27277,6 @@
       }
     ],
     "explanationDe": "Auf großen Wasserflächen sollten Sie langsam fahren, da die Gefahr von Aquaplaning besteht."
-  },
-  {
-    "id": "2.2.03-002",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wie schnell darf ein Mofa (kein Leichtmofa) höchstens fahren?",
-    "options": [],
-    "explanationDe": "Die Höchstgeschwindigkeit eines motorisierten Fahrrads beträgt 25 km/h und 20 km/h für ein leichtes motorisiertes Fahrrad"
   },
   {
     "id": "2.2.03-005",
@@ -29738,32 +29676,6 @@
     "explanationDe": "Als KFZ-Fahrer solltest du darauf achten, dass Kinder direkt auf der Gehwegseite ein- und aussteigen. Sollte die Situation das nicht zulassen, sollten sie nur unter Beaufsichtigung und unter vorherigen Warnung vor möglichen Gefahren auf der Fahrbahnseite ein- oder aussteigen. Kinder werden schlechter gesehen und sind in ihrem Verhalten unberechenbar, daher sollte man darauf achten, dass sie die Straße nicht mehr überqueren müssen."
   },
   {
-    "id": "2.2.15-002",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie sind außerorts wegen eines Defekts mit Ihrem Kraftrad liegen geblieben. Wie sollte der Transport in die Werkstatt erfolgen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Auf einem geeigneten Anhänger",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "In einem geeigneten Kleintransporter",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Mit einem geeigneten Abschleppseil",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Der Betrieb eines Fahrzeugs, das nicht mehr verkehrssicher ist, stellt eine erhebliche und vor allem unkalkulierbare Gefahr für Sie und für andere Verkehrsteilnehmer dar. Daher musst du dein Fahrzeug auf kürzestem Weg aus dem Verkehr ziehen. Du kannst dein Kraftrad auf einem geeigneten Anhänger oder Kleintransporter abtransportieren lassen. \nLaut § 15a (4) StVO dürfen Krafträder nicht mit einem Abschleppseil abgeschleppt werden."
-  },
-  {
     "id": "2.2.15-103",
     "category": "Verhalten Im Strassenverkehr",
     "points": 3,
@@ -31360,32 +31272,6 @@
     "explanationDe": "Wenn ein Fahrgast hinter Ihnen sitzt, erhöht sich Ihr Gewicht, was das Anfahren und die Geschwindigkeitserhöhung erschwert, und auch der Bremsweg zum Anhalten verlängert sich. Da dadurch mehr Seitenfläche entsteht, erhöht sich Ihre Empfindlichkeit gegenüber Seitenwind."
   },
   {
-    "id": "2.2.21-002",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie wollen auf Ihrem Motorrad eine Person mitnehmen. Worauf sollten Sie vor Beginn der Fahrt achten?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Auf die Benutzung des vorgeschriebenen Helms durch den Mitfahrer",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Auf Absprachen über das Verhalten während der Fahrt",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Unerfahrene Mitfahrer erst vorsichtig und behutsam an das Fahren auf dem Motorrad heranführen",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Wenn Sie einen unerfahrenen Passagier mitnehmen, achten Sie darauf, dass er einen Helm trägt, mit ihm über sein Verhalten während der Fahrt Einigkeit besteht und er sich allmählich an die neue Umgebung gewöhnt."
-  },
-  {
     "id": "2.2.21-003",
     "category": "Verhalten Im Strassenverkehr",
     "points": 3,
@@ -31438,32 +31324,6 @@
     "explanationDe": "Achten Sie darauf, dass Ihr Mitfahrer einen Helm trägt, halten Sie seine Füße auf den Fußstützen (sonst erhöht sich das Unfall- und Verletzungsrisiko). Ihr Beifahrer muss sich beim Wenden nicht zur Außenseite der Kurve lehnen, um Gegenzuwirken."
   },
   {
-    "id": "2.2.21-006",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 4,
-    "image": null,
-    "video": null,
-    "textDe": "Sie wollen auf einem Mofa ein fünfjähriges Kind mitnehmen. Welche Sitzgelegenheiten sind dafür zulässig?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Besonderer Kindersitz mit Fußstützen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Gepäckträger mit Kissen",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "Tank mit aufgeschnalltem Polster",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Um ein Kind als Passagier zu befördern, benötigen Sie einen speziellen Kindersitz mit Fußstützen."
-  },
-  {
     "id": "2.2.21-007",
     "category": "Verhalten Im Strassenverkehr",
     "points": 4,
@@ -31488,188 +31348,6 @@
       }
     ],
     "explanationDe": "Bei einem Aufprall können Personen auf den hinteren Sitzen nach vorne oder zur Seite geschleudert werden. Wenn sie nach vorne geschleudert werden, bieten die vorderen Rückenlehnen keinen ausreichenden Schutz. In der Folge sind auch Fahrer/In und Beifahrer/In gefährdet. Auch bei niedrigen Geschwindigkeiten kann es zu Verletzungen kommen."
-  },
-  {
-    "id": "2.2.21-008",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Worauf sollten Sie achten, wenn Sie eine weitere Person auf dem Motorrad mitnehmen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Auch die weitere Person sollte Motorradschutzkleidung tragen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Das Fahrwerk sollte entsprechend eingestellt sein",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Der Reifenfülldruck sollte angepasst sein",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Wenn Sie die Belastung Ihres Motorrads erhöhen, achten Sie darauf, den Reifendruck zu erhöhen und das Fahrgestell/Fahrwerk anzupassen. Ihr Beifahrer sollte außerdem einen Helm und eine Schutzausrüstung tragen."
-  },
-  {
-    "id": "2.2.21-009",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Worauf müssen Sie achten, wenn Sie einen Sozius mitnehmen möchten?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Das Kraftrad muss für 2 Personen zugelassen sein",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Der Sozius muss zum Mitfahren geeignet sein",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Ein mitfahrendes Kind über 7 Jahre muss die vorhandenen Fußstützen und Festhaltemöglichkeiten nutzen können",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Der/die Sozius/-a muss körperlich und geistig in der Lage sein mitfahren zu können, zusätzlich muss das Motorrad dafür ausreichend ausgestattet sein."
-  },
-  {
-    "id": "2.2.21-010",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Auswirkung hat die Mitnahme eines Sozius auf das Fahrverhalten eines Kraftrads?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Das Kraftrad ist schwerer zu stabilisieren",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Das Verhalten beim Bremsen ändert sich",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Die Empfindlichkeit gegenüber Seitenwind nimmt ab",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Die Eigenbewegung des/r Sozius/-a destabilisiert das Motorrad. Das Fahren mit Sozius sollte geübt werden."
-  },
-  {
-    "id": "2.2.21-011",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie möchten auf Ihrem Motorrad einen Sozius und Gepäck mitnehmen. Was müssen Sie beachten?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Die zulässige Gesamtmasse darf nicht überschritten werden",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Gepäckstücke müssen sicher befestigt sein",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Beleuchtungseinrichtungen dürfen nicht verdeckt sein",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Du darfst das zulässige Gesamtgewicht für das Motorrad nicht überschreiten. Dieses setzt sich aus dem Leergewicht und der maximal erlaubten Zuladung zusammen. Um ein mögliches Herumfliegen von Gepäckstücken zu vermeiden, müssen diese sicher befestigt sein. Die Beleuchtungseinrichtungen müssen zu jeder Zeit sichtbar sein und dürfen nicht durch das aufgeladenen Gepäck verdeckt werden."
-  },
-  {
-    "id": "2.2.21-012",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie möchten auf Ihrem Zweirad einen Sozius mitnehmen. Worauf sollten Sie vor Beginn der Fahrt achten?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "der Sozius einen geeigneten Schutzhelm trägt",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "der Sozius zu seinem Verhalten während der Fahrt eingewiesen ist",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "vorhandene technische Einstellmöglichkeiten am Zweirad für den Soziusbetrieb genutzt werden",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Grundsätzlich müssen bei der Mitnahme eines Sozius Beifahrersitz, Fußrasten und eine Haltevorrichtung am Motorrad vorhanden sein. Sowohl Fahrer als auch Mitfahrer müssen während der Fahrt einen geeigneten Schutzhelm tragen. Um eine sichere Fahrt zu gewährleisten, musst du den Sozius vor der Fahrt über das richtige Verhalten aufklären."
-  },
-  {
-    "id": "2.2.21-013",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Womit müssen Sie rechnen, wenn Sie einen Sozius mitnehmen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Das Fahrverhalten in Kurven verändert sich",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Der Überholweg kann länger werden",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Der Bremsweg verkürzt sich",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Sei dir bewusst, dass durch das zusätzliche Gewicht des Sozius dein Motorrad träger wird und sich der Schwerpunkt nach hinten verlagert. Du wirst deshalb nicht mehr ganz so dynamisch um Kurven fahren können, wie ohne Sozius.\nAußerdem solltest du auch beachten das durch das zusätzliche Gewicht dein Überholweg merklich länger werden kann."
-  },
-  {
-    "id": "2.2.21-014",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Bedingung müssen Sie erfüllen, damit Sie ein fünfjähriges Kind auf Ihrem Mofa mitnehmen dürfen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "mindestens 16 Jahre alt sein",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "das Mofa mit einem speziellen Kindersitz ausrüsten",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "sicherstellen, dass die Füße des Kindes nicht in die Räder geraten können",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Es ist gesetzlich vorgeschrieben, dass du mindestens das 16. Lebensjahr vollendet haben musst, wenn du ein Kind unter 7 Jahren auf dem Mofa mitnehmen willst. \nDa das Kind unter 7 Jahre alt ist, musst du auf dem Mofa einen speziellen Kindersitz befestigen können. Die Körpergröße und Körperbeherrschung des Kindes reichen noch nicht aus, um sich sicher und eigenständig auf dem Mofa festzuhalten. Außerdem musst du sicherstellen, dass die Füße des Kindes nicht in die Räder geraten können. Hierfür gibt es spezielle Schutzvorrichtungen, wie z. B. Fußrasten."
   },
   {
     "id": "2.2.21-102",
@@ -32419,110 +32097,6 @@
       }
     ],
     "explanationDe": "Die Ladung des Lkw inklusive Anhänger darf höchstens 20.75 m lang sein."
-  },
-  {
-    "id": "2.2.22-007",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie führen an Ihrem Motorrad zusätzlich angebrachtes Gepäck mit. Worauf sollten Sie achten?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Auf mögliche Empfehlungen des Fahrzeugherstellers zur Höchstgeschwindigkeit",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Auf eine geänderte Schwerpunktlage des Motorrads",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Auf eine geänderte Seitenwindempfindlichkeit des Motorrads",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Durch das Gepäck hat dein Motorrad eine größere Angriffsfläche, somit ist die Seitenwindempfindlichkeit stärker. Durch das Zusatzgewicht verlagert sich auch der Schwerpunkt deines Motorrads. Du solltest also auf eine gleichmäßige Verteilung des Gepäcks achten und dein Fahrverhalten entsprechend anpassen.\nMöglicherweise gibt es Empfehlungen des Fahrzeugherstellers, wie du deine Geschwindigkeit an die Ladung anpassen sollst. Diese solltest du einhalten. Du findest sie in der Betriebsanleitung."
-  },
-  {
-    "id": "2.2.22-008",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Auswirkung hat eine falsche Beladung auf die Fahrstabilität eines Motorrads?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Eine schwere Beladung am Heck führt bei hoher Geschwindigkeit leichter zum Flattern und Pendeln",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Eine einseitige seitliche Beladung beeinflusst das Fahrverhalten negativ",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Leichtes Gepäck im Tankrucksack begünstigt das Schleudern",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Durch eine zu schwere Beladung am Heck des Motorrads, wirkt zu wenig Gewicht auf den vorderen Reifen und die Lenkung. Somit kann es leichter zu Flattern und Pendeln kommen. Unterschiedlich schwer beladene Seiten wirken sich negativ auf die Stabilität und das Fahrverhalten aus. Das Motorrad neigt sich beim Bremsen oder Kurven fahren stärker auf die schwerer beladene Seite.\nLeichtes Gepäck im Tankrucksack wirkt sich nicht auf die Fahrstabilität des Motorrads aus."
-  },
-  {
-    "id": "2.2.22-009",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Was kann bei voller Beladung eines Kraftrads erforderlich sein?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ein Anpassen des Reifenfülldrucks",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Ein Einstellen des Fahrwerks",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Ein Einstellen der Rückspiegel",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Ist das Kraftrad voll beladen, übt die Beladung mehr Druck auf die Reifen aus. Du solltest deshalb den Reifenfülldruck prüfen.\nDurch das Gewicht der Beladung könnte das Fahrwerk weiter nach unten gedrückt werden und muss deshalb neu eingestellt werden.\nSteht die Beladung über das Kraftrad hinaus, solltest du auch die Rückspiegel neu einstellen."
-  },
-  {
-    "id": "2.2.22-010",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Das Tragen eines Rucksacks während der Fahrt kann sich auf das Fahrverhalten Ihres Zweirads auswirken. Was kann die Folge sein?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Eine höhere Anfälligkeit für Seitenwind",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Eine Verlagerung des Schwerpunkts",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Eine Verbesserung des Lenkverhaltens",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Du bietest durch das Tragen eines Rucksacks eine größere Angriffsfläche für Seitenwind. Außerdem verlagert sich der Schwerpunkt durch das Tragen eines Rucksacks nach oben. Dadurch kannst du nicht so schnell lenken."
   },
   {
     "id": "2.2.22-101",
@@ -33346,32 +32920,6 @@
     "explanationDe": "Eine geeignete Jacke, Hose und Stiefel gehören zu den Sicherheitsausrüstungen, die Sie bei Unfällen und Verletzungen schützen können. Turnschuhe sind keine Schutzausrüstung."
   },
   {
-    "id": "2.2.23-010",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Warum soll man beim Motorradfahren geeignete Stiefel tragen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Weil bereits beim Umkippen im Stand erhebliche Fußverletzungen auftreten können",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Weil durch Witterungseinflüsse Unterkühlungen mit Gesundheitsschäden möglich sind",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Weil der Luftwiderstand verringert wird",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Stiefel reduzieren den Luftwiderstand nicht. Geeignete Stiefel schützen Sie vor Verletzungen und Unterkühlung."
-  },
-  {
     "id": "2.2.23-014",
     "category": "Verhalten Im Strassenverkehr",
     "points": 2,
@@ -33424,32 +32972,6 @@
     "explanationDe": "Wenn Sie im Stillstand stehen, benutzen Sie Ihre Bremsen, um sicherzustellen, dass das System korrekt funktioniert (sowohl die Bremsübertragung, die Verbindung als auch die Bremsen selbst)"
   },
   {
-    "id": "2.2.23-018",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Folgen hat ein stark zerkratztes Helmvisier?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Man wird stärker als sonst geblendet",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Die eigene Sicht wird beeinträchtigt",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Bei Tageslicht ergeben sich keine negativen Folgen",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Ein stark zerkratztes Helmvisier beeinträchtigt Ihre Sicht und lässt das Licht mit der Gefahr der Blendung intensiver sehen."
-  },
-  {
     "id": "2.2.23-019",
     "category": "Verhalten Im Strassenverkehr",
     "points": 3,
@@ -33474,32 +32996,6 @@
       }
     ],
     "explanationDe": "Stellen Sie sicher, dass die Bremsleuchte für die Hand- und Fußbremse getrennt funktioniert."
-  },
-  {
-    "id": "2.2.23-020",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wo dürfen Sie Gepäck am Motorrad unterbringen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "In Packtaschen oder auf dem Gepäckträger",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Im Tankrucksack",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Gleichmäßig verteilt rechts und links am Lenker",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Sie können Gepäck im Tankrucksack, in den Packtaschen (gleichmäßig rechts und links verteilt) und im Gepäckträger aufbewahren."
   },
   {
     "id": "2.2.23-021",
@@ -33783,32 +33279,6 @@
     "explanationDe": "Sie müssen es aushalten, das Mobiltelefon weiter klingeln zu lassen. Das Aufnehmen oder Halten des Telefons ist für Kfz-FahrerInnen unter Auflage hoher Verkehrsbußen generell verboten. Sofern es für Sie erforderlich ist, halten Sie an der nächsten verkehrsgerechten Stelle an. Schalten Sie zuerst den Motor aus. Erst jetzt ist Ihnen der Griff zum Telefon erlaubt."
   },
   {
-    "id": "2.2.23-042",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 4,
-    "image": null,
-    "video": null,
-    "textDe": "Was kann die Folge sein, wenn Ihr Beifahrer (Sozius) auf dem Motorrad keine auffällige Kleidung trägt?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "für den nachfolgenden Verkehr schlechter zu erkennen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "für Vorausfahrende schlechter zu erkennen",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "für Entgegenkommende schlechter zu erkennen",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Wenn Ihr Passagier keine gut sichtbare Kleidung trägt (auffällige Kleidung), werden Sie für Personen, die hinter Ihnen fahren, weniger sichtbar."
-  },
-  {
     "id": "2.2.23-043",
     "category": "Verhalten Im Strassenverkehr",
     "points": 4,
@@ -33833,58 +33303,6 @@
       }
     ],
     "explanationDe": "Motorräder sind leicht zu übersehen, weil sie klein sind, und noch mehr, wenn sie schnell sind und Kleidung tragen, die schwer zu sehen ist."
-  },
-  {
-    "id": "2.2.23-044",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Was ist zu erwarten, wenn Sie beim Motorradfahren keine auffällige Motorrad-Sicherheitsbekleidung tragen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ich bin schlechter erkennbar",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Ich habe ein erhöhtes Unfallrisiko",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Ich habe keine Nachteile zu erwarten",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Wenn Sie keine gut sichtbare Kleidung (auffällige Kleidung) tragen, sind Sie für andere Fahrer und Personen auf der Straße weniger sichtbar und haben daher ein höheres Unfallrisiko."
-  },
-  {
-    "id": "2.2.23-045",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Weshalb ist das Tragen einer Motorrad-Sicherheitsbekleidung während der Fahrt dringend geboten?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Bei einem Sturz können Verletzungen vermindert werden",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Bei Regen kann Aquaplaning verhindert werden",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "Beim Umfallen wird das Motorrad vor Beschädigungen geschützt",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Motorradschutzkleidung schützt Sie bei einem Unfall vor Verletzungen. Es reduziert weder das Aquaplaning noch schützt es das Motorrad."
   },
   {
     "id": "2.2.23-046",
@@ -33965,58 +33383,6 @@
     "explanationDe": "Du solltest besonders auf spielende Kinder am Fahrzeug achten. Auf das mögliche Ausschwenken deines Fahrzeugs und auf den fließenden Verkehr. Alle 3 sind richtig."
   },
   {
-    "id": "2.2.23-049",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Warum ist das Fahren ohne Motorradschutzkleidung riskant?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "eine erhöhte Verletzungsgefahr",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "ein geringerer Schutz vor Witterungseinflüssen",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "ein Versicherungsnachteil im Schadensfall",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Das Tragen von Motorradschutzkleidung verringert das Verletzungsrisiko bei Unfällen und schützt Sie auch vor Witterungseinflüssen. Im Falle eines Unfalls wird der Versicherungsschutz reduziert, wenn Sie keine Schutzkleidung tragen."
-  },
-  {
-    "id": "2.2.23-050",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Warum sollen Sie Motorradschutzkleidung tragen, die farblich auffällig ist?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Weil ich damit für andere besser zu erkennen bin",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Weil dadurch das Unfallrisiko verringert wird",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Weil diese bei Ausfall der Fahrzeugbeleuchtung die Heimfahrt ermöglicht",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Wenn Sie gut sichtbare Farben tragen, sind Sie leichter zu sehen und verringern somit das Unfallrisiko."
-  },
-  {
     "id": "2.2.23-052",
     "category": "Verhalten Im Strassenverkehr",
     "points": 4,
@@ -34095,84 +33461,6 @@
     "explanationDe": "Bei einem Halterwechsel müssen Sie keine Hauptuntersuchung durchführen lassen, da diese dennoch aktuell bleibt. Sie müssen die Zulassungsbehörde informieren, dass es einen Halterwechsel gegeben hat und ihr einen Haftpflichtversicherungsnachweis vorlegen, damit die Zulassungsbehörde das Fahrzeug auf den neuen Halter zulassen kann."
   },
   {
-    "id": "2.2.23-055",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie sollten Ihr Helmvisier regelmäßig kontrollieren. Warum sollten Sie es bei Kratzern austauschen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Weil ich sonst bei Dunkelheit leichter geblendet werde",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Weil meine Sicht sonst eingeschränkt ist",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Weil mein Gesicht ständig zu erkennen sein sollte",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Ein stark zerkratztes Helmvisier vermindert Ihre Sicht und lässt das Licht intensiver erscheinen, mit dem Risiko, geblendet zu werden."
-  },
-  {
-    "id": "2.2.23-056",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Womit müssen Sie rechnen, wenn Sie beim Motorradfahren keine geeignete Motorradschutzkleidung tragen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Bei einem Sturz besteht eine höhere Verletzungsgefahr für mich",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Mein Schutz vor Wettereinflüssen ist schlechter",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Bei einem Unfall muss ich bei Versicherungszahlungen mit Kürzungen rechnen",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Das Tragen von Motorradschutzkleidung verringert das Verletzungsrisiko bei Unfällen und schützt Sie auch vor dem Wetter. Im Falle eines Unfalls wird der Versicherungsschutz verringert, falls Sie keine Schutzkleidung tragen."
-  },
-  {
-    "id": "2.2.23-057",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie möchten Ihr am Kraftrad befestigtes Navigationsgerät nutzen. Was sollten Sie beachten?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "das Fahrtziel bei stehendem Kraftrad eingeben",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "das Gerät möglichst nicht während der Fahrt bedienen",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "die Sprachausgabe über Headset benutzen",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Um dich voll auf die Fahrt konzentrieren zu können, solltest du dein am Kraftrad befestigtes Navi im stehenden Zustand benutzen (Fahrtziel eingeben), das Gerät möglichst nicht während der Fahrt bedienen und soweit vorhanden die Sprachausgabe über ein Headset benutzen."
-  },
-  {
     "id": "2.2.23-058",
     "category": "Verhalten Im Strassenverkehr",
     "points": 2,
@@ -34197,58 +33485,6 @@
       }
     ],
     "explanationDe": "Die Motorradschutzkleidung besteht aus: Schuhen, Handschuhen, Jacke, Hose und Helm."
-  },
-  {
-    "id": "2.2.23-059",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Warum sollten Sie beim Fahren mit einem Kraftrad geeignete Motorradstiefel tragen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "bei einem Umkippen im Stand schwere Fußverletzungen auftreten können",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "bei einem Unfall der Versicherungsanspruch eingeschränkt werden kann",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "die Fahrzeugbedienung durch Witterungseinflüsse eingeschränkt sein kann",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Beim umkippen kann der Fuß verletzt werden. Die Fahrzeugbedienung kann unter schlechten Witterungsverhältnissen eingeschränkt sein. Die Versicherung kann im Falle eines Unfalls die Zahlung verweigern."
-  },
-  {
-    "id": "2.2.23-060",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Warum sollten Sie ein zerkratztes Helmvisier ersetzen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "die Sicht einschränken",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Blendungseffekte verstärken",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "das Visier stärker beschlagen lassen",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Sie werden stark geblendet durch anderes Licht und die Sicht ist ebenfalls eingeschränkt."
   },
   {
     "id": "2.2.23-061",
@@ -34277,32 +33513,6 @@
     "explanationDe": "Der Motorradhelm schützt Sie vor Kopfverletzungen, nach einem Unfall müssen Sie den Helm ersetzen."
   },
   {
-    "id": "2.2.23-062",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wie wird die ordnungsgemäße Funktion des Rückspiegels am Zweirad sichergestellt?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "muss richtig eingestellt sein",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "darf nicht beschädigt sein",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "darf seitlich nicht über das Lenkerende hinausragen",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Der Rückspiegel am Zweirad muss richtig auf den Fahrer eingestellt sein - so, dass er alle wesentlichen Verkehrsvorgänge beobachten kann. Ein beschädigter Rückspiegel gilt nicht als ordnungsgemäß funktionsfähig. Der Rückspiegel eines Motorrads kann seitlich über das Lenkerende herausragen, um die nötigen Bereiche besser abdecken zu können."
-  },
-  {
     "id": "2.2.23-063",
     "category": "Verhalten Im Strassenverkehr",
     "points": 3,
@@ -34327,162 +33537,6 @@
       }
     ],
     "explanationDe": "Zu laute Geräusche wie z. B. zu lautes Musik hören können dazu führen das Warnsignal übertönt werden und dazu, dass man erst spät auf diese reagiert.\nAuch Ablenkungen durch Telefonieren können dazu führen, dass du Warnsignale zu spät oder gar nicht mitbekommst."
-  },
-  {
-    "id": "2.2.23-064",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welchen Vorteil bietet ein Integralhelm beim Führen eines Kraftrads?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Verletzungen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Insekten",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Nässe",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Ein Integralhelm bietet mehr Schutz als andere Helmmodelle, da Integralhelme, auch Vollvisierhelm genannt, vollständig geschlossen sind. Das Kinn bildet mit dem Helm ein Ganzes und lässt sich nicht hochschieben, wodurch du gut gegen Verletzungen geschützt bist. Der komplette Gesichtsschutz hält Wind, Regen und Insekten von deinen Augen fern. So sind deine Augen durch das Visier gegen Wind und Wetter geschützt und deine Sicht wird nicht durch Witterungseinflüsse beschränkt."
-  },
-  {
-    "id": "2.2.23-065",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Was sollten Sie vor Fahrtantritt an Ihrem Zweirad kontrollieren?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Die Funktion der Beleuchtung",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Die Funktion der Bremsen",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Die Einstellung des Zündzeitpunkts",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Du solltest vor jedem Fahrtantritt kontrollieren, ob die Beleuchtung deines Zweirads einwandfrei funktioniert. Kontrolliere unbedingt auch die Funktion der Bremsen, bevor du losfährst."
-  },
-  {
-    "id": "2.2.23-066",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wodurch sind Sie auf dem Motorrad für andere Verkehrsteilnehmer besser sichtbar?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ich trage auffällige Kleidung",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Ich trage bei Dunkelheit Kleidung mit retro-reflektierenden Bereichen",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Ich fahre mit Fernlicht",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Wenn du auffällige Kleidung trägst, zum Beispiel eine Motorradjacke in knalligen Farben oder eine Jacke die Licht reflektiert, bist du für andere Verkehrsteilnehmer besser sichtbar."
-  },
-  {
-    "id": "2.2.23-067",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Anforderung sollten Motorradstiefel erfüllen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "haben eine rutschhemmende Sohle",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "reichen über die Knöchel",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "haben eine lockere Passform",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Achte auf die genaue Passform, die Stiefel sollten eng anliegen und über deine Knöchel reichen, ohne deine Bewegungsfreiheit einzuschränken.\nEbenso solltest du darauf achten, dass die Stiefel rutschfeste Sohlen haben, diese bieten eine gute Haftung an den Fußrasten."
-  },
-  {
-    "id": "2.2.23-068",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Anforderung sollten Motorradhandschuhe erfüllen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "haben eine passgenaue Form",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "ermöglichen ein gutes Griffgefühl",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "bestehen aus abriebfestem Material",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Die Motorradhandschuhe sollten eng anliegen, aber nicht zu fest sein. Deine Finger sollten leicht gebeugt sein, ohne dass der Stoff spannt.\nDie Handschuhe sollten dir ein gutes Griffgefühl bieten, um Brems- und Kupplungshebel problemlos betätigen zu können.\nWähle Motorradhandschuhe aus abriebfesten Materialien wie Leder oder speziellen Textilien, um bei einem Sturz oder einem Unfall besser vor Hautabschürfungen und Verbrennungen geschützt zu sein."
-  },
-  {
-    "id": "2.2.23-069",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie fahren ein Mofa mit einer bauartbedingten Höchstgeschwindigkeit von 25 km/h. Wie müssen Sie sich vor Kopfverletzungen schützen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "mit einem geeigneten und passenden Motorradhelm schützen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "mit einem geeigneten und passenden Fahrradhelm schützen",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "nicht schützen, wenn ich nur mit Schrittgeschwindigkeit fahre",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Da das Mofa über 20 km/h fahren kann, musst du einen geeigneten Motorradhelm tragen, um deinen Kopf bei der Geschwindigkeit im Straßenverkehr ausreichend zu schützen."
   },
   {
     "id": "2.2.23-070",
@@ -36949,32 +36003,6 @@
     "explanationDe": "Seien Sie sich bewusst, dass das schnelle Fahren mit hoher Geschwindigkeit einen hohen Kraftstoffverbrauch und damit auch einen hohen Schadstoffausstoß zur Folge hat. Es kommt hierdurch ebenfalls zu mehr Lärm und nicht zu einem geringeren Lärmpegel."
   },
   {
-    "id": "2.5.01-017",
-    "category": "Umweltschutz",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wie können Sie beim Betrieb eines Kraftrads unnötigen Lärm vermeiden?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Durch die ausschließliche Verwendung von zulässigen Auspuffanlagen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Durch hochtouriges Anfahren",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "Durch ungleichmäßige Fahrweise",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Unzulässige Auspuffanlagen führen zu einer höheren Lärmbelästigung. \nEine ungleichmäßige Fahrweise, wie häufiges Abbremsen und anschließend wieder starkes Beschleunigen, führt zu unnötigem Lärm.\nHochtouriges Anfahren führt zu unnötigem Lärm."
-  },
-  {
     "id": "2.5.01-018",
     "category": "Umweltschutz",
     "points": 3,
@@ -37946,94 +36974,6 @@
     "explanationDe": "Es ist erforderlich, eine Versicherung für Ihr Fahrzeug zu haben, ohne die Sie es nicht fahren dürfen."
   },
   {
-    "id": "2.6.02-011",
-    "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wann dürfen Sie mit einem Mofa auf öffentlichen Straßen nicht fahren?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Wenn keine Haftpflichtversicherung besteht",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Wenn das Mofa nicht verkehrssicher ist",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Wenn keine Kraftfahrzeugsteuer bezahlt wurde",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Ein motorisiertes Fahrrad muss gegen Schäden Dritter bei Unfällen versichert sein und das Fahrzeug muss verkehrssicher sein."
-  },
-  {
-    "id": "2.6.02-012",
-    "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Wie alt müssen Sie mindestens sein, um ein Mofa fahren zu dürfen?",
-    "options": [],
-    "explanationDe": "Sie müssen mindestens 15 Jahre alt sein, um ein motorisiertes Fahrrad zu fahren."
-  },
-  {
-    "id": "2.6.02-013",
-    "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Folgen hat es, wenn Sie mit einem Mofa fahren, das durch \"Frisieren\" schneller als 25 km/h läuft?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Bestrafung wegen Fahrens ohne Fahrerlaubnis",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Bußgeld und Bestrafung, weil Betriebserlaubnis und Versicherungsschutz erloschen sind",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Es hat keine nachteiligen Folgen, solange man mit diesem Mofa nicht schneller als 25 km/h fährt",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Wenn Sie Ihr motorisiertes Fahrrad so einstellen, dass es schneller als 25 km/h fährt, erlischt Ihre Benutzungserlaubnis, Ihre Versicherung und Sie können mit einer Geldstrafe belegt werden, wenn Sie ohne die richtige Erlaubnis fahren."
-  },
-  {
-    "id": "2.6.02-014",
-    "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wodurch erlischt die Betriebserlaubnis eines Mofas?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Durch „Ausräumen“ des Schalldämpfers",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Durch Änderung des Übersetzungsverhältnisses",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Durch Anbringung eines zweiten Rückspiegels",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Änderungen, die sich auf das Verhalten Ihres Motorrads auswirken, wie z. B. Getriebeübersetzung, Schalldämpfer, können zum Erlöschen der Betriebserlaubnis führen."
-  },
-  {
     "id": "2.6.02-015",
     "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
     "points": 2,
@@ -38136,32 +37076,6 @@
       }
     ],
     "explanationDe": "Das Versicherungsnummernschild ist maximal 1 Jahr gültig."
-  },
-  {
-    "id": "2.6.02-023",
-    "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Das Versicherungskennzeichen Ihres Zweirades ist nicht mehr gültig. Welche Folgen hat es, wenn Sie damit weiterhin fahren?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ich muss mit einer Geldstrafe oder Freiheitsstrafe rechnen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Ich muss ggf. für entstehende Unfallschäden selbst aufkommen",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Ich darf nur noch Schrittgeschwindigkeit fahren",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Es ist gesetzlich vorgeschrieben, eine Versicherung für das Fahren zu haben. Ohne eine solche Versicherung riskieren Sie eine Geldstrafe oder eine Gefängnisstrafe. Wenn Sie ohne Versicherung einen Unfall haben, müssen Sie für eventuelle Schäden Dritter selbst aufkommen."
   },
   {
     "id": "2.6.02-027",
@@ -38372,32 +37286,6 @@
     "explanationDe": "Nach der technischen Veränderung eines Fahrzeugs wird bei der Begutachtung in der Regel ein Abnahmeprotokoll erstellt. Es kann jedoch auch eine Eintragung im Teil 1 der Zulassungsbescheinigung erfolgen. Das Protokoll ist durch den/die Kfz-FahrerIn während jeder Fahrt mitzuführen. Auf Verlangen muss das Protokoll beispielsweise bei einer Polizeikontrolle vorgezeigt werden."
   },
   {
-    "id": "2.6.02-037",
-    "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Die bauartbedingte Höchstgeschwindigkeit eines Mofas beträgt durch eine unzulässige technische Änderung mehr als 25 km/h. Welche Folge hat die Nutzung eines solchen Mofas im öffentlichen Straßenverkehr für Sie?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ich begehe eine Straftat wegen Fahrens ohne Fahrerlaubnis",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Ich begehe eine Ordnungswidrigkeit wegen Erlöschens der Betriebserlaubnis",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Keine, solange ich mit diesem Mofa nicht schneller als 25 km/h fahre",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Sobald Sie etwas ohne allgemeine Betriebserlaubnis oder Abnahme an Ihrem Fahrzeug verändern erlischt die Betriebserlaubnis. Da das Fahren mit einem Mofa über 25 km/h schon der Klasse AM oder höher angehört fahren Sie ohne gültiger Fahrerlaubnis."
-  },
-  {
     "id": "2.6.02-038",
     "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
     "points": 3,
@@ -38422,58 +37310,6 @@
       }
     ],
     "explanationDe": "Die Begutachtung muss umgehend nach dem Umbau erfolgen."
-  },
-  {
-    "id": "2.6.02-041",
-    "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Wann müssen Sie spätestens ein neues Versicherungskennzeichen an Ihrem Zweirad anbringen, um übergangslos weiterfahren zu dürfen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "1. März",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "1. Januar",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "1. Juni",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Ab dem 1. März 2023 werden die neuen Versicherungskennzeichen ungültig. Um übergangslos weiterfahren zu dürfen, kümmere dich rechtzeitig um ein neues Kennzeichen."
-  },
-  {
-    "id": "2.6.02-042",
-    "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Die Gültigkeit des Versicherungskennzeichens Ihres Zweirads ist abgelaufen. Welche Folge hat dies für dessen Benutzung im öffentlichen Straßenverkehr?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "nicht mehr fahren",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "auf einem Gehweg schieben",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "auf einem Parkplatz parken",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Es ist verboten, ein Zweirad ohne gültiges Versicherungskennzeichen im öffentlichen Straßenverkehr zu nutzen. Der Gesetzgeber setzt eine Pflichtversicherung voraus, damit mögliche Unfallkosten gedeckt sind. \nDu darfst dein Zweirad ohne gültiges Versicherungskennzeichen auf einem Gehweg schieben, da dies nicht als „fahren“ zählt."
   },
   {
     "id": "2.6.02-101",
@@ -39078,100 +37914,6 @@
     "explanationDe": "Erkundigen Sie sich vor der Fahrt welche Bestimmungen im Ausland gelten."
   },
   {
-    "id": "2.7.02-001",
-    "category": "Technik",
-    "points": 4,
-    "image": null,
-    "video": null,
-    "textDe": "Sie stellen am Lenkkopflager Spiel fest. Was ist zu tun?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Spiel beseitigen lassen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Spiel kann bleiben, da sich der Lenker leichter bewegen lässt",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Ein loser Lenker mit etwas Spiel ist gefährlich und erschwert die Kontrolle über das Motorrad. Stellen Sie sicher, dass kein Spiel vorhanden ist, um Ihre Sicherheit zu gewährleisten."
-  },
-  {
-    "id": "2.7.02-002",
-    "category": "Technik",
-    "points": 4,
-    "image": null,
-    "video": null,
-    "textDe": "Beim Bewegen des Lenkers stellen Sie einen Rastpunkt im Lenkkopflager fest. Was ist zu tun?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Rastpunkt beseitigen lassen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Spiel im Lenkkopflager vergrößern, damit die Spursicherheit verbessert wird",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Wenn Sie Spiel im Lenkkopflager feststellen, ist Ihr Motorrad schwieriger zu kontrollieren, stellen Sie sicher, dass Sie keins haben, um Ihre Sicherheit zu garantieren."
-  },
-  {
-    "id": "2.7.02-003",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wozu kann Spiel im Lenkkopflager führen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Das Fahrverhalten kann negativ beeinflusst werden",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Das Fahrverhalten wird verbessert",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "Die Spursicherheit wird verbessert",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Ein loser Lenker mit etwas Spiel ist gefährlich und erschwert die Kontrolle über das Motorrad. Stellen Sie sicher, dass kein Spiel vorhanden ist, um Ihre Sicherheit zu gewährleisten."
-  },
-  {
-    "id": "2.7.02-004",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wie kann sich ein defekter Lenkungsdämpfer auf das Fahrverhalten auswirken?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ein defekter Lenkungsdämpfer kann zum Flattern des Lenkers führen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Die Fahrsicherheit kann sich verschlechtern",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Die Fahrsicherheit wird nur bei geringer Fahrgeschwindigkeit verschlechtert",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Ein defekter Lenkungsstoßdämpfer kann das Lenkrad zum Vibrieren/Schütteln bringen und die Stabilität und Fahrtüchtigkeit Ihres Motorrads beeinträchtigen."
-  },
-  {
     "id": "2.7.02-005",
     "category": "Technik",
     "points": 3,
@@ -39196,74 +37938,6 @@
       }
     ],
     "explanationDe": "Alle drei verschlechtern die Lenkung Ihres Motorrads und erschweren die Kontrolle und das sichere Fahren."
-  },
-  {
-    "id": "2.7.02-006",
-    "category": "Technik",
-    "points": 4,
-    "image": null,
-    "video": null,
-    "textDe": "Sie stellen an Ihrem Motorrad ein schlechtes Spurverhalten fest. Woran kann das liegen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Radlagerspiel zu groß",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Hinterradschwinge ausgeschlagen",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Sowohl das Spiel in den Radlagern als auch die ausgelenkte Hinterradgabel können dazu führen, dass Ihr Motorrad den Kurs nicht hält und die Handhabung schwieriger und weniger sicher wird."
-  },
-  {
-    "id": "2.7.02-010",
-    "category": "Technik",
-    "points": 4,
-    "image": null,
-    "video": null,
-    "textDe": "Sie stellen fest, dass der Hebelweg der hydraulischen Vorderradbremse Ihres Motorrads wesentlich länger geworden ist. Was müssen Sie tun?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Vorderradbremse instand setzen lassen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Bis zur nächsten Inspektion nur Hinterradbremse benutzen",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "Umgehend Bremsflüssigkeit nachfüllen",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Es ist ein Zeichen für eine defekte Vorderradbremse, die repariert oder ersetzt werden muss."
-  },
-  {
-    "id": "2.7.02-012",
-    "category": "Technik",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Die Spiegelhalterung an Ihrem Motorrad ist lose. Was tun Sie?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Spiegelhalterung befestigen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Spiegel abbauen",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Sie sollten niemals Ihren Spiegel entfernen und müssen ihn reparieren, da er jederzeit benötigt wird, um den Verkehr hinter Ihnen zu sehen."
   },
   {
     "id": "2.7.02-015",
@@ -39729,32 +38403,6 @@
     "explanationDe": "Um Schäden am Motor zu vermeiden, sollten Sie den Motor umgehend abstellen und den Motorölstand kontrollieren."
   },
   {
-    "id": "2.7.02-035",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wann muss die Bremsanlage an Ihrem Kraftrad umgehend überprüft werden?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Wenn der Bremsflüssigkeitsstand im Vorratsbehälter deutlich abgesunken ist",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Wenn bei der Betätigung des Bremshebels kein Druckpunkt vorhanden ist",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Wenn während der Fahrt die Bremskontrollleuchte leuchtet",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Die Bremskontrolleuchte warnt vor defekter Bremsanlage, leuchtet diese während der Fahrt, sollten Sie das Fahrzeug umgehend überprüfen lassen. Bei einseitiger Bremsung kann das Fahrzeug nicht die Spur halten. Lassen Sie die Bremsanlage überprüfen."
-  },
-  {
     "id": "2.7.02-036",
     "category": "Technik",
     "points": 3,
@@ -39911,58 +38559,6 @@
     "explanationDe": "Überprüfe umgehend den Auspuff, ist dieser z.B. nicht mehr ausreichend befestigt, kann dies Schäden am Auspuff verursachen, wodurch die Geräusche lauter werden können. Sorge also dafür, dass mögliche Defekte behoben werden, bevor du weiterfährst."
   },
   {
-    "id": "2.7.02-042",
-    "category": "Technik",
-    "points": 4,
-    "image": null,
-    "video": null,
-    "textDe": "Sie stellen deutliches Spiel am Lenkkopflager Ihres Motorrads fest. Wie verhalten Sie sich richtig?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "das Lenkkopflager reparieren lassen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "die Steckachse des Vorderrads festziehen lassen",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "den Lenker an den Klemmschellen festziehen lassen",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Ein deutliches Spiel am Lenkkopflager deutet darauf hin, dass das Lager kaputt ist. Lasse es fachgerecht reparieren, bevor du weiterfährst."
-  },
-  {
-    "id": "2.7.02-043",
-    "category": "Technik",
-    "points": 4,
-    "image": null,
-    "video": null,
-    "textDe": "Woran können Sie Mängel am Lenkkopflager Ihres Motorrads erkennen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Rastpunkte fest",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Schwergängigkeit fest",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Spiel fest",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Das Lenkkopflager sollte leichtgängig und ohne Rastpunkte und Spiel bewegbar sein.\nWenn der Lenker z.B. schwer zu drehen ist, kann das am Lenkkopflager liegen. Ein schwergängiger Lenker macht das Motorrad weniger steuerbar und ist deshalb sofort fachgerecht zu beheben."
-  },
-  {
     "id": "2.7.02-044",
     "category": "Technik",
     "points": 2,
@@ -40015,32 +38611,6 @@
     "explanationDe": "Wenn der Leerweg am Bremshebel der hydraulischen Vorderradbremse größer geworden ist, ist wahrscheinlich die Bremse defekt. Lasse die Bauteile der Vorderradbremse umgehend überprüfen und instand setzen."
   },
   {
-    "id": "2.7.02-046",
-    "category": "Technik",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Das Spurverhalten Ihres Motorrads hat sich verschlechtert. Was kann die Ursache dafür sein?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Die Kettenspanner wurden ungleichmäßig nachgestellt",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Die Lagerung der Hinterradschwinge ist verschlissen",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Die Leerlaufdrehzahl ist zu hoch eingestellt",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Die Hinterradschwinge ist die beweglich gelagerte Aufhängung für das Hinterrad. Wenn die Lagerung der Hinterradschwinge verschlissen ist, verschlechtert sich das Spurverhalten. Lasse ein neues Lager einbauen.\nWenn die Kettenspanner deines Motorrads ungleichmäßig nachgestellt wurden, könnte das Hinterrad nicht mehr genau in einer Linie mit dem Vorderrad stehen und das Spurverhalten könnte sich verschlechtern."
-  },
-  {
     "id": "2.7.02-047",
     "category": "Technik",
     "points": 3,
@@ -40065,32 +38635,6 @@
       }
     ],
     "explanationDe": "Eine verschlissene und rutschende Kupplung erkennst du daran, dass sie nicht mehr greift und du nicht mehr richtig schalten kannst. Das ist besonders dann problematisch, wenn du schnell beschleunigen musst, wie z.B. beim Überholen auf der Landstraße oder beim Einfädeln auf der Autobahn. Lasse die Kupplung von einer Werkstatt instand setzen."
-  },
-  {
-    "id": "2.7.02-048",
-    "category": "Technik",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Sie befinden sich auf einer längeren Reise und machen einen Tankstopp. Welche Kontrolle sollten Sie an Ihrem Motorrad dabei durchführen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Bereifung",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Beleuchtung",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Gepäckbefestigung",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Vor dem Antritt längerer Fahrten solltest du deine Beleuchtung und deine Bereifung kontrollieren. Ebenso solltest du vor dem Losfahren und bei jedem Stopp kontrollieren das dein Gepäck richtig befestigt ist."
   },
   {
     "id": "2.7.02-049",
@@ -40143,58 +38687,6 @@
       }
     ],
     "explanationDe": "Grund für eine zu hohe Kühlmitteltemperatur können Ablagerung und Schmutz sein, denn sie verringern die Wärmeableitung. \nDurch Lecks oder defekte Dichtungen kann Kühlmittel austreten. Wenn du weniger Kühlmittel hast, erwärmt es sich schneller. Kontrolliere dein Fahrzeug auf sichtbare Lecks und lasse sie gegebenenfalls reparieren.\nWenn der Kühlerlüfter defekt ist, steigt die Temperatur schnell an. Prüfe den Kühlerlüfter auf Verstopfungen und lasse ihn, wenn nötig, in einer Werkstatt instand setzen."
-  },
-  {
-    "id": "2.7.02-051",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wodurch verschlechtert sich die Fahrstabilität eines Motorrads?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Durch ein ausgeschlagenes Lenkkopflager",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Durch einen verschlissenen Stoßdämpfer",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Durch eine undichte Auspuffanlage",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Ein ausgeschlagenes Lenkkopflager führt zu Spiel in der Lenkung. Besonders in Kurven könnte die Fahrstabilität deines Motorrads schlechter sein.\nWenn deine Stoßdämpfer verschlissen sind, können sie die Unebenheiten der Straße nicht mehr ausgleichen. Die Haftung der Reifen auf der Fahrbahn kann sich verringern und die Fahrstabilität deines Motorrads verschlechtert sich."
-  },
-  {
-    "id": "2.7.02-052",
-    "category": "Technik",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Der Motor Ihres Motorrads ist flüssigkeitsgekühlt. Was sollten Sie beachten?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ich kontrolliere regelmäßig den Kühlmittelstand",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Ich reinige regelmäßig die Außenflächen des Kühlers",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Ich fülle bei jedem Tankstopp Kühlflüssigkeit nach",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Du solltest regelmäßig den Kühlmittelstand kontrollieren und bei Bedarf nachfüllen, um ein Überhitzen des Motors zu vermeiden.\nAblagerungen und Schmutz können die Funktion des Kühlers beeinträchtigen. Vermeide das, indem du die Außenflächen sauber hältst."
   },
   {
     "id": "2.7.02-103",
@@ -41191,42 +39683,6 @@
     "explanationDe": "Den Reifendruck solltest du regelmäßig bei kalten Reifen und unmittelbar nach jedem Reifenwechsel überprüfen. Die Prüfung muss nicht nach jeder Fahrt erfolgen."
   },
   {
-    "id": "2.7.05-003",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Profiltiefe müssen die Reifen Ihres Mofas mindestens aufweisen?",
-    "options": [],
-    "explanationDe": "Die Profiltiefe deines Mofas muss 1 mm sein."
-  },
-  {
-    "id": "2.7.05-004",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Folge kann zu hoher oder zu niedriger Luftdruck in den Reifen des Kraftrads haben?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Das Fahrverhalten des Kraftrads verschlechtert sich",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Der Reifenverschleiß erhöht sich",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Der Reaktionsweg verlängert sich",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Der Reifenverschließ erhöht sich durch größere Reibung. Der Reifen verformt sich und verschlechtert dadurch das Fahrverhalten."
-  },
-  {
     "id": "2.7.05-005",
     "category": "Technik",
     "points": 3,
@@ -41329,16 +39785,6 @@
       }
     ],
     "explanationDe": "Beschädigungen am Reifen durch z.B. einen Nagel oder ähnliche Fremdkörper können zum Verlust des Reifenfülldrucks führen. Durch das Fahren mit hohen Geschwindigkeiten auf Autobahnen erwärmt sich der Reifen und der Reifendruck wird höher. Dadurch kann schleichend Luft entweichen, wenn die Ventilkappe fehlt."
-  },
-  {
-    "id": "2.7.05-009",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie fahren ein Motorrad mit einem Hubraum von über 125 cm³. Welche gesetzlich vorgeschriebene Mindestprofiltiefe müssen alle Reifen Ihres Motorrads aufweisen?",
-    "options": [],
-    "explanationDe": "Die gesetzlich vorgeschriebene Mindestprofiltiefe der Reifen beträgt 1,6 mm."
   },
   {
     "id": "2.7.05-101",
@@ -41531,58 +39977,6 @@
     "textDe": "Welche gesetzlich vorgeschriebene Mindestprofiltiefe müssen alle Reifen Ihres Pkws am Hauptprofil aufweisen?",
     "options": [],
     "explanationDe": "Die gesetzlich vorgeschriebene Mindestprofiltiefe der Reifen beträgt 1,6 mm. Das Hauptprofil sind die Rillen in den mittleren Laufflächenbereichen."
-  },
-  {
-    "id": "2.7.06-001",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welchen Vorteil hat ein Motorrad mit Automatischem Blockierverhinderer (ABV)?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Bei Gefahrbremsungen ist die Sturzgefahr geringer",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Beim schnelleren Fahren entsteht kein höheres Unfallrisiko",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "Beim Bremsen ist weniger Kraftaufwand erforderlich",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Bei Gefahrenbremsungen neigen die Räder zum Blockieren und du könntest stürzen. Ein ABV wirkt durch die Regelung des Bremsdrucks einem Blockieren der Räder entgegen und vermindert so die Sturzgefahr."
-  },
-  {
-    "id": "2.7.06-002",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie fahren ein Motorrad mit Automatischem Blockierverhinderer (ABV). Was ist zu beachten, wenn Sie in einer Kurve bremsen müssen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Trotz Schräglage sollte ich dosiert bremsen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Mit regelndem ABV bleibt die Lenkfähigkeit länger erhalten",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "In Schräglage nimmt die Bremskraft automatisch zu",
-        "isCorrect": false
-      }
-    ],
-    "explanationDe": "Der Automatische Blockierverhinderer (ABV) hilft dabei, den Bremsvorgang zu stabilisieren und das Blockieren der Räder zu verhindern.\nWeil der ABV das Blockieren der Räder verhindert, kannst du auch während des Bremsvorgangs lenken.\nTrotzdem solltest du in Schräglage dosiert bremsen, weil das Motorrad durch starkes Bremsen seitlich wegrutschen könnte."
   },
   {
     "id": "2.7.06-101",
@@ -42051,32 +40445,6 @@
       }
     ],
     "explanationDe": "Die Bremsflüssigkeit nach Vorgaben des Herstellers solltest du regelmäßig austauschen lassen, weil damit die Bremsanlage auch bei hoher Belastung funktionstüchtig bleibt, damit der Wasseranteil in der Bremsflüssigkeit nicht unzulässig hoch wird und damit die Bauteile der Bremsanlage nicht beschädigt werden."
-  },
-  {
-    "id": "2.7.10-001",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Was muss an einem Mofa ständig betriebsbereit sein?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Scheinwerfer für Dauerabblendlicht",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Schlussleuchte",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Rückstrahler",
-        "isCorrect": true
-      }
-    ],
-    "explanationDe": "Alle drei müssen auf der Straße sichtbar sein und Ihre Sicherheit garantieren."
   },
   {
     "id": "2.7.10-003",

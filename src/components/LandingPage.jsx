@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { BookOpen, Award, BarChart3, Settings, ChevronRight, HelpCircle, X, MessageCircle, Sparkles, Video, Lightbulb } from 'lucide-react';
+import { BookOpen, Award, BarChart3, Settings, ChevronRight, HelpCircle, X, MessageCircle, Sparkles, Video, Lightbulb, Gamepad2 } from 'lucide-react';
 import { questions } from '../data/questions';
 import { SupportModal } from './SupportModal';
 import { AIChat } from './AIChat';
@@ -142,22 +142,22 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
           }}>
             {/* Header */}
             <div style={{
-              position: 'relative', padding: '16px', textAlign: 'center', borderBottom: '1px solid #f3f4f6',
+              padding: '16px', display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f3f4f6',
               background: 'linear-gradient(to bottom right, #f8fafc, #e2e8f0)'
             }}>
+              <h2 style={{ fontSize: '16px', fontWeight: 'bold', color: '#0d9488', margin: 0, display: 'flex', alignItems: 'center', gap: '8px' }}>
+                <Lightbulb size={20} style={{ flexShrink: 0 }} />
+                <span>{t('MẸO HỌC LÝ THUYẾT', 'Theorie-Tricks')}</span>
+              </h2>
               <button
                 onClick={() => setShowTheoryTipsModal(false)}
                 style={{
-                  position: 'absolute', top: '12px', right: '12px', padding: '8px', color: '#6b7280',
-                  backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '9999px', border: 'none', cursor: 'pointer'
+                  padding: '8px', color: '#6b7280', backgroundColor: 'rgba(255,255,255,0.8)',
+                  borderRadius: '9999px', border: 'none', cursor: 'pointer', flexShrink: 0
                 }}
               >
                 <X size={20} />
               </button>
-              <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#0d9488', margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
-                <Lightbulb size={20} />
-                {t('MẸO HỌC LÝ THUYẾT', 'Theorie-Tricks')}
-              </h2>
             </div>
 
             <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
@@ -332,31 +332,17 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
           </div>
 
           <div className="flex flex-col gap-3 mt-2">
-            <button onClick={() => onNavigate('/settings')} style={{
+            <button onClick={() => setShowTheoryTipsModal(true)} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
               cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
             }}>
               <div className="flex items-center gap-4">
-                <Settings size={20} strokeWidth={1.5} />
-                <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
-                  {t('Cài đặt', 'Einstellungen')}
-                </span>
-              </div>
-              <ChevronRight size={18} opacity={0.5} />
-            </button>
-
-            <button onClick={() => setShowSupportModal(true)} style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
-              cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
-            }}>
-              <div className="flex items-center gap-4">
-                <div style={{ width: '20px', height: '20px', background: '#7cb342', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
+                <div style={{ width: '20px', height: '20px', background: '#0d9488', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <Lightbulb size={12} color="white" strokeWidth={3} />
                 </div>
                 <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
-                  {t('Ủng hộ', 'Unterstützen')}
+                  {t('MẸO HỌC LÝ THUYẾT', 'Theorie-Tricks')}
                 </span>
               </div>
               <ChevronRight size={18} opacity={0.5} />
@@ -388,23 +374,51 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
                   <Video size={12} color="white" strokeWidth={3} />
                 </div>
                 <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
-                  {t('VIDEO THỰC HÀNH', 'Praxis-Tipps')}
+                  {t('VIDEO THỰC HÀNH THEO CHỦ ĐỀ', 'Praxis-Tipps')}
                 </span>
               </div>
               <ChevronRight size={18} opacity={0.5} />
             </button>
 
-            <button onClick={() => setShowTheoryTipsModal(true)} style={{
+            <button onClick={() => onNavigate('/settings')} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
               cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
             }}>
               <div className="flex items-center gap-4">
-                <div style={{ width: '20px', height: '20px', background: '#0d9488', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
-                  <Lightbulb size={12} color="white" strokeWidth={3} />
+                <Settings size={20} strokeWidth={1.5} />
+                <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
+                  {t('Cài đặt', 'Einstellungen')}
+                </span>
+              </div>
+              <ChevronRight size={18} opacity={0.5} />
+            </button>
+
+            <button onClick={() => alert(t('Tính năng lái xe mô phỏng đang được phát triển!', 'Fahrsimulator-Funktion in Entwicklung!'))} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
+              cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
+            }}>
+              <div className="flex items-center gap-4">
+                <Gamepad2 size={20} strokeWidth={1.5} />
+                <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
+                  {t('Mô phỏng lái xe', 'Fahrsimulator')}
+                </span>
+              </div>
+              <ChevronRight size={18} opacity={0.5} />
+            </button>
+
+            <button onClick={() => setShowSupportModal(true)} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
+              cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
+            }}>
+              <div className="flex items-center gap-4">
+                <div style={{ width: '20px', height: '20px', background: '#7cb342', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
                 <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
-                  {t('MẸO HỌC LÝ THUYẾT', 'Theorie-Tricks')}
+                  {t('Ủng hộ', 'Unterstützen')}
                 </span>
               </div>
               <ChevronRight size={18} opacity={0.5} />

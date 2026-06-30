@@ -182,6 +182,7 @@ export const AIChat = ({ user }) => {
     }
   ]);
   const [activeCategory, setActiveCategory] = useState(questionCategories[0].id);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const messagesEndRef = useRef(null);
 
@@ -300,7 +301,7 @@ Trả lời bằng tiếng Việt một cách dễ hiểu, có chia đoạn rõ 
                 }`}>
                 {msg.sender === 'user' ? 'BẠN' : 'TRỢ LÝ HỌC TẬP'}
               </span>
-              <div 
+              <div
                 className="p-3 rounded-2xl text-[13px] font-medium leading-relaxed shadow-2xs border whitespace-pre-wrap"
                 style={msg.sender === 'user'
                   ? { background: '#2b576b', borderColor: '#2b576b', color: '#ffffff' }
@@ -318,7 +319,7 @@ Trả lời bằng tiếng Việt một cách dễ hiểu, có chia đoạn rõ 
               <span className="text-[9px] font-sans font-extrabold tracking-wider uppercase text-slate-600">
                 TRỢ LÝ HỌC TẬP
               </span>
-              <div 
+              <div
                 className="rounded-2xl p-3 text-xs font-bold border"
                 style={{ background: '#f8fafc', borderColor: '#f1f5f9', color: '#64748b' }}
               >
@@ -331,42 +332,60 @@ Trả lời bằng tiếng Việt một cách dễ hiểu, có chia đoạn rõ 
       </div>
 
       {/* Controlled Selection Panel */}
-      <div 
-        className="flex flex-col bg-white border border-gray-200 rounded-xl p-3 mb-2 shadow-xs shrink-0 overflow-hidden"
-        style={{ height: '240px' }}
+      <div
+        className="flex flex-col bg-white border border-gray-200 rounded-xl p-3 mb-2 shadow-xs shrink-0"
+        style={{ height: '240px', position: 'relative' }}
       >
-        <span className="text-[10px] font-extrabold text-slate-800 uppercase tracking-wider mb-2 flex items-center gap-1.5">
-          Chọn câu hỏi muốn giải đáp:
-        </span>
-
-        {/* Category switcher tabs */}
-        <div className="flex gap-1.5 overflow-x-auto pb-2 no-scrollbar shrink-0 border-b border-gray-100 mb-2.5">
-          {questionCategories.map((cat) => (
-            <button
-              key={cat.id}
-              onClick={() => setActiveCategory(cat.id)}
-              className="px-3 py-1.5 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all whitespace-nowrap"
-              style={activeCategory === cat.id
-                ? { background: '#2b576b', color: '#ffffff', boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }
-                : { background: '#f1f5f9', color: '#475569' }
-              }
+        {/* Custom Category Dropdown */}
+        <div className="mb-3 shrink-0 w-full" style={{ position: 'relative', zIndex: 50 }}>
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="w-full flex items-center justify-between bg-[#f1f5f9] hover:bg-[#e2e8f0] border border-slate-200 text-[#2b576b] py-2.5 px-3.5 rounded-xl text-[11px] font-extrabold uppercase tracking-wider focus:outline-none transition-all shadow-xs"
+          >
+            <span>Chủ đề: {activeCategoryData?.title}</span>
+            <svg className={`w-4 h-4 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M19 9l-7 7-7-7" />
+            </svg>
+          </button>
+          
+          {isDropdownOpen && (
+            <div 
+              className="absolute top-full left-0 right-0 mt-1 border border-slate-200 rounded-xl shadow-xl flex flex-col py-1"
+              style={{ backgroundColor: '#ffffff', zIndex: 9999, maxHeight: '200px', overflowY: 'auto' }}
             >
-              {cat.title}
-            </button>
-          ))}
+              {questionCategories.map((cat) => (
+                <button
+                  key={cat.id}
+                  onClick={() => {
+                    setActiveCategory(cat.id);
+                    setIsDropdownOpen(false);
+                  }}
+                  style={activeCategory === cat.id ? { backgroundColor: '#2b576b', color: '#ffffff' } : {}}
+                  className={`px-3.5 py-2 text-left text-[11px] font-extrabold uppercase tracking-wider transition-colors ${
+                    activeCategory !== cat.id 
+                      ? 'text-slate-600 hover:bg-slate-50' 
+                      : ''
+                  }`}
+                >
+                  {cat.title}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         {/* List of questions in active category */}
-        <div className="flex-1 overflow-y-auto space-y-1.5 pr-1 custom-scroll">
+        <div className="flex-1 overflow-y-auto space-y-2 pr-1 custom-scroll">
           {activeCategoryData?.questions.map((q) => (
             <button
               key={q.id}
               onClick={() => handleSelectQuestion(q)}
               disabled={isLoading}
-              className="w-full text-left p-2 rounded-lg text-[11px] font-bold transition-all disabled:opacity-55 flex items-center justify-between"
-              style={{ background: '#f8fafc', border: '1px solid #f1f5f9', color: '#334155' }}
+              className="w-full text-left p-2.5 rounded-xl text-[11px] font-bold transition-all disabled:opacity-55 flex items-center justify-between hover:scale-[1.01] active:scale-[0.99]"
+              style={{ background: '#f8fafc', border: '1px solid #e2e8f0', color: '#334155', boxShadow: '0 1px 2px rgba(0,0,0,0.02)' }}
             >
-              <span>{q.label}</span>
+              <span className="leading-relaxed pr-2">{q.label}</span>
+              <span className="text-[#2b576b] opacity-60 text-lg leading-none">→</span>
             </button>
           ))}
         </div>

@@ -19,11 +19,15 @@ def is_motorcycle_question(q):
             
     # Heuristics based on text for remaining
     textDe = q.get('textDe', '').lower()
-    if 'ihr motorrad' in textDe or 'ihr kraftrad' in textDe or 'ihr zweirad' in textDe:
+    if 'ihr motorrad' in textDe or 'ihr kraftrad' in textDe or 'ihr zweirad' in textDe or 'ihrem mofa' in textDe:
         return True
-    if 'sie als kraftradfahrer' in textDe or 'sie als motorradfahrer' in textDe:
+    if 'sie als kraftradfahrer' in textDe or 'sie als motorradfahrer' in textDe or 'beim motorradfahren' in textDe:
         return True
-    if 'hauptständer' in textDe or 'seitenständer' in textDe:
+    if 'hauptständer' in textDe or 'seitenständer' in textDe or 'motorradschutzkleidung' in textDe or 'helmvisier' in textDe:
+        return True
+    if 'motorradstiefel' in textDe or 'motorradhandschuhe' in textDe or 'integralhelm' in textDe:
+        return True
+    if 'lenkkopflager' in textDe or 'lenkungsdämpfer' in textDe:
         return True
         
     return False

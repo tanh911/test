@@ -48767,29 +48767,6 @@
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"Lái xe chậm, gác chân lên gác chân\".\nBạn nên lái xe chậm trên vùng nước lớn vì có nguy cơ bị trượt nước.\nPhương án B (\"Không phanh trước, nhấc chân lên và lái qua\") là sai. Phương án C (\"Tránh vỉa hè\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
-    "id": "2.2.03-002",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wie schnell darf ein Mofa (kein Leichtmofa) höchstens fahren?",
-    "textVi": "Tốc độ tối đa mà xe máy (không phải xe máy nhẹ) có thể di chuyển là bao nhiêu?",
-    "options": [],
-    "vocabulary": [
-      {
-        "de": "Höchstgeschwindigkeit",
-        "vi": "tốc độ tối đa"
-      },
-      {
-        "de": "Fahrrad",
-        "vi": "xe đạp"
-      }
-    ],
-    "explanationDe": "Die Höchstgeschwindigkeit eines motorisierten Fahrrads beträgt 25 km/h und 20 km/h für ein leichtes motorisiertes Fahrrad",
-    "explanationVi": "Tốc độ tối đa của xe đạp có động cơ là 25 km/h và 20 km/h đối với xe đạp có động cơ hạng nhẹ",
-    "aiExplanation": "Tốc độ tối đa của xe đạp có động cơ là 25 km/h và 20 km/h đối với xe đạp có động cơ hạng nhẹ\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
     "id": "2.2.03-005",
     "category": "Verhalten Im Strassenverkehr",
     "points": 4,
@@ -55846,44 +55823,6 @@
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"Dừng trên vai\"; **B** \"Lùi xe\"; **C** \"Quay đầu\".\nTheo StVO § 18 Đường cao tốc và Đường cao tốc: \n(7) Wenden und Rückwärtsfahren sind wordoten.\n(8) Cấm dừng lại, kể cả trên vai.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
-    "id": "2.2.21-006",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 4,
-    "image": null,
-    "video": null,
-    "textDe": "Sie wollen auf einem Mofa ein fünfjähriges Kind mitnehmen. Welche Sitzgelegenheiten sind dafür zulässig?",
-    "textVi": "Bạn muốn dắt theo một đứa trẻ năm tuổi đi xe gắn máy. Bạn có muốn làm điều đó không?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Besonderer Kindersitz mit Fußstützen",
-        "textVi": "Ghế trẻ em đặc biệt có chỗ để chân",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Gepäckträger mit Kissen",
-        "textVi": "Giá để hành lý có đệm",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "Tank mit aufgeschnalltem Polster",
-        "textVi": "Bình có đệm có đai",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Kindersitz",
-        "vi": "ghế trẻ em trên xe"
-      }
-    ],
-    "explanationDe": "Um ein Kind als Passagier zu befördern, benötigen Sie einen speziellen Kindersitz mit Fußstützen.",
-    "explanationVi": "Để vận chuyển trẻ em với tư cách hành khách, bạn cần có ghế trẻ em đặc biệt có chỗ để chân.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"Ghế trẻ em đặc biệt có chỗ để chân\".\nĐể vận chuyển trẻ em với tư cách hành khách, bạn cần có ghế trẻ em đặc biệt có chỗ để chân.\nPhương án B (\"Giá để hành lý có đệm\") là sai. Phương án C (\"Bình có đệm có đai\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
     "id": "2.2.21-007",
     "category": "Verhalten Im Strassenverkehr",
     "points": 4,
@@ -55920,44 +55859,6 @@
     "explanationDe": "Bei einem Aufprall können Personen auf den hinteren Sitzen nach vorne oder zur Seite geschleudert werden. Wenn sie nach vorne geschleudert werden, bieten die vorderen Rückenlehnen keinen ausreichenden Schutz. In der Folge sind auch Fahrer/In und Beifahrer/In gefährdet. Auch bei niedrigen Geschwindigkeiten kann es zu Verletzungen kommen.",
     "explanationVi": "Bei einem Aufprall können Personen auf den Hinteren Sitzen nach vorne oder zur Seite geschleudert werden. Nếu bị ném về phía trước, tựa lưng phía trước sẽ không cung cấp sự bảo vệ đầy đủ. Hậu quả là người lái và hành khách phía trước cũng gặp nguy hiểm. Chấn thương có thể xảy ra ngay cả ở tốc độ thấp.",
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"Chấn thương có thể xảy ra ngay cả ở tốc độ thấp\"; **B** \"Những người ngồi ở ghế trước có thể gặp nguy hiểm\"; **C** \"Những người này có thể bị văng ra khỏi xe\".\nBei einem Aufprall können Personen auf den Hinteren Sitzen nach vorne oder zur Seite geschleudert werden. Nếu bị ném về phía trước, tựa lưng phía trước sẽ không cung cấp sự bảo vệ đầy đủ. Hậu quả là người lái và hành khách phía trước cũng gặp nguy hiểm. Chấn thương có thể xảy ra ngay cả ở tốc độ thấp.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.21-008",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Worauf sollten Sie achten, wenn Sie eine weitere Person auf dem Motorrad mitnehmen?",
-    "textVi": "Bạn nên chú ý điều gì nếu đi cùng người khác trên xe máy?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Auch die weitere Person sollte Motorradschutzkleidung tragen",
-        "textVi": "Auch die weitere Person sollte Motorradschutzkleidung tragen",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Das Fahrwerk sollte entsprechend eingestellt sein",
-        "textVi": "Das Fahrwerk sollte entsprechend eingestellt sein",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Der Reifenfülldruck sollte angepasst sein",
-        "textVi": "Der Reifenfülldruck sollte angepasst sein",
-        "isCorrect": true
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Reifendruck",
-        "vi": "áp suất lốp"
-      }
-    ],
-    "explanationDe": "Wenn Sie die Belastung Ihres Motorrads erhöhen, achten Sie darauf, den Reifendruck zu erhöhen und das Fahrgestell/Fahrwerk anzupassen. Ihr Beifahrer sollte außerdem einen Helm und eine Schutzausrüstung tragen.",
-    "explanationVi": "Nếu bạn tăng tải trọng cho xe máy của mình, hãy đảm bảo tăng áp suất lốp và điều chỉnh khung xe/hệ thống treo. Hành khách của bạn cũng nên đội mũ bảo hiểm và đồ bảo hộ.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"Auch die weitere Person sollte Motorradschutzkleidung tragen\"; **B** \"Das Fahrwerk sollte entsprechend eingestellt sein\"; **C** \"Der Reifenfülldruck sollte angepasst sein\".\nNếu bạn tăng tải trọng cho xe máy của mình, hãy đảm bảo tăng áp suất lốp và điều chỉnh khung xe/hệ thống treo. Hành khách của bạn cũng nên đội mũ bảo hiểm và đồ bảo hộ.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
     "id": "2.2.21-102",
@@ -57085,98 +56986,6 @@
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"20,75 m\".\nTải trọng của xe tải kể cả rơ-moóc có thể dài tối đa 20,75 m.\nPhương án B (\"18,00 m\") là sai. Phương án C (\"24,25 m\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
-    "id": "2.2.22-008",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Auswirkung hat eine falsche Beladung auf die Fahrstabilität eines Motorrads?",
-    "textVi": "Việc tải không đúng có ảnh hưởng gì đến độ ổn định khi lái của xe máy?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Eine schwere Beladung am Heck führt bei hoher Geschwindigkeit leichter zum Flattern und Pendeln",
-        "textVi": "Tải nặng ở phía sau dẫn đến rung lắc và lắc lư ở tốc độ cao",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Eine einseitige seitliche Beladung beeinflusst das Fahrverhalten negativ",
-        "textVi": "Tải trọng một bên có ảnh hưởng tiêu cực đến hành vi lái xe",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Leichtes Gepäck im Tankrucksack begünstigt das Schleudern",
-        "textVi": "Hành lý nhẹ trong túi đựng bình xăng làm tăng nguy cơ trượt bánh",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Geschwindigkeit",
-        "vi": "tốc độ"
-      },
-      {
-        "de": "Reifen",
-        "vi": "lốp xe"
-      },
-      {
-        "de": "Bremsen",
-        "vi": "phanh xe"
-      }
-    ],
-    "explanationDe": "Durch eine zu schwere Beladung am Heck des Motorrads, wirkt zu wenig Gewicht auf den vorderen Reifen und die Lenkung. Somit kann es leichter zu Flattern und Pendeln kommen. Unterschiedlich schwer beladene Seiten wirken sich negativ auf die Stabilität und das Fahrverhalten aus. Das Motorrad neigt sich beim Bremsen oder Kurven fahren stärker auf die schwerer beladene Seite.\nLeichtes Gepäck im Tankrucksack wirkt sich nicht auf die Fahrstabilität des Motorrads aus.",
-    "explanationVi": "Nếu tải trọng phía sau xe quá nặng thì sẽ có quá ít trọng lượng dồn lên lốp trước và tay lái. Điều này có nghĩa là rung lắc và lắc lư có thể xảy ra dễ dàng hơn. Các mặt chịu tải khác nhau có tác động tiêu cực đến độ ổn định và khả năng xử lý. Khi phanh hoặc vào cua, xe nghiêng về phía nặng hơn.\nHành lý nhẹ trong túi đựng bình xăng không ảnh hưởng đến độ ổn định khi lái xe.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Tải nặng ở phía sau dẫn đến rung lắc và lắc lư ở tốc độ cao\"; **B** \"Tải trọng một bên có ảnh hưởng tiêu cực đến hành vi lái xe\".\nNếu tải trọng phía sau xe quá nặng thì sẽ có quá ít trọng lượng dồn lên lốp trước và tay lái. Điều này có nghĩa là rung lắc và lắc lư có thể xảy ra dễ dàng hơn. Các mặt chịu tải khác nhau có tác động tiêu cực đến độ ổn định và khả năng xử lý. Khi phanh hoặc vào cua, xe nghiêng về phía nặng hơn.\nHành lý nhẹ trong túi đựng bình xăng không ảnh hưởng đến độ ổn định khi lái xe.\nPhương án C (\"Hành lý nhẹ trong túi đựng bình xăng làm tăng nguy cơ trượt bánh\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.22-009",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Was kann bei voller Beladung eines Kraftrads erforderlich sein?",
-    "textVi": "Cần những gì khi xe máy chất đầy đồ?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ein Anpassen des Reifenfülldrucks",
-        "textVi": "Điều chỉnh áp suất lốp",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Ein Einstellen des Fahrwerks",
-        "textVi": "Điều chỉnh khung xe",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Ein Einstellen der Rückspiegel",
-        "textVi": "Điều chỉnh gương chiếu hậu",
-        "isCorrect": true
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Kraftrad",
-        "vi": "xe máy"
-      },
-      {
-        "de": "Reifen",
-        "vi": "lốp xe"
-      },
-      {
-        "de": "Rückspiegel",
-        "vi": "gương chiếu hậu trong"
-      }
-    ],
-    "explanationDe": "Ist das Kraftrad voll beladen, übt die Beladung mehr Druck auf die Reifen aus. Du solltest deshalb den Reifenfülldruck prüfen.\nDurch das Gewicht der Beladung könnte das Fahrwerk weiter nach unten gedrückt werden und muss deshalb neu eingestellt werden.\nSteht die Beladung über das Kraftrad hinaus, solltest du auch die Rückspiegel neu einstellen.",
-    "explanationVi": "Nếu xe máy chở đầy tải, tải trọng sẽ gây áp lực lên lốp nhiều hơn. Vì vậy bạn nên kiểm tra áp suất lốp.\nTrọng lượng của tải trọng có thể đẩy khung xe xuống sâu hơn và do đó cần phải điều chỉnh lại.\nNếu tải trọng vượt quá xe, bạn cũng nên chỉnh lại gương chiếu hậu.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"Điều chỉnh áp suất lốp\"; **B** \"Điều chỉnh khung xe\"; **C** \"Điều chỉnh gương chiếu hậu\".\nNếu xe máy chở đầy tải, tải trọng sẽ gây áp lực lên lốp nhiều hơn. Vì vậy bạn nên kiểm tra áp suất lốp.\nTrọng lượng của tải trọng có thể đẩy khung xe xuống sâu hơn và do đó cần phải điều chỉnh lại.\nNếu tải trọng vượt quá xe, bạn cũng nên chỉnh lại gương chiếu hậu.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
     "id": "2.2.22-101",
     "category": "Verhalten Im Strassenverkehr",
     "points": 2,
@@ -58298,39 +58107,6 @@
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Áo khoác phù hợp\"; **B** \"Quần phù hợp\".\nÁo khoác, quần dài và ủng phù hợp là một trong những trang bị an toàn có thể bảo vệ bạn trong trường hợp xảy ra tai nạn và thương tích. Giày thể thao không phải là thiết bị bảo hộ.\nPhương án C (\"Giày thể thao\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
-    "id": "2.2.23-010",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Warum soll man beim Motorradfahren geeignete Stiefel tragen?",
-    "textVi": "Tại sao bạn nên mang ủng phù hợp khi đi xe máy?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Weil bereits beim Umkippen im Stand erhebliche Fußverletzungen auftreten können",
-        "textVi": "Bởi vì chấn thương bàn chân đáng kể có thể xảy ra ngay cả khi bị lật khi đang đứng yên",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Weil durch Witterungseinflüsse Unterkühlungen mit Gesundheitsschäden möglich sind",
-        "textVi": "Bởi vì ảnh hưởng của thời tiết có thể gây hạ thân nhiệt gây tổn hại cho sức khỏe",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Weil der Luftwiderstand verringert wird",
-        "textVi": "Do sức cản của không khí giảm",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [],
-    "explanationDe": "Stiefel reduzieren den Luftwiderstand nicht. Geeignete Stiefel schützen Sie vor Verletzungen und Unterkühlung.",
-    "explanationVi": "Ủng không làm giảm sức cản không khí. Những đôi ủng phù hợp sẽ bảo vệ bạn khỏi bị thương và hạ thân nhiệt.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Bởi vì chấn thương bàn chân đáng kể có thể xảy ra ngay cả khi bị lật khi đang đứng yên\"; **B** \"Bởi vì ảnh hưởng của thời tiết có thể gây hạ thân nhiệt gây tổn hại cho sức khỏe\".\nỦng không làm giảm sức cản không khí. Những đôi ủng phù hợp sẽ bảo vệ bạn khỏi bị thương và hạ thân nhiệt.\nPhương án C (\"Do sức cản của không khí giảm\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
     "id": "2.2.23-014",
     "category": "Verhalten Im Strassenverkehr",
     "points": 2,
@@ -58405,39 +58181,6 @@
     "explanationDe": "Wenn Sie im Stillstand stehen, benutzen Sie Ihre Bremsen, um sicherzustellen, dass das System korrekt funktioniert (sowohl die Bremsübertragung, die Verbindung als auch die Bremsen selbst)",
     "explanationVi": "Khi đứng yên, hãy sử dụng phanh để đảm bảo hệ thống hoạt động chính xác (cả bộ truyền động phanh, kết nối và phanh)",
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"hộp số cơ khí và các bộ phận kết nối đều hoạt động\"; **B** \"hệ thống phanh thủy lực được siết chặt\".\nKhi đứng yên, hãy sử dụng phanh để đảm bảo hệ thống hoạt động chính xác (cả bộ truyền động phanh, kết nối và phanh)\nPhương án C (\"giảm tốc độ phanh là đủ\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.23-018",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Folgen hat ein stark zerkratztes Helmvisier?",
-    "textVi": "Mũ bảo hiểm bị trầy xước nặng sẽ gây ra hậu quả gì?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Man wird stärker als sonst geblendet",
-        "textVi": "Bạn bị mù nhiều hơn bình thường",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Die eigene Sicht wird beeinträchtigt",
-        "textVi": "Tầm nhìn của chính bạn bị suy giảm",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Bei Tageslicht ergeben sich keine negativen Folgen",
-        "textVi": "Không có hậu quả tiêu cực nào trong ánh sáng ban ngày",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [],
-    "explanationDe": "Ein stark zerkratztes Helmvisier beeinträchtigt Ihre Sicht und lässt das Licht mit der Gefahr der Blendung intensiver sehen.",
-    "explanationVi": "Tấm che mặt của mũ bảo hiểm bị trầy xước nặng sẽ làm giảm tầm nhìn của bạn và khiến bạn nhìn thấy ánh sáng rõ hơn và có nguy cơ bị chói.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Bạn bị mù nhiều hơn bình thường\"; **B** \"Tầm nhìn của chính bạn bị suy giảm\".\nTấm che mặt của mũ bảo hiểm bị trầy xước nặng sẽ làm giảm tầm nhìn của bạn và khiến bạn nhìn thấy ánh sáng rõ hơn và có nguy cơ bị chói.\nPhương án C (\"Không có hậu quả tiêu cực nào trong ánh sáng ban ngày\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
     "id": "2.2.23-019",
@@ -58831,81 +58574,6 @@
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"Bởi vì chúng hẹp hơn ô tô\"; **B** \"Bởi vì các xe máy tiếp cận nhau rất nhanh khi tăng tốc cao\"; **C** \"Bởi vì đoàn xe đôi khi di chuyển với trang phục kín đáo\".\nXe máy rất dễ bị bỏ sót vì chúng nhỏ, thậm chí còn hơn thế khi chúng chạy nhanh và mặc quần áo khó nhìn thấy.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
-    "id": "2.2.23-044",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Was ist zu erwarten, wenn Sie beim Motorradfahren keine auffällige Motorrad-Sicherheitsbekleidung tragen?",
-    "textVi": "Có phải bạn đang làm điều đó, wenn Sie beim Motorradfahren keine auffällige Motorrad-Sicherheitsbekleidung tragen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ich bin schlechter erkennbar",
-        "textVi": "Tôi ít được nhận ra hơn",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Ich habe ein erhöhtes Unfallrisiko",
-        "textVi": "Tôi có nguy cơ xảy ra tai nạn cao hơn",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Ich habe keine Nachteile zu erwarten",
-        "textVi": "Tôi không phải đối mặt với bất kỳ bất lợi nào",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [],
-    "explanationDe": "Wenn Sie keine gut sichtbare Kleidung (auffällige Kleidung) tragen, sind Sie für andere Fahrer und Personen auf der Straße weniger sichtbar und haben daher ein höheres Unfallrisiko.",
-    "explanationVi": "Nếu bạn không mặc quần áo dễ nhìn thấy (quần áo dễ thấy), bạn sẽ khó bị những người lái xe khác và những người trên đường nhìn thấy và do đó có nguy cơ xảy ra tai nạn cao hơn.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Tôi ít được nhận ra hơn\"; **B** \"Tôi có nguy cơ xảy ra tai nạn cao hơn\".\nNếu bạn không mặc quần áo dễ nhìn thấy (quần áo dễ thấy), bạn sẽ khó bị những người lái xe khác và những người trên đường nhìn thấy và do đó có nguy cơ xảy ra tai nạn cao hơn.\nPhương án C (\"Tôi không phải đối mặt với bất kỳ bất lợi nào\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.23-045",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Weshalb ist das Tragen einer Motorrad-Sicherheitsbekleidung während der Fahrt dringend geboten?",
-    "textVi": "Tại sao việc mặc quần áo an toàn khi lái xe mô tô là điều cần thiết khẩn cấp?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Bei einem Sturz können Verletzungen vermindert werden",
-        "textVi": "Bei einem Sturz können Verletzungen vermindert werden",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Bei Regen kann Aquaplaning verhindert werden",
-        "textVi": "Bei Regen kann Aquaplaning verhindert werden",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "Beim Umfallen wird das Motorrad vor Beschädigungen geschützt",
-        "textVi": "Beim Umfallen wird das Motorrad vor Beschädigungen geschützt",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Aquaplaning",
-        "vi": "hiện tượng trượt nước"
-      },
-      {
-        "de": "Regen",
-        "vi": "mưa"
-      }
-    ],
-    "explanationDe": "Motorradschutzkleidung schützt Sie bei einem Unfall vor Verletzungen. Es reduziert weder das Aquaplaning noch schützt es das Motorrad.",
-    "explanationVi": "Quần áo bảo hộ xe máy bảo vệ bạn khỏi bị thương trong trường hợp xảy ra tai nạn. Nó không làm giảm hiện tượng aquaplaning cũng như không bảo vệ xe máy.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"Bei einem Sturz können Verletzungen vermindert werden\".\nQuần áo bảo hộ xe máy bảo vệ bạn khỏi bị thương trong trường hợp xảy ra tai nạn. Nó không làm giảm hiện tượng aquaplaning cũng như không bảo vệ xe máy.\nPhương án B (\"Bei Regen kann Aquaplaning verhindert werden\") là sai. Phương án C (\"Beim Umfallen wird das Motorrad vor Beschädigungen geschützt\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
     "id": "2.2.23-046",
     "category": "Verhalten Im Strassenverkehr",
     "points": 4,
@@ -59021,72 +58689,6 @@
     "explanationDe": "Du solltest besonders auf spielende Kinder am Fahrzeug achten. Auf das mögliche Ausschwenken deines Fahrzeugs und auf den fließenden Verkehr. Alle 3 sind richtig.",
     "explanationVi": "Bạn nên đặc biệt chú ý đến trẻ em đang chơi đùa trên xe. Về khả năng xoay xe của bạn và về luồng giao thông. Cả 3 đều đúng.",
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"Về trẻ em đang chơi trên xe\"; **B** \"Khi đang di chuyển trên đường\"; **C** \"Khi xe của tôi có thể bị lắc lư\".\nBạn nên đặc biệt chú ý đến trẻ em đang chơi đùa trên xe. Về khả năng xoay xe của bạn và về luồng giao thông. Cả 3 đều đúng.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.23-049",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Warum ist das Fahren ohne Motorradschutzkleidung riskant?",
-    "textVi": "Tại sao lái xe mà không có quần áo bảo hộ xe máy lại nguy hiểm?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "eine erhöhte Verletzungsgefahr",
-        "textVi": "tăng nguy cơ chấn thương",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "ein geringerer Schutz vor Witterungseinflüssen",
-        "textVi": "ít khả năng bảo vệ trước tác động của thời tiết",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "ein Versicherungsnachteil im Schadensfall",
-        "textVi": "bất lợi về bảo hiểm trong trường hợp bị hư hỏng",
-        "isCorrect": true
-      }
-    ],
-    "vocabulary": [],
-    "explanationDe": "Das Tragen von Motorradschutzkleidung verringert das Verletzungsrisiko bei Unfällen und schützt Sie auch vor Witterungseinflüssen. Im Falle eines Unfalls wird der Versicherungsschutz reduziert, wenn Sie keine Schutzkleidung tragen.",
-    "explanationVi": "Mặc quần áo bảo hộ khi đi mô tô giúp giảm nguy cơ chấn thương khi xảy ra tai nạn và cũng bảo vệ bạn khỏi các yếu tố thời tiết. Trong trường hợp xảy ra tai nạn, bảo hiểm sẽ bị giảm nếu bạn không mặc quần áo bảo hộ.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"tăng nguy cơ chấn thương\"; **B** \"ít khả năng bảo vệ trước tác động của thời tiết\"; **C** \"bất lợi về bảo hiểm trong trường hợp bị hư hỏng\".\nMặc quần áo bảo hộ khi đi mô tô giúp giảm nguy cơ chấn thương khi xảy ra tai nạn và cũng bảo vệ bạn khỏi các yếu tố thời tiết. Trong trường hợp xảy ra tai nạn, bảo hiểm sẽ bị giảm nếu bạn không mặc quần áo bảo hộ.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.23-050",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Warum sollen Sie Motorradschutzkleidung tragen, die farblich auffällig ist?",
-    "textVi": "Tại sao bạn nên mặc quần áo bảo hộ xe máy có màu sắc nổi bật?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Weil ich damit für andere besser zu erkennen bin",
-        "textVi": "Weil ich damit für andere besser zu erkennen bin",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Weil dadurch das Unfallrisiko verringert wird",
-        "textVi": "Weil Dadurch das Unfallrisiko verringert wird",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Weil diese bei Ausfall der Fahrzeugbeleuchtung die Heimfahrt ermöglicht",
-        "textVi": "Weil diese bei Ausfall der Fahrzeugbeleuchtung die Heimfahrt ermöglicht",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [],
-    "explanationDe": "Wenn Sie gut sichtbare Farben tragen, sind Sie leichter zu sehen und verringern somit das Unfallrisiko.",
-    "explanationVi": "Mặc màu sắc dễ nhìn giúp bạn dễ nhìn hơn, giảm nguy cơ tai nạn.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Weil ich damit für andere besser zu erkennen bin\"; **B** \"Weil Dadurch das Unfallrisiko verringert wird\".\nMặc màu sắc dễ nhìn giúp bạn dễ nhìn hơn, giảm nguy cơ tai nạn.\nPhương án C (\"Weil diese bei Ausfall der Fahrzeugbeleuchtung die Heimfahrt ermöglicht\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
     "id": "2.2.23-052",
@@ -59210,110 +58812,6 @@
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"thông báo cho cơ quan đăng ký về việc thay đổi chủ sở hữu\"; **B** \"xuất trình cho cơ quan đăng ký bằng chứng về sự tồn tại của bảo hiểm trách nhiệm đối với chiếc xe\".\nNếu bạn thay đổi chủ sở hữu, bạn không cần phải tiến hành kiểm tra tổng thể vì việc này sẽ vẫn còn hiệu lực. Bạn phải thông báo cho cơ quan đăng ký biết xe đã thay đổi chủ sở hữu và cung cấp bằng chứng về trách nhiệm bảo hiểm để cơ quan đăng ký đăng ký xe cho chủ sở hữu mới.\nPhương án C (\"thường tiến hành kiểm tra tổng thể khi chủ sở hữu thay đổi\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
-    "id": "2.2.23-055",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie sollten Ihr Helmvisier regelmäßig kontrollieren. Warum sollten Sie es bei Kratzern austauschen?",
-    "textVi": "Bạn nên kiểm tra tấm che mũ bảo hiểm của mình thường xuyên. Tại sao bạn nên thay thế nếu nó bị trầy xước?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Weil ich sonst bei Dunkelheit leichter geblendet werde",
-        "textVi": "Bởi vì nếu không tôi sẽ dễ bị mù hơn trong bóng tối",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Weil meine Sicht sonst eingeschränkt ist",
-        "textVi": "Bởi vì tầm nhìn của tôi sẽ bị hạn chế",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Weil mein Gesicht ständig zu erkennen sein sollte",
-        "textVi": "Bởi vì khuôn mặt của tôi luôn được nhìn thấy",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Dunkelheit",
-        "vi": "bóng tối, điều kiện thiếu sáng"
-      }
-    ],
-    "explanationDe": "Ein stark zerkratztes Helmvisier vermindert Ihre Sicht und lässt das Licht intensiver erscheinen, mit dem Risiko, geblendet zu werden.",
-    "explanationVi": "Tấm che mũ bảo hiểm bị trầy xước nặng sẽ làm giảm tầm nhìn của bạn và khiến ánh sáng trở nên gay gắt hơn, có nguy cơ bị mù.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Bởi vì nếu không tôi sẽ dễ bị mù hơn trong bóng tối\"; **B** \"Bởi vì tầm nhìn của tôi sẽ bị hạn chế\".\nTấm che mũ bảo hiểm bị trầy xước nặng sẽ làm giảm tầm nhìn của bạn và khiến ánh sáng trở nên gay gắt hơn, có nguy cơ bị mù.\nPhương án C (\"Bởi vì khuôn mặt của tôi luôn được nhìn thấy\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.23-056",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Womit müssen Sie rechnen, wenn Sie beim Motorradfahren keine geeignete Motorradschutzkleidung tragen?",
-    "textVi": "Bạn nên mong đợi điều gì nếu không mặc quần áo bảo hộ xe máy phù hợp khi đi xe máy?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Bei einem Sturz besteht eine höhere Verletzungsgefahr für mich",
-        "textVi": "Nếu tôi ngã, tôi có nguy cơ bị thương cao hơn",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Mein Schutz vor Wettereinflüssen ist schlechter",
-        "textVi": "Khả năng bảo vệ của tôi khỏi thời tiết kém hơn",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Bei einem Unfall muss ich bei Versicherungszahlungen mit Kürzungen rechnen",
-        "textVi": "Nếu tôi gặp tai nạn, tôi sẽ phải giảm khoản thanh toán bảo hiểm",
-        "isCorrect": true
-      }
-    ],
-    "vocabulary": [],
-    "explanationDe": "Das Tragen von Motorradschutzkleidung verringert das Verletzungsrisiko bei Unfällen und schützt Sie auch vor dem Wetter. Im Falle eines Unfalls wird der Versicherungsschutz verringert, falls Sie keine Schutzkleidung tragen.",
-    "explanationVi": "Mặc quần áo bảo hộ khi đi mô tô giúp giảm nguy cơ chấn thương khi xảy ra tai nạn và cũng bảo vệ bạn khỏi thời tiết. Trong trường hợp xảy ra tai nạn, bảo hiểm sẽ bị giảm nếu bạn không mặc quần áo bảo hộ.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"Nếu tôi ngã, tôi có nguy cơ bị thương cao hơn\"; **B** \"Khả năng bảo vệ của tôi khỏi thời tiết kém hơn\"; **C** \"Nếu tôi gặp tai nạn, tôi sẽ phải giảm khoản thanh toán bảo hiểm\".\nMặc quần áo bảo hộ khi đi mô tô giúp giảm nguy cơ chấn thương khi xảy ra tai nạn và cũng bảo vệ bạn khỏi thời tiết. Trong trường hợp xảy ra tai nạn, bảo hiểm sẽ bị giảm nếu bạn không mặc quần áo bảo hộ.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.23-060",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Warum sollten Sie ein zerkratztes Helmvisier ersetzen?",
-    "textVi": "Tại sao nên thay tấm che mũ bảo hiểm bị trầy xước?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "die Sicht einschränken",
-        "textVi": "hạn chế tầm nhìn",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Blendungseffekte verstärken",
-        "textVi": "tăng độ chói",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "das Visier stärker beschlagen lassen",
-        "textVi": "làm cho tấm che mặt bị mờ hơn",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [],
-    "explanationDe": "Sie werden stark geblendet durch anderes Licht und die Sicht ist ebenfalls eingeschränkt.",
-    "explanationVi": "Bạn sẽ bị mù nghiêm trọng bởi ánh sáng khác và tầm nhìn của bạn cũng sẽ bị hạn chế.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"hạn chế tầm nhìn\"; **B** \"tăng độ chói\".\nBạn sẽ bị mù nghiêm trọng bởi ánh sáng khác và tầm nhìn của bạn cũng sẽ bị hạn chế.\nPhương án C (\"làm cho tấm che mặt bị mờ hơn\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
     "id": "2.2.23-061",
     "category": "Verhalten Im Strassenverkehr",
     "points": 4,
@@ -59347,44 +58845,6 @@
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"mũ bảo hiểm xe máy phù hợp và phù hợp\".\nMũ bảo hiểm xe máy bảo vệ bạn khỏi những chấn thương ở đầu, sau khi xảy ra tai nạn bạn cần phải thay mũ bảo hiểm.\nPhương án B (\"mũ bảo hiểm xe máy được bảo quản tốt\") là sai. Phương án C (\"mũ bảo hiểm an toàn lao động đã được thử nghiệm chính thức\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
-    "id": "2.2.23-062",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wie wird die ordnungsgemäße Funktion des Rückspiegels am Zweirad sichergestellt?",
-    "textVi": "Làm thế nào để đảm bảo chức năng thích hợp của gương chiếu hậu trên xe hai bánh?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "muss richtig eingestellt sein",
-        "textVi": "phải được điều chỉnh chính xác",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "darf nicht beschädigt sein",
-        "textVi": "không được hư hỏng",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "darf seitlich nicht über das Lenkerende hinausragen",
-        "textVi": "không được nhô ra ngoài phần cuối của tay lái",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Rückspiegel",
-        "vi": "gương chiếu hậu trong"
-      }
-    ],
-    "explanationDe": "Der Rückspiegel am Zweirad muss richtig auf den Fahrer eingestellt sein - so, dass er alle wesentlichen Verkehrsvorgänge beobachten kann. Ein beschädigter Rückspiegel gilt nicht als ordnungsgemäß funktionsfähig. Der Rückspiegel eines Motorrads kann seitlich über das Lenkerende herausragen, um die nötigen Bereiche besser abdecken zu können.",
-    "explanationVi": "Gương chiếu hậu trên xe hai bánh phải được điều chỉnh phù hợp với người lái xe - để người lái xe có thể quan sát tất cả các quá trình giao thông quan trọng. Ein beschädigter Rückspiegel mạ vàng không phù hợp với các chức năng fähig. Gương chiếu hậu của xe mô tô có thể nhô ra phía bên tay lái để có thể che phủ tốt hơn những khu vực cần thiết.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"phải được điều chỉnh chính xác\"; **B** \"không được hư hỏng\".\nGương chiếu hậu trên xe hai bánh phải được điều chỉnh phù hợp với người lái xe - để người lái xe có thể quan sát tất cả các quá trình giao thông quan trọng. Ein beschädigter Rückspiegel mạ vàng không phù hợp với các chức năng fähig. Gương chiếu hậu của xe mô tô có thể nhô ra phía bên tay lái để có thể che phủ tốt hơn những khu vực cần thiết.\nPhương án C (\"không được nhô ra ngoài phần cuối của tay lái\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
     "id": "2.2.23-063",
     "category": "Verhalten Im Strassenverkehr",
     "points": 3,
@@ -59416,194 +58876,6 @@
     "explanationDe": "Zu laute Geräusche wie z. B. zu lautes Musik hören können dazu führen das Warnsignal übertönt werden und dazu, dass man erst spät auf diese reagiert.\nAuch Ablenkungen durch Telefonieren können dazu führen, dass du Warnsignale zu spät oder gar nicht mitbekommst.",
     "explanationVi": "Những tiếng động quá lớn như B. zu lautes Musik hören können dazu führen das Warnsignal übertönt werden und dazu, dass man erst spät auf diese reagiert.\nSự xao lãng do các cuộc gọi điện thoại gây ra cũng có thể có nghĩa là bạn nhận thấy các tín hiệu cảnh báo quá muộn hoặc không hề nhận thấy.",
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Nghe nhạc lớn\"; **B** \"Bị phân tâm khi nói chuyện điện thoại\".\nNhững tiếng động quá lớn như B. zu lautes Musik hören können dazu führen das Warnsignal übertönt werden und dazu, dass man erst spät auf diese reagiert.\nSự xao lãng do các cuộc gọi điện thoại gây ra cũng có thể có nghĩa là bạn nhận thấy các tín hiệu cảnh báo quá muộn hoặc không hề nhận thấy.\nPhương án C (\"Lái xe ở tốc độ động cơ thấp\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.23-064",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welchen Vorteil bietet ein Integralhelm beim Führen eines Kraftrads?",
-    "textVi": "Mũ bảo hiểm cả mặt có lợi ích gì khi điều khiển xe máy?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Verletzungen",
-        "textVi": "Chấn thương",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Insekten",
-        "textVi": "Côn trùng",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Nässe",
-        "textVi": "Ẩm ướt",
-        "isCorrect": true
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Regen",
-        "vi": "mưa"
-      }
-    ],
-    "explanationDe": "Ein Integralhelm bietet mehr Schutz als andere Helmmodelle, da Integralhelme, auch Vollvisierhelm genannt, vollständig geschlossen sind. Das Kinn bildet mit dem Helm ein Ganzes und lässt sich nicht hochschieben, wodurch du gut gegen Verletzungen geschützt bist. Der komplette Gesichtsschutz hält Wind, Regen und Insekten von deinen Augen fern. So sind deine Augen durch das Visier gegen Wind und Wetter geschützt und deine Sicht wird nicht durch Witterungseinflüsse beschränkt.",
-    "explanationVi": "Mũ bảo hiểm full-face mang lại khả năng bảo vệ tốt hơn các mẫu mũ bảo hiểm khác vì mũ bảo hiểm full-face hay còn gọi là mũ bảo hiểm full-face được bao bọc hoàn toàn. Cằm tạo thành một tổng thể với mũ bảo hiểm và không thể bị đẩy lên, điều đó có nghĩa là bạn được bảo vệ tốt khỏi chấn thương. Der komplette Gesichtsschutz hält Wind, Regen und Insekten von deinen Augen fern. Điều này có nghĩa là mắt của bạn được tấm che bảo vệ khỏi gió và thời tiết và tầm nhìn của bạn không bị hạn chế bởi thời tiết.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"Chấn thương\"; **B** \"Côn trùng\"; **C** \"Ẩm ướt\".\nMũ bảo hiểm full-face mang lại khả năng bảo vệ tốt hơn các mẫu mũ bảo hiểm khác vì mũ bảo hiểm full-face hay còn gọi là mũ bảo hiểm full-face được bao bọc hoàn toàn. Cằm tạo thành một tổng thể với mũ bảo hiểm và không thể bị đẩy lên, điều đó có nghĩa là bạn được bảo vệ tốt khỏi chấn thương. Der komplette Gesichtsschutz hält Wind, Regen und Insekten von deinen Augen fern. Điều này có nghĩa là mắt của bạn được tấm che bảo vệ khỏi gió và thời tiết và tầm nhìn của bạn không bị hạn chế bởi thời tiết.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.23-066",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wodurch sind Sie auf dem Motorrad für andere Verkehrsteilnehmer besser sichtbar?",
-    "textVi": "Làm thế nào để những người tham gia giao thông khác trên xe máy dễ nhìn thấy bạn hơn?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ich trage auffällige Kleidung",
-        "textVi": "Tôi mặc quần áo dễ thấy",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Ich trage bei Dunkelheit Kleidung mit retro-reflektierenden Bereichen",
-        "textVi": "Tôi mặc quần áo có vùng phản chiếu trong bóng tối",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Ich fahre mit Fernlicht",
-        "textVi": "Tôi lái xe với đèn pha",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Dunkelheit",
-        "vi": "bóng tối, điều kiện thiếu sáng"
-      }
-    ],
-    "explanationDe": "Wenn du auffällige Kleidung trägst, zum Beispiel eine Motorradjacke in knalligen Farben oder eine Jacke die Licht reflektiert, bist du für andere Verkehrsteilnehmer besser sichtbar.",
-    "explanationVi": "Nếu bạn mặc quần áo bắt mắt, chẳng hạn như áo khoác mô tô sáng màu hoặc áo khoác phản chiếu ánh sáng, bạn sẽ dễ được những người tham gia giao thông khác nhìn thấy hơn.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Tôi mặc quần áo dễ thấy\"; **B** \"Tôi mặc quần áo có vùng phản chiếu trong bóng tối\".\nNếu bạn mặc quần áo bắt mắt, chẳng hạn như áo khoác mô tô sáng màu hoặc áo khoác phản chiếu ánh sáng, bạn sẽ dễ được những người tham gia giao thông khác nhìn thấy hơn.\nPhương án C (\"Tôi lái xe với đèn pha\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.23-067",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Anforderung sollten Motorradstiefel erfüllen?",
-    "textVi": "Bốt xe máy phải đáp ứng những yêu cầu gì?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "haben eine rutschhemmende Sohle",
-        "textVi": "có đế chống trượt",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "reichen über die Knöchel",
-        "textVi": "dài qua mắt cá chân",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "haben eine lockere Passform",
-        "textVi": "có độ vừa vặn rộng rãi",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [],
-    "explanationDe": "Achte auf die genaue Passform, die Stiefel sollten eng anliegen und über deine Knöchel reichen, ohne deine Bewegungsfreiheit einzuschränken.\nEbenso solltest du darauf achten, dass die Stiefel rutschfeste Sohlen haben, diese bieten eine gute Haftung an den Fußrasten.",
-    "explanationVi": "Hãy chú ý đến độ vừa vặn chính xác, đôi ủng phải vừa khít và dài qua mắt cá chân mà không hạn chế khả năng tự do di chuyển của bạn.\nBạn cũng nên đảm bảo rằng đôi ủng có đế chống trượt, giúp bám tốt vào phần gác chân.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"có đế chống trượt\"; **B** \"dài qua mắt cá chân\".\nHãy chú ý đến độ vừa vặn chính xác, đôi ủng phải vừa khít và dài qua mắt cá chân mà không hạn chế khả năng tự do di chuyển của bạn.\nBạn cũng nên đảm bảo rằng đôi ủng có đế chống trượt, giúp bám tốt vào phần gác chân.\nPhương án C (\"có độ vừa vặn rộng rãi\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.23-068",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 2,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Anforderung sollten Motorradhandschuhe erfüllen?",
-    "textVi": "Găng tay xe máy cần đáp ứng những yêu cầu gì?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "haben eine passgenaue Form",
-        "textVi": "có hình dạng vừa vặn chính xác",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "ermöglichen ein gutes Griffgefühl",
-        "textVi": "cho phép bám đường tốt",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "bestehen aus abriebfestem Material",
-        "textVi": "được làm bằng vật liệu chống mài mòn",
-        "isCorrect": true
-      }
-    ],
-    "vocabulary": [],
-    "explanationDe": "Die Motorradhandschuhe sollten eng anliegen, aber nicht zu fest sein. Deine Finger sollten leicht gebeugt sein, ohne dass der Stoff spannt.\nDie Handschuhe sollten dir ein gutes Griffgefühl bieten, um Brems- und Kupplungshebel problemlos betätigen zu können.\nWähle Motorradhandschuhe aus abriebfesten Materialien wie Leder oder speziellen Textilien, um bei einem Sturz oder einem Unfall besser vor Hautabschürfungen und Verbrennungen geschützt zu sein.",
-    "explanationVi": "Găng tay xe máy phải vừa khít nhưng không quá chật. Ngón tay của bạn phải hơi cong mà chất liệu không bị bó chặt.\nGăng tay phải giúp bạn có độ bám tốt để bạn có thể dễ dàng vận hành cần phanh và ly hợp.\nChọn găng tay xe máy làm bằng vật liệu chống mài mòn như da hoặc vải dệt đặc biệt để được bảo vệ tốt hơn khỏi trầy xước và bỏng trong trường hợp bị ngã hoặc tai nạn.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"có hình dạng vừa vặn chính xác\"; **B** \"cho phép bám đường tốt\"; **C** \"được làm bằng vật liệu chống mài mòn\".\nGăng tay xe máy phải vừa khít nhưng không quá chật. Ngón tay của bạn phải hơi cong mà chất liệu không bị bó chặt.\nGăng tay phải giúp bạn có độ bám tốt để bạn có thể dễ dàng vận hành cần phanh và ly hợp.\nChọn găng tay xe máy làm bằng vật liệu chống mài mòn như da hoặc vải dệt đặc biệt để được bảo vệ tốt hơn khỏi trầy xước và bỏng trong trường hợp bị ngã hoặc tai nạn.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.2.23-069",
-    "category": "Verhalten Im Strassenverkehr",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie fahren ein Mofa mit einer bauartbedingten Höchstgeschwindigkeit von 25 km/h. Wie müssen Sie sich vor Kopfverletzungen schützen?",
-    "textVi": "Bạn lái xe máy với tốc độ tối đa liên quan đến thiết kế là 25 km/h. Bạn muốn làm gì với Kopfverletzungen schützen?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "mit einem geeigneten und passenden Motorradhelm schützen",
-        "textVi": "bảo vệ bằng mũ bảo hiểm xe máy phù hợp và phù hợp",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "mit einem geeigneten und passenden Fahrradhelm schützen",
-        "textVi": "bảo vệ bằng mũ bảo hiểm xe đạp phù hợp và phù hợp",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "nicht schützen, wenn ich nur mit Schrittgeschwindigkeit fahre",
-        "textVi": "không bảo vệ nếu tôi chỉ đi xe với tốc độ đi bộ",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Schrittgeschwindigkeit",
-        "vi": "tốc độ đi bộ (4-7 km/h)"
-      },
-      {
-        "de": "Höchstgeschwindigkeit",
-        "vi": "tốc độ tối đa"
-      },
-      {
-        "de": "Geschwindigkeit",
-        "vi": "tốc độ"
-      }
-    ],
-    "explanationDe": "Da das Mofa über 20 km/h fahren kann, musst du einen geeigneten Motorradhelm tragen, um deinen Kopf bei der Geschwindigkeit im Straßenverkehr ausreichend zu schützen.",
-    "explanationVi": "Vì xe máy có thể di chuyển với tốc độ trên 20 km/h nên bạn phải đội mũ bảo hiểm xe máy phù hợp để bảo vệ đầu mình ở tốc độ này khi tham gia giao thông.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"bảo vệ bằng mũ bảo hiểm xe máy phù hợp và phù hợp\".\nVì xe máy có thể di chuyển với tốc độ trên 20 km/h nên bạn phải đội mũ bảo hiểm xe máy phù hợp để bảo vệ đầu mình ở tốc độ này khi tham gia giao thông.\nPhương án B (\"bảo vệ bằng mũ bảo hiểm xe đạp phù hợp và phù hợp\") là sai. Phương án C (\"không bảo vệ nếu tôi chỉ đi xe với tốc độ đi bộ\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
     "id": "2.2.23-070",
@@ -63638,44 +62910,6 @@
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Mức tiêu thụ nhiên liệu tăng\"; **B** \"Lượng khí thải ô nhiễm tăng\".\nHãy lưu ý rằng lái xe nhanh ở tốc độ cao sẽ dẫn đến mức tiêu thụ nhiên liệu cao và do đó lượng khí thải ô nhiễm cao. Điều này cũng dẫn đến nhiều tiếng ồn hơn chứ không phải mức độ tiếng ồn thấp hơn.\nPhương án C (\"Mức độ tiếng ồn giảm\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
-    "id": "2.5.01-017",
-    "category": "Umweltschutz",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wie können Sie beim Betrieb eines Kraftrads unnötigen Lärm vermeiden?",
-    "textVi": "Làm thế nào bạn có thể tránh được những tiếng ồn không cần thiết khi vận hành xe máy?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Durch die ausschließliche Verwendung von zulässigen Auspuffanlagen",
-        "textVi": "Bằng cách sử dụng độc quyền hệ thống ống xả đã được phê duyệt",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Durch hochtouriges Anfahren",
-        "textVi": "Bằng cách khởi động ở tốc độ cao",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "Durch ungleichmäßige Fahrweise",
-        "textVi": "Bằng cách lái xe không đều",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Anfahren",
-        "vi": "khởi động xe, bắt đầu lái"
-      }
-    ],
-    "explanationDe": "Unzulässige Auspuffanlagen führen zu einer höheren Lärmbelästigung. \nEine ungleichmäßige Fahrweise, wie häufiges Abbremsen und anschließend wieder starkes Beschleunigen, führt zu unnötigem Lärm.\nHochtouriges Anfahren führt zu unnötigem Lärm.",
-    "explanationVi": "Hệ thống xả trái phép dẫn đến gia tăng ô nhiễm tiếng ồn. \nKiểu lái xe không đều, chẳng hạn như phanh thường xuyên rồi tăng tốc nhanh, sẽ dẫn đến tiếng ồn không đáng có.\nKhởi động ở tốc độ cao sẽ gây ra tiếng ồn không đáng có.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"Bằng cách sử dụng độc quyền hệ thống ống xả đã được phê duyệt\".\nHệ thống xả trái phép dẫn đến gia tăng ô nhiễm tiếng ồn. \nKiểu lái xe không đều, chẳng hạn như phanh thường xuyên rồi tăng tốc nhanh, sẽ dẫn đến tiếng ồn không đáng có.\nKhởi động ở tốc độ cao sẽ gây ra tiếng ồn không đáng có.\nPhương án B (\"Bằng cách khởi động ở tốc độ cao\") là sai. Phương án C (\"Bằng cách lái xe không đều\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
     "id": "2.5.01-018",
     "category": "Umweltschutz",
     "points": 3,
@@ -65074,39 +64308,6 @@
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"không được sử dụng khi tham gia giao thông\".\nCần phải có bảo hiểm cho chiếc xe của mình, nếu không có bảo hiểm thì bạn không được phép lái nó.\nPhương án B (\"phải hủy đăng ký tại cơ quan đăng ký\") là sai. Phương án C (\"phải xuất trình cho trung tâm kiểm tra kỹ thuật\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
-    "id": "2.6.02-014",
-    "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wodurch erlischt die Betriebserlaubnis eines Mofas?",
-    "textVi": "Wodurch erlischt die Betriebserlaubnis eines Mofas?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Durch „Ausräumen“ des Schalldämpfers",
-        "textVi": "Bằng cách “dọn sạch” bộ giảm thanh",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Durch Änderung des Übersetzungsverhältnisses",
-        "textVi": "Bằng cách thay đổi tỷ số truyền",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Durch Anbringung eines zweiten Rückspiegels",
-        "textVi": "Bằng cách gắn gương chiếu hậu thứ hai",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [],
-    "explanationDe": "Änderungen, die sich auf das Verhalten Ihres Motorrads auswirken, wie z. B. Getriebeübersetzung, Schalldämpfer, können zum Erlöschen der Betriebserlaubnis führen.",
-    "explanationVi": "Những thay đổi ảnh hưởng đến hoạt động của xe máy của bạn, chẳng hạn như: B. tỷ số truyền, bộ giảm thanh, có thể dẫn đến hết hạn giấy phép lái xe.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Bằng cách “dọn sạch” bộ giảm thanh\"; **B** \"Bằng cách thay đổi tỷ số truyền\".\nNhững thay đổi ảnh hưởng đến hoạt động của xe máy của bạn, chẳng hạn như: B. tỷ số truyền, bộ giảm thanh, có thể dẫn đến hết hạn giấy phép lái xe.\nPhương án C (\"Bằng cách gắn gương chiếu hậu thứ hai\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
     "id": "2.6.02-015",
     "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
     "points": 2,
@@ -65566,52 +64767,6 @@
     "explanationDe": "Nach der technischen Veränderung eines Fahrzeugs wird bei der Begutachtung in der Regel ein Abnahmeprotokoll erstellt. Es kann jedoch auch eine Eintragung im Teil 1 der Zulassungsbescheinigung erfolgen. Das Protokoll ist durch den/die Kfz-FahrerIn während jeder Fahrt mitzuführen. Auf Verlangen muss das Protokoll beispielsweise bei einer Polizeikontrolle vorgezeigt werden.",
     "explanationVi": "Sau khi sửa đổi kỹ thuật đối với một chiếc xe, một báo cáo nghiệm thu thường được tạo ra trong quá trình kiểm tra. Tuy nhiên, bạn cũng có thể ghi vào Phần 1 của giấy chứng nhận đăng ký. Người lái xe phải mang theo khúc gỗ bên mình trong mỗi hành trình. Nếu được yêu cầu, thủ tục phải được xuất trình, chẳng hạn như tại trạm kiểm soát của cảnh sát.",
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"mang theo bên mình và nếu cần, nhờ tôi sửa phần giấy đăng ký\".\nSau khi sửa đổi kỹ thuật đối với một chiếc xe, một báo cáo nghiệm thu thường được tạo ra trong quá trình kiểm tra. Tuy nhiên, bạn cũng có thể ghi vào Phần 1 của giấy chứng nhận đăng ký. Người lái xe phải mang theo khúc gỗ bên mình trong mỗi hành trình. Nếu được yêu cầu, thủ tục phải được xuất trình, chẳng hạn như tại trạm kiểm soát của cảnh sát.\nPhương án B (\"gửi cho nhà sản xuất xe\") là sai. Phương án C (\"dán nó vào nơi được chỉ định trong giấy chứng nhận đăng ký phần II\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.6.02-037",
-    "category": "Vorschriften Ueber Den Betrieb Der Fahrzeuge",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Die bauartbedingte Höchstgeschwindigkeit eines Mofas beträgt durch eine unzulässige technische Änderung mehr als 25 km/h. Welche Folge hat die Nutzung eines solchen Mofas im öffentlichen Straßenverkehr für Sie?",
-    "textVi": "Tốc độ tối đa liên quan đến thiết kế của xe máy là hơn 25 km/h do thay đổi kỹ thuật không được phép. Việc sử dụng xe máy như vậy trên đường công cộng gây ra hậu quả gì cho bạn?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ich begehe eine Straftat wegen Fahrens ohne Fahrerlaubnis",
-        "textVi": "Tôi đang phạm tội hình sự vì lái xe không có giấy phép",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Ich begehe eine Ordnungswidrigkeit wegen Erlöschens der Betriebserlaubnis",
-        "textVi": "Tôi đang vi phạm hành chính do giấy phép lái xe của tôi hết hạn",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Keine, solange ich mit diesem Mofa nicht schneller als 25 km/h fahre",
-        "textVi": "Không, miễn là tôi không lái chiếc xe máy này nhanh hơn 25 km/h",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Höchstgeschwindigkeit",
-        "vi": "tốc độ tối đa"
-      },
-      {
-        "de": "Fahrzeug",
-        "vi": "phương tiện giao thông"
-      },
-      {
-        "de": "Fahrerlaubnis",
-        "vi": "giấy phép lái xe"
-      }
-    ],
-    "explanationDe": "Sobald Sie etwas ohne allgemeine Betriebserlaubnis oder Abnahme an Ihrem Fahrzeug verändern erlischt die Betriebserlaubnis. Da das Fahren mit einem Mofa über 25 km/h schon der Klasse AM oder höher angehört fahren Sie ohne gültiger Fahrerlaubnis.",
-    "explanationVi": "Ngay khi bạn thay đổi thứ gì đó trên xe của mình mà không có giấy phép vận hành chung hoặc được chấp nhận, giấy phép vận hành sẽ hết hạn. Vì lái xe máy với tốc độ trên 25 km/h là hạng AM trở lên nên bạn đang lái xe mà không có giấy phép lái xe hợp lệ.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Tôi đang phạm tội hình sự vì lái xe không có giấy phép\"; **B** \"Tôi đang vi phạm hành chính do giấy phép lái xe của tôi hết hạn\".\nNgay khi bạn thay đổi thứ gì đó trên xe của mình mà không có giấy phép vận hành chung hoặc được chấp nhận, giấy phép vận hành sẽ hết hạn. Vì lái xe máy với tốc độ trên 25 km/h là hạng AM trở lên nên bạn đang lái xe mà không có giấy phép lái xe hợp lệ.\nPhương án C (\"Không, miễn là tôi không lái chiếc xe máy này nhanh hơn 25 km/h\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
     "id": "2.6.02-038",
@@ -66637,44 +65792,6 @@
     "explanationDe": "Erkundigen Sie sich vor der Fahrt welche Bestimmungen im Ausland gelten.",
     "explanationVi": "Trước khi đi du lịch, hãy tìm hiểu những quy định nào được áp dụng ở nước ngoài.",
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"Áp dụng các điều kiện sử dụng đường nội thành (ví dụ: phí cầu đường trong thành phố)\"; **B** \"Có các yêu cầu về đánh dấu khi lái xe trong khu vực môi trường\"; **C** \"Áp dụng hạn chế tốc độ\".\nTrước khi đi du lịch, hãy tìm hiểu những quy định nào được áp dụng ở nước ngoài.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.7.02-004",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Wie kann sich ein defekter Lenkungsdämpfer auf das Fahrverhalten auswirken?",
-    "textVi": "Bộ giảm chấn lái bị lỗi có thể ảnh hưởng đến hành vi lái xe như thế nào?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Ein defekter Lenkungsdämpfer kann zum Flattern des Lenkers führen",
-        "textVi": "Bộ giảm chấn lái bị lỗi có thể khiến tay lái chao đảo",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Die Fahrsicherheit kann sich verschlechtern",
-        "textVi": "An toàn lái xe có thể xấu đi",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Die Fahrsicherheit wird nur bei geringer Fahrgeschwindigkeit verschlechtert",
-        "textVi": "An toàn lái xe chỉ giảm sút khi lái xe ở tốc độ thấp",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Lenkrad",
-        "vi": "vô lăng"
-      }
-    ],
-    "explanationDe": "Ein defekter Lenkungsstoßdämpfer kann das Lenkrad zum Vibrieren/Schütteln bringen und die Stabilität und Fahrtüchtigkeit Ihres Motorrads beeinträchtigen.",
-    "explanationVi": "Bộ giảm xóc lái bị lỗi có thể khiến vô lăng rung/rung và ảnh hưởng đến độ ổn định cũng như khả năng lái của xe máy của bạn.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Bộ giảm chấn lái bị lỗi có thể khiến tay lái chao đảo\"; **B** \"An toàn lái xe có thể xấu đi\".\nBộ giảm xóc lái bị lỗi có thể khiến vô lăng rung/rung và ảnh hưởng đến độ ổn định cũng như khả năng lái của xe máy của bạn.\nPhương án C (\"An toàn lái xe chỉ giảm sút khi lái xe ở tốc độ thấp\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
     "id": "2.7.02-015",
@@ -69329,48 +68446,6 @@
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Thường xuyên khi lốp nguội\"; **B** \"Ngay sau mỗi lần thay lốp\".\nBạn nên kiểm tra áp suất lốp thường xuyên khi lốp nguội và ngay sau mỗi lần thay lốp. Việc kiểm tra không nhất thiết phải được thực hiện sau mỗi chuyến đi.\nPhương án C (\"Ngay sau mỗi lần lái xe\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
-    "id": "2.7.05-004",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welche Folge kann zu hoher oder zu niedriger Luftdruck in den Reifen des Kraftrads haben?",
-    "textVi": "Áp suất không khí quá cao hoặc thấp có thể gây ra hậu quả gì trong lốp xe máy?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Das Fahrverhalten des Kraftrads verschlechtert sich",
-        "textVi": "Khả năng xử lý của xe máy kém đi",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Der Reifenverschleiß erhöht sich",
-        "textVi": "Độ mòn của lốp tăng lên",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Der Reaktionsweg verlängert sich",
-        "textVi": "Đường phản ứng kéo dài",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Reaktionsweg",
-        "vi": "quãng đường phản ứng"
-      },
-      {
-        "de": "Reifen",
-        "vi": "lốp xe"
-      }
-    ],
-    "explanationDe": "Der Reifenverschließ erhöht sich durch größere Reibung. Der Reifen verformt sich und verschlechtert dadurch das Fahrverhalten.",
-    "explanationVi": "Độ kín của lốp tăng lên do ma sát lớn hơn. Lốp bị biến dạng và do đó làm giảm hiệu suất lái xe.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Khả năng xử lý của xe máy kém đi\"; **B** \"Độ mòn của lốp tăng lên\".\nĐộ kín của lốp tăng lên do ma sát lớn hơn. Lốp bị biến dạng và do đó làm giảm hiệu suất lái xe.\nPhương án C (\"Đường phản ứng kéo dài\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
     "id": "2.7.05-005",
     "category": "Technik",
     "points": 3,
@@ -69873,82 +68948,6 @@
     "explanationDe": "Die gesetzlich vorgeschriebene Mindestprofiltiefe der Reifen beträgt 1,6 mm. Das Hauptprofil sind die Rillen in den mittleren Laufflächenbereichen.",
     "explanationVi": "Độ sâu gai lốp tối thiểu được pháp luật yêu cầu là 1,6 mm. Hình dáng chính là các rãnh ở khu vực gai giữa.",
     "aiExplanation": "Độ sâu gai lốp tối thiểu được pháp luật yêu cầu là 1,6 mm. Hình dáng chính là các rãnh ở khu vực gai giữa.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.7.06-001",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Welchen Vorteil hat ein Motorrad mit Automatischem Blockierverhinderer (ABV)?",
-    "textVi": "Ưu điểm của xe máy có hệ thống chống bó cứng tự động (ABV) là gì?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Bei Gefahrbremsungen ist die Sturzgefahr geringer",
-        "textVi": "Nguy cơ té ngã khi phanh thấp hơn",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Beim schnelleren Fahren entsteht kein höheres Unfallrisiko",
-        "textVi": "Không có nguy cơ xảy ra tai nạn cao hơn khi lái xe nhanh hơn",
-        "isCorrect": false
-      },
-      {
-        "id": "C",
-        "textDe": "Beim Bremsen ist weniger Kraftaufwand erforderlich",
-        "textVi": "Cần ít nỗ lực hơn khi phanh",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Bremsen",
-        "vi": "phanh xe"
-      }
-    ],
-    "explanationDe": "Bei Gefahrenbremsungen neigen die Räder zum Blockieren und du könntest stürzen. Ein ABV wirkt durch die Regelung des Bremsdrucks einem Blockieren der Räder entgegen und vermindert so die Sturzgefahr.",
-    "explanationVi": "Nếu bạn phanh khẩn cấp, các bánh xe có xu hướng bị bó cứng và bạn có thể bị ngã. Bằng cách điều chỉnh áp suất phanh, phanh chống bó cứng sẽ ngăn bánh xe bị bó cứng và do đó giảm nguy cơ té ngã.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"Nguy cơ té ngã khi phanh thấp hơn\".\nNếu bạn phanh khẩn cấp, các bánh xe có xu hướng bị bó cứng và bạn có thể bị ngã. Bằng cách điều chỉnh áp suất phanh, phanh chống bó cứng sẽ ngăn bánh xe bị bó cứng và do đó giảm nguy cơ té ngã.\nPhương án B (\"Không có nguy cơ xảy ra tai nạn cao hơn khi lái xe nhanh hơn\") là sai. Phương án C (\"Cần ít nỗ lực hơn khi phanh\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.7.06-002",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Sie fahren ein Motorrad mit Automatischem Blockierverhinderer (ABV). Was ist zu beachten, wenn Sie in einer Kurve bremsen müssen?",
-    "textVi": "Bạn đang lái một chiếc mô tô có hệ thống chống bó cứng tự động (ABV). Bạn nên cân nhắc điều gì nếu phải phanh ở khúc cua?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Trotz Schräglage sollte ich dosiert bremsen",
-        "textVi": "Dù đang ở tư thế nghiêng nhưng tôi nên phanh cẩn thận",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Mit regelndem ABV bleibt die Lenkfähigkeit länger erhalten",
-        "textVi": "Với hệ thống chống bó cứng phanh, khả năng đánh lái được giữ lâu hơn",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "In Schräglage nimmt die Bremskraft automatisch zu",
-        "textVi": "Khi nghiêng, lực phanh sẽ tự động tăng lên",
-        "isCorrect": false
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Bremsen",
-        "vi": "phanh xe"
-      }
-    ],
-    "explanationDe": "Der Automatische Blockierverhinderer (ABV) hilft dabei, den Bremsvorgang zu stabilisieren und das Blockieren der Räder zu verhindern.\nWeil der ABV das Blockieren der Räder verhindert, kannst du auch während des Bremsvorgangs lenken.\nTrotzdem solltest du in Schräglage dosiert bremsen, weil das Motorrad durch starkes Bremsen seitlich wegrutschen könnte.",
-    "explanationVi": "Hệ thống chống bó cứng tự động (ABV) giúp ổn định quá trình phanh và ngăn bánh xe bị bó cứng.\nVì ABS giúp bánh xe không bị bó cứng nên bạn cũng có thể đánh lái khi phanh.\nTuy nhiên, bạn nên phanh cẩn thận khi nghiêng vì xe có thể bị trượt sang một bên nếu phanh gấp.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Dù đang ở tư thế nghiêng nhưng tôi nên phanh cẩn thận\"; **B** \"Với hệ thống chống bó cứng phanh, khả năng đánh lái được giữ lâu hơn\".\nHệ thống chống bó cứng tự động (ABV) giúp ổn định quá trình phanh và ngăn bánh xe bị bó cứng.\nVì ABS giúp bánh xe không bị bó cứng nên bạn cũng có thể đánh lái khi phanh.\nTuy nhiên, bạn nên phanh cẩn thận khi nghiêng vì xe có thể bị trượt sang một bên nếu phanh gấp.\nPhương án C (\"Khi nghiêng, lực phanh sẽ tự động tăng lên\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
     "id": "2.7.06-101",
@@ -70736,44 +69735,6 @@
     "explanationDe": "Die Bremsflüssigkeit nach Vorgaben des Herstellers solltest du regelmäßig austauschen lassen, weil damit die Bremsanlage auch bei hoher Belastung funktionstüchtig bleibt, damit der Wasseranteil in der Bremsflüssigkeit nicht unzulässig hoch wird und damit die Bauteile der Bremsanlage nicht beschädigt werden.",
     "explanationVi": "Bạn nên thay dầu phanh thường xuyên theo hướng dẫn của nhà sản xuất vì điều này đảm bảo rằng hệ thống phanh vẫn hoạt động ngay cả khi chịu tải trọng cao để hàm lượng nước trong dầu phanh không cao đến mức chấp nhận được và các bộ phận của hệ thống phanh không bị hư hỏng.",
     "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"Để hệ thống phanh vẫn hoạt động ngay cả khi chịu tải cao\"; **B** \"Để hàm lượng nước trong dầu phanh không trở nên cao đến mức chấp nhận được\"; **C** \"Để các bộ phận của hệ thống phanh không bị hư hỏng\".\nBạn nên thay dầu phanh thường xuyên theo hướng dẫn của nhà sản xuất vì điều này đảm bảo rằng hệ thống phanh vẫn hoạt động ngay cả khi chịu tải trọng cao để hàm lượng nước trong dầu phanh không cao đến mức chấp nhận được và các bộ phận của hệ thống phanh không bị hư hỏng.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
-  },
-  {
-    "id": "2.7.10-001",
-    "category": "Technik",
-    "points": 3,
-    "image": null,
-    "video": null,
-    "textDe": "Was muss an einem Mofa ständig betriebsbereit sein?",
-    "textVi": "Điều gì phải hoạt động liên tục trên xe máy?",
-    "options": [
-      {
-        "id": "A",
-        "textDe": "Scheinwerfer für Dauerabblendlicht",
-        "textVi": "Đèn pha cho chùm sáng gần cố định",
-        "isCorrect": true
-      },
-      {
-        "id": "B",
-        "textDe": "Schlussleuchte",
-        "textVi": "Đèn hậu",
-        "isCorrect": true
-      },
-      {
-        "id": "C",
-        "textDe": "Rückstrahler",
-        "textVi": "Gương phản xạ",
-        "isCorrect": true
-      }
-    ],
-    "vocabulary": [
-      {
-        "de": "Scheinwerfer",
-        "vi": "đèn pha xe"
-      }
-    ],
-    "explanationDe": "Alle drei müssen auf der Straße sichtbar sein und Ihre Sicherheit garantieren.",
-    "explanationVi": "Cả ba đều phải được nhìn thấy trên đường và đảm bảo an toàn cho bạn.",
-    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B, C: **A** \"Đèn pha cho chùm sáng gần cố định\"; **B** \"Đèn hậu\"; **C** \"Gương phản xạ\".\nCả ba đều phải được nhìn thấy trên đường và đảm bảo an toàn cho bạn.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
   },
   {
     "id": "2.7.10-003",

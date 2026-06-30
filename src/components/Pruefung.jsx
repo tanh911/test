@@ -3,11 +3,12 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { questions } from '../data/questions';
 import { SVGGraphics } from './SVGGraphics';
 import { Lernen } from './Lernen';
+import { calculateExamResult, generateExamQuestions } from '../utils/examLogic';
 import { customAlert } from '../utils/customAlert';
 import { SupportModal } from './SupportModal';
 import {
   Timer, AlertTriangle, ShieldCheck, ShieldAlert,
-  Check, RefreshCw, Eye, Info, Volume2, List, CheckCircle, ChevronRight, ChevronLeft, BarChart3, X
+  Check, RefreshCw, Eye, Info, Volume2, List, CheckCircle, ChevronRight, ChevronLeft, BarChart3, X, Star
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -17,31 +18,19 @@ const seedRandom = (seed) => {
 };
 
 const getQuestionTheme = (q) => {
-  // Extract base ID to handle random suffix if any
-  const baseId = typeof q.id === 'string' && q.id.includes('_') ? parseInt(q.id.split('_')[0]) : parseInt(q.id);
-  if ([2, 3, 9, 10].includes(baseId)) return 1; // Verkehrsvorschriften
-  if ([11, 12].includes(baseId)) return 2;      // Gefahrenlehre
-  if ([7, 14].includes(baseId)) return 3;       // Verhalten im Straßenverkehr
-  if ([1, 4, 5, 6, 8].includes(baseId)) return 4; // Vorfahrt & Giao lộ
-  if ([13].includes(baseId)) return 5;          // Technik & Umwelt
-  if ([15].includes(baseId)) return 6;          // Zusatzstoff
-  return 1;
+  return (typeof q.id === 'string' && q.id.startsWith('2.')) ? 2 : 1;
 };
 
 const getBogenQuestions = (bogenId) => {
-  const pools = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
+  const pools = { 1: [], 2: [] };
   questions.forEach(q => {
     const theme = getQuestionTheme(q);
     pools[theme].push(q);
   });
 
   const targets = {
-    1: 12, // ~40% (Verkehrsvorschriften)
-    2: 6,  // ~20% (Gefahrenlehre)
-    3: 5,  // ~17% (Verhalten im Straßenverkehr)
-    4: 3,  // ~10% (Vorfahrt & Giao lộ)
-    5: 3,  // ~10% (Technik & Umwelt)
-    6: 1   // ~3% (Zusatzstoff)
+    1: 20, // 20 Grundstoff
+    2: 10  // 10 Zusatzstoff (Klasse B)
   };
 
   let selected = [];
@@ -60,13 +49,14 @@ const getBogenQuestions = (bogenId) => {
         [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
       }
 
-      for (let i = 0; i < targetCount; i++) {
-        const baseQuestion = shuffledPool[i % shuffledPool.length];
+      // Avoid duplicates by slicing exactly what we need
+      const selectedForTheme = shuffledPool.slice(0, targetCount);
+      selectedForTheme.forEach((baseQuestion, idx) => {
         selected.push({
           ...baseQuestion,
-          id: `${baseQuestion.id}_exam_${themeId}_${i}`
+          id: `${baseQuestion.id}_exam_${themeId}_${idx}`
         });
-      }
+      });
     }
   });
 
@@ -145,6 +135,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
   const [showPremiumModal, setShowPremiumModal] = useState(false);
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+  const [bogenPage, setBogenPage] = useState(0);
 
   // Calculate real progress
   const totalQuestions = questions.length;
@@ -204,14 +195,15 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
     const path = location.pathname;
 
     if (path === '/pruefung' || path === '/pruefung/') {
-      if (examState !== 'idle' && examState !== 'submitted' && examState !== 'lernen_active') {
+      if (examState !== 'idle') {
         setExamState('idle');
       }
       if (selectedBogen !== null) setSelectedBogen(null);
     } else if (path === '/pruefung/musterboegen') {
-      if (examState !== 'musterboegen' && examState !== 'lernen_active') {
+      if (examState === 'idle') {
         setExamState('musterboegen');
       }
+      // Removed the reset of selectedBogen here so users can select a bogen!
     } else if (path.startsWith('/pruefung/musterbogen-')) {
       const match = path.match(/\/pruefung\/musterbogen-(\d+)/);
       const bId = match ? parseInt(match[1]) : null;
@@ -232,71 +224,11 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
   // Start the Exam
   const startExam = () => {
-    const getQuestionTheme = (q) => {
-      if ([2, 3, 9, 10].includes(q.id)) return 1; // Verkehrsvorschriften
-      if ([11, 12].includes(q.id)) return 2;      // Gefahrenlehre
-      if ([7, 14].includes(q.id)) return 3;       // Verhalten im Straßenverkehr
-      if ([1, 4, 5, 6, 8].includes(q.id)) return 4; // Vorfahrt & Giao lộ
-      if ([13].includes(q.id)) return 5;          // Technik & Umwelt
-      if ([15].includes(q.id)) return 6;          // Zusatzstoff
-      return 1;
-    };
-
-    // Phân nhóm câu hỏi
-    const pools = { 1: [], 2: [], 3: [], 4: [], 5: [], 6: [] };
-    questions.forEach(q => {
-      const theme = getQuestionTheme(q);
-      pools[theme].push(q);
-    });
-
-    // Chỉ số lượng mục tiêu cho từng nhóm (tổng = 30 câu)
-    const targets = {
-      1: 12, // ~40% (Verkehrsvorschriften)
-      2: 6,  // ~20% (Gefahrenlehre)
-      3: 5,  // ~17% (Verhalten im Straßenverkehr)
-      4: 3,  // ~10% (Vorfahrt & Giao lộ)
-      5: 3,  // ~10% (Technik & Umwelt)
-      6: 1   // ~3% (Zusatzstoff)
-    };
-
-    let selected = [];
-    Object.keys(targets).forEach(themeId => {
-      const pool = pools[themeId];
-      const targetCount = targets[themeId];
-      if (pool && pool.length > 0) {
-        // Trộn ngẫu nhiên câu hỏi gốc của nhóm đó
-        const shuffledPool = [...pool].sort(() => 0.5 - Math.random());
-        for (let i = 0; i < targetCount; i++) {
-          const baseQuestion = shuffledPool[i % shuffledPool.length];
-          selected.push({
-            ...baseQuestion,
-            id: `${baseQuestion.id}_exam_${themeId}_${i}` // ID duy nhất trong kỳ thi
-          });
-        }
-      }
-    });
-
-    // Trộn ngẫu nhiên danh sách cuối cùng của kỳ thi
-    const shuffled = selected.sort(() => 0.5 - Math.random());
-
-    setExamQuestions(shuffled);
-    setCurrentIndex(0);
-    setAnswers({});
-    setTimeLeft(1800);
-    setExamState('running');
-
-    // Start timer interval
-    if (timerRef.current) clearInterval(timerRef.current);
-    timerRef.current = setInterval(() => {
-      setTimeLeft(prev => {
-        if (prev <= 1) {
-          clearInterval(timerRef.current);
-          submitExam(shuffled, {}); // Auto submit when time runs out
-          return 0;
-        }
-        return prev - 1;
-      });
-    }, 1000);
+    const exam = generateExamQuestions(questions);
+    setLernenQuestions(exam);
+    setLernenMode('exam');
+    setExamType('simulation');
+    setExamState('lernen_active');
   };
 
   // Clear interval on unmount or when state is not running
@@ -341,59 +273,21 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
     setAnswers(activeAnswers);
     setExamState(prev => prev === 'lernen_active' ? 'lernen_active' : 'submitted');
 
-    let totalFehlerpunkte = 0;
-    let countFivePointFails = 0;
-    const details = [];
+    const result = calculateExamResult(activeQuestions, activeAnswers);
+
+    // Update progress for statistics ring
     const updatedProgress = { ...(user.progress || {}) };
     const now = new Date().toISOString();
-
-    activeQuestions.forEach(q => {
-      const selected = activeAnswers[q.id] || [];
-      const correct = q.options.filter(opt => opt.isCorrect).map(opt => opt.id);
-
-      const isCorrect =
-        selected.length === correct.length &&
-        selected.every(val => correct.includes(val));
-
-      const points = q.points;
-      const fehler = isCorrect ? 0 : points;
-      totalFehlerpunkte += fehler;
-
-      if (!isCorrect && points === 5) {
-        countFivePointFails++;
-      }
-
-      details.push({
-        question: q,
-        selected,
-        correct,
-        isCorrect,
-        fehler
-      });
-
-      // Update progress for statistics ring
-      const baseId = typeof q.id === 'string' && q.id.includes('_') ? q.id.split('_')[0] : q.id;
+    result.details.forEach(d => {
+      const baseId = typeof d.question.id === 'string' && d.question.id.includes('_') ? d.question.id.split('_')[0] : d.question.id;
       updatedProgress[baseId] = {
         answered: true,
-        isCorrect,
+        isCorrect: d.isCorrect,
         timestamp: now
       };
     });
 
-    // Failing conditions:
-    // 1. Total Fehlerpunkte > 10
-    // 2. Or if total Fehlerpunkte === 10 and they failed two 5-point questions
-    const failedDueToTwoFivePointQuestions = countFivePointFails >= 2;
-    const passed = totalFehlerpunkte <= 10 && !failedDueToTwoFivePointQuestions;
-
-    const examResult = {
-      fehlerpunkte: totalFehlerpunkte,
-      passed,
-      failedDueToTwoFivePointQuestions,
-      details
-    };
-
-    setResults(examResult);
+    setResults(result);
     setShowResultPopup(true);
 
     // Save to user history
@@ -401,8 +295,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
     examHistory.unshift({
       id: Date.now(),
       date: new Date().toLocaleDateString('vi-VN', { hour: '2-digit', minute: '2-digit' }),
-      fehlerpunkte: totalFehlerpunkte,
-      passed,
+      fehlerpunkte: result.fehlerpunkte,
+      passed: result.passed,
       questionsCount: activeQuestions.length,
       bogenId: examType === 'bogen' ? selectedBogen : null
     });
@@ -458,73 +352,91 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
         }}>
           <div className="home-container">
 
-            {/* Left Side: Large Progress Circle */}
-            <div className="relative flex justify-center items-center w-[280px] h-[280px] flex-shrink-0 animate-fade-in">
-              <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
-                {/* Outer gray base */}
-                <circle cx="100" cy="100" r="95" fill="#e5ebf0" />
+            {/* Left Side: Progress Circle + Legend */}
+            <div className="flex flex-col items-center gap-6">
+              <div className="relative flex justify-center items-center w-[280px] h-[280px] flex-shrink-0 animate-fade-in">
+                <svg viewBox="0 0 200 200" className="w-full h-full transform -rotate-90">
+                  {/* Outer gray base */}
+                  <circle cx="100" cy="100" r="95" fill="#e5ebf0" />
 
-                {/* Track Backgrounds */}
-                <circle cx="100" cy="100" r="80" fill="none" stroke="#d9dedf" strokeWidth="12" />
-                <circle cx="100" cy="100" r="66" fill="none" stroke="#d9dedf" strokeWidth="12" />
-                <circle cx="100" cy="100" r="52" fill="none" stroke="#d9dedf" strokeWidth="12" />
+                  {/* Track Backgrounds */}
+                  <circle cx="100" cy="100" r="80" fill="none" stroke="#d9dedf" strokeWidth="12" />
+                  <circle cx="100" cy="100" r="66" fill="none" stroke="#d9dedf" strokeWidth="12" />
+                  <circle cx="100" cy="100" r="52" fill="none" stroke="#d9dedf" strokeWidth="12" />
 
-                {/* Outer Green Ring: Fit für Prüfung */}
-                <circle
-                  cx="100" cy="100" r="80"
-                  fill="none"
-                  stroke="#7cb342"
-                  strokeWidth="12"
-                  strokeLinecap="round"
-                  strokeDasharray={2 * Math.PI * 80}
-                  strokeDashoffset={2 * Math.PI * 80 - (animatedFit / 100) * (2 * Math.PI * 80)}
-                  style={{
-                    transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    opacity: animatedFit > 0 ? 1 : 0
-                  }}
-                />
+                  {/* Outer Green Ring: Fit für Prüfung */}
+                  <circle
+                    cx="100" cy="100" r="80"
+                    fill="none"
+                    stroke="#7cb342"
+                    strokeWidth="12"
+                    strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 80}
+                    strokeDashoffset={2 * Math.PI * 80 - (animatedFit / 100) * (2 * Math.PI * 80)}
+                    style={{
+                      transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      opacity: animatedFit > 0 ? 1 : 0
+                    }}
+                  />
 
-                {/* Middle Yellow Ring: Mind. 1x geübt */}
-                <circle
-                  cx="100" cy="100" r="66"
-                  fill="none"
-                  stroke="#fbc02d"
-                  strokeWidth="12"
-                  strokeLinecap="round"
-                  strokeDasharray={2 * Math.PI * 66}
-                  strokeDashoffset={2 * Math.PI * 66 - (animatedAnswered / 100) * (2 * Math.PI * 66)}
-                  style={{
-                    transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    opacity: animatedAnswered > 0 ? 1 : 0
-                  }}
-                />
+                  {/* Middle Yellow Ring: Mind. 1x geübt */}
+                  <circle
+                    cx="100" cy="100" r="66"
+                    fill="none"
+                    stroke="#fbc02d"
+                    strokeWidth="12"
+                    strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 66}
+                    strokeDashoffset={2 * Math.PI * 66 - (animatedAnswered / 100) * (2 * Math.PI * 66)}
+                    style={{
+                      transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      opacity: animatedAnswered > 0 ? 1 : 0
+                    }}
+                  />
 
-                {/* Inner Red Ring: Zuletzt falsch */}
-                <circle
-                  cx="100" cy="100" r="52"
-                  fill="none"
-                  stroke="#e53935"
-                  strokeWidth="12"
-                  strokeLinecap="round"
-                  strokeDasharray={2 * Math.PI * 52}
-                  strokeDashoffset={2 * Math.PI * 52 - (animatedWrong / 100) * (2 * Math.PI * 52)}
-                  style={{
-                    transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
-                    opacity: animatedWrong > 0 ? 1 : 0
-                  }}
-                />
+                  {/* Inner Red Ring: Zuletzt falsch */}
+                  <circle
+                    cx="100" cy="100" r="52"
+                    fill="none"
+                    stroke="#e53935"
+                    strokeWidth="12"
+                    strokeLinecap="round"
+                    strokeDasharray={2 * Math.PI * 52}
+                    strokeDashoffset={2 * Math.PI * 52 - (animatedWrong / 100) * (2 * Math.PI * 52)}
+                    style={{
+                      transition: 'stroke-dashoffset 1.2s cubic-bezier(0.4, 0, 0.2, 1)',
+                      opacity: animatedWrong > 0 ? 1 : 0
+                    }}
+                  />
 
-                {/* Inner White Center */}
-                <circle cx="100" cy="100" r="45" fill="white" />
-              </svg>
+                  {/* Inner White Center */}
+                  <circle cx="100" cy="100" r="45" fill="white" />
+                </svg>
 
-              {/* Center Text overlay */}
-              <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <div style={{ fontSize: 'calc(36px * var(--text-scale, 1))', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px' }}>{fitPercent.toFixed(1)}%</div>
-                <div style={{ fontSize: 'calc(12px * var(--text-scale, 1))', color: '#546e7a', marginTop: '6px', fontWeight: '500' }}>
-                  {t.fit}
+                {/* Center Text overlay */}
+                <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
+                  <div style={{ fontSize: 'calc(36px * var(--text-scale, 1))', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px' }}>{fitPercent.toFixed(1)}%</div>
+                  <div style={{ fontSize: 'calc(12px * var(--text-scale, 1))', color: '#546e7a', marginTop: '6px', fontWeight: '500' }}>
+                    {t.fit}
+                  </div>
+                  <BarChart3 size={18} color="#546e7a" className="mt-1.5" />
                 </div>
-                <BarChart3 size={18} color="#546e7a" className="mt-1.5" />
+              </div>
+
+              {/* Legend */}
+              <div className="flex justify-center gap-5 mt-1 pb-4">
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: '#7cb342', boxShadow: '0 2px 4px rgba(124, 179, 66, 0.3)' }} />
+                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2' }}>Đã học tốt</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: '#fbc02d', boxShadow: '0 2px 4px rgba(251, 192, 45, 0.3)' }} />
+                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2' }}>Đang học</span>
+                </div>
+                <div className="flex flex-col items-center gap-1.5">
+                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: '#e53935', boxShadow: '0 2px 4px rgba(229, 57, 53, 0.3)' }} />
+                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2' }}>Hay sai</span>
+                </div>
               </div>
             </div>
 
@@ -535,17 +447,9 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
               <div className="flex items-center gap-4 mb-2">
                 <button
                   onClick={() => navigate('/')}
-                  style={{
-                    width: '32px', height: '32px',
-                    background: '#2b576b',
-                    color: 'white',
-                    border: 'none',
-                    borderRadius: '6px',
-                    display: 'flex', alignItems: 'center', justifyContent: 'center',
-                    cursor: 'pointer'
-                  }}
+                  className="w-10 h-10 rounded-full bg-white shadow-sm flex items-center justify-center text-gray-700 hover:bg-gray-50 transition-all border border-gray-200 shrink-0"
                 >
-                  <ChevronLeft size={20} strokeWidth={2.5} />
+                  <ChevronLeft size={24} strokeWidth={2} />
                 </button>
                 <div style={{ fontSize: 'calc(22px * var(--text-scale, 1))', color: '#546e7a', fontWeight: '400' }}>
                   {t.pruefung}
@@ -570,7 +474,11 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 </button>
 
                 <button
-                  onClick={() => navigate('/pruefung/simulation')}
+                  onClick={() => {
+                    setExamType('simulation');
+                    startExam();
+                    navigate('/pruefung/simulation');
+                  }}
                   style={{
                     display: 'flex', alignItems: 'center', justifyItems: 'space-between',
                     background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
@@ -585,7 +493,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 </button>
 
                 <button
-                  onClick={() => customAlert('Chức năng sẽ sớm ra mắt.', 'info')}
+                  onClick={() => navigate('/training/fragen?filter=errors')}
                   style={{
                     display: 'flex', alignItems: 'center', justifyItems: 'space-between',
                     background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
@@ -594,13 +502,13 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 >
                   <div className="flex items-center gap-4">
                     <CheckCircle size={22} className="text-[#7cb342]" />
-                    <span style={{ fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '400' }}>1 {t.letzteFehler}</span>
+                    <span style={{ fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '400' }}>{wrongCount} {t.letzteFehler}</span>
                   </div>
                   <ChevronRight size={18} opacity={0.5} />
                 </button>
 
                 <button
-                  onClick={() => customAlert('Chức năng sẽ sớm ra mắt.', 'info')}
+                  onClick={() => navigate('/training/fragen?filter=marked')}
                   style={{
                     display: 'flex', alignItems: 'center', justifyItems: 'space-between',
                     background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
@@ -608,8 +516,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                   }}
                 >
                   <div className="flex items-center gap-4">
-                    <CheckCircle size={22} className="text-[#7cb342]" />
-                    <span style={{ fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '400' }}>0 {t.markierteFragen}</span>
+                    <Star size={22} className="text-[#fbc02d]" />
+                    <span style={{ fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '400' }}>{user?.savedQuestions?.length || 0} {t.markierteFragen}</span>
                   </div>
                   <ChevronRight size={18} opacity={0.5} />
                 </button>
@@ -624,13 +532,16 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
   if (examState === 'musterboegen') {
     const boegen = Array.from({ length: 66 }, (_, i) => i + 1);
+    const itemsPerPage = 22;
+    const totalPages = Math.ceil(boegen.length / itemsPerPage);
+    const currentBoegen = boegen.slice(bogenPage * itemsPerPage, (bogenPage + 1) * itemsPerPage);
 
     // Get attempts from user history for a specific bogen
     const getBogenAttempts = (bId) => {
       const history = user?.examHistory || [];
       const bogenHistory = history.filter(h => h.bogenId === bId);
-      // limit to 3, oldest first (left-to-right)
-      const attempts = bogenHistory.slice(0, 3).reverse();
+      // limit to 3, newest first (left-to-right)
+      const attempts = bogenHistory.slice(0, 3);
       while (attempts.length < 3) {
         attempts.push(null);
       }
@@ -727,11 +638,35 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
         <div className="flex-1 p-3 md:p-4 flex flex-col justify-start items-center overflow-hidden">
           <div className="w-full max-w-6xl h-full bg-white border border-gray-200 rounded-lg shadow-sm flex flex-col overflow-hidden">
 
-            {/* Title Header */}
+            {/* Pagination Header */}
+            <div className="flex items-center justify-between p-3 border-b border-gray-100 bg-[#f8fafc]">
+              <button
+                disabled={bogenPage === 0}
+                onClick={() => setBogenPage(p => p - 1)}
+                className={`p-2 rounded-full ${bogenPage === 0 ? 'text-gray-300' : 'text-[#24405E] hover:bg-gray-200'}`}
+              >
+                <ChevronLeft size={20} />
+              </button>
+              <div className="flex flex-col items-center">
+                <span className="text-sm font-bold text-[#24405E]">
+                  Trang {bogenPage + 1} / {totalPages}
+                </span>
+                <span className="text-xs text-gray-500 font-medium">
+                  (Bogen {bogenPage * itemsPerPage + 1} - {Math.min((bogenPage + 1) * itemsPerPage, 66)})
+                </span>
+              </div>
+              <button
+                disabled={bogenPage === totalPages - 1}
+                onClick={() => setBogenPage(p => p + 1)}
+                className={`p-2 rounded-full ${bogenPage === totalPages - 1 ? 'text-gray-300' : 'text-[#24405E] hover:bg-gray-200'}`}
+              >
+                <ChevronRight size={20} />
+              </button>
+            </div>
 
             {/* Grid Container */}
-            <div className="flex-1 overflow-y-auto p-4 md:p-5 bogen-responsive-grid gap-x-3 md:gap-x-6 gap-y-1.5 md:gap-y-3.5 align-middle items-center">
-              {boegen.map(b => {
+            <div className="flex-1 overflow-y-auto p-4 md:p-5 bogen-responsive-grid gap-x-3 md:gap-x-6 gap-y-1.5 md:gap-y-3.5 align-top items-start">
+              {currentBoegen.map(b => {
                 const isLocked = false;
                 const attempts = getBogenAttempts(b);
 
@@ -774,15 +709,14 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                       {/* 3 Progress Squares */}
                       <div className="flex gap-1 mt-0.5">
                         {attempts.map((attempt, index) => {
-                          let bgClass = 'bg-gray-200';
+                          let bgColor = '#e2e8f0'; // default gray
                           if (attempt) {
-                            bgClass = attempt.passed ? 'bg-green-500' : 'bg-red-500';
+                            bgColor = attempt.passed ? '#22c55e' : '#ef4444'; // green or red
                           }
                           return (
                             <div
                               key={index}
-                              style={{ width: '10px', height: '6px', borderRadius: '0.5px' }}
-                              className={bgClass}
+                              style={{ width: '10px', height: '6px', borderRadius: '1px', backgroundColor: bgColor }}
                             />
                           );
                         })}
@@ -893,414 +827,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
     );
   }
 
-  if (examState === 'running' || examState === 'submitted') {
-    const currentQ = examQuestions[currentIndex];
-    const selectedForCurrent = answers[currentQ.id] || [];
 
-    return (
-      <div className="flex flex-col h-full bg-[#E2F5E6] text-gray-900 font-sans overflow-hidden relative">
-
-        {/* Header Bar: Progress & Timer */}
-        <div className="bg-[#2C8040] text-white flex items-center justify-between px-4 py-3 shrink-0 border-b border-[#1E5E3A] select-none">
-          <div className="flex items-center gap-1.5 font-black font-mono text-sm">
-            <div className="w-5 h-5 rounded-full bg-white flex items-center justify-center text-[#2C8040] shadow-xs">
-              <Info className="w-3 h-3" />
-            </div>
-            <span>{t.frage} {currentIndex + 1} / {examQuestions.length}</span>
-          </div>
-
-          <div className={`flex items-center gap-1.5 px-3 py-1.5 font-mono text-xs font-black rounded-md shadow-xs ${timeLeft < 300 ? 'bg-[#D71921] text-white animate-pulse' : 'bg-[#1E5E3A] text-white'
-            }`}>
-            <Timer className="w-4 h-4" />
-            <span>{formatTime(timeLeft)}</span>
-          </div>
-
-          {examState === 'running' ? (
-            <div className="flex gap-2">
-              <button
-                onClick={() => setShowCancelConfirm(true)}
-                className="px-2.5 py-1.5 bg-white/10 hover:bg-white/20 border border-white/20 text-white font-bold rounded-md text-[10px] md:text-[11px] uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
-              >
-                {languageMode === 'vi' ? 'Hủy' : 'Abbrechen'}
-              </button>
-              <button
-                onClick={() => setShowSubmitConfirm(true)}
-                className="px-3 py-1.5 bg-[#D71921] hover:bg-[#B91C1C] text-white font-black rounded-md text-[10px] md:text-[11px] uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
-              >
-                {t.abgeben}
-              </button>
-            </div>
-          ) : (
-            <button
-              onClick={() => {
-                setShowResultPopup(false);
-                if (examType === 'bogen') {
-                  setExamState('musterboegen');
-                  navigate('/pruefung/musterboegen');
-                } else {
-                  setExamState('idle');
-                  navigate('/pruefung');
-                }
-              }}
-              className="px-3 py-1.5 bg-[#D71921] hover:bg-[#B91C1C] text-white font-black rounded-md text-[11px] uppercase tracking-wider transition-colors shadow-sm cursor-pointer"
-            >
-              {t.zurueck}
-            </button>
-          )}
-        </div>
-
-        {/* Question Navigator Grid */}
-        <div className="grid gap-1.5 p-3 bg-white/80 backdrop-blur-xs border-b border-[#BCDDC3] shrink-0" style={{ gridTemplateColumns: 'repeat(10, minmax(0, 1fr))' }}>
-          {examQuestions.map((q, i) => {
-            const hasAnswer = (answers[q.id] || []).length > 0;
-            const isActive = i === currentIndex;
-
-            let btnClass = "border-[#BCDDC3] text-gray-700 bg-white/50";
-            if (examState === 'submitted') {
-              const qCorrect = results.details.find(d => d.question.id === q.id)?.isCorrect;
-              if (qCorrect) {
-                btnClass = "border-green-600 bg-green-500 text-white";
-              } else {
-                btnClass = "border-red-600 bg-red-500 text-white";
-              }
-            } else if (hasAnswer) {
-              btnClass = "border-[#2C8040] bg-[#2C8040] text-white";
-            }
-            if (isActive) {
-              btnClass += " ring-2 ring-[#EAB308] ring-offset-1 font-black shadow-xs scale-105";
-            }
-
-            return (
-              <button
-                key={q.id}
-                onClick={() => setCurrentIndex(i)}
-                className={`py-2 rounded-lg text-xs font-black border text-center transition-all ${btnClass}`}
-              >
-                {i + 1}
-              </button>
-            );
-          })}
-        </div>
-
-        {/* Scrollable Question Body */}
-        <div className="flex-1 overflow-y-auto px-4 py-4 pb-28 no-scrollbar space-y-4">
-
-          <div className="flex justify-between items-center bg-white/60 p-3 rounded-xl border border-[#BCDDC3] text-xs shadow-2xs">
-            <span className="font-black border-2 border-[#D71921] text-[#D71921] px-2.5 py-1 bg-white rounded-lg text-xs">
-              {currentQ.points} {t.fehlerpunkte}
-            </span>
-            <button
-              onClick={() => handleSpeak(currentQ.textDe)}
-              className="p-1.5 border bg-white border-[#2C8040]/30 hover:border-[#2C8040] text-[#2C8040] rounded-md transition-colors"
-              title={languageMode === 'de' ? 'Aussprache' : (languageMode === 'vi' ? 'Phát âm' : 'Phát âm / Aussprache')}
-            >
-              <Volume2 className="w-4 h-4" />
-            </button>
-          </div>
-
-          {/* Question Text */}
-          <div className="space-y-1.5">
-            {(languageMode === 'de' || languageMode === 'both') && (
-              <h2 className="text-[17px] font-black text-gray-900 leading-snug">
-                {currentQ.textDe}
-              </h2>
-            )}
-            {(languageMode === 'vi' || languageMode === 'both') && (
-              <p className="text-[15px] text-gray-850 font-bold italic border-l-4 border-[#2C8040] pl-2.5 py-0.5 leading-relaxed bg-white/70 rounded-r-md">
-                {currentQ.textVi}
-              </p>
-            )}
-          </div>
-
-          {/* Visual Media */}
-          {currentQ.video && (
-            <div className="flex justify-center border border-[#BCDDC3] bg-black p-0.5 rounded-lg overflow-hidden shadow-2xs max-w-[220px] mx-auto">
-              <video
-                src={currentQ.video}
-                controls
-                className="w-full h-auto max-h-[100px] object-contain"
-                poster={currentQ.image || undefined}
-              />
-            </div>
-          )}
-
-          {currentQ.image && !currentQ.video && (
-            <div className="flex justify-center border border-[#BCDDC3] bg-black p-0.5 rounded-lg overflow-hidden shadow-2xs max-w-[220px] mx-auto">
-              <img
-                src={currentQ.image}
-                alt="Question Visual"
-                className="w-full h-auto max-h-[100px] object-contain"
-              />
-            </div>
-          )}
-
-          {currentQ.imageType && !currentQ.image && !currentQ.video && (
-            <div className="flex justify-center bg-white/80 p-2 rounded-lg border border-[#BCDDC3] shadow-3xs max-w-[150px] mx-auto">
-              <SVGGraphics type={currentQ.imageType} className="w-full max-w-[100px] h-auto aspect-square rounded-lg overflow-hidden border border-gray-200" />
-            </div>
-          )}
-
-          {/* Options */}
-          <div className="space-y-3 pt-1">
-            {currentQ.options.map((opt) => {
-              const isSelected = selectedForCurrent.includes(opt.id);
-
-              let cardBg = "bg-white border border-[#BCDDC3] hover:bg-gray-50";
-              let checkboxStyle = "border-2 border-gray-300 bg-white text-transparent";
-              let checkIcon = null;
-
-              if (examState === 'submitted') {
-                if (opt.isCorrect) {
-                  cardBg = "bg-green-50 border-2 border-green-600 shadow-sm";
-                  checkboxStyle = "border-2 border-green-600 bg-green-600 text-white";
-                  checkIcon = <Check className="w-5 h-5 text-white" strokeWidth={3} />;
-                } else if (isSelected && !opt.isCorrect) {
-                  cardBg = "bg-red-50 border-2 border-red-500 shadow-sm";
-                  checkboxStyle = "border-2 border-red-500 bg-red-500 text-white font-extrabold";
-                  checkIcon = <X className="w-5 h-5 text-white" strokeWidth={3} />;
-                } else {
-                  cardBg = "bg-white/70 border border-gray-200 opacity-60";
-                  checkboxStyle = "border-2 border-gray-300 bg-gray-50 text-transparent";
-                }
-              } else if (isSelected) {
-                cardBg = "bg-[#E2F5E6] border-2 border-[#2C8040] shadow-xs";
-                checkboxStyle = "border-2 border-[#2C8040] bg-[#2C8040] text-white";
-                checkIcon = (
-                  <svg className="w-5 h-5 stroke-[4px]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" d="M5 13l4 4L19 7" />
-                  </svg>
-                );
-              }
-
-              return (
-                <button
-                  key={opt.id}
-                  onClick={() => {
-                    if (examState === 'running') handleOptionClick(currentQ.id, opt.id);
-                  }}
-                  className={`w-full text-left py-3.5 px-4 flex gap-4 items-center transition-all rounded-xl shadow-3xs ${cardBg}`}
-                >
-                  <div className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 transition-colors ${checkboxStyle}`}>
-                    {checkIcon}
-                  </div>
-                  <div className="space-y-1 flex-1">
-                    {(languageMode === 'de' || languageMode === 'both') && (
-                      <p className="text-[17px] font-black text-gray-900 leading-snug">{opt.textDe}</p>
-                    )}
-                    {(languageMode === 'vi' || languageMode === 'both') && (
-                      <p className="text-[15px] font-bold text-gray-800 italic border-t border-black/5 pt-1.5 mt-1">{opt.textVi}</p>
-                    )}
-                  </div>
-                </button>
-              );
-            })}
-          </div>
-
-          {examState === 'submitted' && (
-            <div className="mt-4 p-4 bg-green-50 border border-green-200 rounded-xl shadow-xs">
-              <div className="flex items-center gap-2 mb-2">
-                <Info className="w-5 h-5 text-green-700" />
-                <h4 className="font-bold text-green-800 uppercase tracking-wider text-sm">{t.explanationTitle}</h4>
-              </div>
-              <div className="space-y-2 text-[14px] font-medium text-green-900">
-                {(languageMode === 'de' || languageMode === 'both') && currentQ.explanationDe && (
-                  <p>{currentQ.explanationDe}</p>
-                )}
-                {(languageMode === 'vi' || languageMode === 'both') && currentQ.explanationVi && (
-                  <p>{currentQ.explanationVi}</p>
-                )}
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Navigation Footer */}
-        <div className="absolute bottom-0 left-0 w-full bg-[#2C8040] border-t border-[#1E5E3A] px-4 py-4 flex justify-between items-center z-20 shadow-lg">
-          <div className="flex gap-2">
-            <button
-              onClick={() => currentIndex > 0 && setCurrentIndex(currentIndex - 1)}
-              disabled={currentIndex === 0}
-              className="w-12 h-12 flex items-center justify-center bg-white text-black border-2 border-gray-300 rounded-xl disabled:opacity-30 hover:bg-neutral-100 transition-colors font-black text-xl shadow-sm"
-            >
-              ←
-            </button>
-          </div>
-
-          <div className="bg-[#D71921] border-2 border-white text-white font-mono text-[13px] font-black px-4.5 py-2.5 rounded-lg shadow-md uppercase tracking-wider">
-            {currentQ.points} {t.fehlerpunkte}
-          </div>
-
-          <div className="flex gap-2">
-            <button
-              onClick={() => currentIndex < examQuestions.length - 1 && setCurrentIndex(currentIndex + 1)}
-              disabled={currentIndex === examQuestions.length - 1}
-              className="px-5 py-3 bg-white text-[#2C8040] hover:bg-neutral-50 font-black rounded-xl text-xs uppercase tracking-wider transition-colors disabled:opacity-30 border-2 border-gray-300 shadow-sm"
-            >
-              {t.weiter}
-            </button>
-            <button
-              onClick={() => currentIndex < examQuestions.length - 1 && setCurrentIndex(currentIndex + 1)}
-              disabled={currentIndex === examQuestions.length - 1}
-              className="w-12 h-12 flex items-center justify-center bg-white text-black border-2 border-gray-300 rounded-xl disabled:opacity-30 hover:bg-neutral-100 transition-colors font-black text-xl shadow-sm"
-            >
-              →
-            </button>
-          </div>
-        </div>
-        {/* Result Popup Overlay */}
-        {examState === 'submitted' && showResultPopup && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm px-4 animate-in fade-in duration-300" style={{ backgroundColor: 'rgba(0,0,0,0.65)' }}>
-            <div className="w-full max-w-sm shadow-2xl overflow-hidden animate-in zoom-in-95 duration-300" style={{ backgroundColor: 'white', border: '1px solid rgba(0,0,0,0.05)', borderRadius: '24px' }}>
-              <div className="px-5 pt-8 pb-6 text-center relative" style={{ backgroundColor: results.passed ? '#f0fdf4' : '#fef2f2' }}>
-                <div className="flex justify-center mb-5 relative z-10">
-                  {results.passed ? (
-                    <div className="w-20 h-20 flex items-center justify-center shadow-sm" style={{ backgroundColor: '#dcfce7', color: '#16a34a', border: '4px solid white', borderRadius: '50%' }}>
-                      <CheckCircle className="w-10 h-10" strokeWidth={2.5} />
-                    </div>
-                  ) : (
-                    <div className="w-20 h-20 flex items-center justify-center shadow-sm" style={{ backgroundColor: '#fee2e2', color: '#dc2626', border: '4px solid white', borderRadius: '50%' }}>
-                      <X className="w-10 h-10" strokeWidth={2.5} />
-                    </div>
-                  )}
-                </div>
-                <h2 className="text-[20px] font-black leading-tight mb-3 tracking-tight" style={{ color: results.passed ? '#16a34a' : '#dc2626' }}>
-                  {results.passed ? t.passed : t.failed}
-                </h2>
-
-                <div className="flex flex-col items-center p-4 mt-2 shadow-sm border border-gray-100 w-full max-w-[280px] mx-auto" style={{ backgroundColor: 'white', borderRadius: '16px' }}>
-                  <div className="text-center pb-3 border-b border-gray-100 w-full">
-                    <div className="text-[48px] leading-none font-black tracking-tighter" style={{ color: '#111827' }}>
-                      {results.fehlerpunkte}
-                    </div>
-                    <div className="text-[11px] font-bold uppercase tracking-widest mt-1.5" style={{ color: '#6b7280' }}>
-                      {t.fehlerpunkte}
-                    </div>
-                  </div>
-                  <div className="pt-3 flex justify-between items-center w-full px-2">
-                    <span className="text-[12px] font-bold uppercase tracking-wide" style={{ color: '#6b7280' }}>
-                      {languageMode === 'de' ? 'Falsche Fragen:' : (languageMode === 'vi' ? 'Số câu sai:' : 'Số câu sai:')}
-                    </span>
-                    <span className="text-[16px] font-black" style={{ color: '#dc2626' }}>
-                      {results.details?.filter(d => !d.isCorrect).length || 0}
-                      <span className="text-[13px] font-bold" style={{ color: '#9ca3af' }}> / {results.details?.length || 30}</span>
-                    </span>
-                  </div>
-                </div>
-
-                {results.failedDueToTwoFivePointQuestions && (
-                  <p className="text-[13px] font-bold mt-5 px-2 leading-relaxed" style={{ color: '#ef4444' }}>{t.failedRule5}</p>
-                )}
-              </div>
-              <div className="px-6 py-5 space-y-3" style={{ backgroundColor: 'white' }}>
-                <button
-                  onClick={() => setShowResultPopup(false)}
-                  className="w-full py-4 font-black text-[13px] uppercase tracking-wider transition-all active:scale-[0.98] shadow-sm cursor-pointer"
-                  style={{ backgroundColor: '#2C8040', color: 'white', borderRadius: '12px' }}
-                >
-                  XEM ĐÁP ÁN CHI TIẾT
-                </button>
-                <button
-                  onClick={() => {
-                    setShowResultPopup(false);
-                    if (examType === 'bogen') {
-                      setExamState('musterboegen');
-                      navigate('/pruefung/musterboegen');
-                    } else {
-                      setExamState('idle');
-                      navigate('/pruefung');
-                    }
-                  }}
-                  className="w-full py-3.5 font-bold text-[14px] transition-all active:scale-[0.98] cursor-pointer"
-                  style={{ backgroundColor: '#f3f4f6', color: '#4b5563', borderRadius: '12px' }}
-                >
-                  {t.zurueck}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-        {/* Cancel Confirmation Modal */}
-        {showCancelConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-            <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center animate-in fade-in zoom-in duration-200">
-              <div className="w-16 h-16 bg-red-100 rounded-full flex items-center justify-center text-red-600 mx-auto mb-4">
-                <Info className="w-10 h-10" />
-              </div>
-              <h2 className="text-xl font-black text-gray-900 mb-2">
-                {languageMode === 'vi' ? 'Hủy kỳ thi thử?' : 'Prüfung abbrechen?'}
-              </h2>
-              <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-                {languageMode === 'vi'
-                  ? 'Bạn có chắc chắn muốn hủy bài thi thử này? Tiến trình của bạn sẽ không được lưu.'
-                  : 'Möchten Sie die aktuelle Prüfung wirklich abbrechen? Ihr Fortschritt wird nicht gespeichert.'}
-              </p>
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    setShowCancelConfirm(false);
-                    if (timerRef.current) clearInterval(timerRef.current);
-                    timerRef.current = null;
-                    if (examType === 'bogen') {
-                      setExamState('musterboegen');
-                      navigate('/pruefung/musterboegen');
-                    } else {
-                      setExamState('idle');
-                      navigate('/pruefung');
-                    }
-                  }}
-                  className="w-full py-3.5 bg-red-600 hover:bg-red-700 text-white font-black rounded-xl text-sm uppercase tracking-wide transition-colors cursor-pointer"
-                >
-                  {languageMode === 'vi' ? 'Có, Hủy bài' : 'Ja, abbrechen'}
-                </button>
-                <button
-                  onClick={() => setShowCancelConfirm(false)}
-                  className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition-colors cursor-pointer"
-                >
-                  {languageMode === 'vi' ? 'Không, làm tiếp' : 'Nein, weiter'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Submit Confirmation Modal */}
-        {showSubmitConfirm && (
-          <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm px-4">
-            <div className="bg-white w-full max-w-sm rounded-3xl shadow-2xl p-6 text-center animate-in fade-in zoom-in duration-200">
-              <div className="w-16 h-16 bg-green-100 rounded-full flex items-center justify-center text-green-600 mx-auto mb-4">
-                <CheckCircle className="w-10 h-10" />
-              </div>
-              <h2 className="text-xl font-black text-gray-900 mb-2">
-                {languageMode === 'vi' ? 'Nộp bài thi thử?' : 'Prüfung abgeben?'}
-              </h2>
-              <p className="text-sm text-gray-600 mb-6 leading-relaxed">
-                {languageMode === 'vi'
-                  ? 'Bạn có chắc chắn muốn nộp bài thi ngay bây giờ để kiểm tra kết quả không?'
-                  : 'Möchten Sie die Prüfung wirklich abgeben, um das Ergebnis zu sehen?'}
-              </p>
-              <div className="space-y-2">
-                <button
-                  onClick={() => {
-                    setShowSubmitConfirm(false);
-                    submitExam();
-                  }}
-                  className="w-full py-3.5 bg-[#2C8040] hover:bg-[#1E5E3A] text-white font-black rounded-xl text-sm uppercase tracking-wide transition-colors cursor-pointer"
-                >
-                  {languageMode === 'vi' ? 'Có, Nộp bài' : 'Ja, abgeben'}
-                </button>
-                <button
-                  onClick={() => setShowSubmitConfirm(false)}
-                  className="w-full py-3 bg-gray-100 hover:bg-gray-200 text-gray-700 font-bold rounded-xl text-sm transition-colors cursor-pointer"
-                >
-                  {languageMode === 'vi' ? 'Không, làm tiếp' : 'Nein, weiter'}
-                </button>
-              </div>
-            </div>
-          </div>
-        )}
-      </div>
-    );
-  }
 
   if (examState === 'lernen_active') {
     return (
@@ -1310,7 +837,13 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
           onUpdateUser={onUpdateUser}
           onTriggerLogin={onTriggerLogin}
           onNavigate={(dest) => {
-            setExamState('musterboegen');
+            if (examType === 'simulation') {
+              setExamState('idle');
+              navigate('/pruefung');
+            } else {
+              setExamState('musterboegen');
+              navigate('/pruefung/musterboegen');
+            }
           }}
           languageMode={languageMode}
           predefinedQuestions={lernenQuestions}
@@ -1378,7 +911,13 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 <button
                   onClick={() => {
                     setShowResultPopup(false);
-                    setExamState('musterboegen');
+                    if (examType === 'simulation') {
+                      setExamState('idle');
+                      navigate('/pruefung');
+                    } else {
+                      setExamState('musterboegen');
+                      navigate('/pruefung/musterboegen');
+                    }
                   }}
                   className="w-full py-3.5 font-bold text-[14px] transition-all active:scale-[0.98] cursor-pointer"
                   style={{ backgroundColor: '#f3f4f6', color: '#4b5563', borderRadius: '12px' }}

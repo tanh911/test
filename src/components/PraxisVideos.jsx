@@ -6,72 +6,72 @@ const praxisCategories = [
     id: 'grundfahraufgaben',
     title: 'Bài tập cơ bản',
     videos: [
-      { id: 'v_gf1', label: 'Phanh khẩn cấp (Gefahrbremsung)', url: 'https://www.youtube.com/embed/zrj-4gwm1FU' },
-      { id: 'v_gf2', label: 'Khởi hành ngang dốc (Anfahren am Berg)', url: 'https://www.youtube.com/embed/4_0YWT1PW0s' },
-      { id: 'v_gf3', label: 'Quay đầu xe (Wenden)', url: 'https://www.youtube.com/embed/QoHtOfB86gw' }
+      { id: 'v_gf1', label: 'Phanh khẩn cấp (Gefahrbremsung)', url: 'https://www.youtube.com/embed/xqFItvT9cmw' },
+      { id: 'v_gf2', label: 'Khởi hành ngang dốc (Anfahren am Berg)', url: 'https://www.youtube.com/embed/DUF9Ot339gQ' },
+      { id: 'v_gf3', label: 'Quay đầu xe (Wenden)', url: 'https://www.youtube.com/embed/CgUjV5rAFo8' }
     ]
   },
   {
     id: 'parking',
     title: 'Đỗ xe',
     videos: [
-      { id: 'v1', label: 'Ghép ngang (Längseinparken)', url: 'https://www.youtube.com/embed/kHOFQrkDe9Q' },
-      { id: 'v2', label: 'Ghép dọc lùi (Rückwärts einparken)', url: 'https://www.youtube.com/embed/rmgtpGZnPVc' },
-      { id: 'v3', label: 'Đỗ xe tiến (Vorwärts einparken)', url: 'https://www.youtube.com/embed/kHOFQrkDe9Q' }
+      { id: 'v1', label: 'Ghép ngang (Längseinparken)', url: 'https://www.youtube.com/embed/xySkh2Q8QXM' },
+      { id: 'v2', label: 'Ghép dọc lùi (Rückwärts einparken)', url: 'https://www.youtube.com/embed/ZYzQWehjytk' },
+      { id: 'v3', label: 'Đỗ xe tiến (Vorwärts einparken)', url: 'https://www.youtube.com/embed/D-mN1hl5O44' }
     ]
   },
   {
     id: 'junctions',
     title: 'Ngã tư & Vòng xuyến',
     videos: [
-      { id: 'v4', label: 'Nhìn điểm mù (Schulterblick)', url: 'https://www.youtube.com/embed/Hme_SwCZqxQ' },
-      { id: 'v5', label: 'Vào & ra bùng binh (Kreisverkehr)', url: 'https://www.youtube.com/embed/N40uK_T1KHA' },
-      { id: 'v6', label: 'Rẽ trái nhường đường', url: 'https://www.youtube.com/embed/fIQCF5ucj2M' }
+      { id: 'v4', label: 'Nhìn điểm mù (Schulterblick)', url: 'https://www.youtube.com/embed/7OEX-Ds7wyE' },
+      { id: 'v5', label: 'Vào & ra bùng binh (Kreisverkehr)', url: 'https://www.youtube.com/embed/_AyjvKv8Xx8' },
+      { id: 'v6', label: 'Rẽ trái nhường đường', url: 'https://www.youtube.com/embed/3t_PJqyoNsk' }
     ]
   },
   {
     id: 'stadtverkehr',
     title: 'Lái xe trong phố',
     videos: [
-      { id: 'v_sv1', label: 'Nhường đường người đi bộ (Zebrastreifen)', url: 'https://www.youtube.com/embed/wB1nLTEf1k4' },
-      { id: 'v_sv2', label: 'Đối phó với xe đạp (Radfahrer)', url: 'https://www.youtube.com/embed/g4Pgz-T9ab4' },
-      { id: 'v_sv3', label: 'Đi chung đường với xe điện (Straßenbahn)', url: 'https://www.youtube.com/embed/XkVZhTkH57Y' }
+      { id: 'v_sv1', label: 'Nhường đường người đi bộ (Zebrastreifen)', url: 'https://www.youtube.com/embed/PKz8RWD1XCA' },
+      { id: 'v_sv2', label: 'Đối phó với xe đạp (Radfahrer)', url: 'https://www.youtube.com/embed/hqr4SVDjO64' },
+      { id: 'v_sv3', label: 'Đi chung đường với xe điện (Straßenbahn)', url: 'https://www.youtube.com/embed/IPCob5EDdqc' }
     ]
   },
   {
     id: 'landstrasse',
     title: 'Đường quốc lộ',
     videos: [
-      { id: 'v_ls1', label: 'Vượt xe an toàn (Überholen)', url: 'https://www.youtube.com/embed/8IEBOA6XAs0' },
-      { id: 'v_ls2', label: 'Lái xe qua đường cong (Kurvenfahren)', url: 'https://www.youtube.com/embed/XkVZhTkH57Y' },
-      { id: 'v_ls3', label: 'Nhận biết biển báo trên quốc lộ', url: 'https://www.youtube.com/embed/dS2FNoqLsXQ' }
+      { id: 'v_ls1', label: 'Vượt xe an toàn (Überholen)', url: 'https://www.youtube.com/embed/KUhCCTYV2Gg' },
+      { id: 'v_ls2', label: 'Lái xe qua đường cong (Kurvenfahren)', url: 'https://www.youtube.com/embed/ynzCCM3rp10' },
+      { id: 'v_ls3', label: 'Nhận biết biển báo trên quốc lộ', url: 'https://www.youtube.com/embed/ynzCCM3rp10' }
     ]
   },
   {
     id: 'highway',
     title: 'Autobahn',
     videos: [
-      { id: 'v7', label: 'Nhập làn Autobahn (Auffahrt)', url: 'https://www.youtube.com/embed/mDgF7SdVOW0' },
-      { id: 'v8', label: 'Chuyển làn tốc độ cao (Spurwechsel)', url: 'https://www.youtube.com/embed/mDgF7SdVOW0' },
-      { id: 'v9', label: 'Rời Autobahn an toàn (Abfahrt)', url: 'https://www.youtube.com/embed/cD0q62DXk2Q' }
+      { id: 'v7', label: 'Nhập làn Autobahn (Auffahrt)', url: 'https://www.youtube.com/embed/OqW-s1sH5zw' },
+      { id: 'v8', label: 'Chuyển làn tốc độ cao (Spurwechsel)', url: 'https://www.youtube.com/embed/sKy4Mu6L6yo' },
+      { id: 'v9', label: 'Rời Autobahn an toàn (Abfahrt)', url: 'https://www.youtube.com/embed/OqW-s1sH5zw' }
     ]
   },
   {
     id: 'technik',
     title: 'Hỏi đáp kỹ thuật xe',
     videos: [
-      { id: 'v_tk1', label: 'Kiểm tra lốp xe (Reifen prüfen)', url: 'https://www.youtube.com/embed/zrj-4gwm1FU' },
-      { id: 'v_tk2', label: 'Kiểm tra hệ thống đèn (Lichtanlage)', url: 'https://www.youtube.com/embed/KA_QdzO_OOY' },
-      { id: 'v_tk3', label: 'Mở nắp capo (Motorraum prüfen)', url: 'https://www.youtube.com/embed/mTPdpyclgH4' }
+      { id: 'v_tk1', label: 'Kiểm tra lốp xe (Reifen prüfen)', url: 'https://www.youtube.com/embed/gslAFCbyZdo' },
+      { id: 'v_tk2', label: 'Kiểm tra hệ thống đèn (Lichtanlage)', url: 'https://www.youtube.com/embed/iBN1_3PYtPY' },
+      { id: 'v_tk3', label: 'Mở nắp capo (Motorraum prüfen)', url: 'https://www.youtube.com/embed/gslAFCbyZdo' }
     ]
   },
   {
     id: 'pruefung_tipps',
     title: 'Mẹo thi thực hành',
     videos: [
-      { id: 'v_pt1', label: 'Những lỗi trượt trực tiếp (Durchfallgründe)', url: 'https://www.youtube.com/embed/zrj-4gwm1FU' },
-      { id: 'v_pt2', label: 'Khắc phục tâm lý thi (Prüfungsangst)', url: 'https://www.youtube.com/embed/bA1oOUhJVCo' },
-      { id: 'v_pt3', label: 'Các khẩu lệnh của giám khảo', url: 'https://www.youtube.com/embed/CcfAOV8nMAg' }
+      { id: 'v_pt1', label: 'Những lỗi trượt trực tiếp (Durchfallgründe)', url: 'https://www.youtube.com/embed/Zq1hMQM2Vxs' },
+      { id: 'v_pt2', label: 'Khắc phục tâm lý thi (Prüfungsangst)', url: 'https://www.youtube.com/embed/qP-ecNh02e4' },
+      { id: 'v_pt3', label: 'Các khẩu lệnh của giám khảo', url: 'https://www.youtube.com/embed/FfHAwVPQY90' }
     ]
   }
 ];
@@ -91,7 +91,7 @@ export const PraxisVideos = () => {
           src={activeVideo.url.replace('youtube.com', 'youtube-nocookie.com') + "?rel=0&modestbranding=1"}
           title={activeVideo.label}
           frameBorder="0"
-          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+          allow="fullscreen; web-share"
           referrerPolicy="strict-origin-when-cross-origin"
           allowFullScreen
         ></iframe>

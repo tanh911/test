@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lightbulb, Calculator, HelpCircle, Key, Percent } from 'lucide-react';
+import { Lightbulb, Calculator, HelpCircle, Key, Percent, Image as ImageIcon, Eye } from 'lucide-react';
 
 const tipCategories = [
   {
@@ -193,6 +193,92 @@ const tipCategories = [
         explanation: 'Nếu làn đường của bạn có xe đỗ, công trình hoặc vật cản, bạn phải nhường đường cho xe đi ngược chiều trước khi lách qua.'
       }
     ]
+  },
+  {
+    id: 'images',
+    title: 'Mẹo hình ảnh & Video',
+    icon: ImageIcon,
+    description: 'Các dấu hiệu nhận biết nhanh trong các câu hỏi có hình ảnh sa hình hoặc video tình huống.',
+    tips: [
+      {
+        term: 'Đường ray xe điện (Straßenbahn)',
+        rule: '👉 Nhìn thấy đường ray = Cảnh giác cao độ',
+        explanation: 'Trong mọi câu hỏi hình ảnh có đường ray xe điện, xe điện hầu như luôn có quyền ưu tiên (kể cả khi rẽ hay đi thẳng). Hãy luôn quan sát gương chiếu hậu xem có xe điện không.'
+      },
+      {
+        term: 'Biển mũi tên xanh (Grüner Pfeil)',
+        effect: '🚨 Cẩn thận bẫy',
+        explanation: 'Gặp biển mũi tên xanh bằng tôn cạnh đèn đỏ: Bắt buộc phải DỪNG HẲN 100% tại vạch trước khi rẽ phải. Nếu đáp án nói "Rẽ phải luôn không cần dừng" -> SAI.'
+      },
+      {
+        term: 'Bóng râm trên mặt đường / Rừng cây',
+        rule: '👉 Chú ý động vật hoang dã / Đường trơn',
+        explanation: 'Các hình ảnh có rừng cây hai bên đường, hoặc có biển báo hươu nai: Đáp án đúng luôn là "Giảm tốc độ", "Sẵn sàng phanh" do động vật có thể lao ra hoặc mặt đường ẩm ướt.'
+      },
+      {
+        term: 'Quả bóng lăn ra đường (Ball rollt auf die Fahrbahn)',
+        rule: '👉 Phanh khẩn cấp ngay lập tức',
+        explanation: 'Khi thấy quả bóng lăn ra đường trong hình/video, CHẮC CHẮN sẽ có trẻ em chạy theo sau. Đáp án đúng luôn là "Phanh ngay lập tức" (sofort bremsen).'
+      },
+      {
+        term: 'Màu sắc biển báo chỉ đường',
+        rule: '👉 Xanh lam = Cao tốc, Vàng = Quốc lộ, Trắng = Trong phố',
+        explanation: 'Dựa vào màu sắc biển chỉ đường trong hình, bạn có thể biết mình đang ở loại đường nào để áp dụng đúng luật tốc độ.'
+      },
+      {
+        term: 'Đuôi xe tải / xe buýt nhấp nháy đèn vàng',
+        rule: '👉 Không được vượt hoặc vượt cực chậm',
+        explanation: 'Nếu xe buýt đang bật đèn Warnblinkanlage (nháy cả 4 xi nhan) tại bến, bạn chỉ được phép đi vượt qua với tốc độ bước bộ (Schrittgeschwindigkeit - 4-7km/h) cho cả 2 chiều đường.'
+      }
+    ]
+  },
+  {
+    id: 'elderly',
+    title: 'Mẹo học vẹt (Dễ nhớ)',
+    icon: Eye,
+    description: 'Dành riêng cho người lớn tuổi hoặc không rành tiếng Đức. Cứ thấy chữ Đức này là CHỌN hoặc KHÔNG CHỌN!',
+    tips: [
+      {
+        term: 'Thấy chữ: "Bremsbereit sein" (Chuẩn bị phanh)',
+        effect: '✅ LUÔN LUÔN CHỌN',
+        explanation: 'Từ này nghĩa là lái xe cẩn thận chuẩn bị phanh. Trong mọi tình huống, đây luôn là đáp án được điểm.'
+      },
+      {
+        term: 'Thấy chữ: "Geschwindigkeit verringern" (Giảm tốc độ)',
+        effect: '✅ LUÔN LUÔN CHỌN',
+        explanation: 'Giảm tốc độ là cách an toàn nhất trong luật Đức. Cứ thấy cụm từ này là đánh dấu chọn ngay.'
+      },
+      {
+        term: 'Thấy chữ: "Sofort bremsen" (Phanh ngay lập tức)',
+        effect: '✅ CHỌN NGAY',
+        explanation: 'Thường đi kèm với hình ảnh có quả bóng (Ball) lăn ra đường, hoặc có trẻ em đứng mép đường.'
+      },
+      {
+        term: 'Thấy chữ: "Warten" (Chờ đợi) hoặc "Verzichten" (Nhường)',
+        effect: '✅ ĐA SỐ LÀ CHỌN',
+        explanation: 'Bất cứ khi nào đáp án bảo bạn phải chờ đợi (warten) hoặc nhường đường (auf Vorfahrt verzichten), đó thường là đáp án đúng.'
+      },
+      {
+        term: 'Thấy chữ: "Hupen" (Bấm còi) hoặc "Lichthupe" (Nháy đèn pha)',
+        effect: '🚨 TUYỆT ĐỐI KHÔNG CHỌN',
+        explanation: 'Bấm còi hoặc nháy pha để xin đường ở Đức là sai luật. Chỉ được bóp còi khi cực kỳ nguy hiểm ngoài khu dân cư.'
+      },
+      {
+        term: 'Thấy chữ: "Zügig weiterfahren" (Cứ thế phóng nhanh qua)',
+        effect: '🚨 TUYỆT ĐỐI KHÔNG CHỌN',
+        explanation: 'Lái xe mà không thèm quan sát, phóng nhanh qua ngã tư hoặc chỗ nguy hiểm luôn là đáp án làm bạn mất điểm.'
+      },
+      {
+        term: 'Thấy chữ: "Darauf vertrauen..." (Tin tưởng rằng...)',
+        effect: '🚨 KHÔNG BAO GIỜ CHỌN',
+        explanation: 'Ví dụ "tin tưởng người kia sẽ nhường mình". Lái xe không được tin tưởng ai cả, phải tự quan sát. Đáp án này luôn sai.'
+      },
+      {
+        term: 'Thấy chữ: "Immer" (Luôn luôn) hoặc "Nur" (Chỉ)',
+        effect: '🚨 CHÚ Ý, THƯỜNG LÀ SAI',
+        explanation: 'Những câu khẳng định quá chắc nịch như "luôn luôn phải rẽ" hay "chỉ được phép đi thẳng" hầu hết đều là đáp án lừa.'
+      }
+    ]
   }
 ];
 
@@ -207,7 +293,9 @@ export const TheoryTips = () => {
     keywords: { primary: '#0d9488', bgLight: '#f0fdfa', border: '#ccfbf1', text: '#115e59' },
     formulas: { primary: '#3b82f6', bgLight: '#eff6ff', border: '#dbeafe', text: '#1e40af' },
     numbers: { primary: '#8b5cf6', bgLight: '#f5f3ff', border: '#ede9fe', text: '#5b21b6' },
-    priorities: { primary: '#f59e0b', bgLight: '#fffbeb', border: '#fef3c7', text: '#92400e' }
+    priorities: { primary: '#f59e0b', bgLight: '#fffbeb', border: '#fef3c7', text: '#92400e' },
+    images: { primary: '#ec4899', bgLight: '#fdf2f8', border: '#fce7f3', text: '#9d174d' },
+    elderly: { primary: '#ef4444', bgLight: '#fef2f2', border: '#fee2e2', text: '#991b1b' }
   };
 
   const colors = accentColors[activeTab] || accentColors.keywords;
@@ -237,7 +325,7 @@ export const TheoryTips = () => {
 
       <div className="flex flex-col p-4 flex-1 overflow-hidden">
         {/* Navigation Tabs */}
-        <div className="grid grid-cols-2 gap-2 shrink-0 border-b border-slate-100 pb-3 mb-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 shrink-0 border-b border-slate-100 pb-3 mb-3">
           {tipCategories.map((cat) => {
             const CatIcon = cat.icon;
             const isActive = activeTab === cat.id;
