@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { Lightbulb, Calculator, HelpCircle, Key, Percent, Image as ImageIcon, Eye } from 'lucide-react';
+import { Lightbulb, Calculator, HelpCircle, Key, Percent, Image as ImageIcon, Eye, ChevronDown } from 'lucide-react';
 
 const tipCategories = [
   {
@@ -284,6 +284,7 @@ const tipCategories = [
 
 export const TheoryTips = () => {
   const [activeTab, setActiveTab] = useState('keywords');
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   const activeCategory = tipCategories.find(c => c.id === activeTab);
   const IconComponent = activeCategory.icon;
@@ -324,39 +325,57 @@ export const TheoryTips = () => {
       </div>
 
       <div className="flex flex-col p-4 flex-1 overflow-hidden">
-        {/* Navigation Tabs */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-2 shrink-0 border-b border-slate-100 pb-3 mb-3">
-          {tipCategories.map((cat) => {
-            const CatIcon = cat.icon;
-            const isActive = activeTab === cat.id;
-            const catColor = accentColors[cat.id];
-            
-            return (
-              <button
-                key={cat.id}
-                onClick={() => setActiveTab(cat.id)}
-                className="px-2 py-2 rounded-lg text-[10px] font-bold transition-all duration-200 text-center flex items-center justify-center gap-1.5 border"
-                style={isActive
-                  ? { 
-                      background: `linear-gradient(135deg, ${catColor.primary} 0%, ${catColor.text} 100%)`, 
-                      color: '#ffffff', 
-                      borderColor: 'transparent',
-                      transform: 'translateY(-1px)', 
-                      boxShadow: `0 3px 8px -2px ${catColor.primary}40` 
-                    }
-                  : { 
-                      background: '#ffffff', 
-                      color: '#64748b', 
-                      borderColor: '#e2e8f0',
-                      boxShadow: '0 1px 2px rgba(0,0,0,0.02)'
-                    }
-                }
-              >
-                <CatIcon size={12} style={{ opacity: isActive ? 1 : 0.7 }} />
-                {cat.title}
-              </button>
-            );
-          })}
+        {/* Category Selector Dropdown */}
+        <div className="relative mb-3 shrink-0">
+          <button
+            onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+            className="w-full px-4 py-2.5 bg-white rounded-xl border flex items-center justify-between transition-all duration-200 hover:border-slate-300 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
+            style={{ borderColor: colors.border, background: colors.bgLight }}
+          >
+            <div className="flex items-center gap-2">
+              <div className="p-1 rounded bg-white shadow-sm flex items-center justify-center" style={{ color: colors.primary, border: `1px solid ${colors.border}` }}>
+                <IconComponent size={14} />
+              </div>
+              <span className="font-bold text-xs text-slate-800">{activeCategory.title}</span>
+            </div>
+            <ChevronDown size={16} className="text-slate-400 transition-transform duration-200" style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'none' }} />
+          </button>
+
+          {isDropdownOpen && (
+            <>
+              <div 
+                className="fixed inset-0 z-10" 
+                onClick={() => setIsDropdownOpen(false)}
+              />
+              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 py-1 max-h-[250px] overflow-y-auto">
+                {tipCategories.map((cat) => {
+                  const CatIcon = cat.icon;
+                  const isActive = activeTab === cat.id;
+                  const catColor = accentColors[cat.id];
+                  
+                  return (
+                    <button
+                      key={cat.id}
+                      onClick={() => {
+                        setActiveTab(cat.id);
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full px-3 py-2 flex items-center gap-2.5 transition-colors duration-150 hover:bg-slate-50 text-left"
+                      style={isActive ? { backgroundColor: catColor.bgLight } : {}}
+                    >
+                      <div className="p-1 rounded bg-white shadow-sm flex items-center justify-center" style={{ color: catColor.primary, border: `1px solid ${catColor.border}` }}>
+                        <CatIcon size={12} />
+                      </div>
+                      <div className="flex flex-col">
+                        <span className="font-bold text-xs text-slate-800" style={isActive ? { color: catColor.primary } : {}}>{cat.title}</span>
+                        <span className="text-[10px] text-slate-400 font-medium line-clamp-1">{cat.description}</span>
+                      </div>
+                    </button>
+                  );
+                })}
+              </div>
+            </>
+          )}
         </div>
 
         {/* Selected Category Description */}
@@ -368,7 +387,7 @@ export const TheoryTips = () => {
             color: colors.text
           }}
         >
-          <p className="text-[11px] leading-relaxed font-medium">{activeCategory.description}</p>
+          <p className="text-[13px] md:text-[14px] leading-relaxed font-medium">{activeCategory.description}</p>
         </div>
 
         {/* Tips Scrollable List */}
@@ -379,7 +398,7 @@ export const TheoryTips = () => {
               className="p-3.5 bg-white rounded-xl border border-slate-100 shadow-[0_1px_3px_rgba(0,0,0,0.02)] hover:shadow-md transition-all duration-200"
             >
               {/* Term Label */}
-              <div className="font-bold text-[12px] text-slate-800 mb-1.5 flex items-start gap-1.5">
+              <div className="font-bold text-[14px] md:text-[15px] text-slate-800 mb-1.5 flex items-start gap-1.5">
                 <span className="w-1.5 h-1.5 rounded-full mt-1.5 shrink-0" style={{ backgroundColor: colors.primary }}></span>
                 <span className="leading-snug">{tip.term}</span>
               </div>
@@ -388,7 +407,7 @@ export const TheoryTips = () => {
               <div className="flex flex-wrap gap-1.5 mb-2">
                 {tip.effect && (
                   <div 
-                    className="text-[9px] font-bold px-2 py-0.5 rounded-full tracking-wide"
+                    className="text-[10px] md:text-[11px] font-bold px-2 py-0.5 rounded-full tracking-wide"
                     style={{ 
                       color: tip.effect.includes('SAI') ? '#ef4444' : '#10b981', 
                       backgroundColor: tip.effect.includes('SAI') ? '#fef2f2' : '#ecfdf5'
@@ -399,19 +418,19 @@ export const TheoryTips = () => {
                 )}
 
                 {tip.formula && (
-                  <div className="text-[9px] font-mono font-bold text-slate-600 bg-slate-50 px-2 py-0.5 rounded-full">
+                  <div className="text-[10px] md:text-[11px] font-mono font-bold text-slate-600 bg-slate-50 px-2 py-0.5 rounded-full">
                     Công thức: <span className="text-blue-600 font-extrabold">{tip.formula}</span>
                   </div>
                 )}
 
                 {tip.value && (
-                  <div className="text-[9px] font-mono font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full">
+                  <div className="text-[10px] md:text-[11px] font-mono font-bold text-violet-600 bg-violet-50 px-2 py-0.5 rounded-full">
                     Giá trị: <span className="text-violet-700 font-extrabold">{tip.value}</span>
                   </div>
                 )}
 
                 {tip.rule && (
-                  <div className="text-[9px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
+                  <div className="text-[10px] md:text-[11px] font-bold text-amber-600 bg-amber-50 px-2 py-0.5 rounded-full">
                     {tip.rule}
                   </div>
                 )}
@@ -419,7 +438,7 @@ export const TheoryTips = () => {
 
               {/* Explanation / Example Box */}
               <div 
-                className="text-[11px] leading-relaxed font-medium mt-1 text-slate-600"
+                className="text-[13px] md:text-[14px] leading-relaxed font-medium mt-1 text-slate-600"
                 style={{
                   borderLeft: `2.5px solid ${colors.primary}`,
                   paddingLeft: '8px',
