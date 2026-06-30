@@ -365,13 +365,32 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
                 <span style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#64748b', fontWeight: '600' }}>Tên đăng nhập (Username)</span>
-                <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', color: '#0f172a', fontWeight: '700', backgroundColor: '#f1f5f9', padding: '4px 10px', borderRadius: '6px' }}>{user.username}</span>
+                <span style={{ 
+                  fontSize: 'calc(14px * var(--text-scale, 1))', 
+                  color: '#0f172a', 
+                  fontWeight: '700', 
+                  backgroundColor: '#f1f5f9', 
+                  padding: '4px 10px', 
+                  borderRadius: '6px',
+                  maxWidth: '160px',
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis'
+                }} title={user.username}>{user.username}</span>
               </div>
               
               {user.username !== 'guest' && user.email && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
                   <span style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#64748b', fontWeight: '600' }}>Email đăng ký</span>
-                  <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', color: '#0f172a', fontWeight: '700' }}>{user.email}</span>
+                  <span style={{ 
+                    fontSize: 'calc(14px * var(--text-scale, 1))', 
+                    color: '#0f172a', 
+                    fontWeight: '700',
+                    maxWidth: '160px',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis'
+                  }} title={user.email}>{user.email}</span>
                 </div>
               )}
               
