@@ -329,16 +329,16 @@ export const TheoryTips = () => {
         <div className="relative mb-3 shrink-0">
           <button
             onClick={() => setIsDropdownOpen(!isDropdownOpen)}
-            className="w-full px-4 py-2.5 bg-white rounded-xl border flex items-center justify-between transition-all duration-200 hover:border-slate-300 shadow-[0_1px_2px_rgba(0,0,0,0.02)]"
-            style={{ borderColor: colors.border, background: colors.bgLight }}
+            className="w-full px-4 py-3 bg-white rounded-xl border flex items-center justify-between transition-all duration-200 hover:border-slate-400 shadow-sm"
+            style={{ borderColor: '#cbd5e1' }}
           >
-            <div className="flex items-center gap-2">
-              <div className="p-1 rounded bg-white shadow-sm flex items-center justify-center" style={{ color: colors.primary, border: `1px solid ${colors.border}` }}>
-                <IconComponent size={14} />
+            <div className="flex items-center gap-2.5">
+              <div className="p-1 rounded bg-slate-50 flex items-center justify-center border border-slate-100" style={{ color: colors.primary }}>
+                <IconComponent size={16} />
               </div>
-              <span className="font-bold text-xs text-slate-800">{activeCategory.title}</span>
+              <span className="font-bold text-sm text-slate-800">{activeCategory.title}</span>
             </div>
-            <ChevronDown size={16} className="text-slate-400 transition-transform duration-200" style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'none' }} />
+            <ChevronDown size={18} className="text-slate-400 transition-transform duration-200" style={{ transform: isDropdownOpen ? 'rotate(180deg)' : 'none' }} />
           </button>
 
           {isDropdownOpen && (
@@ -347,7 +347,7 @@ export const TheoryTips = () => {
                 className="fixed inset-0 z-10" 
                 onClick={() => setIsDropdownOpen(false)}
               />
-              <div className="absolute top-full left-0 right-0 mt-1 bg-white border border-slate-200 rounded-xl shadow-lg z-20 py-1 max-h-[250px] overflow-y-auto">
+              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-20 py-1 max-h-[280px] overflow-y-auto">
                 {tipCategories.map((cat) => {
                   const CatIcon = cat.icon;
                   const isActive = activeTab === cat.id;
@@ -360,15 +360,15 @@ export const TheoryTips = () => {
                         setActiveTab(cat.id);
                         setIsDropdownOpen(false);
                       }}
-                      className="w-full px-3 py-2 flex items-center gap-2.5 transition-colors duration-150 hover:bg-slate-50 text-left"
+                      className="w-full px-4 py-2.5 flex items-center gap-3 transition-colors duration-150 hover:bg-slate-50 text-left border-b border-slate-50 last:border-0"
                       style={isActive ? { backgroundColor: catColor.bgLight } : {}}
                     >
-                      <div className="p-1 rounded bg-white shadow-sm flex items-center justify-center" style={{ color: catColor.primary, border: `1px solid ${catColor.border}` }}>
-                        <CatIcon size={12} />
+                      <div className="p-1 rounded bg-white shadow-sm flex items-center justify-center border border-slate-100" style={{ color: catColor.primary }}>
+                        <CatIcon size={14} />
                       </div>
                       <div className="flex flex-col">
                         <span className="font-bold text-xs text-slate-800" style={isActive ? { color: catColor.primary } : {}}>{cat.title}</span>
-                        <span className="text-[10px] text-slate-400 font-medium line-clamp-1">{cat.description}</span>
+                        <span className="text-[10px] text-slate-400 font-semibold line-clamp-1">{cat.description}</span>
                       </div>
                     </button>
                   );
