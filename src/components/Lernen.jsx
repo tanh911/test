@@ -53,6 +53,7 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
   const chatEndRef = useRef(null);
   const videoRef = useRef(null);
   const fullscreenVideoRef = useRef(null);
+  const lastTimeRef = useRef(0);
   const mobileNavRef = useRef(null);
   const [showVideoExitConfirm, setShowVideoExitConfirm] = useState(false);
   const [examAnswers, setExamAnswers] = useState({});
@@ -192,6 +193,7 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
   useEffect(() => {
     const currentQ = activeQuestions[currentIndex] || activeQuestions[0];
     if (!currentQ) return;
+    lastTimeRef.current = 0;
 
     if (mode === 'lesen') {
       setSelectedOptions(currentQ.options.filter(o => o.isCorrect).map(o => o.id));
@@ -244,6 +246,22 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
       chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
   }, [aiMessages, isAiOpen]);
+
+  const handleSeeking = (e) => {
+    if (!isSubmitted) {
+      e.target.currentTime = lastTimeRef.current;
+    }
+  };
+
+  const handleTimeUpdate = (e) => {
+    if (!isSubmitted) {
+      if (Math.abs(e.target.currentTime - lastTimeRef.current) > 1.5) {
+        e.target.currentTime = lastTimeRef.current;
+      } else {
+        lastTimeRef.current = e.target.currentTime;
+      }
+    }
+  };
 
   const handleOptionClick = (optionId) => {
     if (mode === 'exam') {
@@ -1049,6 +1067,9 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                     ref={videoRef}
                     src={currentQuestion.video}
                     controls={isSubmitted}
+                    playsInline
+                    onSeeking={handleSeeking}
+                    onTimeUpdate={handleTimeUpdate}
                     onPlay={(e) => {
                       if (!hasPlayedOnce) setHasPlayedOnce(true);
                       if (videoPlayCount >= 5 && !isSubmitted) {
@@ -1534,6 +1555,8 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                   controls={isSubmitted}
                   autoPlay
                   playsInline
+                  onSeeking={handleSeeking}
+                  onTimeUpdate={handleTimeUpdate}
                   onPlay={(e) => {
                     if (!isSubmitted && videoPlayCount >= 5) {
                       e.target.pause();
