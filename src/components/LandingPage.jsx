@@ -17,6 +17,7 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
   const [showAIChatModal, setShowAIChatModal] = useState(false);
   const [showPraxisModal, setShowPraxisModal] = useState(false);
   const [showTheoryTipsModal, setShowTheoryTipsModal] = useState(false);
+  const [showSimulatorModal, setShowSimulatorModal] = useState(false);
 
   // Calculate real progress
   const totalQuestions = questions.length;
@@ -43,7 +44,7 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
   }, [fitPercent, answeredPercent, wrongPercent]);
 
   React.useEffect(() => {
-    if (showAIChatModal || showSupportModal || showPraxisModal || showTheoryTipsModal) {
+    if (showAIChatModal || showSupportModal || showPraxisModal || showTheoryTipsModal || showSimulatorModal) {
       document.body.style.overflow = 'hidden';
     } else {
       document.body.style.overflow = '';
@@ -163,6 +164,40 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
             <div style={{ flex: 1, overflowY: 'auto', display: 'flex', flexDirection: 'column' }}>
               <TheoryTips />
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Simulator Modal */}
+      {showSimulatorModal && (
+        <div style={{
+          position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, zIndex: 100,
+          background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backdropFilter: 'blur(4px)'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff', borderRadius: '16px', width: '90%', maxWidth: '400px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', padding: '24px', textAlign: 'center'
+          }} className="animate-fade-in">
+            <div style={{ width: '60px', height: '60px', background: '#f3e8ff', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
+              <Gamepad2 size={32} color="#9c27b0" strokeWidth={2} />
+            </div>
+            <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1f2937', marginBottom: '8px' }}>
+              {t('Tính năng đang phát triển', 'In Entwicklung')}
+            </h2>
+            <p style={{ fontSize: '14px', color: '#6b7280', marginBottom: '24px', lineHeight: '1.5' }}>
+              {t('Module giả lập lái xe 3D và các bài thực hành sa hình đang được đội ngũ xây dựng. Vui lòng quay lại sau nhé!', 'Das 3D-Fahrsimulator-Modul und die praktischen Übungen werden derzeit entwickelt. Bitte kommen Sie später wieder!')}
+            </p>
+            <button
+              onClick={() => setShowSimulatorModal(false)}
+              style={{
+                width: '100%', padding: '12px', background: '#9c27b0', color: 'white',
+                border: 'none', borderRadius: '8px', fontWeight: '600', cursor: 'pointer',
+                transition: 'opacity 0.2s'
+              }}
+            >
+              {t('Đóng', 'Schließen')}
+            </button>
           </div>
         </div>
       )}
@@ -394,7 +429,7 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
               <ChevronRight size={18} opacity={0.5} />
             </button>
 
-            <button onClick={() => alert(t('Tính năng lái xe mô phỏng đang được phát triển!', 'Fahrsimulator-Funktion in Entwicklung!'))} style={{
+            <button onClick={() => setShowSimulatorModal(true)} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
               cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
