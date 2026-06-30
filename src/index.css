@@ -1411,6 +1411,10 @@ input {
   font-size: calc(15px * var(--text-scale, 1));
   font-weight: 600;
   display: none;
+  max-width: 160px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 @media (min-width: 900px) {
