@@ -136,6 +136,13 @@ function App() {
     localStorage.getItem('fuhrerschein_font_size') || 'normal'
   );
 
+  // Close login modal automatically when user successfully logs in
+  useEffect(() => {
+    if (user && !user.isGuest) {
+      setShowLoginModal(false);
+    }
+  }, [user]);
+
   useEffect(() => {
     const scale = fontSizeMode === 'large' ? '1.15' : fontSizeMode === 'xlarge' ? '1.3' : '1';
     
@@ -262,6 +269,14 @@ function App() {
   const handleLogout = () => {
     clearToken();
     setUser({ username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true });
+    
+    // Sign out from Firebase Auth to ensure total logout
+    import('./lib/firebase').then(({ auth }) => {
+      import('firebase/auth').then(({ signOut }) => {
+        signOut(auth).catch(err => console.error("Firebase SignOut Error:", err));
+      });
+    });
+
     navigate('/');
   };
 
