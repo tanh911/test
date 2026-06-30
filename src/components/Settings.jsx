@@ -1,10 +1,14 @@
 import React, { useState } from 'react';
-import { ShieldCheck, User, Mail, LogOut, Settings as SettingsIcon, AlertTriangle, Save } from 'lucide-react';
+import { ShieldCheck, User, Mail, LogOut, Settings as SettingsIcon, AlertTriangle, Save, ChevronLeft } from 'lucide-react';
+import { useNavigate } from 'react-router-dom';
 
 export const Settings = ({ user, onUpdateUser, onLogout }) => {
+  const navigate = useNavigate();
   const [displayName, setDisplayName] = useState(user.displayName || '');
   const [email, setEmail] = useState(user.email || '');
   const [message, setMessage] = useState({ type: '', text: '' });
+
+  const [showConfirmReset, setShowConfirmReset] = useState(false);
 
   const handleSaveSettings = (e) => {
     e.preventDefault();
@@ -38,48 +42,99 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
     setTimeout(() => setMessage({ type: '', text: '' }), 3000);
   };
 
-  const handleResetProgress = () => {
-    if (window.confirm('CẢNH BÁO: Hành động này sẽ xóa toàn bộ tiến trình học tập, lịch sử thi thử và danh sách các câu hỏi đã lưu của bạn. Bạn có muốn tiếp tục không?')) {
-      const resetUser = {
-        ...user,
-        savedQuestions: [],
-        examHistory: [],
-        progress: {}
-      };
+  const executeResetProgress = () => {
+    const resetUser = {
+      ...user,
+      savedQuestions: [],
+      examHistory: [],
+      progress: {}
+    };
 
-      // Xóa tất cả các phiên học/thi đang lưu trong cache (sessionStorage & localStorage)
-      sessionStorage.removeItem('fuhrerschein_learning_session_v2');
-      sessionStorage.removeItem('fuhrerschein_learning_session');
-      sessionStorage.removeItem('fuhrerschein_exam_session');
-      localStorage.removeItem('fuhrerschein_exam_session');
+    // Xóa tất cả các phiên học/thi đang lưu trong cache (sessionStorage & localStorage)
+    sessionStorage.removeItem('fuhrerschein_learning_session_v2');
+    sessionStorage.removeItem('fuhrerschein_learning_session');
+    sessionStorage.removeItem('fuhrerschein_exam_session');
+    localStorage.removeItem('fuhrerschein_exam_session');
 
-      // Update Database local object if it's guest
-      const users = JSON.parse(localStorage.getItem('fuhrerschein_users') || '{}');
-      if (user.username !== 'guest' && users[user.username.toLowerCase()]) {
-        users[user.username.toLowerCase()].savedQuestions = [];
-        users[user.username.toLowerCase()].examHistory = [];
-        users[user.username.toLowerCase()].progress = {};
-        localStorage.setItem('fuhrerschein_users', JSON.stringify(users));
-      }
-
-      onUpdateUser(resetUser);
-      setMessage({ type: 'success', text: 'Tiến độ học tập đã được thiết lập lại về ban đầu!' });
-      setTimeout(() => setMessage({ type: '', text: '' }), 3000);
+    // Update Database local object if it's guest
+    const users = JSON.parse(localStorage.getItem('fuhrerschein_users') || '{}');
+    if (user.username !== 'guest' && users[user.username.toLowerCase()]) {
+      users[user.username.toLowerCase()].savedQuestions = [];
+      users[user.username.toLowerCase()].examHistory = [];
+      users[user.username.toLowerCase()].progress = {};
+      localStorage.setItem('fuhrerschein_users', JSON.stringify(users));
     }
+
+    onUpdateUser(resetUser);
+    setShowConfirmReset(false);
+    setMessage({ type: 'success', text: 'Tiến độ học tập đã được thiết lập lại về ban đầu!' });
+    setTimeout(() => setMessage({ type: '', text: '' }), 3000);
   };
 
   return (
-    <div style={{ flex: 1, backgroundColor: '#f4f7f9', overflowY: 'auto', padding: '32px 16px', fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif" }} className="no-scrollbar">
+    <div style={{ flex: 1, backgroundColor: '#f4f7f9', overflowY: 'auto', padding: '32px 16px', fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif", position: 'relative' }} className="no-scrollbar">
+      
+      {/* Cửa sổ xác nhận tùy chỉnh (Custom Confirm Modal) */}
+      {showConfirmReset && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, backgroundColor: 'rgba(15, 23, 42, 0.6)', backdropFilter: 'blur(4px)', zIndex: 99999, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '16px' }}>
+          <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '32px', width: '100%', maxWidth: '400px', boxShadow: '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)', animation: 'fadeIn 0.2s ease-out' }}>
+            <div style={{ width: '48px', height: '48px', borderRadius: '50%', backgroundColor: '#ffe4e6', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 20px' }}>
+              <AlertTriangle size={24} color="#e11d48" />
+            </div>
+            <h3 style={{ fontSize: 'calc(18px * var(--text-scale, 1))', fontWeight: '800', color: '#0f172a', textAlign: 'center', marginBottom: '12px' }}>Xác nhận xóa dữ liệu</h3>
+            <p style={{ fontSize: 'calc(14px * var(--text-scale, 1))', color: '#475569', textAlign: 'center', lineHeight: '1.6', marginBottom: '32px' }}>
+              Hành động này sẽ xóa vĩnh viễn <b style={{color: '#e11d48'}}>toàn bộ tiến trình học tập</b>, lịch sử thi thử và danh sách câu hỏi đã lưu của bạn. Bạn có chắc chắn muốn tiếp tục không?
+            </p>
+            <div style={{ display: 'flex', gap: '12px' }}>
+              <button 
+                onClick={() => setShowConfirmReset(false)}
+                style={{ flex: 1, padding: '12px', backgroundColor: '#f1f5f9', color: '#475569', border: 'none', borderRadius: '12px', fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '700', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#e2e8f0'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#f1f5f9'}
+              >
+                Hủy bỏ
+              </button>
+              <button 
+                onClick={executeResetProgress}
+                style={{ flex: 1, padding: '12px', backgroundColor: '#e11d48', color: 'white', border: 'none', borderRadius: '12px', fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '700', cursor: 'pointer', transition: 'background-color 0.2s', boxShadow: '0 4px 12px rgba(225, 29, 72, 0.2)' }}
+                onMouseOver={(e) => e.target.style.backgroundColor = '#be123c'}
+                onMouseOut={(e) => e.target.style.backgroundColor = '#e11d48'}
+              >
+                Đồng ý xóa
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <div style={{ maxWidth: '800px', margin: '0 auto', display: 'flex', flexDirection: 'column', gap: '24px' }}>
         
         {/* Header */}
         <div style={{ display: 'flex', alignItems: 'center', gap: '12px', marginBottom: '8px' }}>
+          <button 
+            onClick={() => navigate('/')}
+            style={{
+              width: '40px', height: '40px',
+              background: '#e2e8f0',
+              color: '#1e293b',
+              border: 'none',
+              borderRadius: '12px',
+              display: 'flex', alignItems: 'center', justifyContent: 'center',
+              cursor: 'pointer',
+              marginRight: '4px',
+              transition: 'background-color 0.2s'
+            }}
+            onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#cbd5e1'}
+            onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#e2e8f0'}
+          >
+            <ChevronLeft size={24} strokeWidth={2.5} />
+          </button>
           <div style={{ width: '48px', height: '48px', borderRadius: '14px', backgroundColor: '#1a4a5e', display: 'flex', alignItems: 'center', justifyContent: 'center', color: 'white', boxShadow: '0 4px 12px rgba(26, 74, 94, 0.2)' }}>
             <SettingsIcon size={24} />
           </div>
           <div>
-            <h1 style={{ fontSize: '24px', fontWeight: '800', color: '#1a4a5e', margin: 0, letterSpacing: '-0.02em' }}>Cài đặt ứng dụng</h1>
-            <p style={{ fontSize: '13px', color: '#64748b', margin: '4px 0 0 0', fontWeight: '500' }}>Cấu hình hệ thống & thông tin tài khoản của bạn</p>
+            <h1 style={{ fontSize: 'calc(24px * var(--text-scale, 1))', fontWeight: '800', color: '#1a4a5e', margin: 0, letterSpacing: '-0.02em' }}>Cài đặt ứng dụng</h1>
+            <p style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#64748b', margin: '4px 0 0 0', fontWeight: '500' }}>Cấu hình hệ thống & thông tin tài khoản của bạn</p>
           </div>
         </div>
 
@@ -94,7 +149,7 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
             border: `1px solid ${message.type === 'success' ? '#bbf7d0' : '#fecaca'}`,
             color: message.type === 'success' ? '#166534' : '#991b1b',
             fontWeight: '600',
-            fontSize: '14px',
+            fontSize: 'calc(14px * var(--text-scale, 1))',
             animation: 'fadeIn 0.3s ease-out'
           }}>
             {message.type === 'success' ? <ShieldCheck size={20} /> : <AlertTriangle size={20} />}
@@ -104,7 +159,7 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
 
         {/* Profile Form */}
         <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '32px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)', border: '1px solid #e2e8f0' }}>
-          <h2 style={{ fontSize: '18px', fontWeight: '700', color: '#1e293b', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <h2 style={{ fontSize: 'calc(18px * var(--text-scale, 1))', fontWeight: '700', color: '#1e293b', marginBottom: '24px', display: 'flex', alignItems: 'center', gap: '8px' }}>
             <User size={20} color="#2b6f8a" /> Thông tin cá nhân
           </h2>
           
@@ -112,7 +167,7 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
             
             {/* Display Name */}
             <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#475569', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <label style={{ display: 'block', fontSize: 'calc(13px * var(--text-scale, 1))', fontWeight: '700', color: '#475569', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Tên hiển thị học viên
               </label>
               <div style={{ position: 'relative' }}>
@@ -124,7 +179,7 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
                   value={displayName}
                   onChange={(e) => setDisplayName(e.target.value)}
                   placeholder="Nhập tên của bạn"
-                  style={{ width: '100%', padding: '14px 16px 14px 44px', backgroundColor: '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '15px', fontWeight: '600', color: '#0f172a', transition: 'all 0.2s', outline: 'none' }}
+                  style={{ width: '100%', padding: '14px 16px 14px 44px', backgroundColor: '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '600', color: '#0f172a', transition: 'all 0.2s', outline: 'none' }}
                   onFocus={(e) => { e.target.style.borderColor = '#2b6f8a'; e.target.style.backgroundColor = 'white'; }}
                   onBlur={(e) => { e.target.style.borderColor = '#e2e8f0'; e.target.style.backgroundColor = '#f8fafc'; }}
                 />
@@ -133,7 +188,7 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
 
             {/* Email */}
             <div>
-              <label style={{ display: 'block', fontSize: '13px', fontWeight: '700', color: '#475569', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <label style={{ display: 'block', fontSize: 'calc(13px * var(--text-scale, 1))', fontWeight: '700', color: '#475569', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 Địa chỉ Email
               </label>
               <div style={{ position: 'relative' }}>
@@ -146,7 +201,7 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
                   onChange={(e) => setEmail(e.target.value)}
                   placeholder="email@example.com"
                   disabled={user.username === 'guest'}
-                  style={{ width: '100%', padding: '14px 16px 14px 44px', backgroundColor: user.username === 'guest' ? '#f1f5f9' : '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: '15px', fontWeight: '600', color: '#0f172a', transition: 'all 0.2s', outline: 'none', opacity: user.username === 'guest' ? 0.6 : 1 }}
+                  style={{ width: '100%', padding: '14px 16px 14px 44px', backgroundColor: user.username === 'guest' ? '#f1f5f9' : '#f8fafc', border: '2px solid #e2e8f0', borderRadius: '12px', fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '600', color: '#0f172a', transition: 'all 0.2s', outline: 'none', opacity: user.username === 'guest' ? 0.6 : 1 }}
                   onFocus={(e) => { if (user.username !== 'guest') { e.target.style.borderColor = '#2b6f8a'; e.target.style.backgroundColor = 'white'; } }}
                   onBlur={(e) => { if (user.username !== 'guest') { e.target.style.borderColor = '#e2e8f0'; e.target.style.backgroundColor = '#f8fafc'; } }}
                 />
@@ -155,7 +210,7 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
 
             <button
               type="submit"
-              style={{ marginTop: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '16px', backgroundColor: '#1a4a5e', color: 'white', border: 'none', borderRadius: '12px', fontSize: '14px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', boxShadow: '0 4px 12px rgba(26, 74, 94, 0.2)', transition: 'background-color 0.2s' }}
+              style={{ marginTop: '12px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '10px', width: '100%', padding: '16px', backgroundColor: '#1a4a5e', color: 'white', border: 'none', borderRadius: '12px', fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', cursor: 'pointer', boxShadow: '0 4px 12px rgba(26, 74, 94, 0.2)', transition: 'background-color 0.2s' }}
               onMouseOver={(e) => e.target.style.backgroundColor = '#113240'}
               onMouseOut={(e) => e.target.style.backgroundColor = '#1a4a5e'}
             >
@@ -167,43 +222,43 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
         <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '24px' }}>
           {/* Account Info Card */}
           <div style={{ backgroundColor: 'white', borderRadius: '24px', padding: '32px', boxShadow: '0 4px 20px rgba(0, 0, 0, 0.03)', border: '1px solid #e2e8f0' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: 'calc(16px * var(--text-scale, 1))', fontWeight: '700', color: '#1e293b', marginBottom: '20px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <ShieldCheck size={20} color="#10b981" /> Trạng thái tài khoản
             </h3>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
-                <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Tên đăng nhập (Username)</span>
-                <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: '700', backgroundColor: '#f1f5f9', padding: '4px 10px', borderRadius: '6px' }}>{user.username}</span>
+                <span style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#64748b', fontWeight: '600' }}>Tên đăng nhập (Username)</span>
+                <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', color: '#0f172a', fontWeight: '700', backgroundColor: '#f1f5f9', padding: '4px 10px', borderRadius: '6px' }}>{user.username}</span>
               </div>
               
               {user.username !== 'guest' && user.email && (
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', paddingBottom: '12px', borderBottom: '1px solid #f1f5f9' }}>
-                  <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Email đăng ký</span>
-                  <span style={{ fontSize: '14px', color: '#0f172a', fontWeight: '700' }}>{user.email}</span>
+                  <span style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#64748b', fontWeight: '600' }}>Email đăng ký</span>
+                  <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', color: '#0f172a', fontWeight: '700' }}>{user.email}</span>
                 </div>
               )}
               
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                <span style={{ fontSize: '13px', color: '#64748b', fontWeight: '600' }}>Vai trò hệ thống</span>
-                <span style={{ fontSize: '12px', color: '#166534', fontWeight: '800', backgroundColor: '#dcfce7', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase' }}>Học viên</span>
+                <span style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#64748b', fontWeight: '600' }}>Vai trò hệ thống</span>
+                <span style={{ fontSize: 'calc(12px * var(--text-scale, 1))', color: '#166534', fontWeight: '800', backgroundColor: '#dcfce7', padding: '4px 10px', borderRadius: '6px', textTransform: 'uppercase' }}>Học viên</span>
               </div>
             </div>
           </div>
 
           {/* Danger Zone */}
           <div style={{ backgroundColor: '#fff1f2', borderRadius: '24px', padding: '32px', border: '1px solid #fecdd3' }}>
-            <h3 style={{ fontSize: '16px', fontWeight: '700', color: '#be123c', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+            <h3 style={{ fontSize: 'calc(16px * var(--text-scale, 1))', fontWeight: '700', color: '#be123c', marginBottom: '12px', display: 'flex', alignItems: 'center', gap: '8px' }}>
               <AlertTriangle size={20} color="#e11d48" /> Vùng nguy hiểm
             </h3>
-            <p style={{ fontSize: '13px', color: '#9f1239', lineHeight: '1.6', marginBottom: '24px', fontWeight: '500' }}>
+            <p style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#9f1239', lineHeight: '1.6', marginBottom: '24px', fontWeight: '500' }}>
               Các hành động dưới đây sẽ xóa dữ liệu trên trình duyệt này hoặc yêu cầu đăng nhập lại. Vui lòng cân nhắc kỹ trước khi thực hiện.
             </p>
             
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
               <button
-                onClick={handleResetProgress}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', backgroundColor: 'white', color: '#e11d48', border: '2px solid #fda4af', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s' }}
+                onClick={() => setShowConfirmReset(true)}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', backgroundColor: 'white', color: '#e11d48', border: '2px solid #fda4af', borderRadius: '12px', fontSize: 'calc(13px * var(--text-scale, 1))', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s' }}
                 onMouseOver={(e) => { e.target.style.backgroundColor = '#ffe4e6'; e.target.style.borderColor = '#fb7185'; }}
                 onMouseOut={(e) => { e.target.style.backgroundColor = 'white'; e.target.style.borderColor = '#fda4af'; }}
               >
@@ -212,7 +267,7 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
               
               <button
                 onClick={onLogout}
-                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', backgroundColor: '#e11d48', color: 'white', border: 'none', borderRadius: '12px', fontSize: '13px', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(225, 29, 72, 0.2)' }}
+                style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', padding: '14px', backgroundColor: '#e11d48', color: 'white', border: 'none', borderRadius: '12px', fontSize: 'calc(13px * var(--text-scale, 1))', fontWeight: '700', cursor: 'pointer', transition: 'all 0.2s', boxShadow: '0 4px 12px rgba(225, 29, 72, 0.2)' }}
                 onMouseOver={(e) => e.target.style.backgroundColor = '#be123c'}
                 onMouseOut={(e) => e.target.style.backgroundColor = '#e11d48'}
               >

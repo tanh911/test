@@ -1,6 +1,8 @@
-import React from 'react';
-import { BookOpen, Award, BarChart3, Settings, ChevronRight, HelpCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { BookOpen, Award, BarChart3, Settings, ChevronRight, HelpCircle, X, MessageCircle, Sparkles } from 'lucide-react';
 import { questions } from '../data/questions';
+import { SupportModal } from './SupportModal';
+import { AIChat } from './AIChat';
 
 export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'both', onLanguageChange }) => {
   const t = (vi, de) => {
@@ -8,6 +10,9 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
     if (languageMode === 'de') return de;
     return `${vi} / ${de}`;
   };
+
+  const [showSupportModal, setShowSupportModal] = useState(false);
+  const [showAIChatModal, setShowAIChatModal] = useState(false);
 
   // Calculate real progress
   const totalQuestions = questions.length;
@@ -33,9 +38,56 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
     return () => clearTimeout(timer);
   }, [fitPercent, answeredPercent, wrongPercent]);
 
-  return (
-    <div className="flex flex-col min-h-full bg-[#f4f7f9]" style={{fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif"}}>
+  React.useEffect(() => {
+    if (showAIChatModal || showSupportModal) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = '';
+    }
+    return () => {
+      document.body.style.overflow = '';
+    };
+  }, [showAIChatModal, showSupportModal]);
 
+  return (
+    <div className="flex flex-col min-h-full bg-[#f4f7f9]" style={{ fontFamily: "'Segoe UI', system-ui, -apple-system, sans-serif" }}>
+      <SupportModal isOpen={showSupportModal} onClose={() => setShowSupportModal(false)} languageMode={languageMode} />
+
+      {/* AI Chat Modal */}
+      {showAIChatModal && (
+        <div style={{
+          position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center',
+          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '16px'
+        }}>
+          <div style={{
+            backgroundColor: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '448px', height: '80vh',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', display: 'flex', flexDirection: 'column'
+          }}>
+            {/* Header */}
+            <div style={{
+              position: 'relative', padding: '16px', textAlign: 'center', borderBottom: '1px solid #f3f4f6',
+              background: 'linear-gradient(to bottom right, #eff6ff, #dbeafe)'
+            }}>
+              <button
+                onClick={() => setShowAIChatModal(false)}
+                style={{
+                  position: 'absolute', top: '12px', right: '12px', padding: '8px', color: '#6b7280',
+                  backgroundColor: 'rgba(255,255,255,0.5)', borderRadius: '9999px', border: 'none', cursor: 'pointer'
+                }}
+              >
+                <X size={20} />
+              </button>
+              <h2 style={{ fontSize: '18px', fontWeight: 'bold', color: '#1e3a8a', margin: 0, display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                {t('TRỢ LÝ HỌC TẬP', 'KI-Tutor')}
+              </h2>
+            </div>
+
+            <div style={{ flex: 1, overflowY: 'auto' }}>
+              <AIChat user={user} />
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* Main Responsive Content */}
       <style>{`
@@ -61,7 +113,7 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
           }
         }
       `}</style>
-      
+
       <div className="landing-container">
 
         {/* Left Side: Progress Circle */}
@@ -126,8 +178,8 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
 
           {/* Center Text overlay */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <div style={{fontSize: '36px', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px'}}>{fitPercent.toFixed(1)}%</div>
-            <div style={{fontSize: '12px', color: '#546e7a', marginTop: '6px', fontWeight: '500'}}>
+            <div style={{ fontSize: 'calc(36px * var(--text-scale, 1))', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px' }}>{fitPercent.toFixed(1)}%</div>
+            <div style={{ fontSize: 'calc(12px * var(--text-scale, 1))', color: '#546e7a', marginTop: '6px', fontWeight: '500' }}>
               {t('Sẵn sàng thi', 'Fit für Prüfung')}
             </div>
           </div>
@@ -135,11 +187,11 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
 
         {/* Right Side: Content & Grid */}
         <div className="flex flex-col w-full max-w-sm gap-6 z-10">
-          
+
           {/* Info Text */}
           <div className="text-center">
-            <div style={{fontSize: '20px', color: '#7cb342', fontWeight: '400', marginBottom: '8px'}}>Klasse B</div>
-            <div style={{fontSize: '15px', color: '#2b576b', fontWeight: '500'}}>
+            <div style={{ fontSize: 'calc(20px * var(--text-scale, 1))', color: '#7cb342', fontWeight: '400', marginBottom: '8px' }}>Klasse B</div>
+            <div style={{ fontSize: 'calc(15px * var(--text-scale, 1))', color: '#2b576b', fontWeight: '500' }}>
               {t('Kỳ thi từ 01.04.2025', 'Prüfung ab 01.04.2025')}
             </div>
           </div>
@@ -152,48 +204,48 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
           }}>
             {/* Training */}
             <button onClick={() => onNavigate('/training')} style={{
-                background: '#2b576b', border: 'none', borderRadius: '4px', padding: '24px 16px',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-                cursor: 'pointer', transition: 'opacity 0.2s', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}>
+              background: '#2b576b', border: 'none', borderRadius: '4px', padding: '24px 16px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+              cursor: 'pointer', transition: 'opacity 0.2s', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
               <BookOpen size={28} strokeWidth={1.5} />
-              <span style={{fontSize: '14px', fontWeight: '400'}}>
+              <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
                 {t('Học tập', 'Training')}
               </span>
             </button>
 
             {/* Prüfung */}
             <button onClick={() => onNavigate('/pruefung')} style={{
-                background: '#2b576b', border: 'none', borderRadius: '4px', padding: '24px 16px',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-                cursor: 'pointer', transition: 'opacity 0.2s', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}>
+              background: '#2b576b', border: 'none', borderRadius: '4px', padding: '24px 16px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+              cursor: 'pointer', transition: 'opacity 0.2s', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
               <Award size={28} strokeWidth={1.5} />
-              <span style={{fontSize: '14px', fontWeight: '400'}}>
+              <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
                 {t('Thi thử', 'Prüfung')}
               </span>
             </button>
 
             {/* Statistik */}
             <button onClick={() => onNavigate('/statistik')} style={{
-                background: '#2b576b', border: 'none', borderRadius: '4px', padding: '24px 16px',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-                cursor: 'pointer', transition: 'opacity 0.2s', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}>
+              background: '#2b576b', border: 'none', borderRadius: '4px', padding: '24px 16px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+              cursor: 'pointer', transition: 'opacity 0.2s', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
               <BarChart3 size={28} strokeWidth={1.5} />
-              <span style={{fontSize: '14px', fontWeight: '400'}}>
+              <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
                 {t('Thống kê', 'Statistik')}
               </span>
             </button>
 
             {/* Hilfe & Kontakt */}
             <button onClick={() => onNavigate('/help')} style={{
-                background: '#2b576b', border: 'none', borderRadius: '4px', padding: '24px 16px',
-                display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
-                cursor: 'pointer', transition: 'opacity 0.2s', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
-              }}>
+              background: '#2b576b', border: 'none', borderRadius: '4px', padding: '24px 16px',
+              display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '12px',
+              cursor: 'pointer', transition: 'opacity 0.2s', color: 'white', boxShadow: '0 2px 4px rgba(0,0,0,0.1)'
+            }}>
               <HelpCircle size={28} strokeWidth={1.5} />
-              <span style={{fontSize: '14px', fontWeight: '400'}}>
+              <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
                 {t('Trợ giúp', 'Hilfe & Kontakt')}
               </span>
             </button>
@@ -207,24 +259,40 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
             }}>
               <div className="flex items-center gap-4">
                 <Settings size={20} strokeWidth={1.5} />
-                <span style={{fontSize: '14px', fontWeight: '400'}}>
+                <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
                   {t('Cài đặt', 'Einstellungen')}
                 </span>
               </div>
               <ChevronRight size={18} opacity={0.5} />
             </button>
-            
-            <button style={{
+
+            <button onClick={() => setShowSupportModal(true)} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
               cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
             }}>
               <div className="flex items-center gap-4">
-                <div style={{width: '20px', height: '20px', background: '#7cb342', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center'}}>
+                <div style={{ width: '20px', height: '20px', background: '#7cb342', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                   <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeLinejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>
                 </div>
-                <span style={{fontSize: '14px', fontWeight: '400'}}>
-                  {t('Mở khóa', 'Freischalten')}
+                <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
+                  {t('Ủng hộ', 'Unterstützen')}
+                </span>
+              </div>
+              <ChevronRight size={18} opacity={0.5} />
+            </button>
+
+            <button onClick={() => setShowAIChatModal(true)} style={{
+              display: 'flex', alignItems: 'center', justifyContent: 'space-between',
+              background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
+              cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
+            }}>
+              <div className="flex items-center gap-4">
+                <div style={{ width: '20px', height: '20px', background: '#3b82f6', borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                  <MessageCircle size={12} color="white" strokeWidth={3} />
+                </div>
+                <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
+                  {t('TRỢ LÝ HỌC TẬP', 'KI-Tutor')}
                 </span>
               </div>
               <ChevronRight size={18} opacity={0.5} />
@@ -235,3 +303,4 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
     </div>
   );
 };
+

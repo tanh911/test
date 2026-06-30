@@ -89,7 +89,7 @@ export const Stats = ({ user, onUpdateUser }) => {
             />
           </svg>
           {/* Center text */}
-          <div className="absolute bottom-1 font-bold" style={{ color: color, fontSize: '18px' }}>
+          <div className="absolute bottom-1 font-bold" style={{ color: color, fontSize: 'calc(18px * var(--text-scale, 1))' }}>
             {percent.toFixed(1)}%
           </div>
         </div>

@@ -36,7 +36,7 @@ const LangPill = ({ languageMode, onChange }) => (
       >
         {opt.src
           ? <img src={opt.src} alt={opt.alt} style={{ width: '28px', height: '20px', objectFit: 'cover', borderRadius: '3px', boxShadow: '0 2px 4px rgba(0,0,0,0.3)' }} />
-          : <span style={{ fontSize: '11px', fontWeight: '900' }}>{opt.label}</span>
+          : <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: '900' }}>{opt.label}</span>
         }
       </button>
     ))}
@@ -89,7 +89,7 @@ const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onSho
       <div className="navbar-inner">
         {/* Brand */}
         <button className="navbar-brand" onClick={() => navigate('/')}>
-          <span style={{ fontSize: '30px', lineHeight: 1 }}>🚦</span>
+          <img src="/newicon.jpg" alt="Logo" style={{ width: 'calc(32px * var(--text-scale, 1))', height: 'calc(32px * var(--text-scale, 1))', borderRadius: '8px', objectFit: 'cover' }} />
           <div>
             <span className="navbar-brand-name">Führerschein</span>
             <span className="navbar-brand-sub"> Việt-Đức</span>
@@ -274,8 +274,8 @@ function App() {
   if (userLoading) return (
     <div style={{ minHeight: '100vh', display: 'flex', alignItems: 'center', justifyContent: 'center', background: '#f0f4f8' }}>
       <div style={{ textAlign: 'center' }}>
-        <div style={{ fontSize: '36px', marginBottom: '12px' }}>🚦</div>
-        <div style={{ fontSize: '14px', color: '#6b7280', fontWeight: '600' }}>Đang tải...</div>
+        <img src="/newicon.jpg" alt="Logo" style={{ width: '48px', height: '48px', borderRadius: '12px', marginBottom: '16px', objectFit: 'cover' }} />
+        <div style={{ fontSize: 'calc(14px * var(--text-scale, 1))', color: '#6b7280', fontWeight: '600' }}>Đang tải...</div>
       </div>
     </div>
   );
@@ -303,17 +303,17 @@ function App() {
           <Route path="/" element={
             <LandingPage
               user={user}
-              onNavigate={(p) => navigate(p)}
+              onNavigate={(p, opts) => navigate(p, opts)}
               onShowLogin={() => setShowLoginModal(true)}
               languageMode={languageMode}
               onLanguageChange={(mode) => { setLanguageMode(mode); localStorage.setItem('fuhrerschein_lang_mode', mode); }}
             />
           } />
-          <Route path="/training" element={<TrainingDashboard user={user} onNavigate={(p) => navigate(p)} onShowLogin={() => setShowLoginModal(true)} languageMode={languageMode} />} />
-          <Route path="/training/fragen" element={<Lernen user={user} onUpdateUser={handleUpdateUser} onTriggerLogin={() => setShowLoginModal(true)} onNavigate={(p) => navigate(p)} languageMode={languageMode} />} />
+          <Route path="/training" element={<TrainingDashboard user={user} onUpdateUser={handleUpdateUser} onNavigate={(p, opts) => navigate(p, opts)} onShowLogin={() => setShowLoginModal(true)} languageMode={languageMode} />} />
+          <Route path="/training/fragen" element={<Lernen user={user} onUpdateUser={handleUpdateUser} onTriggerLogin={() => setShowLoginModal(true)} onNavigate={(p, opts) => navigate(p, opts)} languageMode={languageMode} />} />
           <Route path="/pruefung/*" element={<Pruefung user={user} onUpdateUser={handleUpdateUser} onTriggerLogin={() => setShowLoginModal(true)} languageMode={languageMode} />} />
           <Route path="/statistik" element={<Stats user={user} onUpdateUser={handleUpdateUser} />} />
-          <Route path="/help" element={<Help user={user} languageMode={languageMode} />} />
+          <Route path="/help" element={<Help user={user} languageMode={languageMode} onNavigate={(p, opts) => navigate(p, opts)} />} />
           <Route path="/settings" element={<Settings user={user} onUpdateUser={handleUpdateUser} onLogout={handleLogout} />} />
           <Route path="/privacy" element={<PrivacyPolicy onNavigate={navigate} />} />
           <Route path="*" element={<Navigate to="/" replace />} />

@@ -4,6 +4,7 @@ import { questions } from '../data/questions';
 import { SVGGraphics } from './SVGGraphics';
 import { Lernen } from './Lernen';
 import { customAlert } from '../utils/customAlert';
+import { SupportModal } from './SupportModal';
 import {
   Timer, AlertTriangle, ShieldCheck, ShieldAlert,
   Check, RefreshCw, Eye, Info, Volume2, List, CheckCircle, ChevronRight, ChevronLeft, BarChart3, X
@@ -83,6 +84,7 @@ const getBogenQuestions = (bogenId) => {
 export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'both' }) => {
   const navigate = useNavigate();
   const location = useLocation();
+  const [showSupportModal, setShowSupportModal] = useState(false);
   const t = {
     // idle state
     fit: languageMode === 'de' ? 'Fit für Prüfung' : (languageMode === 'vi' ? 'Sẵn sàng thi' : 'Fit für Prüfung / Sẵn sàng thi'),
@@ -342,6 +344,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
     let totalFehlerpunkte = 0;
     let countFivePointFails = 0;
     const details = [];
+    const updatedProgress = { ...(user.progress || {}) };
+    const now = new Date().toISOString();
 
     activeQuestions.forEach(q => {
       const selected = activeAnswers[q.id] || [];
@@ -366,6 +370,14 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
         isCorrect,
         fehler
       });
+
+      // Update progress for statistics ring
+      const baseId = typeof q.id === 'string' && q.id.includes('_') ? q.id.split('_')[0] : q.id;
+      updatedProgress[baseId] = {
+        answered: true,
+        isCorrect,
+        timestamp: now
+      };
     });
 
     // Failing conditions:
@@ -397,7 +409,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
     onUpdateUser({
       ...user,
-      examHistory
+      examHistory,
+      progress: updatedProgress
     });
   };
 
@@ -507,8 +520,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
               {/* Center Text overlay */}
               <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-                <div style={{fontSize: '36px', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px'}}>{fitPercent.toFixed(1)}%</div>
-                <div style={{fontSize: '12px', color: '#546e7a', marginTop: '6px', fontWeight: '500'}}>
+                <div style={{fontSize: 'calc(36px * var(--text-scale, 1))', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px'}}>{fitPercent.toFixed(1)}%</div>
+                <div style={{fontSize: 'calc(12px * var(--text-scale, 1))', color: '#546e7a', marginTop: '6px', fontWeight: '500'}}>
                   {t.fit}
                 </div>
                 <BarChart3 size={18} color="#546e7a" className="mt-1.5" />
@@ -534,7 +547,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 >
                   <ChevronLeft size={20} strokeWidth={2.5} />
                 </button>
-                <div style={{ fontSize: '22px', color: '#546e7a', fontWeight: '400' }}>
+                <div style={{ fontSize: 'calc(22px * var(--text-scale, 1))', color: '#546e7a', fontWeight: '400' }}>
                   {t.pruefung}
                 </div>
               </div>
@@ -551,7 +564,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 >
                   <div className="flex items-center gap-4">
                     <List size={22} className="text-[#2b576b]" />
-                    <span style={{ fontSize: '15px', fontWeight: '400' }}>{t.musterboegen}</span>
+                    <span style={{ fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '400' }}>{t.musterboegen}</span>
                   </div>
                   <ChevronRight size={18} opacity={0.5} />
                 </button>
@@ -566,7 +579,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 >
                   <div className="flex items-center gap-4">
                     <ShieldCheck size={22} className="text-[#7cb342]" />
-                    <span style={{ fontSize: '15px', fontWeight: '400' }}> {t.simulation}</span>
+                    <span style={{ fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '400' }}> {t.simulation}</span>
                   </div>
                   <ChevronRight size={18} opacity={0.5} />
                 </button>
@@ -581,7 +594,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 >
                   <div className="flex items-center gap-4">
                     <CheckCircle size={22} className="text-[#7cb342]" />
-                    <span style={{ fontSize: '15px', fontWeight: '400' }}>1 {t.letzteFehler}</span>
+                    <span style={{ fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '400' }}>1 {t.letzteFehler}</span>
                   </div>
                   <ChevronRight size={18} opacity={0.5} />
                 </button>
@@ -596,7 +609,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 >
                   <div className="flex items-center gap-4">
                     <CheckCircle size={22} className="text-[#7cb342]" />
-                    <span style={{ fontSize: '15px', fontWeight: '400' }}>0 {t.markierteFragen}</span>
+                    <span style={{ fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '400' }}>0 {t.markierteFragen}</span>
                   </div>
                   <ChevronRight size={18} opacity={0.5} />
                 </button>
@@ -662,7 +675,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
             padding: 8px 4px;
             border-radius: 3px;
             font-weight: bold;
-            font-size: 11px;
+            font-size: calc(11px * var(--text-scale, 1));
             text-align: center;
             display: flex;
             align-items: center;
@@ -677,7 +690,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
             padding: 10px 24px;
             border-radius: 3px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: calc(12px * var(--text-scale, 1));
             text-transform: uppercase;
             letter-spacing: 0.05em;
             cursor: pointer;
@@ -700,7 +713,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
             }
             .pruefung-footer-orange-btn {
               padding: 6px 20px;
-              font-size: 12px;
+              font-size: calc(12px * var(--text-scale, 1));
               min-height: auto;
             }
             .pruefung-footer-red-btn {
@@ -842,6 +855,9 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
           )}
         </div>
 
+        {/* Support Modal */}
+        <SupportModal isOpen={showSupportModal} onClose={() => setShowSupportModal(false)} languageMode={languageMode} />
+
         {/* Premium Overlay Modal */}
         {showPremiumModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 backdrop-blur-xs p-4 animate-fade-in">
@@ -854,15 +870,18 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
               </h3>
               <p className="text-sm text-gray-600 mb-6 leading-relaxed">
                 {languageMode === 'vi'
-                  ? 'Vui lòng nâng cấp tài khoản Premium để mở khóa toàn bộ 66 bộ đề thi thử mẫu.'
-                  : 'Bitte upgraden Sie auf Premium, um alle 66 Musterbögen freizuschalten.'}
+                  ? 'Vui lòng ủng hộ chúng mình bằng tài khoản Premium để sử dụng toàn bộ 66 bộ đề thi thử mẫu.'
+                  : 'Bitte unterstützen Sie uns mit einem Premium-Konto, um alle 66 Musterbögen freizuschalten.'}
               </p>
               <div className="space-y-2">
                 <button
-                  onClick={() => customAlert(languageMode === 'vi' ? 'Chức năng nâng cấp đang được phát triển.' : 'Upgrade-Funktion wird entwickelt.', 'info')}
+                  onClick={() => {
+                    setShowPremiumModal(false);
+                    setShowSupportModal(true);
+                  }}
                   className="w-full py-3 bg-[#F59E0B] hover:bg-yellow-650 text-white font-bold rounded-xl text-sm transition-colors uppercase tracking-wide"
                 >
-                  {languageMode === 'vi' ? 'Nâng cấp ngay' : 'Jetzt upgraden'}
+                  {languageMode === 'vi' ? 'Ủng hộ ngay' : 'Jetzt unterstützen'}
                 </button>
                 <button
                   onClick={() => setShowPremiumModal(false)}

@@ -1,8 +1,8 @@
-import React from 'react';
-import { ChevronLeft, ChevronRight, Menu, BarChart3, List, CheckCircle } from 'lucide-react';
+import React, { useState } from 'react';
+import { ChevronLeft, ChevronRight, Menu, BarChart3, List, CheckCircle, Star, Calendar, Clock } from 'lucide-react';
 import { questions } from '../data/questions';
 
-export const TrainingDashboard = ({ user, onNavigate, onShowLogin, languageMode = 'both' }) => {
+export const TrainingDashboard = ({ user, onUpdateUser, onNavigate, onShowLogin, languageMode = 'both' }) => {
   const t = {
     fit: languageMode === 'de' ? 'Fit für Prüfung' : (languageMode === 'vi' ? 'Sẵn sàng thi' : 'Fit für Prüfung / Sẵn sàng thi'),
     training: languageMode === 'de' ? 'Training' : (languageMode === 'vi' ? 'Luyện tập' : 'Training / Luyện tập'),
@@ -13,6 +13,25 @@ export const TrainingDashboard = ({ user, onNavigate, onShowLogin, languageMode 
     lastErrors: languageMode === 'de' ? 'letzte Fehler' : (languageMode === 'vi' ? 'lỗi sai gần đây' : 'letzte Fehler / lỗi sai gần đây'),
     markedQuestions: languageMode === 'de' ? 'markierte Fragen' : (languageMode === 'vi' ? 'câu hỏi đã đánh dấu' : 'câu hỏi đã đánh dấu / markiert'),
   };
+
+  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [examDateStr, setExamDateStr] = useState(user?.examDate || '');
+
+  const handleSaveExamDate = () => {
+    if (user && onUpdateUser && examDateStr) {
+      onUpdateUser({ ...user, examDate: examDateStr });
+    }
+    setShowDatePicker(false);
+  };
+
+  const getDaysUntilExam = () => {
+    if (!user?.examDate) return null;
+    const diff = new Date(user.examDate).setHours(0,0,0,0) - new Date().setHours(0,0,0,0);
+    const days = Math.ceil(diff / (1000 * 3600 * 24));
+    return days;
+  };
+
+  const daysLeft = getDaysUntilExam();
 
   // Calculate real progress
   const totalQuestions = questions.length;
@@ -136,8 +155,8 @@ export const TrainingDashboard = ({ user, onNavigate, onShowLogin, languageMode 
           
           {/* Center Text overlay */}
           <div className="absolute inset-0 flex flex-col items-center justify-center text-center">
-            <div style={{fontSize: '36px', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px'}}>{fitPercent.toFixed(1)}%</div>
-            <div style={{fontSize: '12px', color: '#546e7a', marginTop: '6px', fontWeight: '500'}}>
+            <div style={{fontSize: 'calc(36px * var(--text-scale, 1))', fontWeight: '600', color: '#7cb342', lineHeight: '1', marginTop: '10px'}}>{fitPercent.toFixed(1)}%</div>
+            <div style={{fontSize: 'calc(12px * var(--text-scale, 1))', color: '#546e7a', marginTop: '6px', fontWeight: '500'}}>
               {t.fit}
             </div>
             <BarChart3 size={18} color="#546e7a" className="mt-1.5" />
@@ -163,20 +182,70 @@ export const TrainingDashboard = ({ user, onNavigate, onShowLogin, languageMode 
             >
               <ChevronLeft size={20} strokeWidth={2.5} />
             </button>
-            <div style={{fontSize: '22px', color: '#546e7a', fontWeight: '400'}}>
+            <div style={{fontSize: 'calc(22px * var(--text-scale, 1))', color: '#546e7a', fontWeight: '400'}}>
               {t.training}
             </div>
           </div>
+
+          {/* Exam Date Widget */}
+          {!user?.isGuest && (
+            <div style={{ background: 'white', padding: '16px', borderRadius: '8px', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', marginBottom: '8px', borderLeft: '4px solid #fbc02d' }}>
+              {!showDatePicker ? (
+                <>
+                  {daysLeft !== null && daysLeft >= 0 ? (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div style={{ background: '#fef9c3', padding: '10px', borderRadius: '50%' }}>
+                          <Clock size={24} color="#ca8a04" />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#713f12', fontWeight: 'bold' }}>Ngày thi đang đến gần!</div>
+                          <div style={{ fontSize: 'calc(20px * var(--text-scale, 1))', color: '#ca8a04', fontWeight: '800' }}>{daysLeft} <span style={{fontSize:'12px', fontWeight:'600'}}>ngày</span></div>
+                        </div>
+                      </div>
+                      <button onClick={() => setShowDatePicker(true)} style={{ background: 'none', border: 'none', color: '#9ca3af', cursor: 'pointer', padding: '4px' }}>
+                        <Calendar size={18} />
+                      </button>
+                    </div>
+                  ) : (
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center gap-3">
+                        <div style={{ background: '#f0f9ff', padding: '10px', borderRadius: '50%' }}>
+                          <Calendar size={24} color="#0284c7" />
+                        </div>
+                        <div>
+                          <div style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#0c4a6e', fontWeight: 'bold' }}>Mục tiêu thi lý thuyết</div>
+                          <div style={{ fontSize: 'calc(11px * var(--text-scale, 1))', color: '#0284c7', marginTop: '2px' }}>{daysLeft < 0 ? 'Ngày thi đã qua, cập nhật lại?' : 'Đặt ngày dự kiến để đốc thúc học tập'}</div>
+                        </div>
+                      </div>
+                      <button onClick={() => setShowDatePicker(true)} style={{ background: '#0284c7', color: 'white', border: 'none', padding: '6px 12px', borderRadius: '6px', fontWeight: 'bold', fontSize: '12px', cursor: 'pointer' }}>
+                        Thiết lập
+                      </button>
+                    </div>
+                  )}
+                </>
+              ) : (
+                <div className="flex flex-col gap-2">
+                  <div style={{ fontSize: 'calc(13px * var(--text-scale, 1))', fontWeight: 'bold', color: '#374151' }}>Chọn ngày thi dự kiến:</div>
+                  <input type="date" value={examDateStr} onChange={(e) => setExamDateStr(e.target.value)} style={{ width: '100%', padding: '8px', borderRadius: '6px', border: '1px solid #d1d5db', outline: 'none' }} />
+                  <div className="flex gap-2 mt-1">
+                    <button onClick={handleSaveExamDate} style={{ flex: 1, padding: '8px', background: '#2b576b', color: 'white', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>Lưu</button>
+                    <button onClick={() => setShowDatePicker(false)} style={{ flex: 1, padding: '8px', background: '#f3f4f6', color: '#4b5563', border: 'none', borderRadius: '6px', fontWeight: 'bold', cursor: 'pointer' }}>Hủy</button>
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
 
           {/* List Items */}
           <div className="flex flex-col gap-3">
             {[
               { title: t.practice30, icon: <div className="font-bold text-[#2b576b] tracking-wider text-sm flex flex-col leading-none"><span>30</span><span className="text-[8px]">IIII</span></div>, path: '/training/fragen' },
-              { title: t.allThemes, icon: <List size={22} className="text-[#2b576b]" />, path: '/training/fragen' },
-              { title: t.focusAreas, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
+              { title: t.allThemes, icon: <List size={22} className="text-[#2b576b]" />, path: '/training/fragen?filter=all' },
+              { title: t.focusAreas, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen?filter=focus' },
               { title: t.searchQuestions, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
-              { title: `0 ${t.lastErrors}`, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
-              { title: `0 ${t.markedQuestions}`, icon: <CheckCircle size={22} className="text-[#7cb342]" />, path: '/training/fragen' },
+              { title: `${wrongCount} ${t.lastErrors}`, icon: <CheckCircle size={22} className="text-[#e53935]" />, path: '/training/fragen?filter=errors' },
+              { title: `${user?.savedQuestions?.length || 0} ${t.markedQuestions}`, icon: <Star size={22} className="text-[#fbc02d]" />, path: '/training/fragen?filter=marked' },
             ].map((item, idx) => (
               <button 
                 key={idx}
@@ -189,7 +258,7 @@ export const TrainingDashboard = ({ user, onNavigate, onShowLogin, languageMode 
               >
                 <div className="flex items-center gap-4">
                   {item.icon}
-                  <span style={{fontSize: '15px', fontWeight: '400'}}>{item.title}</span>
+                  <span style={{fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: '400'}}>{item.title}</span>
                 </div>
                 <ChevronRight size={18} opacity={0.5} />
               </button>

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { Eye, EyeOff, Lock, User, Mail, AlertCircle, CheckCircle2, Loader2 } from 'lucide-react';
+import React, { useState, useEffect } from 'react';
+import { Eye, EyeOff, Lock, User, Mail, AlertCircle, CheckCircle2, Loader2, Phone } from 'lucide-react';
 import { hashPassword, verifyPassword, createToken, checkPasswordStrength } from '../lib/auth';
 import { registerWithEmail, loginWithEmail, verifyEmail, updateUserProfile } from '../lib/firebase';
 
@@ -30,7 +30,7 @@ const StrengthBar = ({ password }) => {
           borderRadius: '2px', transition: 'all 0.3s ease'
         }} />
       </div>
-      <div style={{ fontSize: '11px', color, fontWeight: '600', marginTop: '3px' }}>{label}</div>
+      <div style={{ fontSize: 'calc(11px * var(--text-scale, 1))', color, fontWeight: '600', marginTop: '3px' }}>{label}</div>
     </div>
   );
 };
@@ -50,7 +50,7 @@ export const Auth = ({ onLogin, onCancel }) => {
     setError('');
     setSuccess('');
 
-    if (isLogin) {
+    if (authMode === 'login') {
       if (!username.trim() || !password.trim()) {
         setError('Vui lòng nhập đầy đủ tài khoản/email và mật khẩu.');
         return;
@@ -74,7 +74,7 @@ export const Auth = ({ onLogin, onCancel }) => {
     try {
       const key = username.trim().toLowerCase();
 
-      if (isLogin) {
+      if (authMode === 'login') {
         // --- LOGIN FLOW ---
 
         // 1. Firebase Login (nếu nhập Email có chứa @)
@@ -158,7 +158,7 @@ export const Auth = ({ onLogin, onCancel }) => {
 
           // Chuyển form về tab Đăng Nhập sau 3 giây
           setTimeout(() => {
-            setIsLogin(true);
+            setAuthMode('login');
             setUsername(email.trim()); // Điền sẵn email cho người dùng
             setPassword('');
             setSuccess('');
@@ -196,12 +196,12 @@ export const Auth = ({ onLogin, onCancel }) => {
     width: '100%', padding: '11px 14px',
     background: '#f9fafb', borderRadius: '8px',
     border: '1.5px solid #e5e7eb',
-    fontSize: '14px', fontWeight: '500', color: '#111827',
+    fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '500', color: '#111827',
     outline: 'none', transition: 'border-color 0.15s',
     fontFamily: 'inherit',
   };
   const labelStyle = {
-    display: 'block', fontSize: '11px', fontWeight: '700',
+    display: 'block', fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: '700',
     textTransform: 'uppercase', letterSpacing: '0.05em',
     color: '#6b7280', marginBottom: '6px',
   };
@@ -211,11 +211,11 @@ export const Auth = ({ onLogin, onCancel }) => {
 
       {/* Header */}
       <div style={{ textAlign: 'center', marginBottom: '24px' }}>
-        <div style={{ fontSize: '28px', marginBottom: '8px' }}>🚦</div>
-        <h2 style={{ fontSize: '18px', fontWeight: '800', color: '#111827', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
+        <img src="/newicon.jpg" alt="Logo" style={{ width: 'calc(36px * var(--text-scale, 1))', height: 'calc(36px * var(--text-scale, 1))', borderRadius: '10px', marginBottom: '12px', objectFit: 'cover' }} />
+        <h2 style={{ fontSize: 'calc(18px * var(--text-scale, 1))', fontWeight: '800', color: '#111827', letterSpacing: '0.02em', textTransform: 'uppercase' }}>
           Führerschein Việt-Đức
         </h2>
-        <p style={{ fontSize: '12px', color: '#6b7280', fontWeight: '600', marginTop: '4px', letterSpacing: '0.03em' }}>
+        <p style={{ fontSize: 'calc(12px * var(--text-scale, 1))', color: '#6b7280', fontWeight: '600', marginTop: '4px', letterSpacing: '0.03em' }}>
           HỌC LÝ THUYẾT LÁI XE ĐỨC
         </p>
       </div>
@@ -226,7 +226,7 @@ export const Auth = ({ onLogin, onCancel }) => {
           <button key={String(id)} type="button"
             onClick={() => { setIsLogin(id); setError(''); setSuccess(''); }}
             style={{
-              flex: 1, padding: '8px', borderRadius: '6px', fontSize: '13px', fontWeight: '700',
+              flex: 1, padding: '8px', borderRadius: '6px', fontSize: 'calc(13px * var(--text-scale, 1))', fontWeight: '700',
               transition: 'all 0.15s',
               background: isLogin === id ? 'white' : 'transparent',
               color: isLogin === id ? '#1a4a5e' : '#9ca3af',
@@ -242,13 +242,13 @@ export const Auth = ({ onLogin, onCancel }) => {
       {error && (
         <div style={{ display: 'flex', alignItems: 'flex-start', gap: '8px', padding: '10px 12px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', marginBottom: '16px' }}>
           <AlertCircle size={16} color="#ef4444" style={{ flexShrink: 0, marginTop: '1px' }} />
-          <span style={{ fontSize: '13px', color: '#b91c1c', fontWeight: '600', lineHeight: '1.4' }}>{error}</span>
+          <span style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#b91c1c', fontWeight: '600', lineHeight: '1.4' }}>{error}</span>
         </div>
       )}
       {success && (
         <div style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 12px', background: '#f0fdf4', border: '1px solid #bbf7d0', borderRadius: '8px', marginBottom: '16px' }}>
           <CheckCircle2 size={16} color="#16a34a" style={{ flexShrink: 0 }} />
-          <span style={{ fontSize: '13px', color: '#15803d', fontWeight: '600' }}>{success}</span>
+          <span style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#15803d', fontWeight: '600' }}>{success}</span>
         </div>
       )}
 
@@ -314,7 +314,7 @@ export const Auth = ({ onLogin, onCancel }) => {
           style={{
             width: '100%', padding: '12px', borderRadius: '8px',
             background: loading ? '#93c5fd' : 'linear-gradient(135deg, #1a4a5e 0%, #2b6f8a 100%)',
-            color: 'white', fontWeight: '700', fontSize: '14px',
+            color: 'white', fontWeight: '700', fontSize: 'calc(14px * var(--text-scale, 1))',
             letterSpacing: '0.04em', textTransform: 'uppercase',
             border: 'none', cursor: loading ? 'not-allowed' : 'pointer',
             display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
@@ -326,11 +326,10 @@ export const Auth = ({ onLogin, onCancel }) => {
           {loading ? 'Đang xử lý...' : (isLogin ? 'Đăng Nhập' : 'Tạo Tài Khoản')}
         </button>
       </form>
-
       {/* Divider */}
       <div style={{ display: 'flex', alignItems: 'center', gap: '12px', margin: '20px 0' }}>
         <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
-        <span style={{ fontSize: '11px', color: '#9ca3af', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Hoặc</span>
+        <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', color: '#9ca3af', fontWeight: '700', letterSpacing: '0.05em', textTransform: 'uppercase' }}>Hoặc</span>
         <div style={{ flex: 1, height: '1px', background: '#e5e7eb' }} />
       </div>
 
@@ -391,7 +390,7 @@ export const Auth = ({ onLogin, onCancel }) => {
               display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
               padding: '10px', borderRadius: '8px',
               background: 'white', border: '1.5px solid #e5e7eb',
-              fontSize: '13px', fontWeight: '700', color: '#374151',
+              fontSize: 'calc(13px * var(--text-scale, 1))', fontWeight: '700', color: '#374151',
               cursor: 'pointer', transition: 'border-color 0.15s, background 0.15s',
             }}
             onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
@@ -408,7 +407,7 @@ export const Auth = ({ onLogin, onCancel }) => {
           style={{
             width: '100%', padding: '10px', borderRadius: '8px',
             background: 'transparent', border: '1.5px solid #e5e7eb',
-            color: '#6b7280', fontSize: '12px', fontWeight: '700',
+            color: '#6b7280', fontSize: 'calc(12px * var(--text-scale, 1))', fontWeight: '700',
             letterSpacing: '0.03em', textTransform: 'uppercase',
             cursor: 'pointer', transition: 'border-color 0.15s, color 0.15s',
           }}
@@ -422,7 +421,7 @@ export const Auth = ({ onLogin, onCancel }) => {
           <button type="button" onClick={onCancel}
             style={{
               width: '100%', padding: '8px', background: 'transparent', border: 'none',
-              color: '#9ca3af', fontSize: '12px', fontWeight: '600', cursor: 'pointer',
+              color: '#9ca3af', fontSize: 'calc(12px * var(--text-scale, 1))', fontWeight: '600', cursor: 'pointer',
               letterSpacing: '0.02em', transition: 'color 0.15s',
             }}
             onMouseEnter={(e) => e.currentTarget.style.color = '#374151'}

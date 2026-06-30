@@ -1,5 +1,5 @@
 import { initializeApp } from 'firebase/app';
-import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, updateProfile } from 'firebase/auth';
+import { getAuth, GoogleAuthProvider, FacebookAuthProvider, signInWithPopup, createUserWithEmailAndPassword, signInWithEmailAndPassword, sendEmailVerification, updateProfile, RecaptchaVerifier, signInWithPhoneNumber } from 'firebase/auth';
 import { getFirestore } from 'firebase/firestore';
 
 // Cấu hình Firebase của ứng dụng vietfuhreschein
@@ -22,10 +22,22 @@ export const db = getFirestore(app);
 export const googleProvider = new GoogleAuthProvider();
 export const facebookProvider = new FacebookAuthProvider();
 
-// Hàm tiện ích đăng nhập bằng Popup
+// Hàm tiện ích đăng nhập
 export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
 export const signInWithFacebook = () => signInWithPopup(auth, facebookProvider);
 export const registerWithEmail = (email, password) => createUserWithEmailAndPassword(auth, email, password);
 export const loginWithEmail = (email, password) => signInWithEmailAndPassword(auth, email, password);
 export const verifyEmail = (user) => sendEmailVerification(user);
 export const updateUserProfile = (user, data) => updateProfile(user, data);
+
+// Phone Auth
+export const setupRecaptcha = (containerId, callback) => {
+  if (!window.recaptchaVerifier) {
+    window.recaptchaVerifier = new RecaptchaVerifier(auth, containerId, {
+      'size': 'invisible',
+      'callback': callback
+    });
+  }
+  return window.recaptchaVerifier;
+};
+export const loginWithPhone = (phoneNumber, appVerifier) => signInWithPhoneNumber(auth, phoneNumber, appVerifier);

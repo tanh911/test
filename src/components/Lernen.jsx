@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useLocation } from 'react-router-dom';
 import { questions } from '../data/questions';
 import { SVGGraphics } from './SVGGraphics';
 import {
@@ -7,7 +8,11 @@ import {
 import { customAlert } from '../utils/customAlert';
 
 export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languageMode = 'both', predefinedQuestions = null, mode = 'practice', onExamSubmit }) => {
-  const sessionKey = predefinedQuestions ? null : 'fuhrerschein_learning_session_v2';
+  const location = useLocation();
+  const searchParams = new URLSearchParams(location.search);
+  const filterType = searchParams.get('filter') || 'all';
+
+  const sessionKey = predefinedQuestions ? null : `fuhrerschein_learning_session_v2_${filterType}`;
   const [currentIndex, setCurrentIndex] = useState(() => {
     if (sessionKey) {
       const savedSession = sessionStorage.getItem(sessionKey);
@@ -136,8 +141,20 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
       }
     }
 
-    // Chọn ngẫu nhiên 30 câu từ toàn bộ kho (1851 câu)
-    const shuffledPool = [...questions].sort(() => 0.5 - Math.random());
+    let pool = questions;
+    if (filterType === 'errors') {
+      const progressEntries = user?.progress ? Object.entries(user.progress).filter(([k,v]) => v.answered && !v.isCorrect).map(([k,v]) => k) : [];
+      pool = questions.filter(q => progressEntries.includes(getBaseId(q.id)));
+    } else if (filterType === 'marked') {
+      const savedIds = user?.savedQuestions || [];
+      pool = questions.filter(q => savedIds.includes(getBaseId(q.id)));
+    }
+    
+    // Nếu pool rỗng (vd: không có lỗi sai nào), fallback về toàn bộ câu hỏi (hoặc có thể hiển thị rỗng, nhưng code hiện tại luôn cần câu hỏi)
+    if (pool.length === 0) pool = questions;
+
+    // Chọn ngẫu nhiên tối đa 30 câu từ pool
+    const shuffledPool = [...pool].sort(() => 0.5 - Math.random());
     const selected = shuffledPool.slice(0, 30).map((q, i) => ({
       ...q,
       id: `${q.id}_rnd_${i}` // ID duy nhất để phân biệt tiến trình
@@ -442,12 +459,12 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
           {showQuestion && (
             <div className="mb-6 text-left w-full">
               {(languageMode === 'de' || languageMode === 'both') && (
-                <h2 style={{ fontSize: '18px', fontWeight: 700, color: theme.textDark }}>
+                <h2 style={{ fontSize: 'calc(18px * var(--text-scale, 1))', fontWeight: 700, color: theme.textDark }}>
                   {currentQuestion.textDe}
                 </h2>
               )}
               {(languageMode === 'vi' || languageMode === 'both') && (
-                <p style={{ fontSize: '15px', fontWeight: 700, color: theme.textDark, opacity: 0.85, marginTop: (languageMode === 'both') ? '4px' : '0px' }}>
+                <p style={{ fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: 700, color: theme.textDark, opacity: 0.85, marginTop: (languageMode === 'both') ? '4px' : '0px' }}>
                   {currentQuestion.textVi}
                 </p>
               )}
@@ -591,12 +608,12 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
 
                       <div style={{ display: 'flex', flexDirection: 'column', flex: 1, paddingTop: '4px' }}>
                         {(languageMode === 'de' || languageMode === 'both') && (
-                          <span style={{ fontSize: '16px', fontWeight: 700, color: theme.textDark, lineHeight: '1.3' }}>
+                          <span style={{ fontSize: 'calc(16px * var(--text-scale, 1))', fontWeight: 700, color: theme.textDark, lineHeight: '1.3' }}>
                             {option.textDe}
                           </span>
                         )}
                         {(languageMode === 'vi' || languageMode === 'both') && option.textVi && (
-                          <span style={{ fontSize: '14px', fontWeight: 650, color: '#4b5563', fontStyle: 'italic', marginTop: (languageMode === 'both') ? '4px' : '0px' }}>
+                          <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: 650, color: '#4b5563', fontStyle: 'italic', marginTop: (languageMode === 'both') ? '4px' : '0px' }}>
                             {option.textVi}
                           </span>
                         )}
@@ -615,7 +632,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                   }}
                   disabled={videoPlayCount >= 5}
                   className={`transition-all ${videoPlayCount >= 5 ? 'opacity-50 cursor-not-allowed' : 'hover:opacity-90'}`}
-                  style={{ width: '100%', backgroundColor: videoPlayCount >= 5 ? '#6b7280' : '#0000a0', color: 'white', fontWeight: 'bold', fontSize: '18px', padding: '10px', borderRadius: '4px', border: '1px solid #000' }}
+                  style={{ width: '100%', backgroundColor: videoPlayCount >= 5 ? '#6b7280' : '#0000a0', color: 'white', fontWeight: 'bold', fontSize: 'calc(18px * var(--text-scale, 1))', padding: '10px', borderRadius: '4px', border: '1px solid #000' }}
                 >
                   {languageMode === 'de' ? 'Video starten' : languageMode === 'vi' ? 'Bắt đầu video' : 'Video starten / Bắt đầu video'}
                 </button>
@@ -627,20 +644,20 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                       if (videoRef.current) videoRef.current.pause();
                     }}
                     className="hover:opacity-90"
-                    style={{ width: '100%', backgroundColor: '#0000a0', color: 'white', fontWeight: 'bold', fontSize: '18px', padding: '10px', borderRadius: '4px', border: '1px solid #000' }}
+                    style={{ width: '100%', backgroundColor: '#0000a0', color: 'white', fontWeight: 'bold', fontSize: 'calc(18px * var(--text-scale, 1))', padding: '10px', borderRadius: '4px', border: '1px solid #000' }}
                   >
                     {languageMode === 'de' ? 'Zur Aufgabenstellung' : languageMode === 'vi' ? 'Vào câu hỏi' : 'Zur Aufgabenstellung / Vào câu hỏi'}
                   </button>
                 )}
 
-                <div style={{ marginTop: '20px', fontSize: '15px', fontWeight: 'bold', textAlign: 'center', color: '#0a4c2f' }}>
+                <div style={{ marginTop: '20px', fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: 'bold', textAlign: 'center', color: '#0a4c2f' }}>
                   {!hasPlayedOnce && videoPlayCount === 0 ? (
                     languageMode === 'de' ? (
                       <span>Sie können das Video insgesamt <strong>5</strong> Mal ansehen.</span>
                     ) : languageMode === 'vi' ? (
                       <span>Bạn có thể xem video tối đa <strong>5</strong> lần.</span>
                     ) : (
-                      <span>Sie können das Video insgesamt <strong>5</strong> Mal ansehen.<br /><span style={{ fontSize: '13px', color: '#4b5563', fontWeight: 'normal' }}>(Bạn có thể xem video tối đa 5 lần)</span></span>
+                      <span>Sie können das Video insgesamt <strong>5</strong> Mal ansehen.<br /><span style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#4b5563', fontWeight: 'normal' }}>(Bạn có thể xem video tối đa 5 lần)</span></span>
                     )
                   ) : (
                     languageMode === 'de' ? (
@@ -648,7 +665,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                     ) : languageMode === 'vi' ? (
                       <span>Bạn có thể xem video này thêm <strong style={{ color: '#e50000' }}>{5 - videoPlayCount}</strong> lần nữa.</span>
                     ) : (
-                      <span>Sie können sich den Film noch <strong style={{ color: '#e50000' }}>{5 - videoPlayCount}</strong> mal ansehen.<br /><span style={{ fontSize: '13px', color: '#4b5563', fontWeight: 'normal' }}>(Bạn có thể xem video này thêm {5 - videoPlayCount} lần)</span></span>
+                      <span>Sie können sich den Film noch <strong style={{ color: '#e50000' }}>{5 - videoPlayCount}</strong> mal ansehen.<br /><span style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#4b5563', fontWeight: 'normal' }}>(Bạn có thể xem video này thêm {5 - videoPlayCount} lần)</span></span>
                     )
                   )}
                 </div>
@@ -663,7 +680,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 <button
                   onClick={() => setShowConfirmModal('abgeben')}
                   className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: theme.btnRed, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+                  style={{ backgroundColor: theme.btnRed, height: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '0 20px' }}
                 >
                   {languageMode === 'de' ? 'Abgeben' : (languageMode === 'vi' ? 'Đánh giá' : 'Đánh giá / Abgeben')}
                 </button>
@@ -671,7 +688,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 <button
                   onClick={() => setShowConfirmModal('abbrechen')}
                   className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: theme.btnRed, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+                  style={{ backgroundColor: theme.btnRed, height: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '0 20px' }}
                 >
                   {t.abbrechen}
                 </button>
@@ -680,7 +697,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
               <button
                 onClick={mode === 'review' ? () => onNavigate('/pruefung') : handleOpenAi}
                 className="font-bold text-white shadow-sm hover:opacity-90 transition-opacity flex items-center justify-center gap-2"
-                style={{ background: mode === 'review' ? theme.btnRed : 'linear-gradient(to right, #6366f1, #a855f7)', height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+                style={{ background: mode === 'review' ? theme.btnRed : 'linear-gradient(to right, #6366f1, #a855f7)', height: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '0 20px' }}
               >
                 {mode === 'review' ? t.abbrechen : t.aiExplanation}
               </button>
@@ -713,14 +730,14 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                       if (onExamSubmit) onExamSubmit(perfectAnswers);
                     }}
                     className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#3b82f6', height: '44px', borderRadius: '12px', fontSize: '13px', padding: '0 16px' }}
+                    style={{ backgroundColor: '#3b82f6', height: '44px', borderRadius: '12px', fontSize: 'calc(13px * var(--text-scale, 1))', padding: '0 16px' }}
                   >
                     Auto Pass
                   </button>
                   <button
                     onClick={handleNext}
                     className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                    style={{ backgroundColor: '#2b576b', height: '44px', borderRadius: '12px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+                    style={{ backgroundColor: '#2b576b', height: '44px', borderRadius: '12px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '0 20px' }}
                   >
                     {t.nextQuestion}
                   </button>
@@ -729,7 +746,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 <button
                   onClick={handleSubmit}
                   className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                  style={{ backgroundColor: theme.btnGreen, height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+                  style={{ backgroundColor: theme.btnGreen, height: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '0 20px' }}
                 >
                   {t.aufloesung}
                 </button>
@@ -738,7 +755,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
               <button
                 onClick={handleNext}
                 className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#2b576b', height: '44px', borderRadius: '8px', fontSize: '15px', minWidth: '160px', padding: '0 20px' }}
+                style={{ backgroundColor: '#2b576b', height: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '0 20px' }}
               >
                 {t.nextQuestion}
               </button>
@@ -752,7 +769,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
 
         {/* MOBILE: Horizontal scrollable single row */}
         <div className="mobile-only" style={{ backgroundColor: theme.topBar, padding: '8px 10px 10px' }}>
-          <div style={{ fontSize: '12px', fontWeight: 'bold', color: 'rgba(255,255,255,0.8)', marginBottom: '6px' }}>
+          <div style={{ fontSize: 'calc(12px * var(--text-scale, 1))', fontWeight: 'bold', color: 'rgba(255,255,255,0.8)', marginBottom: '6px' }}>
             {t.fragen}: {currentIndex + 1} / {filteredQuestions.length}
           </div>
           <div
@@ -798,7 +815,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                     color: textColor,
                     border: currentIndex === idx ? '2.5px solid white' : '1px solid rgba(255,255,255,0.3)',
                     borderRadius: '4px',
-                    fontSize: '13px',
+                    fontSize: 'calc(13px * var(--text-scale, 1))',
                     fontWeight: 'bold',
                     cursor: 'pointer',
                     boxShadow: currentIndex === idx ? '0 0 0 2px rgba(0,0,0,0.5)' : 'none',
@@ -819,7 +836,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
 
         {/* DESKTOP: Arrow navbar with sliding window */}
         <div className="desktop-only" style={{ flexDirection: 'column', width: '100%' }}>
-          <div style={{ alignSelf: 'flex-start', padding: '6px 24px', fontSize: '15px', fontWeight: 'bold', color: 'white', backgroundColor: theme.topBar, borderTopLeftRadius: '4px', borderTopRightRadius: '4px', marginLeft: '12px' }}>
+          <div style={{ alignSelf: 'flex-start', padding: '6px 24px', fontSize: 'calc(15px * var(--text-scale, 1))', fontWeight: 'bold', color: 'white', backgroundColor: theme.topBar, borderTopLeftRadius: '4px', borderTopRightRadius: '4px', marginLeft: '12px' }}>
             {filteredQuestions.length} {t.fragen}
           </div>
           <div style={{ backgroundColor: theme.topBar, padding: '10px 12px', display: 'flex', flexDirection: 'row', alignItems: 'center', justifyContent: 'space-between' }}>
@@ -861,7 +878,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 }
                 return (
                   <button key={pageNum} onClick={() => setCurrentIndex(pageNum - 1)} className="flex items-center justify-center font-bold relative hover:opacity-90"
-                    style={{ width: '54px', height: '38px', minWidth: '54px', backgroundColor: bgColor, color: textColor, border: currentIndex === pageNum - 1 ? '3px solid black' : '1px solid black', fontSize: '16px' }}>
+                    style={{ width: '54px', height: '38px', minWidth: '54px', backgroundColor: bgColor, color: textColor, border: currentIndex === pageNum - 1 ? '3px solid black' : '1px solid black', fontSize: 'calc(16px * var(--text-scale, 1))' }}>
                     {isPageBookmarked && <div style={{ position: 'absolute', top: 0, right: 0, width: 0, height: 0, borderStyle: 'solid', borderWidth: '0 8px 8px 0', borderColor: 'transparent black transparent transparent' }} />}
                     {hasVideo && <div style={{ position: 'absolute', top: '3px', left: '3px', width: 0, height: 0, borderStyle: 'solid', borderWidth: '4px 0 4px 6px', borderColor: 'transparent transparent transparent black' }} />}
                     {pageNum}
@@ -891,8 +908,8 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
       {showConfirmModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 60, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
           <div style={{ background: 'white', borderRadius: '14px', padding: '28px 24px', maxWidth: '360px', width: '100%', boxShadow: '0 20px 50px rgba(0,0,0,0.25)', textAlign: 'center' }}>
-            <div style={{ fontSize: '36px', marginBottom: '12px' }}>⚠️</div>
-            <h3 style={{ fontSize: '17px', fontWeight: '700', color: '#111827', marginBottom: '8px' }}>
+            <div style={{ fontSize: 'calc(36px * var(--text-scale, 1))', marginBottom: '12px' }}>⚠️</div>
+            <h3 style={{ fontSize: 'calc(17px * var(--text-scale, 1))', fontWeight: '700', color: '#111827', marginBottom: '8px' }}>
               {showConfirmModal === 'abgeben'
                 ? (languageMode === 'de' ? 'Prüfung abgeben?' : (languageMode === 'vi' ? 'Nộp bài thi?' : 'Nộp bài thi? / Prüfung abgeben?'))
                 : (mode === 'exam' 
@@ -901,7 +918,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                   )
               }
             </h3>
-            <p style={{ fontSize: '13px', color: '#6b7280', lineHeight: '1.5', marginBottom: '24px' }}>
+            <p style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#6b7280', lineHeight: '1.5', marginBottom: '24px' }}>
               {showConfirmModal === 'abgeben'
                 ? (languageMode === 'de' ? 'Möchten Sie die Prüfung wirklich abgeben? Danach können Sie keine Antworten mehr ändern.' : (languageMode === 'vi' ? 'Bạn có chắc chắn muốn nộp bài thi ngay bây giờ không? Bạn sẽ không thể thay đổi đáp án sau khi nộp.' : 'Bạn có chắc chắn muốn nộp bài? / Möchten Sie die Prüfung wirklich abgeben?'))
                 : (mode === 'exam'
@@ -913,7 +930,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
             <div style={{ display: 'flex', gap: '10px' }}>
               <button
                 onClick={() => setShowConfirmModal(false)}
-                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: '1.5px solid #e5e7eb', background: 'white', fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: '#374151' }}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: '1.5px solid #e5e7eb', background: 'white', fontWeight: '700', fontSize: 'calc(14px * var(--text-scale, 1))', cursor: 'pointer', color: '#374151' }}
                 onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
                 onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
               >
@@ -933,7 +950,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                   }
                   setShowConfirmModal(false);
                 }}
-                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: 'none', background: showConfirmModal === 'abgeben' ? theme.btnGreen : theme.btnRed, fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: 'white' }}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: 'none', background: showConfirmModal === 'abgeben' ? theme.btnGreen : theme.btnRed, fontWeight: '700', fontSize: 'calc(14px * var(--text-scale, 1))', cursor: 'pointer', color: 'white' }}
                 onMouseEnter={(e) => e.currentTarget.style.opacity = '0.88'}
                 onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
               >
@@ -970,27 +987,32 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
             <X size={28} strokeWidth={3} />
           </button>
 
-          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ width: '100%', height: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center', position: 'relative' }}>
             {currentQuestion.video ? (
-              <video
-                ref={fullscreenVideoRef}
-                src={currentQuestion.video}
-                controls={!(!isSubmitted && videoPlayCount >= 5)}
-                autoPlay
-                playsInline
-                onPlay={(e) => {
-                  if (!isSubmitted && videoPlayCount >= 5) {
-                    e.target.pause();
+              <>
+                <video
+                  ref={fullscreenVideoRef}
+                  src={currentQuestion.video}
+                  controls={isSubmitted}
+                  autoPlay
+                  playsInline
+                  onPlay={(e) => {
+                    if (!isSubmitted && videoPlayCount >= 5) {
+                      e.target.pause();
+                      setIsFullscreenMode(false);
+                      customAlert(languageMode === 'de' ? 'Maximale Anzahl an Wiederholungen (5) erreicht.' : 'Đã đạt giới hạn 5 lần xem video.', 'warning');
+                    }
+                  }}
+                  onEnded={() => {
+                    if (!showQuestion) setVideoPlayCount(prev => prev + 1);
                     setIsFullscreenMode(false);
-                    customAlert(languageMode === 'de' ? 'Maximale Anzahl an Wiederholungen (5) erreicht.' : 'Đã đạt giới hạn 5 lần xem video.', 'warning');
-                  }
-                }}
-                onEnded={() => {
-                  if (!showQuestion) setVideoPlayCount(prev => prev + 1);
-                  setIsFullscreenMode(false);
-                }}
-                style={{ width: '100%', height: '100%', objectFit: 'contain' }}
-              />
+                  }}
+                  style={{ width: '100%', height: '100%', objectFit: 'contain' }}
+                />
+                {!isSubmitted && (
+                  <div style={{ position: 'absolute', inset: 0, zIndex: 10 }} onClick={(e) => e.stopPropagation()} />
+                )}
+              </>
             ) : currentQuestion.image ? (
               <img src={currentQuestion.image} alt="Fullscreen Question" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             ) : currentQuestion.imageType ? (
@@ -1031,10 +1053,10 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                   }}>
                     {msg.sender === 'ai' && (
                       <div style={{ display: 'flex', alignItems: 'center', gap: '8px', marginBottom: '4px' }}>
-                        <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#6b7280' }}>Bạn Đồng Hành</span>
+                        <span style={{ fontSize: 'calc(12px * var(--text-scale, 1))', fontWeight: 'bold', color: '#6b7280' }}>Bạn Đồng Hành</span>
                       </div>
                     )}
-                    <div style={{ fontSize: '14px', lineHeight: '1.6', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+                    <div style={{ fontSize: 'calc(14px * var(--text-scale, 1))', lineHeight: '1.6', whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
                       {renderFormattedText(msg.text)}
                     </div>
                   </div>
@@ -1055,7 +1077,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
             </div>
 
             <div style={{ padding: '12px 16px 16px 16px', backgroundColor: '#ffffff', borderTop: '1px solid #f3f4f6', display: 'flex', flexDirection: 'column', gap: '8px' }}>
-              <div style={{ fontSize: '10px', fontWeight: 'bold', color: '#1a4a5e', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+              <div style={{ fontSize: 'calc(10px * var(--text-scale, 1))', fontWeight: 'bold', color: '#1a4a5e', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
                 {t.quickQuestionsTitle}
               </div>
               <div className="flex flex-row flex-wrap gap-2">
