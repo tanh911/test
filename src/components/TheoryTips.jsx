@@ -344,11 +344,35 @@ export const TheoryTips = () => {
           {isDropdownOpen && (
             <>
               <div 
-                className="fixed inset-0 z-10" 
+                style={{
+                  position: 'fixed',
+                  top: 0,
+                  bottom: 0,
+                  left: 0,
+                  right: 0,
+                  zIndex: 99,
+                  backgroundColor: 'transparent'
+                }}
                 onClick={() => setIsDropdownOpen(false)}
               />
-              <div className="absolute top-full left-0 right-0 mt-1.5 bg-white border border-slate-200 rounded-xl shadow-xl z-20 py-1 max-h-[280px] overflow-y-auto">
-                {tipCategories.map((cat) => {
+              <div 
+                style={{
+                  position: 'absolute',
+                  top: '100%',
+                  left: 0,
+                  right: 0,
+                  marginTop: '6px',
+                  backgroundColor: '#ffffff',
+                  border: '1px solid #cbd5e1',
+                  borderRadius: '12px',
+                  boxShadow: '0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)',
+                  zIndex: 100,
+                  padding: '6px 0',
+                  maxHeight: '280px',
+                  overflowY: 'auto'
+                }}
+              >
+                {tipCategories.map((cat, catIdx) => {
                   const CatIcon = cat.icon;
                   const isActive = activeTab === cat.id;
                   const catColor = accentColors[cat.id];
@@ -360,10 +384,27 @@ export const TheoryTips = () => {
                         setActiveTab(cat.id);
                         setIsDropdownOpen(false);
                       }}
-                      className="w-full px-4 py-2.5 flex items-center gap-3 transition-colors duration-150 hover:bg-slate-50 text-left border-b border-slate-50 last:border-0"
-                      style={isActive ? { backgroundColor: catColor.bgLight } : {}}
+                      style={{
+                        width: '100%',
+                        padding: '10px 16px',
+                        display: 'flex',
+                        alignItems: 'center',
+                        gap: '12px',
+                        backgroundColor: isActive ? catColor.bgLight : '#ffffff',
+                        border: 'none',
+                        borderBottom: catIdx === tipCategories.length - 1 ? 'none' : '1px solid #f1f5f9',
+                        textAlign: 'left',
+                        cursor: 'pointer',
+                        transition: 'background-color 0.15s'
+                      }}
+                      onMouseEnter={(e) => {
+                        if (!isActive) e.currentTarget.style.backgroundColor = '#f8fafc';
+                      }}
+                      onMouseLeave={(e) => {
+                        if (!isActive) e.currentTarget.style.backgroundColor = '#ffffff';
+                      }}
                     >
-                      <div className="p-1 rounded bg-white shadow-sm flex items-center justify-center border border-slate-100" style={{ color: catColor.primary }}>
+                      <div className="p-1 rounded bg-white shadow-sm flex items-center justify-center border border-slate-100" style={{ color: catColor.primary, width: '24px', height: '24px' }}>
                         <CatIcon size={14} />
                       </div>
                       <div className="flex flex-col">
