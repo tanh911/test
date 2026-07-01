@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Lock, User, Mail, AlertCircle, CheckCircle2, Loader2, Phone } from 'lucide-react';
 import { hashPassword, verifyPassword, createToken, checkPasswordStrength } from '../lib/auth';
-import { registerWithEmail, loginWithEmail, verifyEmail, updateUserProfile } from '../lib/firebase';
+import { registerWithEmail, loginWithEmail, verifyEmail, updateUserProfile, signInWithGoogle, signInWithFacebook } from '../lib/firebase';
 
 const GoogleIcon = () => (
   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -340,7 +340,6 @@ export const Auth = ({ onLogin, onCancel }) => {
             Icon: GoogleIcon, label: 'Google', onClick: async () => {
               setError('');
               try {
-                const { signInWithGoogle } = await import('../lib/firebase');
                 const result = await signInWithGoogle();
                 const user = result.user;
                 onLogin({
@@ -364,7 +363,6 @@ export const Auth = ({ onLogin, onCancel }) => {
             Icon: FacebookIcon, label: 'Facebook', onClick: async () => {
               setError('');
               try {
-                const { signInWithFacebook } = await import('../lib/firebase');
                 const result = await signInWithFacebook();
                 const user = result.user;
                 onLogin({

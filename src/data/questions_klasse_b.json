@@ -12405,24 +12405,24 @@
     "image": null,
     "video": null,
     "textDe": "Wie müssen Sie einen Überholvorgang beenden?",
-    "textVi": "Bạn nên thực hiện động tác vượt như thế nào?",
+    "textVi": "Bạn phải kết thúc động tác vượt như thế nào?",
     "options": [
       {
         "id": "A",
         "textDe": "Ohne den Überholten zu behindern, so bald wie möglich wieder nach rechts einordnen",
-        "textVi": "Không cản trở người bị vượt, hãy lùi về bên phải càng sớm càng tốt",
+        "textVi": "Không cản trở người bị vượt, hãy nhập lại làn bên phải càng sớm càng tốt",
         "isCorrect": true
       },
       {
         "id": "B",
         "textDe": "Das Wiedereinordnen rechtzeitig und deutlich anzeigen",
-        "textVi": "Báo hiệu kịp thời và rõ ràng để lùi về làn bên phải",
+        "textVi": "Báo hiệu kịp thời và rõ ràng việc nhập lại làn bên phải",
         "isCorrect": true
       },
       {
         "id": "C",
         "textDe": "Dicht vor dem Überholten wieder auf die rechte Fahrbahnseite wechseln",
-        "textVi": "Lùi về bên phải đường gần với người bị vượt",
+        "textVi": "Chuyển về bên phải đường ngay sát phía trước người bị vượt",
         "isCorrect": false
       }
     ],
@@ -14409,7 +14409,7 @@
     "image": "/images/1_2_09-103-B.png",
     "video": null,
     "textDe": "Alle drei Fahrzeuge wollen links abbiegen. Wer hat sich richtig eingeordnet?",
-    "textVi": "Cả ba xe đều muốn rẽ trái. Ai đã phân loại mình một cách chính xác?",
+    "textVi": "Cả ba xe đều muốn rẽ trái. Ai đã đi vào làn (vị trí chuẩn bị rẽ) chính xác?",
     "options": [
       {
         "id": "A",
@@ -14455,7 +14455,7 @@
     "image": "/images/1_2_09-104-B.png",
     "video": null,
     "textDe": "Nach dem Linksabbiegen wollen Sie sofort rechts abbiegen. Wie ordnen Sie sich ein?",
-    "textVi": "Sau khi rẽ trái, bạn muốn rẽ phải ngay. Bạn tự phân loại mình như thế nào?",
+    "textVi": "Sau khi rẽ trái, bạn muốn rẽ phải ngay. Bạn đi vào làn (vị trí chuẩn bị rẽ) như thế nào?",
     "options": [
       {
         "id": "A",
@@ -14864,19 +14864,19 @@
       {
         "id": "A",
         "textDe": "Nachfolgenden Verkehr beobachten, Fahrtrichtung anzeigen, einordnen",
-        "textVi": "Quan sát phương tiện giao thông sau, chỉ ra hướng di chuyển, phân loại",
+        "textVi": "Quan sát phương tiện giao thông phía sau, bật xi-nhan báo hướng rẽ, đi vào làn (vị trí chuẩn bị rẽ)",
         "isCorrect": true
       },
       {
         "id": "B",
         "textDe": "Fahrtrichtung anzeigen, einordnen, nachfolgenden Verkehr beobachten",
-        "textVi": "Hiển thị hướng di chuyển, phân loại, quan sát phương tiện giao thông sau",
+        "textVi": "Bật xi-nhan báo hướng rẽ, đi vào làn (vị trí chuẩn bị rẽ), quan sát phương tiện giao thông phía sau",
         "isCorrect": false
       },
       {
         "id": "C",
         "textDe": "Einordnen, Fahrtrichtung anzeigen, nachfolgenden Verkehr beobachten",
-        "textVi": "Sắp xếp, chỉ hướng di chuyển, quan sát phương tiện giao thông sau",
+        "textVi": "Đi vào làn (vị trí chuẩn bị rẽ), bật xi-nhan báo hướng rẽ, quan sát phương tiện giao thông phía sau",
         "isCorrect": false
       }
     ],
@@ -37361,7 +37361,7 @@
       {
         "id": "B",
         "textDe": "Ich beschleunige, damit der Überholende sich hinter mir einordnen kann",
-        "textVi": "Tôi tăng tốc để người vượt có thể xếp hàng phía sau tôi",
+        "textVi": "Tôi tăng tốc để người vượt có thể nhập làn vào phía sau tôi",
         "isCorrect": false
       },
       {
@@ -48413,7 +48413,7 @@
     "image": null,
     "video": null,
     "textDe": "Sie wollen auf einer Straße mit einem Fahrstreifen für jede Richtung nach links abbiegen. Wo müssen Sie sich einordnen?",
-    "textVi": "Bạn muốn rẽ trái trên đường có một làn đường cho mỗi hướng. Bạn phải phù hợp ở đâu?",
+    "textVi": "Bạn muốn rẽ trái trên đường có một làn đường cho mỗi hướng. Bạn phải đi vào làn (vị trí chuẩn bị rẽ) ở vị trí nào?",
     "options": [
       {
         "id": "A",
@@ -50948,7 +50948,7 @@
       {
         "id": "B",
         "textDe": "Ich reihe mich rechts hinter den bereits wartenden Fahrzeugen ein",
-        "textVi": "Tôi xếp hàng bên phải phía sau những xe đang đợi",
+        "textVi": "Tôi đi vào làn bên phải phía sau những xe đang chờ",
         "isCorrect": false
       },
       {

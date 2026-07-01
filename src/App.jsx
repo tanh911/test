@@ -132,6 +132,7 @@ function App() {
     localStorage.getItem('fuhrerschein_lang_mode') || 'both'
   );
   const [showLoginModal, setShowLoginModal] = useState(false);
+  const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [fontSizeMode, setFontSizeMode] = useState(() =>
     localStorage.getItem('fuhrerschein_font_size') || 'normal'
   );
@@ -267,6 +268,11 @@ function App() {
   };
 
   const handleLogout = () => {
+    setShowLogoutConfirm(true);
+  };
+
+  const confirmLogout = () => {
+    setShowLogoutConfirm(false);
     clearToken();
     setUser({ username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true });
     
@@ -347,6 +353,40 @@ function App() {
               onLogin={(u) => { handleLogin(u); setShowLoginModal(false); }}
               onCancel={() => setShowLoginModal(false)}
             />
+          </div>
+        </div>
+      )}
+      {/* Logout Confirm Modal */}
+      {showLogoutConfirm && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 1000, backgroundColor: 'rgba(0,0,0,0.45)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div style={{ background: 'white', borderRadius: '14px', padding: '28px 24px', maxWidth: '360px', width: '100%', boxShadow: '0 20px 50px rgba(0,0,0,0.25)', textAlign: 'center' }}>
+            <div style={{ fontSize: 'calc(36px * var(--text-scale, 1))', marginBottom: '12px' }}>⚠️</div>
+            <h3 style={{ fontSize: 'calc(17px * var(--text-scale, 1))', fontWeight: '700', color: '#111827', marginBottom: '8px' }}>
+              {languageMode === 'de' ? 'Abmelden?' : (languageMode === 'vi' ? 'Đăng xuất?' : 'Đăng xuất? / Abmelden?')}
+            </h3>
+            <p style={{ fontSize: 'calc(13px * var(--text-scale, 1))', color: '#6b7280', lineHeight: '1.5', marginBottom: '24px' }}>
+              {languageMode === 'de' 
+                ? 'Möchten Sie sich wirklich abmelden?' 
+                : (languageMode === 'vi' ? 'Bạn có chắc chắn muốn thoát ra ngoài (đăng xuất) không?' : 'Bạn có chắc chắn muốn thoát ra ngoài không? / Möchten Sie sich wirklich abmelden?')}
+            </p>
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <button
+                onClick={() => setShowLogoutConfirm(false)}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: '1.5px solid #e5e7eb', background: 'white', fontWeight: '700', fontSize: 'calc(14px * var(--text-scale, 1))', cursor: 'pointer', color: '#374151' }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+              >
+                {languageMode === 'de' ? 'Zurück' : (languageMode === 'vi' ? 'Trở lại' : 'Trở lại / Zurück')}
+              </button>
+              <button
+                onClick={confirmLogout}
+                style={{ flex: 1, padding: '11px', borderRadius: '8px', border: 'none', background: '#e50000', fontWeight: '700', fontSize: 'calc(14px * var(--text-scale, 1))', cursor: 'pointer', color: 'white' }}
+                onMouseEnter={(e) => e.currentTarget.style.opacity = '0.88'}
+                onMouseLeave={(e) => e.currentTarget.style.opacity = '1'}
+              >
+                {languageMode === 'de' ? 'Ja, abmelden' : (languageMode === 'vi' ? 'Có, đăng xuất' : 'Có / Ja')}
+              </button>
+            </div>
           </div>
         </div>
       )}
