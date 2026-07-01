@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { PlayCircle, ExternalLink } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { PlayCircle, ExternalLink, ChevronDown, Check } from 'lucide-react';
 
 const praxisCategories = [
   {
@@ -79,6 +79,18 @@ const praxisCategories = [
 export const PraxisVideos = () => {
   const [activeCategory, setActiveCategory] = useState(praxisCategories[0].id);
   const [activeVideo, setActiveVideo] = useState(praxisCategories[0].videos[0]);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const dropdownRef = useRef(null);
+
+  useEffect(() => {
+    const handleClickOutside = (event) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target)) {
+        setIsDropdownOpen(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, []);
 
   const activeCategoryData = praxisCategories.find(c => c.id === activeCategory);
 
@@ -112,25 +124,43 @@ export const PraxisVideos = () => {
           </a>
         </div>
 
-        {/* Categories */}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 shrink-0 border-b border-gray-200 pb-3 mb-3">
-          {praxisCategories.map((cat) => (
+        {/* Custom Category Dropdown */}
+        <div className="shrink-0 mb-4 border-b border-gray-200 pb-4 relative z-50" ref={dropdownRef}>
+          <label className="block text-[11px] font-bold text-gray-500 mb-1.5 uppercase tracking-wider">
+            Chủ đề thực hành
+          </label>
+          <div className="relative">
             <button
-              key={cat.id}
-              onClick={() => {
-                setActiveCategory(cat.id);
-                const firstVideo = praxisCategories.find(c => c.id === cat.id).videos[0];
-                setActiveVideo(firstVideo);
-              }}
-              className="px-2 py-2 rounded-lg text-[10px] font-extrabold uppercase tracking-wider transition-all text-center leading-tight flex items-center justify-center"
-              style={activeCategory === cat.id
-                ? { background: '#2b576b', color: '#ffffff', boxShadow: '0 1px 2px rgba(0,0,0,0.1)' }
-                : { background: '#f1f5f9', color: '#475569' }
-              }
+              onClick={() => setIsDropdownOpen(!isDropdownOpen)}
+              className="w-full flex items-center justify-between bg-white border border-slate-300 text-slate-800 text-[13.5px] font-bold rounded-xl px-4 py-3 shadow-sm transition-all focus:ring-2 focus:ring-[#2b576b] focus:border-[#2b576b] hover:border-slate-400"
             >
-              {cat.title}
+              <span>{activeCategoryData?.title}</span>
+              <ChevronDown size={18} strokeWidth={2.5} className={`text-slate-500 transition-transform duration-200 ${isDropdownOpen ? 'rotate-180' : ''}`} />
             </button>
-          ))}
+            
+            {isDropdownOpen && (
+              <div className="w-full mt-2 bg-slate-50 border border-slate-200 rounded-xl shadow-inner overflow-hidden mb-3">
+                <div className="max-h-60 overflow-y-auto custom-scroll">
+                  {praxisCategories.map(cat => (
+                    <button
+                      key={cat.id}
+                      onClick={() => {
+                        setActiveCategory(cat.id);
+                        const firstVideo = praxisCategories.find(c => c.id === cat.id).videos[0];
+                        setActiveVideo(firstVideo);
+                        setIsDropdownOpen(false);
+                      }}
+                      className="w-full flex items-center justify-between px-4 py-3 text-left text-[13px] font-semibold transition-colors hover:bg-slate-50"
+                      style={activeCategory === cat.id ? { backgroundColor: '#f0f9ff', color: '#0369a1' } : { color: '#334155' }}
+                    >
+                      <span>{cat.title}</span>
+                      {activeCategory === cat.id && <Check size={16} strokeWidth={3} className="text-[#0369a1]" />}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Video List */}

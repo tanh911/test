@@ -62,7 +62,7 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
       {showAIChatModal && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '16px'
+          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '80px 16px 16px 16px'
         }}>
           <div style={{
             backgroundColor: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '448px', height: '80vh',
@@ -98,7 +98,7 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
       {showPraxisModal && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '16px'
+          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '80px 16px 16px 16px'
         }}>
           <div style={{
             backgroundColor: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '500px', height: '85vh',
@@ -135,7 +135,7 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
       {showTheoryTipsModal && (
         <div style={{
           position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center',
-          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '16px'
+          backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '80px 16px 16px 16px'
         }}>
           <div style={{
             backgroundColor: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '500px', height: '85vh',
