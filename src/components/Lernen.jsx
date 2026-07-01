@@ -320,6 +320,11 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
       setCurrentIndex(currentIndex + 1);
     } else {
       // Finished all questions
+      if (onExamSubmit) {
+        setShowConfirmModal('abgeben');
+        return;
+      }
+
       if (sessionKey) sessionStorage.removeItem(sessionKey);
       if (languageMode === 'de') {
         customAlert('Glückwunsch! Du hast alle Fragen dieser Übung abgeschlossen.', 'success');
@@ -1292,15 +1297,17 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
 
             {!isSubmitted && mode !== 'review' ? (
               mode === 'exam' ? (
-                <div className="flex items-stretch gap-2 md:gap-3">
-                  <button
-                    onClick={handleNext}
-                    className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity w-full"
-                    style={{ backgroundColor: '#2b576b', minHeight: '44px', borderRadius: '12px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '8px 20px', textAlign: 'center' }}
-                  >
-                    {t.nextQuestion}
-                  </button>
-                </div>
+                currentIndex === activeQuestions.length - 1 ? null : (
+                  <div className="flex items-stretch gap-2 md:gap-3">
+                    <button
+                      onClick={handleNext}
+                      className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity w-full"
+                      style={{ backgroundColor: '#2b576b', minHeight: '44px', borderRadius: '12px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '8px 20px', textAlign: 'center' }}
+                    >
+                      {t.nextQuestion}
+                    </button>
+                  </div>
+                )
               ) : (
                 <button
                   onClick={handleSubmit}
@@ -1311,13 +1318,23 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 </button>
               )
             ) : (
-              <button
-                onClick={handleNext}
-                className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
-                style={{ backgroundColor: '#2b576b', minHeight: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '8px 20px', textAlign: 'center' }}
-              >
-                {t.nextQuestion}
-              </button>
+              (currentIndex === activeQuestions.length - 1 && onExamSubmit) ? (
+                <button
+                  onClick={() => setShowConfirmModal('abgeben')}
+                  className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#e53935', minHeight: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '8px 20px', textAlign: 'center' }}
+                >
+                  {languageMode === 'de' ? 'Prüfung abgeben' : (languageMode === 'vi' ? 'Nộp bài đánh giá' : 'Nộp bài / Abgeben')}
+                </button>
+              ) : (
+                <button
+                  onClick={handleNext}
+                  className="flex items-center justify-center font-bold text-white hover:opacity-90 transition-opacity"
+                  style={{ backgroundColor: '#2b576b', minHeight: '44px', borderRadius: '8px', fontSize: 'calc(15px * var(--text-scale, 1))', minWidth: '160px', padding: '8px 20px', textAlign: 'center' }}
+                >
+                  {t.nextQuestion}
+                </button>
+              )
             )}
           </div>
         </div>
