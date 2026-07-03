@@ -1,0 +1,25 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ── Admin helper ─────────────────────────────────────────────────────────
+    function isAdmin() {
+      return request.auth != null
+          && request.auth.token.email == 'bossfc69@gmail.com';
+    }
+
+    // ── Users collection ──────────────────────────────────────────────────────
+    match /users/{userId} {
+      // Admin có thể đọc/ghi tất cả user
+      allow read, write: if isAdmin();
+
+      // User thường chỉ đọc/ghi document của chính mình
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+
+    // ── Mặc định: từ chối tất cả ─────────────────────────────────────────────
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
