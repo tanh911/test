@@ -1,0 +1,388 @@
+[
+  {
+    "id": "1.1.07-001",
+    "category": "Gefahrenlehre",
+    "points": 3,
+    "textDe": "Womit müssen Sie rechnen, wenn vor Ihnen ein Lastzug in eine enge Straße nach rechts abbiegen will?",
+    "textVi": "Bạn phải lường trước điều gì khi một chiếc xe tải lớn (Lastzug) phía trước bạn muốn rẽ phải vào một con đường hẹp?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "seine Geschwindigkeit stark vermindern",
+        "textVi": "giảm tốc độ rất nhiều",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "vor dem Abbiegen nach links ausscheren",
+        "textVi": "đánh lái sang trái trước khi rẽ",
+        "isCorrect": true
+      },
+      {
+        "id": "C",
+        "textDe": "sich besonders weit rechts einordnen",
+        "textVi": "đi vào làn đặc biệt sát bên phải",
+        "isCorrect": false
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "Lastzug",
+        "vi": "xe tải lớn có rơ moóc"
+      },
+      {
+        "de": "enge Straße",
+        "vi": "đường hẹp"
+      },
+      {
+        "de": "abbiegen",
+        "vi": "rẽ"
+      },
+      {
+        "de": "vermindern",
+        "vi": "giảm bớt"
+      },
+      {
+        "de": "ausscheren",
+        "vi": "đánh lái ra, chuyển làn"
+      }
+    ],
+    "explanationDe": "Halten Sie einen großen Abstand zu dem Lkw und überholen Sie keinesfalls auf der rechten Seite, auch wenn Sie als Zweiradfahrer die Möglichkeit dazu hätten. Der Lastzug muss seine Geschwindigkeit zum Abbiegen zunächst stark reduzieren. Aus Platzgründen muss der Lkw-Fahrer dann das Zugfahrzeug gegebenenfalls weit nach links lenken, damit der Anhänger oder der Sattelauflieger beim Abbiegen nicht über den Bordstein rollt.",
+    "explanationVi": "Hãy giữ khoảng cách lớn với xe tải và tuyệt đối không vượt bên phải, ngay cả khi bạn là người đi xe hai bánh và có cơ hội. Chiếc xe tải lớn phải giảm tốc độ đáng kể để rẽ. Vì lý do không gian, người lái xe tải có thể phải đánh lái xe kéo sang trái rất nhiều để đảm bảo rơ moóc hoặc sơ mi rơ moóc không cán qua lề đường khi rẽ.",
+    "aiExplanation": "Khi một chiếc xe tải lớn muốn rẽ vào một con đường hẹp, đặc biệt là rẽ phải, bạn cần đặc biệt cẩn trọng. Xe tải lớn thường cần không gian rộng để vào cua, nên chúng sẽ giảm tốc độ đáng kể và có thể phải đánh lái sang trái trước để phần rơ moóc không bị vướng. Vì vậy, các đáp án A và B là đúng. Đáp án C là sai, vì việc đánh lái sát bên phải sẽ khiến rơ moóc bị vướng vào lề đường. Mẹo nhớ: Luôn giữ khoảng cách an toàn với xe tải và dự đoán chúng sẽ cần không gian rộng để rẽ, tuyệt đối không chen vào khoảng trống bên phải của xe tải khi chúng chuẩn bị rẽ phải nhé!",
+    "image": null,
+    "video": null
+  },
+  {
+    "id": "1.2.05-104",
+    "category": "Verhalten Im Strassenverkehr",
+    "points": 3,
+    "image": null,
+    "video": null,
+    "textDe": "Wie müssen Sie einen Überholvorgang beenden?",
+    "textVi": "Bạn nên thực hiện động tác vượt như thế nào?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Ohne den Überholten zu behindern, so bald wie möglich wieder nach rechts einordnen",
+        "textVi": "Không cản trở người bị vượt, hãy lùi về bên phải càng sớm càng tốt",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Das Wiedereinordnen rechtzeitig und deutlich anzeigen",
+        "textVi": "Báo hiệu kịp thời và rõ ràng để lùi về làn bên phải",
+        "isCorrect": true
+      },
+      {
+        "id": "C",
+        "textDe": "Dicht vor dem Überholten wieder auf die rechte Fahrbahnseite wechseln",
+        "textVi": "Lùi về bên phải đường gần với người bị vượt",
+        "isCorrect": false
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "Blinker",
+        "vi": "đèn xi-nhan"
+      },
+      {
+        "de": "Einordnen",
+        "vi": "vào đúng làn đường"
+      }
+    ],
+    "explanationDe": "Als Überholender müssen Sie sich so bald wie möglich wieder rechts einordnen. Scheren Sie jedoch nicht zu dicht vor dem Überholten ein, weil Sie ihn damit eventuell behindern oder sogar gefährden würden. Benutzen Sie vor dem Ausscheren und dem Wiedereinordnen rechtzeitig den Blinker.",
+    "explanationVi": "Nếu bạn định vượt, bạn phải quay lại làn đường bên phải càng sớm càng tốt. Tuy nhiên, đừng cắt quá gần người bạn đang vượt vì bạn có thể cản trở hoặc thậm chí gây nguy hiểm cho họ. Sử dụng đèn xi nhan đúng lúc trước khi lái ra và quay lại làn đường.",
+    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Không cản trở người bị vượt, hãy lùi về bên phải càng sớm càng tốt\"; **B** \"Báo hiệu kịp thời và rõ ràng để lùi về làn bên phải\".\nNếu bạn định vượt, bạn phải quay lại làn đường bên phải càng sớm càng tốt. Tuy nhiên, đừng cắt quá gần người bạn đang vượt vì bạn có thể cản trở hoặc thậm chí gây nguy hiểm cho họ. Sử dụng đèn xi nhan đúng lúc trước khi lái ra và quay lại làn đường.\nPhương án C (\"Lùi về bên phải đường gần với người bị vượt\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
+  },
+  {
+    "id": "1.2.05-110",
+    "category": "Verhalten Im Strassenverkehr",
+    "points": 3,
+    "image": null,
+    "video": null,
+    "textDe": "In welchen Fällen müssen Sie blinken?",
+    "textVi": "Trong trường hợp nào bạn phải ra hiệu?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Vor dem Ausscheren zum Überholen oder zum Vorbeifahren",
+        "textVi": "Trước khi tấp xe để vượt hoặc lái xe vượt qua",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Vor dem Wiedereinordnen nach dem Überholen",
+        "textVi": "Trước khi quay trở lại sau khi vượt",
+        "isCorrect": true
+      },
+      {
+        "id": "C",
+        "textDe": "Beim Verlassen einer abknickenden Vorfahrtstraße in gerader Richtung",
+        "textVi": "Khi rời khỏi khúc cua ở lề đường theo hướng thẳng",
+        "isCorrect": false
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "Vorfahrt",
+        "vi": "quyền ưu tiên đi trước"
+      },
+      {
+        "de": "Vorfahrtsstraße",
+        "vi": "đường ưu tiên"
+      },
+      {
+        "de": "Vorfahrtstraße",
+        "vi": "đường ưu tiên"
+      },
+      {
+        "de": "Überholen",
+        "vi": "vượt xe"
+      }
+    ],
+    "explanationDe": "Wann immer Sie einen Spurwechsel vornehmen oder abbiegen wollen, müssen Sie blinken. Das gilt auch beim Folgen einer abknickenden Vorfahrt, nicht jedoch, wenn Sie die Vorfahrtsstraße geradeaus verlassen. Auch mit gesetztem Richtungsanzeiger gilt: Vergewissern Sie sich stets, dass Sie beim Ein- oder Ausscheren niemanden gefährden.",
+    "explanationVi": "Bất cứ khi nào muốn chuyển làn hoặc rẽ phải báo hiệu. Điều này cũng áp dụng khi đi theo một khúc cua ở bên phải đường, nhưng không áp dụng nếu bạn đi thẳng về phía bên phải đường. Ngay cả khi đèn báo hướng được đặt, hãy luôn đảm bảo rằng bạn không gây nguy hiểm cho bất kỳ ai khi tấp vào hoặc ra.",
+    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Trước khi tấp xe để vượt hoặc lái xe vượt qua\"; **B** \"Trước khi quay trở lại sau khi vượt\".\nBất cứ khi nào muốn chuyển làn hoặc rẽ phải báo hiệu. Điều này cũng áp dụng khi đi theo một khúc cua ở bên phải đường, nhưng không áp dụng nếu bạn đi thẳng về phía bên phải đường. Ngay cả khi đèn báo hướng được đặt, hãy luôn đảm bảo rằng bạn không gây nguy hiểm cho bất kỳ ai khi tấp vào hoặc ra.\nPhương án C (\"Khi rời khỏi khúc cua ở lề đường theo hướng thẳng\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
+  },
+  {
+    "id": "1.2.07-103",
+    "category": "Verhalten Im Strassenverkehr",
+    "points": 3,
+    "image": null,
+    "video": null,
+    "textDe": "Auf nebeneinanderliegenden Fahrstreifen für eine Fahrtrichtung endet ein Fahrstreifen. Sie befinden sich auf dem nicht durchgehend befahrbaren Fahrstreifen. Welches Verhalten ist richtig?",
+    "textVi": "Một làn đường kết thúc trên các làn đường liền kề cho một hướng di chuyển. Bạn đang ở làn đường không thể tiếp cận liên tục. Hành vi nào là đúng?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Erst unmittelbar vor Beginn der Verengung im Reißverschlussverfahren einordnen",
+        "textVi": "Chỉ di chuyển vào làn đường ngay trước khi bắt đầu thu hẹp bằng phương pháp zip",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Unmittelbar nach dem ersten Hinweis auf die Fahrbahnverengung in den durchgehend zu befahrenden Fahrstreifen einordnen",
+        "textVi": "Ngay sau khi có dấu hiệu đầu tiên về việc đường bị thu hẹp, hãy di chuyển vào làn đường sẽ được sử dụng liên tục",
+        "isCorrect": false
+      },
+      {
+        "id": "C",
+        "textDe": "Beim Einordnen in den durchgehenden Fahrstreifen stets zuerst fahren",
+        "textVi": "Khi nhập vào làn đường liên tục, hãy luôn lái xe trước",
+        "isCorrect": false
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "Fahrbahn",
+        "vi": "phần đường xe chạy"
+      },
+      {
+        "de": "Fahrstreifen",
+        "vi": "làn đường"
+      },
+      {
+        "de": "Fahrzeug",
+        "vi": "phương tiện giao thông"
+      },
+      {
+        "de": "Einfahren",
+        "vi": "lái xe vào"
+      }
+    ],
+    "explanationDe": "Befindet sich auf einer Fahrbahn ein Hindernis oder verengt sich eine mehrspurige Straße, gilt für alle in gleicher Richtung fahrenden Fahrzeuge das Reißverschlussverfahren. Fahren Sie bis zum Ende Ihrer Fahrspur vor. Wechseln Sie nicht schon früher die Spur, um einen Rückstau zu verhindern. Warten Sie hier, bis ein Fahrzeug auf der benachbarten Spur Sie einfahren lässt.",
+    "explanationVi": "Nếu có chướng ngại vật trên đường hoặc nếu đường nhiều làn bị thu hẹp, quy trình kéo dây kéo áp dụng cho tất cả các phương tiện đi cùng chiều. Lái xe đến cuối làn đường của bạn. Không chuyển làn sớm hơn để tránh ùn tắc. Đợi ở đây cho đến khi có xe ở làn bên cạnh cho phép bạn đi vào.",
+    "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"Chỉ di chuyển vào làn đường ngay trước khi bắt đầu thu hẹp bằng phương pháp zip\".\nNếu có chướng ngại vật trên đường hoặc nếu đường nhiều làn bị thu hẹp, quy trình kéo dây kéo áp dụng cho tất cả các phương tiện đi cùng chiều. Lái xe đến cuối làn đường của bạn. Không chuyển làn sớm hơn để tránh ùn tắc. Đợi ở đây cho đến khi có xe ở làn bên cạnh cho phép bạn đi vào.\nPhương án B (\"Ngay sau khi có dấu hiệu đầu tiên về việc đường bị thu hẹp, hãy di chuyển vào làn đường sẽ được sử dụng liên tục\") là sai. Phương án C (\"Khi nhập vào làn đường liên tục, hãy luôn lái xe trước\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
+  },
+  {
+    "id": "1.2.09-120",
+    "category": "Verhalten Im Strassenverkehr",
+    "points": 4,
+    "image": null,
+    "video": null,
+    "textDe": "Sie möchten links abbiegen. In welcher Reihenfolge bereiten Sie das Abbiegen vor?",
+    "textVi": "Bạn muốn rẽ trái. Bạn chuẩn bị rẽ theo thứ tự nào?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Nachfolgenden Verkehr beobachten, Fahrtrichtung anzeigen, einordnen",
+        "textVi": "Quan sát phương tiện giao thông sau, chỉ ra hướng di chuyển, phân loại",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Fahrtrichtung anzeigen, einordnen, nachfolgenden Verkehr beobachten",
+        "textVi": "Hiển thị hướng di chuyển, phân loại, quan sát phương tiện giao thông sau",
+        "isCorrect": false
+      },
+      {
+        "id": "C",
+        "textDe": "Einordnen, Fahrtrichtung anzeigen, nachfolgenden Verkehr beobachten",
+        "textVi": "Sắp xếp, chỉ hướng di chuyển, quan sát phương tiện giao thông sau",
+        "isCorrect": false
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "Abbiegen",
+        "vi": "rẽ đường"
+      },
+      {
+        "de": "Blinken",
+        "vi": "bật xi-nhan báo hiệu"
+      },
+      {
+        "de": "Einordnen",
+        "vi": "vào đúng làn đường"
+      },
+      {
+        "de": "Spiegel",
+        "vi": "gương chiếu hậu"
+      }
+    ],
+    "explanationDe": "Wenn Sie links abbiegen wollen, bereiten Sie das Abbiegen in folgender Reihenfolge vor: 1. schauen, 2. blinken, 3. einordnen. Schauen bedeutet, dass Sie den Nachfolgeverkehr im Spiegel und per Schulterblick beobachten. Anschließend betätigen Sie den Fahrtrichtungsanzeiger für die linke Seite. Erst wenn Sie eine Gefährdung anderer Verkehrsteilnehmer ausschließen können, dürfen Sie sich zum Abbiegen nach links einordnen.",
+    "explanationVi": "Nếu muốn rẽ trái, hãy chuẩn bị rẽ theo thứ tự sau: 1. nhìn, 2. chớp mắt, 3. đi vào làn đường. Nhìn có nghĩa là bạn quan sát phương tiện giao thông tiếp theo trong gương và bằng cách nhìn qua vai mình. Sau đó kích hoạt đèn báo hướng cho phía bên trái. Bạn chỉ có thể di chuyển vào làn đường để rẽ trái nếu có thể loại trừ mọi nguy hiểm cho những người tham gia giao thông khác.",
+    "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"Quan sát phương tiện giao thông sau, chỉ ra hướng di chuyển, phân loại\".\nNếu muốn rẽ trái, hãy chuẩn bị rẽ theo thứ tự sau: 1. nhìn, 2. chớp mắt, 3. đi vào làn đường. Nhìn có nghĩa là bạn quan sát phương tiện giao thông tiếp theo trong gương và bằng cách nhìn qua vai mình. Sau đó kích hoạt đèn báo hướng cho phía bên trái. Bạn chỉ có thể di chuyển vào làn đường để rẽ trái nếu có thể loại trừ mọi nguy hiểm cho những người tham gia giao thông khác.\nPhương án B (\"Hiển thị hướng di chuyển, phân loại, quan sát phương tiện giao thông sau\") là sai. Phương án C (\"Sắp xếp, chỉ hướng di chuyển, quan sát phương tiện giao thông sau\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
+  },
+  {
+    "id": "1.4.41-030",
+    "category": "Verkehrszeichen",
+    "points": 3,
+    "image": "/images/1_4_41-030.png",
+    "video": null,
+    "textDe": "Sie befahren eine so beschilderte Einbahnstraße. Was ist richtig?",
+    "textVi": "Bạn đang lái xe trên đường một chiều có biển chỉ dẫn. Điều gì là đúng?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Ich muss mich zum Linksabbiegen möglichst weit links einordnen",
+        "textVi": "Để rẽ trái, tôi phải di chuyển càng xa về bên trái càng tốt",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Ich darf auch am linken Fahrbahnrand parken",
+        "textVi": "Tôi cũng có thể đỗ xe ở bên trái đường",
+        "isCorrect": true
+      },
+      {
+        "id": "C",
+        "textDe": "Ich darf entgegen der Fahrtrichtung parken",
+        "textVi": "Tôi có thể đỗ xe ngược chiều di chuyển",
+        "isCorrect": false
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "Abbiegen",
+        "vi": "rẽ đường"
+      },
+      {
+        "de": "Parken",
+        "vi": "đỗ xe, đậu xe"
+      },
+      {
+        "de": "Einordnen",
+        "vi": "vào đúng làn đường"
+      },
+      {
+        "de": "Einbahnstraße",
+        "vi": "đường một chiều"
+      }
+    ],
+    "explanationDe": "Die Fahrtrichtung in einer Einbahnstraße wird immer durch den weißen Pfeil auf dem Verkehrsschild angezeigt. Wenn du dich in deiner Einbahnstraße befindest, darfst du am rechte wie auch am linken Fahrbahnrand in Fahrtrichtung parken. \nUm beim Linksabbiegen den nachfolgenden Verkehr hinter dir nicht zu behindern, musst du dich so weit wie möglich nach links einordnen. So lässt du genügend Platz für Fahrzeuge, die geradeaus fahren oder rechts abbiegen wollen.",
+    "explanationVi": "Hướng di chuyển trên đường một chiều luôn được biểu thị bằng mũi tên màu trắng trên biển báo giao thông. Nếu bạn đang đi trên đường một chiều, bạn được phép đỗ xe ở bên phải hoặc bên trái đường theo hướng di chuyển. \nĐể không cản trở giao thông phía sau khi rẽ trái, bạn phải di chuyển càng xa về bên trái càng tốt. Điều này để lại đủ không gian cho các phương tiện muốn đi thẳng hoặc rẽ phải.",
+    "aiExplanation": "Đáp án đúng cho câu hỏi này là A, B: **A** \"Để rẽ trái, tôi phải di chuyển càng xa về bên trái càng tốt\"; **B** \"Tôi cũng có thể đỗ xe ở bên trái đường\".\nHướng di chuyển trên đường một chiều luôn được biểu thị bằng mũi tên màu trắng trên biển báo giao thông. Nếu bạn đang đi trên đường một chiều, bạn được phép đỗ xe ở bên phải hoặc bên trái đường theo hướng di chuyển. \nĐể không cản trở giao thông phía sau khi rẽ trái, bạn phải di chuyển càng xa về bên trái càng tốt. Điều này để lại đủ không gian cho các phương tiện muốn đi thẳng hoặc rẽ phải.\nPhương án C (\"Tôi có thể đỗ xe ngược chiều di chuyển\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
+  },
+  {
+    "id": "2.1.01-007-M",
+    "category": "Gefahrenlehre",
+    "points": 4,
+    "image": "/images/2_1_01-007-M.png",
+    "video": "/videos/2_1_01-007-M.mp4",
+    "textDe": "Wie sollten Sie sich jetzt verhalten?",
+    "textVi": "Bạn nên cư xử thế nào bây giờ?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "Ich verringere meine Geschwindigkeit, damit der Überholende sich vor mir einordnen kann",
+        "textVi": "Tôi giảm tốc độ để người vượt có thể vượt lên trước tôi",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "Ich beschleunige, damit der Überholende sich hinter mir einordnen kann",
+        "textVi": "Tôi tăng tốc để người vượt có thể xếp hàng phía sau tôi",
+        "isCorrect": false
+      },
+      {
+        "id": "C",
+        "textDe": "Ich behalte meine Geschwindigkeit bei, da der Sicherheitsabstand ausreichend ist",
+        "textVi": "Tôi duy trì tốc độ vì khoảng cách an toàn đã đủ",
+        "isCorrect": false
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "Geschwindigkeit",
+        "vi": "tốc độ"
+      },
+      {
+        "de": "Sicherheitsabstand",
+        "vi": "khoảng cách an toàn"
+      },
+      {
+        "de": "Einordnen",
+        "vi": "vào đúng làn đường"
+      }
+    ],
+    "explanationDe": "Der Überholende kann wahrscheinlich seinen Überholvorgang nicht wie geplant abschließen. Um einen Unfall zu verhindern sollten Sie den Überholenden einordnen lassen.",
+    "explanationVi": "Người lái xe vượt có thể sẽ không thể hoàn thành thao tác vượt của mình như kế hoạch. Để tránh xảy ra tai nạn, bạn nên để người vượt bạn xếp hàng.",
+    "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"Tôi giảm tốc độ để người vượt có thể vượt lên trước tôi\".\nNgười lái xe vượt có thể sẽ không thể hoàn thành thao tác vượt của mình như kế hoạch. Để tránh xảy ra tai nạn, bạn nên để người vượt bạn xếp hàng.\nPhương án B (\"Tôi tăng tốc để người vượt có thể xếp hàng phía sau tôi\") là sai. Phương án C (\"Tôi duy trì tốc độ vì khoảng cách an toàn đã đủ\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
+  },
+  {
+    "id": "2.2.02-001",
+    "category": "Verhalten Im Strassenverkehr",
+    "points": 3,
+    "image": null,
+    "video": null,
+    "textDe": "Sie wollen auf einer Straße mit einem Fahrstreifen für jede Richtung nach links abbiegen. Wo müssen Sie sich einordnen?",
+    "textVi": "Bạn muốn rẽ trái trên đường có một làn đường cho mỗi hướng. Bạn phải phù hợp ở đâu?",
+    "options": [
+      {
+        "id": "A",
+        "textDe": "zur Fahrbahnmitte hin",
+        "textVi": "về phía giữa đường",
+        "isCorrect": true
+      },
+      {
+        "id": "B",
+        "textDe": "am rechten Fahrbahnrand",
+        "textVi": "bên phải đường",
+        "isCorrect": false
+      }
+    ],
+    "vocabulary": [
+      {
+        "de": "Fahrbahn",
+        "vi": "phần đường xe chạy"
+      },
+      {
+        "de": "Fahrstreifen",
+        "vi": "làn đường"
+      },
+      {
+        "de": "Abbiegen",
+        "vi": "rẽ đường"
+      },
+      {
+        "de": "Einordnen",
+        "vi": "vào đúng làn đường"
+      }
+    ],
+    "explanationDe": "Wenn Sie in dieser Situation nach links abbiegen, fahren Sie zur Mitte der Straße (das ist die linke Seite Ihrer Fahrbahn).",
+    "explanationVi": "Nếu bạn rẽ trái trong tình huống này, hãy lái xe vào giữa đường (là phía bên trái làn đường của bạn).",
+    "aiExplanation": "Đáp án đúng cho câu hỏi này là A: **A** \"về phía giữa đường\".\nNếu bạn rẽ trái trong tình huống này, hãy lái xe vào giữa đường (là phía bên trái làn đường của bạn).\nPhương án B (\"bên phải đường\") là sai theo quy định StVO.\nHãy đọc kỹ câu hỏi và ghi nhớ quy tắc này để tự tin trong kỳ thi lý thuyết."
+  }
+]

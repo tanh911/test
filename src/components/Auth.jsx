@@ -50,7 +50,7 @@ export const Auth = ({ onLogin, onCancel }) => {
     setError('');
     setSuccess('');
 
-    if (authMode === 'login') {
+    if (isLogin) {
       if (!username.trim() || !password.trim()) {
         setError('Vui lòng nhập đầy đủ tài khoản/email và mật khẩu.');
         return;
@@ -74,7 +74,7 @@ export const Auth = ({ onLogin, onCancel }) => {
     try {
       const key = username.trim().toLowerCase();
 
-      if (authMode === 'login') {
+      if (isLogin) {
         // --- LOGIN FLOW ---
 
         // 1. Firebase Login (nếu nhập Email có chứa @)
@@ -145,7 +145,7 @@ export const Auth = ({ onLogin, onCancel }) => {
         setSuccess('Đăng nhập thành công!');
         setTimeout(() => onLogin(sessionUser), 500);
 
-      } else {
+      } else if (!isLogin) {
         // --- REGISTER FLOW (Firebase Only) ---
         try {
           const userCredential = await registerWithEmail(email.trim(), password);
@@ -158,7 +158,7 @@ export const Auth = ({ onLogin, onCancel }) => {
 
           // Chuyển form về tab Đăng Nhập sau 3 giây
           setTimeout(() => {
-            setAuthMode('login');
+            setIsLogin(true);
             setUsername(email.trim()); // Điền sẵn email cho người dùng
             setPassword('');
             setSuccess('');
@@ -339,6 +339,7 @@ export const Auth = ({ onLogin, onCancel }) => {
           {
             Icon: GoogleIcon, label: 'Google', onClick: async () => {
               setError('');
+              setLoading(true);
               try {
                 const result = await signInWithGoogle();
                 const user = result.user;
@@ -347,15 +348,16 @@ export const Auth = ({ onLogin, onCancel }) => {
                   username: `google_${user.uid}`,
                   displayName: user.displayName || 'Google User',
                   email: user.email || '',
-                  apiKey: '', savedQuestions: [], examHistory: [], progress: {}
+                  apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: false
                 });
               } catch (err) {
                 console.error(err);
-                if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-                  // Do nothing, just let them cancel silently
-                } else {
-                  setError(`Lỗi: ${err.message}`);
+                const silent = ['auth/popup-closed-by-user', 'auth/cancelled-popup-request', 'auth/popup-blocked'];
+                if (!silent.includes(err.code)) {
+                  setError(`Lỗi đăng nhập Google: ${err.message}`);
                 }
+              } finally {
+                setLoading(false);
               }
             }
           },

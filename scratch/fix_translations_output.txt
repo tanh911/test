@@ -1,0 +1,179 @@
+Found 34 questions with potential translation issues.
+
+ID: 1.1.01-111
+DE: Wodurch kann eine gefährliche Situation entstehen?
+VI: Một tình huống nguy hiểm có thể phát sinh từ đâu?
+  [option B] contains 'phù hợp': Do tốc độ không phù hợp
+
+ID: 1.1.01-113
+DE: Was führt häufig zu schweren Unfällen?
+VI: Điều gì thường dẫn đến các vụ tai nạn nghiêm trọng?
+  [option C] contains 'phù hợp': Tốc độ không phù hợp
+
+ID: 1.1.02-127
+DE: Womit müssen Sie in Wohnvierteln mit geringem Verkehr rechnen?
+VI: Bạn mong đợi điều gì ở những khu dân cư ít xe cộ qua lại?
+  [option C] contains 'phù hợp': Rằng tất cả người lớn đều cư xử theo cách phù hợp với giao thông
+
+ID: 1.1.03-110
+DE: Was müssen Sie tun, wenn vor Ihnen ein Nebelfeld die Sicht stark behindert?
+VI: Bạn phải làm gì nếu sương mù phía trước cản trở tầm nhìn của bạn?
+  [option A] contains 'phù hợp': kịp thời điều chỉnh tốc độ phù hợp với điều kiện tầm nhìn
+
+ID: 1.2.05-104
+DE: Wie müssen Sie einen Überholvorgang beenden?
+VI: Bạn nên thực hiện động tác vượt như thế nào?
+  [option A] contains 'lùi về': Không cản trở người bị vượt, hãy lùi về bên phải càng sớm càng tốt
+  [option B] contains 'lùi về': Báo hiệu kịp thời và rõ ràng để lùi về làn bên phải
+  [option C] contains 'lùi về': Lùi về bên phải đường gần với người bị vượt
+
+ID: 1.2.09-103-B
+DE: Alle drei Fahrzeuge wollen links abbiegen. Wer hat sich richtig eingeordnet?
+VI: Cả ba xe đều muốn rẽ trái. Ai đã phân loại mình một cách chính xác?
+  [textVi] contains 'phân loại': Cả ba xe đều muốn rẽ trái. Ai đã phân loại mình một cách chính xác?
+
+ID: 1.2.09-104-B
+DE: Nach dem Linksabbiegen wollen Sie sofort rechts abbiegen. Wie ordnen Sie sich ein?
+VI: Sau khi rẽ trái, bạn muốn rẽ phải ngay. Bạn tự phân loại mình như thế nào?
+  [textVi] contains 'phân loại': Sau khi rẽ trái, bạn muốn rẽ phải ngay. Bạn tự phân loại mình như thế nào?
+
+ID: 1.2.09-120
+DE: Sie möchten links abbiegen. In welcher Reihenfolge bereiten Sie das Abbiegen vor?
+VI: Bạn muốn rẽ trái. Bạn chuẩn bị rẽ theo thứ tự nào?
+  [option A] contains 'phân loại': Quan sát phương tiện giao thông sau, chỉ ra hướng di chuyển, phân loại
+  [option B] contains 'phân loại': Hiển thị hướng di chuyển, phân loại, quan sát phương tiện giao thông sau
+  [option C] contains 'sắp xếp': Sắp xếp, chỉ hướng di chuyển, quan sát phương tiện giao thông sau
+
+ID: 1.2.12-103
+DE: Wo ist das Halten verboten?
+VI: Ở đâu thì cấm dừng xe?
+  [option A] contains 'phù hợp': Trên làn đường, nếu bên phải có lề đường phù hợp
+
+ID: 1.2.12-122
+DE: Wann dürfen Sie nicht auf dem rechten Fahrstreifen parken?
+VI: Khi nào bạn không được phép đỗ xe ở làn bên phải?
+  [option C] contains 'phù hợp': Nếu có làn đường đỗ xe phù hợp ở bên phải làn đường giao thông
+
+ID: 1.2.22-109
+DE: Was müssen Sie bei der Beladung Ihres Fahrzeugs beachten?
+VI: Bạn phải cân nhắc điều gì khi chất đồ lên xe?
+  [option B] contains 'phù hợp': Tôi phải đảm bảo tải trọng chống trượt bằng các phương tiện phù hợp
+
+ID: 1.5.01-133
+DE: Sie fahren ein Kraftfahrzeug mit manuellem Schaltgetriebe. Wodurch erreichen Sie einen sparsamen Kraftstoffverbrauch?
+VI: Bạn đang điều khiển một chiếc xe cơ giới với hộp số tay. Làm thế nào để đạt được mức tiêu thụ nhiên liệu tiết kiệm?
+  [option A] contains 'phù hợp': Bằng cách sử dụng áp suất lốp phù hợp
+
+ID: 2.1.01-007-M
+DE: Wie sollten Sie sich jetzt verhalten?
+VI: Bạn nên cư xử thế nào bây giờ?
+  [option B] contains 'xếp hàng': Tôi tăng tốc để người vượt có thể xếp hàng phía sau tôi
+
+ID: 2.1.11-017
+DE: Auf einer Straße außerorts fährt vor Ihnen ein Pkw deutlich langsamer, als es erlaubt ist und für ihn möglich wäre. Wie verhalten Sie sich richtig?
+VI: Trên đường ngoại thành, một chiếc ô tô phía trước bạn đang lái xe chậm hơn đáng kể so với mức cho phép và có thể xảy ra. Bạn cư xử thế nào cho đúng?
+  [option A] contains 'phù hợp': Tôi điều chỉnh tốc độ của mình cho phù hợp với tốc độ của ô tô
+
+ID: 2.1.11-117
+DE: Wenn Jugendliche bei nächtlichen Freizeitfahrten am Wochenende ein Fahrzeug führen, kommt es häufig zu schweren Verkehrsunfällen. Welche Ursachen können dabei eine besondere Rolle spielen?
+VI: Khi thanh niên điều khiển phương tiện trong những chuyến đi chơi giải trí vào ban đêm vào cuối tuần, tai nạn giao thông nghiêm trọng thường xuyên xảy ra. Những nguyên nhân nào có thể đóng một vai trò cụ thể?
+  [option A] contains 'phù hợp': Tốc độ không phù hợp
+
+ID: 2.2.02-001
+DE: Sie wollen auf einer Straße mit einem Fahrstreifen für jede Richtung nach links abbiegen. Wo müssen Sie sich einordnen?
+VI: Bạn muốn rẽ trái trên đường có một làn đường cho mỗi hướng. Bạn phải phù hợp ở đâu?
+  [textVi] contains 'phù hợp': Bạn muốn rẽ trái trên đường có một làn đường cho mỗi hướng. Bạn phải phù hợp ở đâu?
+
+ID: 2.2.04-105-M
+DE: Sie fahren einen Pkw mit Wohnanhänger. Was gilt hier für den Abstand zum vorausfahrenden Fahrzeug?
+VI: Bạn lái một chiếc ô tô với một đoàn lữ hành. Điều gì áp dụng ở đây cho khoảng cách tới xe phía trước?
+  [option A] contains 'phù hợp': là phù hợp vì xe vượt có thể cắt ngang trước mặt tôi
+
+ID: 2.2.06-101-M
+DE: Wie verhalten Sie sich hier richtig?
+VI: Bạn cư xử đúng ở đây như thế nào?
+  [option B] contains 'xếp hàng': Tôi xếp hàng bên phải phía sau những xe đang đợi
+
+ID: 2.2.12-105
+DE: Wo dürfen Sie innerorts einen Anhänger mit einer zulässigen Gesamtmasse von mehr als 2 t an Sonn- und Feiertagen sowie zwischen 22.00 und 6.00 Uhr regelmäßig parken?
+VI: Bạn có thể thường xuyên đỗ xe moóc có tổng khối lượng cho phép lớn hơn 2 tấn ở đâu trong khu vực thành thị vào Chủ nhật và ngày lễ và trong khoảng thời gian từ 10 giờ tối. và 6 giờ sáng?
+  [option B] contains 'phù hợp': Trong các khu dân cư thuần túy trên những chỗ đậu xe được đánh dấu phù hợp
+
+ID: 2.2.12-106
+DE: Worauf müssen Sie achten, wenn Sie einen Anhänger ohne Zugfahrzeug parken?
+VI: Bạn phải chú ý điều gì khi đỗ xe moóc mà không có xe kéo?
+  [option C] contains 'phù hợp': Đỗ xe trên những lề đường được trải nhựa phù hợp trong thời gian không giới hạn
+
+ID: 2.2.17-116
+DE: Welche Funktion soll der Fernlichtassistent bei Dunkelheit erfüllen?
+VI: Trợ lý đèn pha nên thực hiện chức năng gì trong bóng tối?
+  [option B] contains 'phù hợp': kích hoạt đèn pha khi điều kiện môi trường xung quanh phù hợp
+
+ID: 2.2.18-012
+DE: Sie fahren auf einem Einfädelungsstreifen. Wie verhalten Sie sich?
+VI: Bạn đang lái xe trên làn đường chung. Bạn cư xử thế nào?
+  [option B] contains 'phù hợp': Tăng tốc phù hợp, nếu có thể không dừng lại, nhập vào trong khi vẫn tôn trọng quyền ưu tiên
+
+ID: 2.2.21-107
+DE: Was ist bei der Verwendung eines Kindersitzes mit Prüfzeichen zu beachten?
+VI: Ist bei der Verwendung eines Kindersitzes mit Prüfzeichen zu beachten?
+  [option A] contains 'phù hợp': Ghế trẻ em phải phù hợp với kích thước và cân nặng của trẻ
+  [option B] contains 'phù hợp': Ghế trẻ em phải phù hợp để gắn vào ghế dự định của phương tiện
+
+ID: 2.2.22-105
+DE: Was ist beim Transport von Fahrrädern auf einem Hecktragesystem zu prüfen?
+VI: Bạn nên kiểm tra những gì khi vận chuyển xe đạp trên hệ thống giá đỡ phía sau?
+  [option A] contains 'phù hợp': Liệu hệ thống có phù hợp với xe theo hướng dẫn của nhà sản xuất hay không
+
+ID: 2.2.22-116
+DE: Was müssen Sie beim verkehrssicheren Verstauen einer Ladung beachten?
+VI: Bạn phải cân nhắc điều gì khi xếp hàng hóa an toàn?
+  [textVi] contains 'xếp hàng': Bạn phải cân nhắc điều gì khi xếp hàng hóa an toàn?
+
+ID: 2.2.22-131
+DE: Sie transportieren mit einem Kleintransporter Möbel. Während einer Pause stellen Sie fest, dass ein Zurrgurt stark beschädigt ist. Unter welcher Bedingung dürfen Sie weiterfahren?
+VI: Bạn vận chuyển đồ đạc trong một chiếc xe tải nhỏ. Trong lúc nghỉ giải lao, bạn nhận thấy dây buộc bị hư hỏng nặng. Trong những điều kiện nào bạn được phép tiếp tục lái xe?
+  [option B] contains 'phù hợp': sử dụng các thiết bị cố định tải phù hợp khác
+
+ID: 2.2.22-132
+DE: Was ist beim Transport von Pedelecs auf einem Hecktragesystem für die Anhängekupplung zu beachten?
+VI: Khi vận chuyển Pedelecs trên hệ thống giá đỡ phía sau cho khớp nối rơ-moóc cần chú ý điều gì?
+  [option A] contains 'phù hợp': hệ thống chở phía sau phải phù hợp
+  [option B] contains 'phù hợp': tải trọng hỗ trợ của móc kéo rơ-moóc phải phù hợp
+  [option C] contains 'phù hợp': áp suất bơm lốp của ô tô phải được điều chỉnh cho phù hợp
+
+ID: 2.2.23-009
+DE: Welche Gegenstände gehören zur Sicherheitsausrüstung für Motorradfahrer?
+VI: Thiết bị an toàn dành cho người đi xe máy gồm những vật dụng gì?
+  [option A] contains 'phù hợp': Áo khoác phù hợp
+  [option B] contains 'phù hợp': Quần phù hợp
+
+ID: 2.2.23-061
+DE: Wie müssen Sie sich gegen Kopfverletzungen schützen?
+VI: Bạn phải làm thế nào để tự bảo vệ mình trước những chấn thương ở đầu?
+  [option A] contains 'phù hợp': mũ bảo hiểm xe máy phù hợp và phù hợp
+
+ID: 2.7.05-103
+DE: Was bedeutet das rot gekennzeichnete Symbol auf dem Reifen?
+VI: Biểu tượng màu đỏ trên lốp có nghĩa là gì?
+  [option A] contains 'phù hợp': phù hợp với điều kiện thời tiết mùa đông
+
+ID: 2.7.06-114
+DE: Welchen Vorteil bringt die Nutzung einer Geschwindigkeitsregelanlage (Tempomat) für den Fahrer eines Kraftfahrzeugs?
+VI: Việc sử dụng hệ thống kiểm soát hành trình (tempomat) mang lại lợi ích gì cho người điều khiển phương tiện cơ giới?
+  [option C] contains 'phù hợp': điều chỉnh tốc độ phù hợp với mật độ giao thông
+
+ID: 2.7.06-115
+DE: In welcher Situation ist die Nutzung einer Adaptiven Geschwindigkeitsregelanlage (AGR) zweckmäßig?
+VI: Việc sử dụng hệ thống kiểm soát hành trình thích ứng (EGR) là phù hợp trong tình huống nào?
+  [textVi] contains 'phù hợp': Việc sử dụng hệ thống kiểm soát hành trình thích ứng (EGR) là phù hợp trong tình huống nào?
+
+ID: 2.7.06-118-M
+DE: Sie nutzen während der Fahrt die Adaptive Geschwindigkeitsregelanlage (AGR). Die Geschwindigkeit ist auf 100 km/h eingestellt. Worauf müssen Sie sich vor der Kurve einstellen?
+VI: Bạn sử dụng hệ thống kiểm soát hành trình thích ứng (EGR) khi đang lái xe. Tốc độ được đặt thành 100 km/h. Bạn phải chuẩn bị những gì trước khúc cua?
+  [option B] contains 'phù hợp': Tôi phải điều chỉnh tốc độ cho phù hợp với tình huống
+
+ID: 2.8.01-012
+DE: Womit muss ein Fahrerlaubnisbewerber rechnen, wenn er beim Fahren ohne Fahrerlaubnis erwischt wird?
+VI: Người xin cấp giấy phép lái xe phải mong đợi điều gì nếu anh ta bị bắt quả tang lái xe mà không có giấy phép?
+  [option B] contains 'phù hợp': Có thể yêu cầu kiểm tra khả năng phù hợp để lái xe cơ giới

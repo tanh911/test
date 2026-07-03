@@ -9,6 +9,8 @@ import { Help } from './components/Help';
 import { Stats } from './components/Stats';
 import { Settings } from './components/Settings';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
+import { DrivingSimulation } from './components/DrivingSimulation';
+import { AdminDashboard } from './components/AdminDashboard';
 import { verifyToken, clearToken } from './lib/auth';
 import { LogIn, LogOut } from 'lucide-react';
 
@@ -69,7 +71,7 @@ const ZoomPill = ({ fontSizeMode, onChange }) => (
 
 // ── Top Navbar ───────────────────────────────────────────────────────────────
 
-const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onShowLogin, onLogout, fontSizeMode, onZoomChange }) => {
+const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onShowLogin, onLogout, fontSizeMode, onZoomChange, isAdmin }) => {
   const menuRef = useRef(null);
 
   const t = (vi, de) => {
@@ -112,6 +114,16 @@ const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onSho
                 {user?.displayName?.[0]?.toUpperCase() || '?'}
               </div>
               <span className="navbar-user-name">{user?.displayName}</span>
+              {isAdmin && (
+                <button
+                  className="navbar-auth-btn ghost"
+                  onClick={() => navigate('/admin')}
+                  title="Admin Dashboard"
+                  style={{ background: 'linear-gradient(135deg,#6366f1,#8b5cf6)', color: 'white', border: 'none', borderRadius: '8px', padding: '5px 10px', fontSize: '12px', fontWeight: '700', cursor: 'pointer', display: 'flex', alignItems: 'center', gap: '4px' }}
+                >
+                  🛡️ Admin
+                </button>
+              )}
               <button className="navbar-auth-btn ghost" onClick={onLogout} title={t('Đăng xuất', 'Abmelden')}>
                 <LogOut size={15} />
               </button>
@@ -312,6 +324,7 @@ function App() {
         onShowLogin={() => setShowLoginModal(true)}
         onLogout={handleLogout}
         fontSizeMode={fontSizeMode}
+        isAdmin={!!(user?.email && user.email.trim().toLowerCase() === 'bossfc69@gmail.com')}
         onZoomChange={(mode) => {
           setFontSizeMode(mode);
           localStorage.setItem('fuhrerschein_font_size', mode);
@@ -337,6 +350,8 @@ function App() {
           <Route path="/help" element={<Help user={user} languageMode={languageMode} onNavigate={(p, opts) => navigate(p, opts)} />} />
           <Route path="/settings" element={<Settings user={user} onUpdateUser={handleUpdateUser} onLogout={handleLogout} />} />
           <Route path="/privacy" element={<PrivacyPolicy onNavigate={navigate} />} />
+          <Route path="/simulation" element={<DrivingSimulation languageMode={languageMode} />} />
+          <Route path="/admin" element={<AdminDashboard user={user} onNavigate={navigate} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
       </main>

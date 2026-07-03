@@ -429,7 +429,7 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
               <ChevronRight size={18} opacity={0.5} />
             </button>
 
-            <button onClick={() => setShowSimulatorModal(true)} style={{
+            <button onClick={() => onNavigate('/simulation')} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
               background: 'white', border: 'none', borderRadius: '4px', padding: '16px 20px',
               cursor: 'pointer', boxShadow: '0 1px 3px rgba(0,0,0,0.08)', color: '#2b576b'
