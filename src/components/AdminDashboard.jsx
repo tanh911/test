@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Trash2, Search, RefreshCw, Ban, CheckCircle, Eye, X, AlertTriangle, BarChart2, BookOpen, Award } from 'lucide-react';
+import { Shield, Users, Trash2, Search, RefreshCw, Ban, CheckCircle, Eye, X, AlertTriangle, BarChart2, BookOpen, Award, Gamepad2, ToggleLeft, ToggleRight } from 'lucide-react';
 
 const ADMIN_EMAIL = 'bossfc69@gmail.com';
 
@@ -11,6 +11,8 @@ export function AdminDashboard({ user, onNavigate }) {
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [toast, setToast] = useState(null);
   const [stats, setStats] = useState({ total: 0, active: 0, guests: 0 });
+  const [simulatorEnabled, setSimulatorEnabled] = useState(false);
+  const [togglingSimulator, setTogglingSimulator] = useState(false);
 
   const isAdmin = user?.email === ADMIN_EMAIL;
 
@@ -35,7 +37,33 @@ export function AdminDashboard({ user, onNavigate }) {
     setLoading(false);
   };
 
-  useEffect(() => { if (isAdmin) fetchUsers(); }, [isAdmin]);
+  const fetchSettings = async () => {
+    try {
+      const { db } = await import('../lib/firebase');
+      const { doc, getDoc } = await import('firebase/firestore');
+      const snap = await getDoc(doc(db, 'settings', 'global'));
+      if (snap.exists()) setSimulatorEnabled(!!snap.data().simulatorEnabled);
+    } catch (e) {
+      console.error('fetchSettings:', e);
+    }
+  };
+
+  useEffect(() => { if (isAdmin) { fetchUsers(); fetchSettings(); } }, [isAdmin]);
+
+  const handleToggleSimulator = async () => {
+    setTogglingSimulator(true);
+    try {
+      const { db } = await import('../lib/firebase');
+      const { doc, setDoc } = await import('firebase/firestore');
+      const next = !simulatorEnabled;
+      await setDoc(doc(db, 'settings', 'global'), { simulatorEnabled: next }, { merge: true });
+      setSimulatorEnabled(next);
+      showToast(next ? '✅ Đã bật Simulator cho người dùng!' : '🔒 Đã khoá Simulator!');
+    } catch (e) {
+      showToast('Lỗi: ' + e.message, 'error');
+    }
+    setTogglingSimulator(false);
+  };
 
   const handleDelete = async (uid) => {
     try {
@@ -154,6 +182,40 @@ export function AdminDashboard({ user, onNavigate }) {
               </div>
             </div>
           ))}
+        </div>
+
+        {/* Feature Controls */}
+        <div style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 24px', marginBottom: '24px' }}>
+          <div style={{ fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '16px' }}>⚙️ Quản lý Tính năng</div>
+          <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: '16px', flexWrap: 'wrap' }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '14px' }}>
+              <div style={{ width: '42px', height: '42px', borderRadius: '12px', background: simulatorEnabled ? 'rgba(99,102,241,0.25)' : 'rgba(255,255,255,0.08)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: simulatorEnabled ? '#818cf8' : 'rgba(255,255,255,0.3)', transition: 'all 0.3s' }}>
+                <Gamepad2 size={20} />
+              </div>
+              <div>
+                <div style={{ color: 'white', fontWeight: '700', fontSize: '15px' }}>Mô phỏng lái xe (Simulator)</div>
+                <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px', marginTop: '2px' }}>
+                  {simulatorEnabled ? '🟢 Đang mở — người dùng có thể truy cập' : '🔴 Đang khoá — hiện modal "Đang phát triển"'}
+                </div>
+              </div>
+            </div>
+            <button
+              onClick={handleToggleSimulator}
+              disabled={togglingSimulator}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '8px',
+                padding: '10px 20px', borderRadius: '12px', border: 'none',
+                background: simulatorEnabled ? 'linear-gradient(135deg,#10b981,#059669)' : 'rgba(255,255,255,0.1)',
+                color: simulatorEnabled ? 'white' : 'rgba(255,255,255,0.6)',
+                fontWeight: '700', fontSize: '14px', cursor: togglingSimulator ? 'not-allowed' : 'pointer',
+                transition: 'all 0.3s', opacity: togglingSimulator ? 0.6 : 1,
+                boxShadow: simulatorEnabled ? '0 4px 15px rgba(16,185,129,0.4)' : 'none'
+              }}
+            >
+              {simulatorEnabled ? <ToggleRight size={20} /> : <ToggleLeft size={20} />}
+              {togglingSimulator ? 'Đang lưu...' : (simulatorEnabled ? 'Bật' : 'Tắt')}
+            </button>
+          </div>
         </div>
 
         {/* Search */}

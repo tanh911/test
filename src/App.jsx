@@ -148,6 +148,7 @@ function App() {
   const [fontSizeMode, setFontSizeMode] = useState(() =>
     localStorage.getItem('fuhrerschein_font_size') || 'normal'
   );
+  const [simulatorEnabled, setSimulatorEnabled] = useState(false);
 
   // Close login modal automatically when user successfully logs in
   useEffect(() => {
@@ -167,6 +168,20 @@ function App() {
     // Set style property as fallback
     root.style.setProperty('--text-scale', scale);
   }, [fontSizeMode]);
+
+  // Load simulator flag from Firestore (real-time)
+  useEffect(() => {
+    let unsub = null;
+    import('./lib/firebase').then(({ db }) => {
+      import('firebase/firestore').then(({ doc, onSnapshot }) => {
+        unsub = onSnapshot(doc(db, 'settings', 'global'), (snap) => {
+          if (snap.exists()) setSimulatorEnabled(!!snap.data().simulatorEnabled);
+          else setSimulatorEnabled(false);
+        }, () => setSimulatorEnabled(false));
+      });
+    });
+    return () => { if (unsub) unsub(); };
+  }, []);
 
   const navigate = useNavigate();
   const location = useLocation();
@@ -341,6 +356,7 @@ function App() {
               onShowLogin={() => setShowLoginModal(true)}
               languageMode={languageMode}
               onLanguageChange={(mode) => { setLanguageMode(mode); localStorage.setItem('fuhrerschein_lang_mode', mode); }}
+              simulatorEnabled={simulatorEnabled}
             />
           } />
           <Route path="/training" element={<TrainingDashboard user={user} onUpdateUser={handleUpdateUser} onNavigate={(p, opts) => navigate(p, opts)} onShowLogin={() => setShowLoginModal(true)} languageMode={languageMode} />} />
@@ -350,7 +366,7 @@ function App() {
           <Route path="/help" element={<Help user={user} languageMode={languageMode} onNavigate={(p, opts) => navigate(p, opts)} />} />
           <Route path="/settings" element={<Settings user={user} onUpdateUser={handleUpdateUser} onLogout={handleLogout} />} />
           <Route path="/privacy" element={<PrivacyPolicy onNavigate={navigate} />} />
-          <Route path="/simulation" element={<Navigate to="/" replace />} />
+          <Route path="/simulation" element={simulatorEnabled ? <DrivingSimulation languageMode={languageMode} /> : <Navigate to="/" replace />} />
           <Route path="/admin" element={<AdminDashboard user={user} onNavigate={navigate} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

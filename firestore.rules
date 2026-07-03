@@ -17,6 +17,14 @@ service cloud.firestore {
       allow read, write: if request.auth != null && request.auth.uid == userId;
     }
 
+    // ── Settings collection (feature flags) ──────────────────────────────────
+    match /settings/{docId} {
+      // Mọi người đều đọc được (để check simulatorEnabled)
+      allow read: if true;
+      // Chỉ admin mới ghi được
+      allow write: if isAdmin();
+    }
+
     // ── Mặc định: từ chối tất cả ─────────────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;

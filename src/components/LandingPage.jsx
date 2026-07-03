@@ -6,7 +6,7 @@ import { AIChat } from './AIChat';
 import { PraxisVideos } from './PraxisVideos';
 import { TheoryTips } from './TheoryTips';
 
-export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'both', onLanguageChange }) => {
+export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'both', onLanguageChange, simulatorEnabled = false }) => {
   const t = (vi, de) => {
     if (languageMode === 'vi') return vi;
     if (languageMode === 'de') return de;
@@ -429,20 +429,25 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
               <ChevronRight size={18} opacity={0.5} />
             </button>
 
-            <button onClick={() => setShowSimulatorModal(true)} style={{
+            <button onClick={() => simulatorEnabled ? onNavigate('/simulation') : setShowSimulatorModal(true)} style={{
               display: 'flex', alignItems: 'center', justifyContent: 'space-between',
-              background: '#f3f4f6', border: '1.5px dashed #d1d5db', borderRadius: '4px', padding: '16px 20px',
-              cursor: 'pointer', boxShadow: 'none', color: '#9ca3af', position: 'relative', overflow: 'hidden'
+              background: simulatorEnabled ? 'white' : '#f3f4f6',
+              border: simulatorEnabled ? 'none' : '1.5px dashed #d1d5db',
+              borderRadius: '4px', padding: '16px 20px',
+              cursor: 'pointer', boxShadow: simulatorEnabled ? '0 1px 3px rgba(0,0,0,0.08)' : 'none',
+              color: simulatorEnabled ? '#2b576b' : '#9ca3af', position: 'relative', overflow: 'hidden'
             }}>
               <div className="flex items-center gap-4">
-                <Gamepad2 size={20} strokeWidth={1.5} color="#9ca3af" />
+                <Gamepad2 size={20} strokeWidth={1.5} color={simulatorEnabled ? '#2b576b' : '#9ca3af'} />
                 <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
                   {t('Mô phỏng lái xe', 'Fahrsimulator')}
                 </span>
-                <span style={{
-                  fontSize: '10px', fontWeight: '700', background: '#fef3c7', color: '#d97706',
-                  padding: '2px 7px', borderRadius: '20px', letterSpacing: '0.05em', textTransform: 'uppercase'
-                }}>🔒 {t('Sắp ra mắt', 'Demnächst')}</span>
+                {!simulatorEnabled && (
+                  <span style={{
+                    fontSize: '10px', fontWeight: '700', background: '#fef3c7', color: '#d97706',
+                    padding: '2px 7px', borderRadius: '20px', letterSpacing: '0.05em', textTransform: 'uppercase'
+                  }}>🔒 {t('Sắp ra mắt', 'Demnächst')}</span>
+                )}
               </div>
               <ChevronRight size={18} opacity={0.3} />
             </button>
