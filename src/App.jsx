@@ -350,7 +350,7 @@ function App() {
           <Route path="/help" element={<Help user={user} languageMode={languageMode} onNavigate={(p, opts) => navigate(p, opts)} />} />
           <Route path="/settings" element={<Settings user={user} onUpdateUser={handleUpdateUser} onLogout={handleLogout} />} />
           <Route path="/privacy" element={<PrivacyPolicy onNavigate={navigate} />} />
-          <Route path="/simulation" element={<Navigate to="/" replace />} />
+          <Route path="/simulation" element={<DrivingSimulation languageMode={languageMode} />} />
           <Route path="/admin" element={<AdminDashboard user={user} onNavigate={navigate} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
