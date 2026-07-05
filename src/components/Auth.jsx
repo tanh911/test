@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Lock, User, Mail, AlertCircle, CheckCircle2, Loader2, Phone } from 'lucide-react';
 import { hashPassword, verifyPassword, createToken, checkPasswordStrength } from '../lib/auth';
 import { registerWithEmail, loginWithEmail, verifyEmail, updateUserProfile, signInWithGoogle, signInWithFacebook } from '../lib/firebase';
-import { sendLoginNotification } from '../services/emailService';
+import { sendLoginNotification, sendWelcomeEmail } from '../services/emailService';
 
 const GoogleIcon = () => (
   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -164,6 +164,12 @@ export const Auth = ({ onLogin, onCancel }) => {
 
           await updateUserProfile(user, { displayName: username.trim() });
           await verifyEmail(user);
+
+          // Gửi email cảm ơn / chào mừng cho user mới
+          sendWelcomeEmail({
+            recipientEmail: email.trim(),
+            displayName: username.trim()
+          });
 
           setSuccess('Tạo tài khoản thành công! Vui lòng kiểm tra email của bạn (bao gồm cả mục Thư Rác) và bấm vào link để kích hoạt.');
 

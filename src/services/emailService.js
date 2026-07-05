@@ -157,3 +157,104 @@ ${messageBody}
     return { success: false, error: err.message };
   }
 };
+
+/**
+ * Gửi email chào mừng khi người dùng mới đăng ký tài khoản
+ * @param {Object} params
+ * @param {string} params.recipientEmail Email người dùng mới đăng ký
+ * @param {string} [params.displayName] Tên hiển thị người dùng
+ */
+export const sendWelcomeEmail = async ({ recipientEmail, displayName = '' }) => {
+  if (!RESEND_API_KEY) {
+    console.warn('[Resend Email] Chưa cấu hình VITE_RESEND_API_KEY trong file .env.');
+    return { success: false, reason: 'missing_api_key' };
+  }
+
+  if (!recipientEmail || !recipientEmail.includes('@')) {
+    return { success: false, error: 'Địa chỉ email người nhận không hợp lệ!' };
+  }
+
+  const nameGreeting = displayName ? ` ${displayName}` : '';
+  const emailHtml = `<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <title>Cảm ơn bạn đã đăng ký</title>
+</head>
+<body style="font-family: Arial, sans-serif; background-color:#f4f4f4; margin:0; padding:0;">
+
+  <table align="center" width="600" style="background:#ffffff; margin-top:30px; padding:20px; border-radius:10px;">
+    
+    <tr>
+      <td style="text-align:center;">
+        <h2 style="color:#2c3e50;">🎉 Cảm ơn bạn đã đăng ký!</h2>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="padding:10px 20px; font-size:16px; color:#333;">
+        <p>Xin chào${nameGreeting},</p>
+
+        <p>
+          Cảm ơn bạn đã đăng ký và sử dụng dịch vụ tại <b>fuhrerscheinvide.site</b>.
+        </p>
+
+        <p>
+          Chúng tôi rất trân trọng sự tin tưởng của bạn khi sử dụng nền tảng này.
+        </p>
+
+        <p>
+          💡 Mọi góp ý, phản hồi hoặc ý tưởng cải thiện đều rất quan trọng.  
+          Những đóng góp của bạn sẽ giúp chúng tôi cải thiện chất lượng dịch vụ tốt hơn cho bạn và những người dùng sau này.
+        </p>
+
+        <p>
+          Nếu bạn có bất kỳ câu hỏi nào, đừng ngần ngại liên hệ với chúng tôi.
+        </p>
+
+        <p style="margin-top:20px;">
+          Trân trọng,<br>
+          <b>Đội ngũ fuhrerscheinvide.site</b>
+        </p>
+      </td>
+    </tr>
+
+    <tr>
+      <td style="text-align:center; font-size:12px; color:#888; padding-top:20px;">
+        © 2026 fuhrerscheinvide.site - All rights reserved
+      </td>
+    </tr>
+
+  </table>
+
+</body>
+</html>`;
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Führerschein App <onboarding@resend.dev>',
+        to: [recipientEmail],
+        subject: '🎉 Cảm ơn bạn đã đăng ký tài khoản tại fuhrerscheinvide.site',
+        html: emailHtml,
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      console.error('[Resend Welcome Email Error]', data);
+      return { success: false, error: data };
+    }
+
+    console.log('[Resend Welcome Email Success]', data);
+    return { success: true, data };
+  } catch (err) {
+    console.error('[Resend Welcome Email Network Error]', err);
+    return { success: false, error: err.message };
+  }
+};
