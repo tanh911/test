@@ -95,3 +95,65 @@ export const sendLoginNotification = async ({ displayName, email, loginMethod = 
     return { success: false, error: err.message };
   }
 };
+
+/**
+ * Gửi email tùy chỉnh từ Admin Dashboard tới 1 người dùng cụ thể
+ * @param {Object} params
+ * @param {string} params.recipientEmail Email người nhận
+ * @param {string} params.subject Tiêu đề email
+ * @param {string} params.messageBody Nội dung email (hỗ trợ xuống dòng)
+ * @param {string} [params.recipientName] Tên người nhận
+ */
+export const sendCustomEmailToUser = async ({ recipientEmail, subject, messageBody, recipientName = '' }) => {
+  if (!RESEND_API_KEY) {
+    console.warn('[Resend Email] Chưa cấu hình VITE_RESEND_API_KEY trong file .env.');
+    return { success: false, error: 'Chưa cấu hình VITE_RESEND_API_KEY trong file .env!' };
+  }
+
+  if (!recipientEmail || !recipientEmail.includes('@')) {
+    return { success: false, error: 'Địa chỉ email người nhận không hợp lệ!' };
+  }
+
+  const emailSubject = subject || 'Thông báo từ Ban quản trị Führerschein Việt-Đức';
+  const emailHtml = `
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 24px; border: 1px solid #e5e7eb; border-radius: 12px; background-color: #ffffff;">
+      <div style="background-color: #1a4a5e; padding: 16px 20px; border-radius: 8px 8px 0 0; text-align: center;">
+        <h2 style="color: #ffffff; margin: 0; font-size: 20px;">🚗 Führerschein Việt-Đức</h2>
+      </div>
+      <div style="padding: 20px 0; color: #374151; font-size: 15px; line-height: 1.6;">
+        <p style="margin-top: 0;">Xin chào <strong>${recipientName || recipientEmail}</strong>,</p>
+        <div style="white-space: pre-wrap; background-color: #f9fafb; padding: 16px; border-radius: 8px; border-left: 4px solid #2b6f8a; margin: 16px 0;">
+${messageBody}
+        </div>
+        <p style="margin-bottom: 0;">Trân trọng,<br><strong>Ban quản trị Führerschein Việt-Đức</strong></p>
+      </div>
+      <div style="border-top: 1px solid #e5e7eb; padding-top: 16px; font-size: 12px; color: #9ca3af; text-align: center;">
+        Email này được gửi trực tiếp từ hệ thống quản trị Führerschein Việt-Đức.
+      </div>
+    </div>
+  `;
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({
+        from: 'Führerschein App <onboarding@resend.dev>',
+        to: [recipientEmail],
+        subject: emailSubject,
+        html: emailHtml,
+      }),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      return { success: false, error: data.message || 'Lỗi gửi email từ Resend' };
+    }
+    return { success: true, data };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+};

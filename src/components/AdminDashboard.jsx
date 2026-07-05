@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { Shield, Users, Trash2, Search, RefreshCw, Ban, CheckCircle, Eye, X, AlertTriangle, BarChart2, BookOpen, Award, Gamepad2, ToggleLeft, ToggleRight } from 'lucide-react';
+import { Shield, Users, Trash2, Search, RefreshCw, Ban, CheckCircle, Eye, X, AlertTriangle, BarChart2, BookOpen, Award, Gamepad2, ToggleLeft, ToggleRight, Mail, Send, Loader2 } from 'lucide-react';
+import { sendCustomEmailToUser } from '../services/emailService';
 
 const ADMIN_EMAIL = 'bossfc69@gmail.com';
 
@@ -14,11 +15,65 @@ export function AdminDashboard({ user, onNavigate }) {
   const [simulatorEnabled, setSimulatorEnabled] = useState(false);
   const [togglingSimulator, setTogglingSimulator] = useState(false);
 
+  // State gửi Email qua Resend
+  const [showEmailModal, setShowEmailModal] = useState(false);
+  const [emailModalUser, setEmailModalUser] = useState(null);
+  const [customRecipientEmail, setCustomRecipientEmail] = useState('');
+  const [emailSubject, setEmailSubject] = useState('');
+  const [emailBody, setEmailBody] = useState('');
+  const [sendingEmail, setSendingEmail] = useState(false);
+
   const isAdmin = user?.email === ADMIN_EMAIL;
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleOpenEmailModal = (targetUser = null) => {
+    setEmailModalUser(targetUser);
+    setCustomRecipientEmail(targetUser?.email || '');
+    setEmailSubject('');
+    setEmailBody('');
+    setShowEmailModal(true);
+  };
+
+  const handleSendEmail = async (e) => {
+    e.preventDefault();
+    const recipient = emailModalUser?.email || customRecipientEmail;
+    if (!recipient || !recipient.includes('@')) {
+      showToast('Vui lòng nhập địa chỉ email người nhận hợp lệ!', 'error');
+      return;
+    }
+    if (!emailBody.trim()) {
+      showToast('Vui lòng nhập nội dung email!', 'error');
+      return;
+    }
+
+    setSendingEmail(true);
+    try {
+      const result = await sendCustomEmailToUser({
+        recipientEmail: recipient.trim(),
+        recipientName: emailModalUser?.displayName || '',
+        subject: emailSubject.trim() || 'Thông báo từ Ban quản trị Führerschein Việt-Đức',
+        messageBody: emailBody.trim(),
+      });
+
+      if (result.success) {
+        showToast(`✅ Đã gửi email tới ${recipient} thành công!`);
+        setShowEmailModal(false);
+        setEmailModalUser(null);
+        setCustomRecipientEmail('');
+        setEmailSubject('');
+        setEmailBody('');
+      } else {
+        showToast('Lỗi gửi email: ' + (result.error || 'Thất bại'), 'error');
+      }
+    } catch (err) {
+      showToast('Lỗi: ' + err.message, 'error');
+    } finally {
+      setSendingEmail(false);
+    }
   };
 
   const fetchUsers = async () => {
@@ -160,6 +215,9 @@ export function AdminDashboard({ user, onNavigate }) {
             </div>
           </div>
           <div style={{ display: 'flex', gap: '10px' }}>
+            <button onClick={() => handleOpenEmailModal(null)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', background: 'linear-gradient(135deg, #3b82f6, #2563eb)', border: 'none', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 15px rgba(59,130,246,0.4)' }}>
+              <Mail size={16} /> Gửi Email
+            </button>
             <button onClick={fetchUsers} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontWeight: '600', cursor: 'pointer', fontSize: '14px', backdropFilter: 'blur(10px)' }}>
               <RefreshCw size={16} /> Làm mới
             </button>
@@ -286,6 +344,9 @@ export function AdminDashboard({ user, onNavigate }) {
                         </td>
                         <td style={{ padding: '14px 18px' }}>
                           <div style={{ display: 'flex', gap: '8px' }}>
+                            <button title="Gửi Email" onClick={() => handleOpenEmailModal(u)} style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(59,130,246,0.2)', border: 'none', color: '#60a5fa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Mail size={15} />
+                            </button>
                             <button title="Xem chi tiết" onClick={() => setSelectedUser(u)} style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(99,102,241,0.2)', border: 'none', color: '#6366f1', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <Eye size={15} />
                             </button>
@@ -349,6 +410,9 @@ export function AdminDashboard({ user, onNavigate }) {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button onClick={() => { const target = selectedUser; setSelectedUser(null); handleOpenEmailModal(target); }} style={{ padding: '12px', borderRadius: '12px', background: 'rgba(59,130,246,0.2)', border: '1px solid #3b82f6', color: '#60a5fa', fontWeight: '700', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <Mail size={16} /> Gửi Email cho người dùng
+              </button>
               <button onClick={() => handleToggleBan(selectedUser.id, selectedUser.banned)} style={{ padding: '12px', borderRadius: '12px', background: selectedUser.banned ? 'rgba(16,185,129,0.15)' : 'rgba(239,68,68,0.15)', border: `1px solid ${selectedUser.banned ? '#10b981' : '#ef4444'}`, color: selectedUser.banned ? '#10b981' : '#ef4444', fontWeight: '700', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                 {selectedUser.banned ? <><CheckCircle size={16} /> Mở khoá tài khoản</> : <><Ban size={16} /> Khoá tài khoản</>}
               </button>
@@ -382,6 +446,74 @@ export function AdminDashboard({ user, onNavigate }) {
                 Xoá ngay
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Send Email Modal */}
+      {showEmailModal && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', zIndex: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={() => setShowEmailModal(false)}>
+          <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #1e293b 100%)', borderRadius: '20px', padding: '28px', maxWidth: '520px', width: '100%', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 30px 80px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+                <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(59,130,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
+                  <Mail size={22} />
+                </div>
+                <div>
+                  <h3 style={{ color: 'white', fontWeight: '800', fontSize: '18px', margin: 0 }}>Gửi Email Trực Tiếp</h3>
+                  <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', margin: 0 }}>Qua dịch vụ Resend API</p>
+                </div>
+              </div>
+              <button onClick={() => setShowEmailModal(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', borderRadius: '8px', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={16} /></button>
+            </div>
+
+            <form onSubmit={handleSendEmail} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>Người nhận (Email)</label>
+                <input
+                  type="email"
+                  required
+                  placeholder="nhap_email@example.com"
+                  value={emailModalUser ? emailModalUser.email : customRecipientEmail}
+                  onChange={e => !emailModalUser && setCustomRecipientEmail(e.target.value)}
+                  readOnly={!!emailModalUser?.email}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>Tiêu đề Email</label>
+                <input
+                  type="text"
+                  placeholder="Ví dụ: Thông báo cập nhật tài khoản / Nhắc nhở học tập"
+                  value={emailSubject}
+                  onChange={e => setEmailSubject(e.target.value)}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div>
+                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>Nội dung Email</label>
+                <textarea
+                  required
+                  rows={6}
+                  placeholder="Nhập nội dung thư thông báo gửi tới người dùng ở đây..."
+                  value={emailBody}
+                  onChange={e => setEmailBody(e.target.value)}
+                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontSize: '14px', outline: 'none', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                <button type="button" onClick={() => setShowEmailModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '14px' }}>
+                  Huỷ
+                </button>
+                <button type="submit" disabled={sendingEmail} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: sendingEmail ? '#93c5fd' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)', border: 'none', color: 'white', fontWeight: '700', cursor: sendingEmail ? 'not-allowed' : 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 15px rgba(59,130,246,0.4)' }}>
+                  {sendingEmail ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={16} />}
+                  {sendingEmail ? 'Đang gửi...' : 'Gửi Email Ngay'}
+                </button>
+              </div>
+            </form>
           </div>
         </div>
       )}
