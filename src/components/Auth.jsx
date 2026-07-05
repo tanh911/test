@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Lock, User, Mail, AlertCircle, CheckCircle2, Loader2, Phone } from 'lucide-react';
 import { hashPassword, verifyPassword, createToken, checkPasswordStrength } from '../lib/auth';
 import { registerWithEmail, loginWithEmail, verifyEmail, updateUserProfile, signInWithGoogle, signInWithFacebook } from '../lib/firebase';
+import { sendLoginNotification } from '../services/emailService';
 
 const GoogleIcon = () => (
   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -90,6 +91,11 @@ export const Auth = ({ onLogin, onCancel }) => {
             }
 
             setSuccess('Đăng nhập thành công!');
+            sendLoginNotification({
+              displayName: user.displayName || user.email.split('@')[0],
+              email: user.email,
+              loginMethod: 'Email (Firebase)'
+            });
             setTimeout(() => onLogin({
               uid: user.uid,
               username: user.email,
@@ -143,6 +149,11 @@ export const Auth = ({ onLogin, onCancel }) => {
         const token = await createToken(sessionUser);
         localStorage.setItem('fuhrerschein_token', token);
         setSuccess('Đăng nhập thành công!');
+        sendLoginNotification({
+          displayName: sessionUser.displayName,
+          email: sessionUser.email || sessionUser.username,
+          loginMethod: 'Tài khoản thường'
+        });
         setTimeout(() => onLogin(sessionUser), 500);
 
       } else if (!isLogin) {
@@ -343,6 +354,11 @@ export const Auth = ({ onLogin, onCancel }) => {
               try {
                 const result = await signInWithGoogle();
                 const user = result.user;
+                sendLoginNotification({
+                  displayName: user.displayName || 'Google User',
+                  email: user.email || '',
+                  loginMethod: 'Google'
+                });
                 onLogin({
                   uid: user.uid,
                   username: `google_${user.uid}`,
@@ -367,6 +383,11 @@ export const Auth = ({ onLogin, onCancel }) => {
               try {
                 const result = await signInWithFacebook();
                 const user = result.user;
+                sendLoginNotification({
+                  displayName: user.displayName || 'Facebook User',
+                  email: user.email || '',
+                  loginMethod: 'Facebook'
+                });
                 onLogin({
                   uid: user.uid,
                   username: `fb_${user.uid}`,

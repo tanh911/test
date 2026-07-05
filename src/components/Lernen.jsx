@@ -7,6 +7,8 @@ import {
 } from 'lucide-react';
 import { customAlert } from '../utils/customAlert';
 import { categoryGroups, getCategoryLabel } from '../utils/categoryHelpers';
+import { getMediaUrl } from '../utils/mediaHelpers';
+
 export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languageMode = 'both', predefinedQuestions = null, mode = 'practice', onExamSubmit }) => {
   const location = useLocation();
   const searchParams = new URLSearchParams(location.search);
@@ -97,6 +99,28 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
       return qId.split('_')[0];
     }
     return qId;
+  };
+
+  const getVideoPlayCount = (qId) => {
+    if (!qId) return 0;
+    try {
+      const raw = sessionStorage.getItem('fuhrerschein_video_counts_v1');
+      if (raw) {
+        const counts = JSON.parse(raw);
+        return counts[qId] || 0;
+      }
+    } catch (e) {}
+    return 0;
+  };
+
+  const saveVideoPlayCount = (qId, count) => {
+    if (!qId) return;
+    try {
+      const raw = sessionStorage.getItem('fuhrerschein_video_counts_v1');
+      const counts = raw ? JSON.parse(raw) : {};
+      counts[qId] = count;
+      sessionStorage.setItem('fuhrerschein_video_counts_v1', JSON.stringify(counts));
+    } catch (e) {}
   };
 
   const renderFormattedText = (text) => {
@@ -221,8 +245,9 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
       setIsAiOpen(false);
 
       if (currentQ?.video && mode !== 'review') {
-        setVideoPlayCount(0);
-        setHasPlayedOnce(false);
+        const storedCount = getVideoPlayCount(getBaseId(currentQ.id));
+        setVideoPlayCount(storedCount);
+        setHasPlayedOnce(storedCount > 0);
       }
       return;
     }
@@ -233,9 +258,10 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
     setIsAiOpen(false);
 
     if (currentQ && currentQ.video) {
-      setShowQuestion(false);
-      setVideoPlayCount(0);
-      setHasPlayedOnce(false);
+      const storedCount = getVideoPlayCount(getBaseId(currentQ.id));
+      setVideoPlayCount(storedCount);
+      setHasPlayedOnce(storedCount > 0);
+      setShowQuestion(storedCount > 0);
     } else {
       setShowQuestion(true);
     }
@@ -249,15 +275,15 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
 
   const handleSeeking = (e) => {
     if (!isSubmitted) {
-      e.target.currentTime = lastTimeRef.current;
+      if (e.target.currentTime > lastTimeRef.current + 0.3) {
+        e.target.currentTime = lastTimeRef.current;
+      }
     }
   };
 
   const handleTimeUpdate = (e) => {
     if (!isSubmitted) {
-      if (Math.abs(e.target.currentTime - lastTimeRef.current) > 1.5) {
-        e.target.currentTime = lastTimeRef.current;
-      } else {
+      if (e.target.currentTime > lastTimeRef.current) {
         lastTimeRef.current = e.target.currentTime;
       }
     }
@@ -1070,8 +1096,9 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 <div className="relative w-full border border-black bg-black rounded-sm overflow-hidden shadow-sm">
                   <video
                     ref={videoRef}
-                    src={currentQuestion.video}
+                    src={getMediaUrl(currentQuestion.video)}
                     controls={isSubmitted}
+                    muted
                     playsInline
                     onSeeking={handleSeeking}
                     onTimeUpdate={handleTimeUpdate}
@@ -1087,7 +1114,11 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                     }}
                     onEnded={() => {
                       if (!showQuestion) {
-                        setVideoPlayCount(prev => prev + 1);
+                        setVideoPlayCount(prev => {
+                          const next = prev + 1;
+                          saveVideoPlayCount(getBaseId(currentQuestion.id), next);
+                          return next;
+                        });
                       }
                       setIsFullscreenMode(false);
                     }}
@@ -1100,7 +1131,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 </div>
               ) : currentQuestion.image ? (
                 <div className="relative w-full border border-black bg-slate-50 rounded-sm overflow-hidden shadow-sm">
-                  <img src={currentQuestion.image} alt="Question" className="lernen-media-img" />
+                  <img src={getMediaUrl(currentQuestion.image)} alt="Question" className="lernen-media-img" />
                 </div>
               ) : currentQuestion.imageType ? (
                 <div className="lernen-media-svg relative border border-black overflow-hidden bg-white rounded-sm shadow-sm">
@@ -1211,7 +1242,20 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 <button
                   onClick={() => {
                     if (videoPlayCount < 5) {
-                      if (videoRef.current) videoRef.current.play();
+                      const vid = videoRef.current;
+                      if (vid) {
+                        if (vid.paused || vid.ended) {
+                          lastTimeRef.current = 0;
+                          vid.currentTime = 0;
+                          const promise = vid.play();
+                          if (promise !== undefined) {
+                            promise.catch(err => console.warn('Video replay error:', err));
+                          }
+                        }
+                      }
+                      if (window.innerWidth < 768) {
+                        setIsFullscreenMode(true);
+                      }
                     }
                   }}
                   disabled={videoPlayCount >= 5}
@@ -1568,9 +1612,10 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
               <>
                 <video
                   ref={fullscreenVideoRef}
-                  src={currentQuestion.video}
+                  src={getMediaUrl(currentQuestion.video)}
                   controls={isSubmitted}
                   autoPlay
+                  muted
                   playsInline
                   onSeeking={handleSeeking}
                   onTimeUpdate={handleTimeUpdate}
@@ -1582,7 +1627,13 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                     }
                   }}
                   onEnded={() => {
-                    if (!showQuestion) setVideoPlayCount(prev => prev + 1);
+                    if (!showQuestion) {
+                      setVideoPlayCount(prev => {
+                        const next = prev + 1;
+                        saveVideoPlayCount(getBaseId(currentQuestion.id), next);
+                        return next;
+                      });
+                    }
                     setIsFullscreenMode(false);
                   }}
                   style={{ width: '100%', height: '100%', objectFit: 'contain' }}
@@ -1592,7 +1643,7 @@ Hãy trả lời chính xác, ngắn gọn bằng tiếng Việt, tập trung ph
                 )}
               </>
             ) : currentQuestion.image ? (
-              <img src={currentQuestion.image} alt="Fullscreen Question" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
+              <img src={getMediaUrl(currentQuestion.image)} alt="Fullscreen Question" style={{ width: '100%', height: '100%', objectFit: 'contain' }} />
             ) : currentQuestion.imageType ? (
               <div style={{ width: '100vw', height: '100vw', maxHeight: '100vh', aspectRatio: '1.6', position: 'relative' }}>
                 <SVGGraphics type={currentQuestion.imageType} className="w-full h-full" />

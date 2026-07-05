@@ -47,35 +47,83 @@ export const generateExamQuestions = (allQuestions) => {
     return (typeof q.id === 'string' && q.id.startsWith('2.')) ? 2 : 1;
   };
 
-  const pools = { 1: [], 2: [] };
-  allQuestions.forEach(q => {
-    const theme = getQuestionTheme(q);
-    pools[theme].push(q);
-  });
-
-  const targets = {
-    1: 20, // 20 Grundstoff
-    2: 10  // 10 Zusatzstoff
+  const getMediaType = (q) => {
+    if (q.video) return 'video';
+    if (q.image || q.imageType) return 'image';
+    return 'text';
   };
 
-  let selected = [];
-  Object.keys(targets).forEach(themeId => {
-    const pool = pools[themeId];
-    const targetCount = targets[themeId];
-    if (pool && pool.length > 0) {
-      // Trộn ngẫu nhiên câu hỏi gốc của nhóm đó
-      const shuffledPool = [...pool].sort(() => 0.5 - Math.random());
-      // Lấy đúng số lượng, không bị trùng lặp
-      const selectedForTheme = shuffledPool.slice(0, targetCount);
-      selectedForTheme.forEach((baseQuestion, idx) => {
-        selected.push({
-          ...baseQuestion,
-          id: `${baseQuestion.id}_exam_${themeId}_${idx}` // ID duy nhất trong kỳ thi
-        });
-      });
+  // Classify questions by Theme (1: Grundstoff, 2: Zusatzstoff) and Media type (video, image, text)
+  const pools = {
+    1: { video: [], image: [], text: [] },
+    2: { video: [], image: [], text: [] }
+  };
+
+  allQuestions.forEach(q => {
+    const theme = getQuestionTheme(q);
+    const media = getMediaType(q);
+    if (pools[theme]) {
+      pools[theme][media].push(q);
     }
   });
 
-  // Trộn ngẫu nhiên danh sách cuối cùng của kỳ thi
+  // Distribution targets per official German Class B Driving Exam standards:
+  // Total 30 questions:
+  // - Grundstoff (20 total): 2 video, 10 image, 8 text
+  // - Zusatzstoff (10 total): 1 video, 5 image, 4 text
+  // Overall sum: 3 Video (~10%), 15 Image (~50%), 12 Text (~40%)
+  const targets = {
+    1: { count: 20, video: 2, image: 10, text: 8 },
+    2: { count: 10, video: 1, image: 5, text: 4 }
+  };
+
+  let selected = [];
+
+  [1, 2].forEach(themeId => {
+    const pool = pools[themeId];
+    const target = targets[themeId];
+    const themeSelected = [];
+    const usedIds = new Set();
+
+    const pickFromCategory = (category, count) => {
+      const available = pool[category].filter(q => !usedIds.has(q.id));
+      const shuffled = [...available].sort(() => 0.5 - Math.random());
+      const picked = shuffled.slice(0, count);
+      picked.forEach(q => {
+        usedIds.add(q.id);
+        themeSelected.push(q);
+      });
+    };
+
+    // Pick target amounts for each media type
+    pickFromCategory('video', target.video);
+    pickFromCategory('image', target.image);
+    pickFromCategory('text', target.text);
+
+    // Fallback if any media category had fewer available questions than target count
+    if (themeSelected.length < target.count) {
+      const remainingPool = [
+        ...pool.video,
+        ...pool.image,
+        ...pool.text
+      ].filter(q => !usedIds.has(q.id));
+      const shuffledRemaining = [...remainingPool].sort(() => 0.5 - Math.random());
+      const needed = target.count - themeSelected.length;
+      const extra = shuffledRemaining.slice(0, needed);
+      extra.forEach(q => {
+        usedIds.add(q.id);
+        themeSelected.push(q);
+      });
+    }
+
+    themeSelected.forEach((baseQuestion, idx) => {
+      selected.push({
+        ...baseQuestion,
+        id: `${baseQuestion.id}_exam_${themeId}_${idx}`
+      });
+    });
+  });
+
+  // Randomize final exam order
   return selected.sort(() => 0.5 - Math.random());
 };

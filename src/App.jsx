@@ -177,7 +177,10 @@ function App() {
         unsub = onSnapshot(doc(db, 'settings', 'global'), (snap) => {
           if (snap.exists()) setSimulatorEnabled(!!snap.data().simulatorEnabled);
           else setSimulatorEnabled(false);
-        }, () => setSimulatorEnabled(false));
+        }, (err) => {
+          // Gracefully handle permission error for unauthenticated or guest users
+          setSimulatorEnabled(false);
+        });
       });
     });
     return () => { if (unsub) unsub(); };
@@ -185,6 +188,15 @@ function App() {
 
   const navigate = useNavigate();
   const location = useLocation();
+
+  // Handle SPA fallback redirect if coming from 404.html
+  useEffect(() => {
+    const redirectPath = sessionStorage.getItem('spa_redirect_path');
+    if (redirectPath) {
+      sessionStorage.removeItem('spa_redirect_path');
+      navigate(redirectPath, { replace: true });
+    }
+  }, [navigate]);
 
   // Session restore & Firebase sync
   useEffect(() => {

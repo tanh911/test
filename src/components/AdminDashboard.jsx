@@ -44,7 +44,7 @@ export function AdminDashboard({ user, onNavigate }) {
       const snap = await getDoc(doc(db, 'settings', 'global'));
       if (snap.exists()) setSimulatorEnabled(!!snap.data().simulatorEnabled);
     } catch (e) {
-      console.error('fetchSettings:', e);
+      console.warn('fetchSettings info:', e.message);
     }
   };
 

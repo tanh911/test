@@ -21,6 +21,31 @@ describe('examLogic - generateExamQuestions', () => {
     expect(grundstoff).toHaveLength(20);
     expect(zusatzstoff).toHaveLength(10);
   });
+
+  it('should distribute media types according to Class B specifications (video, image, text)', () => {
+    const mockQuestions = [];
+    // Grundstoff pool (theme 1)
+    for (let i = 1; i <= 5; i++) mockQuestions.push({ id: `1.1.01-v${i}`, video: `v${i}.mp4` });
+    for (let i = 1; i <= 20; i++) mockQuestions.push({ id: `1.1.01-img${i}`, image: `img${i}.png` });
+    for (let i = 1; i <= 25; i++) mockQuestions.push({ id: `1.1.01-t${i}` });
+
+    // Zusatzstoff pool (theme 2)
+    for (let i = 1; i <= 5; i++) mockQuestions.push({ id: `2.1.01-v${i}`, video: `v${i}.mp4` });
+    for (let i = 1; i <= 10; i++) mockQuestions.push({ id: `2.1.01-img${i}`, image: `img${i}.png` });
+    for (let i = 1; i <= 10; i++) mockQuestions.push({ id: `2.1.01-t${i}` });
+
+    const exam = generateExamQuestions(mockQuestions);
+    expect(exam).toHaveLength(30);
+
+    const videoCount = exam.filter(q => q.video).length;
+    const imageCount = exam.filter(q => (q.image || q.imageType) && !q.video).length;
+    const textCount = exam.filter(q => !q.video && !q.image && !q.imageType).length;
+
+    // Expected: 3 Videos (2 Grundstoff + 1 Zusatzstoff), 15 Images (10 + 5), 12 Text (8 + 4)
+    expect(videoCount).toBe(3);
+    expect(imageCount).toBe(15);
+    expect(textCount).toBe(12);
+  });
 });
 
 describe('examLogic - calculateExamResult', () => {
