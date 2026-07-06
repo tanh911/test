@@ -10,21 +10,70 @@ const NOTIFICATION_RECIPIENTS = import.meta.env.VITE_NOTIFICATION_EMAILS
 const RESEND_FROM_EMAIL = import.meta.env.VITE_RESEND_FROM_EMAIL || 'Führerschein App <onboarding@resend.dev>';
 
 /**
- * Gửi email thông báo đăng nhập
- * @param {Object} userData Thông tin người dùng vừa đăng nhập
- * @param {string} userData.displayName Tên hiển thị người dùng
- * @param {string} userData.email Email người dùng
- * @param {string} userData.loginMethod Phương thức đăng nhập (Email, Google, Facebook)
+ * Dispatch email via internal API /api/send-email first (to avoid browser CORS & adblocker NetworkError),
+ * falling back to direct Resend fetch if the API endpoint is unavailable.
  */
-export const sendLoginNotification = async ({ displayName, email, loginMethod = 'Email' }) => {
-  if (!RESEND_API_KEY) {
-    console.warn('[Resend Email] Chưa cấu hình VITE_RESEND_API_KEY trong file .env. Bỏ qua gửi email.');
-    return { success: false, reason: 'missing_api_key' };
+async function dispatchResendEmail({ to, subject, html, from }) {
+  const payload = {
+    to: Array.isArray(to) ? to : [to],
+    subject,
+    html,
+    from: from || RESEND_FROM_EMAIL
+  };
+
+  // 1. Thử gửi qua API Route nội bộ /api/send-email (Tránh hoàn toàn CORS & Adblocker trên trình duyệt)
+  try {
+    const apiRes = await fetch('/api/send-email', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (apiRes.ok || apiRes.status !== 404) {
+      const data = await apiRes.json();
+      if (!apiRes.ok) {
+        const errMsg = data.message || data.error?.message || data.error || JSON.stringify(data);
+        return { success: false, error: errMsg };
+      }
+      return { success: true, data };
+    }
+  } catch (apiErr) {
+    console.warn('[EmailService] API route /api/send-email not available, falling back to direct fetch...', apiErr);
   }
 
+  // 2. Fallback sang fetch trực tiếp Resend nếu không gọi được API nội bộ
+  if (!RESEND_API_KEY) {
+    return { success: false, error: 'Chưa cấu hình VITE_RESEND_API_KEY trong file .env!' };
+  }
+
+  try {
+    const response = await fetch('https://api.resend.com/emails', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${RESEND_API_KEY}`,
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify(payload),
+    });
+
+    const data = await response.json();
+    if (!response.ok) {
+      const errMsg = data.message || data.error?.message || JSON.stringify(data);
+      return { success: false, error: errMsg };
+    }
+    return { success: true, data };
+  } catch (err) {
+    return { success: false, error: err.message };
+  }
+}
+
+/**
+ * Gửi email thông báo đăng nhập
+ */
+export const sendLoginNotification = async ({ displayName, email, loginMethod = 'Email' }) => {
   const recipients = NOTIFICATION_RECIPIENTS.length > 0
     ? NOTIFICATION_RECIPIENTS
-    : ['delivered@resend.dev']; // Mặc định Resend sandbox email
+    : ['delivered@resend.dev'];
 
   const now = new Date().toLocaleString('vi-VN', {
     timeZone: 'Asia/Ho_Chi_Minh',
@@ -68,49 +117,17 @@ export const sendLoginNotification = async ({ displayName, email, loginMethod = 
     </div>
   `;
 
-  try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: 'Führerschein App <onboarding@resend.dev>',
-        to: recipients,
-        subject: emailSubject,
-        html: emailHtml,
-      }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      console.error('[Resend Email Error]', data);
-      return { success: false, error: data };
-    }
-
-    console.log('[Resend Email Success]', data);
-    return { success: true, data };
-  } catch (err) {
-    console.error('[Resend Network Error]', err);
-    return { success: false, error: err.message };
-  }
+  return await dispatchResendEmail({
+    to: recipients,
+    subject: emailSubject,
+    html: emailHtml
+  });
 };
 
 /**
  * Gửi email tùy chỉnh từ Admin Dashboard tới 1 người dùng cụ thể
- * @param {Object} params
- * @param {string} params.recipientEmail Email người nhận
- * @param {string} params.subject Tiêu đề email
- * @param {string} params.messageBody Nội dung email (hỗ trợ xuống dòng)
- * @param {string} [params.recipientName] Tên người nhận
  */
 export const sendCustomEmailToUser = async ({ recipientEmail, subject, messageBody, recipientName = '' }) => {
-  if (!RESEND_API_KEY) {
-    console.warn('[Resend Email] Chưa cấu hình VITE_RESEND_API_KEY trong file .env.');
-    return { success: false, error: 'Chưa cấu hình VITE_RESEND_API_KEY trong file .env!' };
-  }
-
   if (!recipientEmail || !recipientEmail.includes('@')) {
     return { success: false, error: 'Địa chỉ email người nhận không hợp lệ!' };
   }
@@ -134,45 +151,17 @@ ${messageBody}
     </div>
   `;
 
-  try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: RESEND_FROM_EMAIL,
-        to: [recipientEmail],
-        subject: emailSubject,
-        html: emailHtml,
-      }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      const errMsg = data.message || data.error?.message || JSON.stringify(data);
-      console.error('[Resend Custom Email Error]', data);
-      return { success: false, error: errMsg };
-    }
-    return { success: true, data };
-  } catch (err) {
-    return { success: false, error: err.message };
-  }
+  return await dispatchResendEmail({
+    to: recipientEmail,
+    subject: emailSubject,
+    html: emailHtml
+  });
 };
 
 /**
  * Gửi email chào mừng khi người dùng mới đăng ký tài khoản
- * @param {Object} params
- * @param {string} params.recipientEmail Email người dùng mới đăng ký
- * @param {string} [params.displayName] Tên hiển thị người dùng
  */
 export const sendWelcomeEmail = async ({ recipientEmail, displayName = '' }) => {
-  if (!RESEND_API_KEY) {
-    console.warn('[Resend Email] Chưa cấu hình VITE_RESEND_API_KEY trong file .env.');
-    return { success: false, error: 'Chưa cấu hình VITE_RESEND_API_KEY trong file .env!' };
-  }
-
   if (!recipientEmail || !recipientEmail.includes('@')) {
     return { success: false, error: 'Địa chỉ email người nhận không hợp lệ!' };
   }
@@ -233,32 +222,9 @@ export const sendWelcomeEmail = async ({ recipientEmail, displayName = '' }) => 
 </body>
 </html>`;
 
-  try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: RESEND_FROM_EMAIL,
-        to: [recipientEmail],
-        subject: '🎉 Cảm ơn bạn đã đăng ký tài khoản tại fuhrerscheinvide.site',
-        html: emailHtml,
-      }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      const errMsg = data.message || data.error?.message || JSON.stringify(data);
-      console.error('[Resend Welcome Email Error]', data);
-      return { success: false, error: errMsg };
-    }
-
-    console.log('[Resend Welcome Email Success]', data);
-    return { success: true, data };
-  } catch (err) {
-    console.error('[Resend Welcome Email Network Error]', err);
-    return { success: false, error: err.message };
-  }
+  return await dispatchResendEmail({
+    to: recipientEmail,
+    subject: '🎉 Cảm ơn bạn đã đăng ký tài khoản tại fuhrerscheinvide.site',
+    html: emailHtml
+  });
 };
