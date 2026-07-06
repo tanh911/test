@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { Shield, Users, Trash2, Search, RefreshCw, Ban, CheckCircle, Eye, X, AlertTriangle, BarChart2, BookOpen, Award, Gamepad2, ToggleLeft, ToggleRight, Mail, Send, Loader2 } from 'lucide-react';
-import { sendCustomEmailToUser } from '../services/emailService';
+import { sendCustomEmailToUser, sendWelcomeEmail } from '../services/emailService';
 
 const ADMIN_EMAIL = 'bossfc69@gmail.com';
 
@@ -22,12 +22,48 @@ export function AdminDashboard({ user, onNavigate }) {
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [sendingEmail, setSendingEmail] = useState(false);
+  const [sendingBroadcast, setSendingBroadcast] = useState(false);
 
   const isAdmin = user?.email === ADMIN_EMAIL;
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
     setTimeout(() => setToast(null), 3000);
+  };
+
+  const handleSendWelcomeToAllUsers = async () => {
+    const validUsers = users.filter(u => u.email && u.email.includes('@'));
+    if (validUsers.length === 0) {
+      showToast('Không tìm thấy người dùng nào có địa chỉ email hợp lệ!', 'error');
+      return;
+    }
+
+    if (!window.confirm(`Xác nhận gửi Email chào mừng (fuhrerscheinvide.site) tới TẤT CẢ ${validUsers.length} người dùng đã đăng ký?`)) {
+      return;
+    }
+
+    setSendingBroadcast(true);
+    let successCount = 0;
+    let failCount = 0;
+
+    for (const u of validUsers) {
+      try {
+        const res = await sendWelcomeEmail({
+          recipientEmail: u.email.trim(),
+          displayName: u.displayName || ''
+        });
+        if (res.success) {
+          successCount++;
+        } else {
+          failCount++;
+        }
+      } catch (err) {
+        failCount++;
+      }
+    }
+
+    setSendingBroadcast(false);
+    showToast(`🎉 Đã gửi thành công ${successCount}/${validUsers.length} email chào mừng!${failCount > 0 ? ` (${failCount} thất bại)` : ''}`);
   };
 
   const handleOpenEmailModal = (targetUser = null) => {
@@ -214,9 +250,13 @@ export function AdminDashboard({ user, onNavigate }) {
               <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', margin: 0 }}>Quản lý người dùng hệ thống</p>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '10px' }}>
+          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button onClick={handleSendWelcomeToAllUsers} disabled={sendingBroadcast} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: 'white', fontWeight: '700', cursor: sendingBroadcast ? 'not-allowed' : 'pointer', fontSize: '14px', boxShadow: '0 4px 15px rgba(16,185,129,0.4)', opacity: sendingBroadcast ? 0.7 : 1 }}>
+              {sendingBroadcast ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Mail size={16} />}
+              {sendingBroadcast ? 'Đang gửi...' : `Gửi Mail Chào Mừng Tất Cả (${users.filter(u => u.email && u.email.includes('@')).length})`}
+            </button>
             <button onClick={() => handleOpenEmailModal(null)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', background: 'linear-gradient(135deg, #3b82f6, #2563eb)', border: 'none', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 15px rgba(59,130,246,0.4)' }}>
-              <Mail size={16} /> Gửi Email
+              <Mail size={16} /> Soạn Email
             </button>
             <button onClick={fetchUsers} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontWeight: '600', cursor: 'pointer', fontSize: '14px', backdropFilter: 'blur(10px)' }}>
               <RefreshCw size={16} /> Làm mới
