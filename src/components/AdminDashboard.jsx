@@ -28,7 +28,7 @@ export function AdminDashboard({ user, onNavigate }) {
 
   const showToast = (msg, type = 'success') => {
     setToast({ msg, type });
-    setTimeout(() => setToast(null), 3000);
+    setTimeout(() => setToast(null), type === 'error' ? 8000 : 3500);
   };
 
   const handleSendWelcomeToAllUsers = async () => {
@@ -69,7 +69,11 @@ export function AdminDashboard({ user, onNavigate }) {
     if (successCount > 0) {
       showToast(`🎉 Đã gửi thành công ${successCount}/${validUsers.length} email chào mừng!${failCount > 0 ? ` (${failCount} thất bại)` : ''}`);
     } else {
-      showToast(`❌ Gửi thất bại: ${lastError || 'Vui lòng kiểm tra VITE_RESEND_API_KEY'}`, 'error');
+      let friendlyErr = lastError;
+      if (lastError.includes('only send to your own email') || lastError.includes('validation_error')) {
+        friendlyErr = 'Resend chặn gửi email: Bạn chưa Xác minh Tên miền (Domain Verification). Tài khoản Resend dùng thử chỉ được gửi đến email đăng ký. Hãy thêm & verify domain fuhrerscheinvide.site tại https://resend.com/domains';
+      }
+      showToast(`❌ Gửi thất bại: ${friendlyErr}`, 'error');
     }
   };
 
