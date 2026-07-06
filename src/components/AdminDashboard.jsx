@@ -45,6 +45,7 @@ export function AdminDashboard({ user, onNavigate }) {
     setSendingBroadcast(true);
     let successCount = 0;
     let failCount = 0;
+    let lastError = '';
 
     for (const u of validUsers) {
       try {
@@ -56,14 +57,20 @@ export function AdminDashboard({ user, onNavigate }) {
           successCount++;
         } else {
           failCount++;
+          if (res.error) lastError = res.error;
         }
       } catch (err) {
         failCount++;
+        lastError = err.message;
       }
     }
 
     setSendingBroadcast(false);
-    showToast(`🎉 Đã gửi thành công ${successCount}/${validUsers.length} email chào mừng!${failCount > 0 ? ` (${failCount} thất bại)` : ''}`);
+    if (successCount > 0) {
+      showToast(`🎉 Đã gửi thành công ${successCount}/${validUsers.length} email chào mừng!${failCount > 0 ? ` (${failCount} thất bại)` : ''}`);
+    } else {
+      showToast(`❌ Gửi thất bại: ${lastError || 'Vui lòng kiểm tra VITE_RESEND_API_KEY'}`, 'error');
+    }
   };
 
   const handleOpenEmailModal = (targetUser = null) => {

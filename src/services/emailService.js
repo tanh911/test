@@ -7,6 +7,7 @@ const RESEND_API_KEY = import.meta.env.VITE_RESEND_API_KEY || '';
 const NOTIFICATION_RECIPIENTS = import.meta.env.VITE_NOTIFICATION_EMAILS
   ? import.meta.env.VITE_NOTIFICATION_EMAILS.split(',').map(e => e.trim())
   : [];
+const RESEND_FROM_EMAIL = import.meta.env.VITE_RESEND_FROM_EMAIL || 'Führerschein App <onboarding@resend.dev>';
 
 /**
  * Gửi email thông báo đăng nhập
@@ -141,7 +142,7 @@ ${messageBody}
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Führerschein App <onboarding@resend.dev>',
+        from: RESEND_FROM_EMAIL,
         to: [recipientEmail],
         subject: emailSubject,
         html: emailHtml,
@@ -150,7 +151,9 @@ ${messageBody}
 
     const data = await response.json();
     if (!response.ok) {
-      return { success: false, error: data.message || 'Lỗi gửi email từ Resend' };
+      const errMsg = data.message || data.error?.message || JSON.stringify(data);
+      console.error('[Resend Custom Email Error]', data);
+      return { success: false, error: errMsg };
     }
     return { success: true, data };
   } catch (err) {
@@ -167,7 +170,7 @@ ${messageBody}
 export const sendWelcomeEmail = async ({ recipientEmail, displayName = '' }) => {
   if (!RESEND_API_KEY) {
     console.warn('[Resend Email] Chưa cấu hình VITE_RESEND_API_KEY trong file .env.');
-    return { success: false, reason: 'missing_api_key' };
+    return { success: false, error: 'Chưa cấu hình VITE_RESEND_API_KEY trong file .env!' };
   }
 
   if (!recipientEmail || !recipientEmail.includes('@')) {
@@ -238,7 +241,7 @@ export const sendWelcomeEmail = async ({ recipientEmail, displayName = '' }) => 
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: 'Führerschein App <onboarding@resend.dev>',
+        from: RESEND_FROM_EMAIL,
         to: [recipientEmail],
         subject: '🎉 Cảm ơn bạn đã đăng ký tài khoản tại fuhrerscheinvide.site',
         html: emailHtml,
@@ -247,8 +250,9 @@ export const sendWelcomeEmail = async ({ recipientEmail, displayName = '' }) => 
 
     const data = await response.json();
     if (!response.ok) {
+      const errMsg = data.message || data.error?.message || JSON.stringify(data);
       console.error('[Resend Welcome Email Error]', data);
-      return { success: false, error: data };
+      return { success: false, error: errMsg };
     }
 
     console.log('[Resend Welcome Email Success]', data);
