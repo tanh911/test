@@ -1,5 +1,11 @@
+function getCleanEmail(str) {
+  if (!str) return 'no-reply@fuhrerscheinvide.site';
+  const match = str.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+  return match ? match[1] : 'no-reply@fuhrerscheinvide.site';
+}
+
 export default async function handler(req, res) {
-  // Allow CORS for API route if needed
+  // Allow CORS for API route
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
@@ -21,7 +27,8 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Chưa cấu hình RESEND_API_KEY trên server!' });
     }
 
-    const fromAddress = (from && from.includes('@')) ? from : (process.env.VITE_RESEND_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'no-reply@fuhrerscheinvide.site');
+    const rawFrom = from || process.env.VITE_RESEND_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'no-reply@fuhrerscheinvide.site';
+    const cleanFrom = getCleanEmail(rawFrom);
 
     const resendRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',
@@ -30,7 +37,7 @@ export default async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        from: fromAddress,
+        from: cleanFrom,
         to: Array.isArray(to) ? to : [to],
         subject,
         html,
@@ -45,6 +52,6 @@ export default async function handler(req, res) {
 
     return res.status(200).json(data);
   } catch (err) {
-    return res.status(500).json({ error: err.message });
+    return res.status(500).json({ error: err.message, message: err.message });
   }
 }

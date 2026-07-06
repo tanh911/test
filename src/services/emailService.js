@@ -9,16 +9,23 @@ const NOTIFICATION_RECIPIENTS = import.meta.env.VITE_NOTIFICATION_EMAILS
   : [];
 const RESEND_FROM_EMAIL = import.meta.env.VITE_RESEND_FROM_EMAIL || 'no-reply@fuhrerscheinvide.site';
 
+function getCleanEmail(str) {
+  if (!str) return 'no-reply@fuhrerscheinvide.site';
+  const match = str.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+  return match ? match[1] : 'no-reply@fuhrerscheinvide.site';
+}
+
 /**
  * Dispatch email via internal API /api/send-email first (to avoid browser CORS & adblocker NetworkError),
  * falling back to direct Resend fetch if the API endpoint is unavailable.
  */
 async function dispatchResendEmail({ to, subject, html, from }) {
+  const cleanFrom = getCleanEmail(from || RESEND_FROM_EMAIL);
   const payload = {
     to: Array.isArray(to) ? to : [to],
     subject,
     html,
-    from: from || RESEND_FROM_EMAIL
+    from: cleanFrom
   };
 
   // 1. Thử gửi qua API Route nội bộ /api/send-email (Tránh hoàn toàn CORS & Adblocker trên trình duyệt)

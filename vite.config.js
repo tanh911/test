@@ -20,7 +20,9 @@ function apiServerPlugin() {
                 return;
               }
 
-              const fromAddress = (from && from.includes('@')) ? from : (process.env.VITE_RESEND_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'no-reply@fuhrerscheinvide.site');
+              const rawFrom = from || process.env.VITE_RESEND_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'no-reply@fuhrerscheinvide.site';
+              const matchEmail = rawFrom.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+              const fromAddress = matchEmail ? matchEmail[1] : 'no-reply@fuhrerscheinvide.site';
 
               const resendRes = await fetch('https://api.resend.com/emails', {
                 method: 'POST',
