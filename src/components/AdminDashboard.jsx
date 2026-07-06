@@ -70,10 +70,11 @@ export function AdminDashboard({ user, onNavigate }) {
       showToast(`🎉 Đã gửi thành công ${successCount}/${validUsers.length} email chào mừng!${failCount > 0 ? ` (${failCount} thất bại)` : ''}`);
     } else {
       let friendlyErr = lastError;
-      if (lastError.includes('only send to your own email') || lastError.includes('validation_error')) {
-        friendlyErr = 'Resend chặn gửi email: Bạn chưa Xác minh Tên miền (Domain Verification). Tài khoản Resend dùng thử chỉ được gửi đến email đăng ký. Hãy thêm & verify domain fuhrerscheinvide.site tại https://resend.com/domains';
+      if (lastError.includes('only send to your own email')) {
+        friendlyErr = 'Resend chưa cho phép gửi cho người khác: Bạn cần kiểm tra xem Domain fuhrerscheinvide.site trên resend.com/domains đã hiển thị trạng thái "Verified" (màu xanh) hay chưa.';
       }
       showToast(`❌ Gửi thất bại: ${friendlyErr}`, 'error');
+      alert(`[Chi tiết lỗi từ Resend API]\n${lastError || 'Không nhận được phản hồi từ server'}`);
     }
   };
 
