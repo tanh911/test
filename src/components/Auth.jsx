@@ -351,81 +351,47 @@ export const Auth = ({ onLogin, onCancel }) => {
       </div>
 
       {/* Social Buttons */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '10px', marginBottom: '14px' }}>
-        {[
-          {
-            Icon: GoogleIcon, label: 'Google', onClick: async () => {
-              setError('');
-              setLoading(true);
-              try {
-                const result = await signInWithGoogle();
-                const user = result.user;
-                sendLoginNotification({
-                  displayName: user.displayName || 'Google User',
-                  email: user.email || '',
-                  loginMethod: 'Google'
-                });
-                onLogin({
-                  uid: user.uid,
-                  username: `google_${user.uid}`,
-                  displayName: user.displayName || 'Google User',
-                  email: user.email || '',
-                  apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: false
-                });
-              } catch (err) {
-                console.error(err);
-                const silent = ['auth/popup-closed-by-user', 'auth/cancelled-popup-request', 'auth/popup-blocked'];
-                if (!silent.includes(err.code)) {
-                  setError(`Lỗi đăng nhập Google: ${err.message}`);
-                }
-              } finally {
-                setLoading(false);
-              }
+      <div style={{ marginBottom: '14px' }}>
+        <button type="button" onClick={async () => {
+          setError('');
+          setLoading(true);
+          try {
+            const result = await signInWithGoogle();
+            const user = result.user;
+            sendLoginNotification({
+              displayName: user.displayName || 'Google User',
+              email: user.email || '',
+              loginMethod: 'Google'
+            });
+            onLogin({
+              uid: user.uid,
+              username: `google_${user.uid}`,
+              displayName: user.displayName || 'Google User',
+              email: user.email || '',
+              apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: false
+            });
+          } catch (err) {
+            console.error(err);
+            const silent = ['auth/popup-closed-by-user', 'auth/cancelled-popup-request', 'auth/popup-blocked'];
+            if (!silent.includes(err.code)) {
+              setError(`Lỗi đăng nhập Google: ${err.message}`);
             }
-          },
-          {
-            Icon: FacebookIcon, label: 'Facebook', onClick: async () => {
-              setError('');
-              try {
-                const result = await signInWithFacebook();
-                const user = result.user;
-                sendLoginNotification({
-                  displayName: user.displayName || 'Facebook User',
-                  email: user.email || '',
-                  loginMethod: 'Facebook'
-                });
-                onLogin({
-                  uid: user.uid,
-                  username: `fb_${user.uid}`,
-                  displayName: user.displayName || 'Facebook User',
-                  email: user.email || '',
-                  apiKey: '', savedQuestions: [], examHistory: [], progress: {}
-                });
-              } catch (err) {
-                console.error(err);
-                if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
-                  // Do nothing, just let them cancel silently
-                } else {
-                  setError(`Lỗi: ${err.message}`);
-                }
-              }
-            }
-          },
-        ].map(({ Icon, label, onClick }) => (
-          <button key={label} type="button" onClick={onClick}
-            style={{
-              display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-              padding: '10px', borderRadius: '8px',
-              background: 'white', border: '1.5px solid #e5e7eb',
-              fontSize: 'calc(13px * var(--text-scale, 1))', fontWeight: '700', color: '#374151',
-              cursor: 'pointer', transition: 'border-color 0.15s, background 0.15s',
-            }}
-            onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
-            onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-          >
-            <Icon /> {label}
-          </button>
-        ))}
+          } finally {
+            setLoading(false);
+          }
+        }}
+        style={{
+          display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+          padding: '10px', borderRadius: '8px', width: '100%',
+          background: 'white', border: '1.5px solid #e5e7eb',
+          fontSize: 'calc(13px * var(--text-scale, 1))', fontWeight: '700', color: '#374151',
+          cursor: 'pointer', transition: 'all 0.15s',
+        }}
+        onMouseEnter={(e) => e.currentTarget.style.borderColor = '#9ca3af'}
+        onMouseLeave={(e) => e.currentTarget.style.borderColor = '#e5e7eb'}
+        >
+          <GoogleIcon /> Google
+        </button>
       </div>
 
       {/* Guest & Cancel */}

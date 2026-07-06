@@ -7,7 +7,7 @@ const RESEND_API_KEY = import.meta.env.VITE_RESEND_API_KEY || '';
 const NOTIFICATION_RECIPIENTS = import.meta.env.VITE_NOTIFICATION_EMAILS
   ? import.meta.env.VITE_NOTIFICATION_EMAILS.split(',').map(e => e.trim())
   : [];
-const RESEND_FROM_EMAIL = import.meta.env.VITE_RESEND_FROM_EMAIL || 'Fuhrerschein Viet-Duc <onboarding@resend.dev>';
+const RESEND_FROM_EMAIL = import.meta.env.VITE_RESEND_FROM_EMAIL || 'onboarding@resend.dev';
 
 /**
  * Dispatch email via internal API /api/send-email first (to avoid browser CORS & adblocker NetworkError),
