@@ -21,7 +21,7 @@ export default async function handler(req, res) {
       return res.status(400).json({ error: 'Chưa cấu hình RESEND_API_KEY trên server!' });
     }
 
-    const fromAddress = from || process.env.VITE_RESEND_FROM_EMAIL || 'Führerschein App <onboarding@resend.dev>';
+    const fromAddress = from || process.env.VITE_RESEND_FROM_EMAIL || 'Fuhrerschein Viet-Duc <onboarding@resend.dev>';
 
     const resendRes = await fetch('https://api.resend.com/emails', {
       method: 'POST',

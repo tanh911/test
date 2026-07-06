@@ -20,7 +20,7 @@ function apiServerPlugin() {
                 return;
               }
 
-              const fromAddress = from || process.env.VITE_RESEND_FROM_EMAIL || 'Führerschein App <onboarding@resend.dev>';
+              const fromAddress = from || process.env.VITE_RESEND_FROM_EMAIL || 'Fuhrerschein Viet-Duc <onboarding@resend.dev>';
 
               const resendRes = await fetch('https://api.resend.com/emails', {
                 method: 'POST',
