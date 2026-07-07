@@ -193,28 +193,192 @@ const CockpitOverlay = ({ speed, rpm, steer, isDriving, onToggle, activeScenario
 );
 
 // ── 3D World Builder ─────────────────────────────────────────────────────────
+// Helper to generate dynamic canvas texture for grass terrain
+function createGrassTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.fillStyle = '#3f7833';
+  ctx.fillRect(0, 0, 256, 256);
+  
+  for (let i = 0; i < 300; i++) {
+    ctx.fillStyle = 'rgba(45, 90, 35, 0.3)';
+    ctx.beginPath();
+    ctx.arc(Math.random() * 256, Math.random() * 256, 2 + Math.random() * 5, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  for (let i = 0; i < 300; i++) {
+    ctx.fillStyle = 'rgba(85, 155, 65, 0.25)';
+    ctx.beginPath();
+    ctx.arc(Math.random() * 256, Math.random() * 256, 1 + Math.random() * 3, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  for (let i = 0; i < 1500; i++) {
+    ctx.fillStyle = Math.random() > 0.5 ? 'rgba(255, 255, 255, 0.08)' : 'rgba(0, 0, 0, 0.1)';
+    ctx.fillRect(Math.random() * 256, Math.random() * 256, 1, 1);
+  }
+  
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(120, 900);
+  return tex;
+}
+
+// Helper to generate dynamic canvas texture for asphalt roads
+function createRoadTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 512;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.fillStyle = '#2c2c2c';
+  ctx.fillRect(0, 0, 512, 512);
+  
+  for (let i = 0; i < 15000; i++) {
+    ctx.fillStyle = Math.random() > 0.5 ? '#383838' : '#222222';
+    ctx.fillRect(Math.random() * 512, Math.random() * 512, 1 + Math.random(), 1 + Math.random());
+  }
+  for (let i = 0; i < 60; i++) {
+    const x = Math.random() * 512;
+    const y = Math.random() * 512;
+    const grad = ctx.createRadialGradient(x, y, 0, x, y, 10 + Math.random() * 25);
+    grad.addColorStop(0, 'rgba(0,0,0,0.18)');
+    grad.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.fillStyle = grad;
+    ctx.beginPath();
+    ctx.arc(x, y, 35, 0, Math.PI * 2);
+    ctx.fill();
+  }
+  
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(2, 500);
+  return tex;
+}
+
+// Helper to generate dynamic canvas texture for concrete sidewalks
+function createSidewalkTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.fillStyle = '#9e998d';
+  ctx.fillRect(0, 0, 256, 256);
+  
+  for (let i = 0; i < 4000; i++) {
+    ctx.fillStyle = Math.random() > 0.5 ? '#b0ab9e' : '#888478';
+    ctx.fillRect(Math.random() * 256, Math.random() * 256, 1, 1);
+  }
+  
+  ctx.strokeStyle = 'rgba(60, 58, 54, 0.35)';
+  ctx.lineWidth = 3;
+  for (let y = 0; y <= 256; y += 64) {
+    ctx.beginPath();
+    ctx.moveTo(0, y);
+    ctx.lineTo(256, y);
+    ctx.stroke();
+  }
+  let row = 0;
+  for (let y = 0; y < 256; y += 64) {
+    const offset = (row % 2) * 64;
+    for (let x = offset; x <= 256 + 64; x += 128) {
+      ctx.beginPath();
+      ctx.moveTo(x % 256, y);
+      ctx.lineTo(x % 256, y + 64);
+      ctx.stroke();
+    }
+    row++;
+  }
+  
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(1, 500);
+  return tex;
+}
+
+// Helper to generate dynamic building window facade texture
+function createBuildingTexture(baseHexColor) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext('2d');
+  
+  const colorStr = '#' + baseHexColor.toString(16).padStart(6, '0');
+  ctx.fillStyle = colorStr;
+  ctx.fillRect(0, 0, 256, 256);
+  
+  ctx.fillStyle = 'rgba(0, 0, 0, 0.05)';
+  for (let x = 0; x < 256; x += 32) {
+    ctx.fillRect(x, 0, 2, 256);
+  }
+  
+  const winWidth = 14;
+  const winHeight = 24;
+  const gapX = 18;
+  const gapY = 24;
+  
+  for (let y = gapY; y < 256 - winHeight; y += winHeight + gapY) {
+    for (let x = gapX; x < 256 - winWidth; x += winWidth + gapX) {
+      if (Math.random() > 0.15) {
+        ctx.fillStyle = Math.random() > 0.45 ? '#fff4cc' : '#eaf4ff';
+        ctx.fillRect(x, y, winWidth, winHeight);
+        ctx.strokeStyle = 'rgba(0,0,0,0.35)';
+        ctx.lineWidth = 1.5;
+        ctx.strokeRect(x, y, winWidth, winHeight);
+      } else {
+        ctx.fillStyle = '#1c212c';
+        ctx.fillRect(x, y, winWidth, winHeight);
+      }
+    }
+  }
+  
+  const tex = new THREE.CanvasTexture(canvas);
+  tex.wrapS = THREE.RepeatWrapping;
+  tex.wrapT = THREE.RepeatWrapping;
+  tex.repeat.set(3, 2);
+  return tex;
+}
+
+// ── 3D World Builder ─────────────────────────────────────────────────────────
 function buildWorld(scene) {
-  const stdM = (c, r = 0.8) => new THREE.MeshStandardMaterial({ color: c, roughness: r });
+  const grassTex = createGrassTexture();
+  const roadTex = createRoadTexture();
+  const swTex = createSidewalkTexture();
+
+  const roadMat = new THREE.MeshStandardMaterial({ map: roadTex, roughness: 0.95 });
+  const grassMat = new THREE.MeshStandardMaterial({ map: grassTex, roughness: 1.0 });
+  const swMat = new THREE.MeshStandardMaterial({ map: swTex, roughness: 0.9 });
 
   // Road
-  const road = new THREE.Mesh(new THREE.PlaneGeometry(12, 3000), stdM(0x444444));
+  const road = new THREE.Mesh(new THREE.PlaneGeometry(12, 3000), roadMat);
   road.rotation.x = -Math.PI / 2; road.position.z = -1000; scene.add(road);
 
   // Grass
-  const grass = new THREE.Mesh(new THREE.PlaneGeometry(400, 3000), stdM(0x3a7a2a, 1));
+  const grass = new THREE.Mesh(new THREE.PlaneGeometry(400, 3000), grassMat);
   grass.rotation.x = -Math.PI / 2; grass.position.set(0, -0.01, -1000); scene.add(grass);
 
   // Sidewalk strips
   [-7, 7].forEach(x => {
-    const sw = new THREE.Mesh(new THREE.PlaneGeometry(3, 3000), stdM(0x999988, 0.9));
+    const sw = new THREE.Mesh(new THREE.PlaneGeometry(3, 3000), swMat);
     sw.rotation.x = -Math.PI / 2; sw.position.set(x, 0.02, -1000); scene.add(sw);
   });
 
   // Scenery group (loops)
   const scenery = new THREE.Group();
   const LOOP = 100, STEP = 10;
-  const trunkM = stdM(0x5c3d1e, 1), leafM = stdM(0x2d6b1e, 0.9);
-  const bMats = [stdM(0xc8b89a), stdM(0xa05030, 0.9), stdM(0xd8d0b8, 0.7)];
+  const trunkM = new THREE.MeshStandardMaterial({ color: 0x5c3d1e, roughness: 1.0 });
+  const leafM1 = new THREE.MeshStandardMaterial({ color: 0x1f5617, roughness: 0.9 });
+  const leafM2 = new THREE.MeshStandardMaterial({ color: 0x2e6d24, roughness: 0.9 });
+  const leafM3 = new THREE.MeshStandardMaterial({ color: 0x144010, roughness: 0.9 });
+
+  const bColors = [0xc8b89a, 0xa05030, 0xd8d0b8];
+  const bMats = bColors.map(col => new THREE.MeshStandardMaterial({ map: createBuildingTexture(col), roughness: 0.7 }));
 
   for (let i = 0; i < LOOP; i++) {
     const z = -i * STEP;
@@ -225,21 +389,29 @@ function buildWorld(scene) {
     });
     // Curbs
     [-5.5, 5.5].forEach(x => {
-      const c = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.1, STEP), stdM(0xbbbbaa, 0.95));
+      const c = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.1, STEP), new THREE.MeshStandardMaterial({ color: 0xbbbbaa, roughness: 0.95 }));
       c.position.set(x, 0.05, z); scenery.add(c);
     });
-    // Trees every 20m
+    // Volumetric low-poly trees every 20m
     if (i % 2 === 0) {
       [-9, 9].forEach(x => {
         const g = new THREE.Group();
-        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.2, 0.3, 2.5, 6), trunkM);
+        const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.25, 2.5, 6), trunkM);
         trunk.position.y = 1.25;
-        const leaf = new THREE.Mesh(new THREE.SphereGeometry(1.7, 7, 6), leafM);
-        leaf.position.y = 3.2;
-        g.add(trunk); g.add(leaf); g.position.set(x, 0, z); scenery.add(g);
+        
+        const f1 = new THREE.Mesh(new THREE.SphereGeometry(1.5, 8, 8), leafM1);
+        f1.position.y = 3.0;
+        const f2 = new THREE.Mesh(new THREE.SphereGeometry(1.1, 6, 6), leafM2);
+        f2.position.set(0.4, 3.6, -0.2);
+        const f3 = new THREE.Mesh(new THREE.SphereGeometry(0.9, 6, 6), leafM3);
+        f3.position.set(-0.3, 3.5, 0.3);
+        
+        g.add(trunk); g.add(f1); g.add(f2); g.add(f3);
+        g.position.set(x, 0, z);
+        scenery.add(g);
       });
     }
-    // Buildings every 30m
+    // Buildings with window textures every 30m
     if (i % 3 === 0) {
       const h = 6 + (i % 6) * 1.5;
       [-16, 16].forEach(x => {
@@ -510,12 +682,13 @@ export const DrivingSimulation = () => {
         if (!navigator.gpu) throw new Error('WebGPU not supported. Use Chrome 113+ or Edge 113+.');
         clock = new THREE.Clock();
         const scene = new THREE.Scene();
-        scene.background = new THREE.Color(0x87ceeb);
-        scene.fog = new THREE.Fog(0x87ceeb, 60, 320);
+        const skyColor = new THREE.Color(0xa0c0d8);
+        scene.background = skyColor;
+        scene.fog = new THREE.FogExp2(skyColor, 0.005);
 
-        scene.add(new THREE.AmbientLight(0xffffff, 1.3));
-        const sun = new THREE.DirectionalLight(0xfff5e0, 2);
-        sun.position.set(30, 80, 50); scene.add(sun);
+        scene.add(new THREE.AmbientLight(0xd8e8f8, 1.1));
+        const sun = new THREE.DirectionalLight(0xfff5e0, 2.5);
+        sun.position.set(35, 90, 50); scene.add(sun);
 
         const camera = new THREE.PerspectiveCamera(68, containerRef.current.clientWidth / containerRef.current.clientHeight, 0.1, 700);
         camera.position.set(0, 1.3, 0);
