@@ -396,11 +396,9 @@ function buildWorld(scene) {
 
   for (let i = 0; i < LOOP; i++) {
     const z = -i * STEP;
-    // Lane dashes
-    [-2, 2].forEach(x => {
-      const d = new THREE.Mesh(new THREE.PlaneGeometry(0.15, 3), new THREE.MeshBasicMaterial({ color: 0xffffff }));
-      d.rotation.x = -Math.PI / 2; d.position.set(x, 0.03, z); scenery.add(d);
-    });
+    // Lane dashes (centered dividing line)
+    const d = new THREE.Mesh(new THREE.PlaneGeometry(0.15, 3), new THREE.MeshBasicMaterial({ color: 0xffffff }));
+    d.rotation.x = -Math.PI / 2; d.position.set(0, 0.03, z); scenery.add(d);
     // Curbs
     [-5.5, 5.5].forEach(x => {
       const c = new THREE.Mesh(new THREE.BoxGeometry(0.25, 0.1, STEP), new THREE.MeshStandardMaterial({ color: 0xbbbbaa, roughness: 0.95 }));
@@ -729,7 +727,7 @@ export const DrivingSimulation = () => {
         refs.current._scenery = scenery;
         refs.current._LOOP = 2000;
 
-        let carStartX = 0, carStartZ = 0;
+        let carStartX = 2.2, carStartZ = 0;
         camera.position.set(carStartX, 1.3, carStartZ);
         camera.lookAt(carStartX, 1.3, carStartZ - 50);
         setLoadingMsg(null);
@@ -835,13 +833,13 @@ export const DrivingSimulation = () => {
           const r = refs.current;
           const keys = r.keys;
 
-          // Speed
+          // Speed physics (standard training car: 0-100 in ~10s, realistic braking/friction)
           if (r.isDriving) {
-            if (keys['w'] || keys['ArrowUp']) r.speed = Math.min(r.speed + 50 * dt, 150);
-            else if (keys['s'] || keys['ArrowDown']) r.speed = Math.max(r.speed - 80 * dt, 0);
-            else r.speed = Math.max(r.speed - 20 * dt, 0);
+            if (keys['w'] || keys['ArrowUp']) r.speed = Math.min(r.speed + 14 * dt, 130);
+            else if (keys['s'] || keys['ArrowDown']) r.speed = Math.max(r.speed - 45 * dt, 0);
+            else r.speed = Math.max(r.speed - 5 * dt, 0);
           } else {
-            r.speed = Math.max(r.speed - 40 * dt, 0);
+            r.speed = Math.max(r.speed - 25 * dt, 0);
           }
           // Steer — update heading angle based on input
           const MAX_TURN_RATE = 1.2; // rad/s at full steer
@@ -866,11 +864,11 @@ export const DrivingSimulation = () => {
           const dirZ = -Math.cos(r._yaw); // -Z is forward
 
           if (r._scenery) {
-            // Fallback procedural: scroll scenery, steer offset only
+            // Fallback procedural: scroll scenery, steer offset only, camera aligned to right lane (2.2)
             r._scenery.position.z += mps * dt;
             if (r._scenery.position.z > r._LOOP) r._scenery.position.z -= r._LOOP;
-            camera.position.x = r.steer * 0.3;
-            camera.lookAt(r.steer * 0.3, 1.3, -50);
+            camera.position.x = 2.2 + r.steer * 0.3;
+            camera.lookAt(2.2 + r.steer * 0.3, 1.3, -50);
           } else {
             // OSM mode: move car position along heading direction
             r._carX = (r._carX || 0) + dirX * mps * dt;
@@ -970,11 +968,18 @@ export const DrivingSimulation = () => {
             // Respawn if too far behind/ahead
             if (relFwd < -120 || relFwd > 250 || dist > 300) {
               const spawnDist = (Math.random() > 0.3 ? 180 : -100) + Math.random() * 60;
-              const laneOffset = car.isSameDir ? 2.2 : -2.2;
-              
-              car.yaw = (r._yaw || 0) + (car.isSameDir ? 0 : Math.PI);
-              car.x = (r._carX || 0) + fwdX * spawnDist + rightX * laneOffset;
-              car.z = (r._carZ || 0) + fwdZ * spawnDist + rightZ * laneOffset;
+              if (r._scenery) {
+                // Procedural practice mode: lock to absolute lanes
+                car.yaw = car.isSameDir ? 0 : Math.PI;
+                car.x = car.isSameDir ? 2.2 : -2.2;
+                car.z = (r._carZ || 0) - spawnDist;
+              } else {
+                // OSM mode: relative spawning
+                const laneOffset = car.isSameDir ? 2.2 : -2.2;
+                car.yaw = (r._yaw || 0) + (car.isSameDir ? 0 : Math.PI);
+                car.x = (r._carX || 0) + fwdX * spawnDist + rightX * laneOffset;
+                car.z = (r._carZ || 0) + fwdZ * spawnDist + rightZ * laneOffset;
+              }
             }
 
             // Matrices
