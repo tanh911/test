@@ -604,7 +604,7 @@ export const DrivingSimulation = () => {
         const aiCars = Array.from({ length: TRAFFIC_COUNT }, (_, i) => {
           const isSameDir = Math.random() > 0.5;
           return {
-            x: carStartX + (isSameDir ? -2.2 : 2.2),
+            x: carStartX + (isSameDir ? 2.2 : -2.2), // Same dir on right lane (2.2), opposite on left lane (-2.2)
             z: carStartZ - 20 - Math.random() * 300,
             speed: 25 + Math.random() * 30, // absolute km/h
             isSameDir,
@@ -733,6 +733,11 @@ export const DrivingSimulation = () => {
             car.x += Math.sin(car.yaw) * carMPS * dt;
             car.z -= Math.cos(car.yaw) * carMPS * dt;
             
+            // Scroll traffic with the road in procedural mode to stay locked to the lanes
+            if (r._scenery) {
+              car.z += mps * dt;
+            }
+            
             // Distance check relative to player
             const dx = car.x - (r._carX || 0);
             const dz = car.z - (r._carZ || 0);
@@ -749,7 +754,7 @@ export const DrivingSimulation = () => {
             // Respawn if too far behind/ahead
             if (relFwd < -120 || relFwd > 250 || dist > 300) {
               const spawnDist = (Math.random() > 0.3 ? 180 : -100) + Math.random() * 60;
-              const laneOffset = car.isSameDir ? -2.2 : 2.2;
+              const laneOffset = car.isSameDir ? 2.2 : -2.2;
               
               car.yaw = (r._yaw || 0) + (car.isSameDir ? 0 : Math.PI);
               car.x = (r._carX || 0) + fwdX * spawnDist + rightX * laneOffset;
