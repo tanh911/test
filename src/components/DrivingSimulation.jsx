@@ -469,17 +469,20 @@ export const DrivingSimulation = () => {
         const rearCam = new THREE.PerspectiveCamera(100, 3.2, 0.1, 300);
         const leftCam = new THREE.PerspectiveCamera(80, 1.75, 0.1, 80);
         const rightCam = new THREE.PerspectiveCamera(80, 1.75, 0.1, 80);
+        let frameCount = 0;
 
         if (rearMirrorRef.current) {
           try {
             mirrorRenderer = new WebGLRenderer({ antialias: false });
             mirrorRenderer.setPixelRatio(1);
             mirrorRenderer.shadowMap.enabled = false;
+            mirrorRenderer.setSize(160, 96); // Fixed size to prevent expensive WebGL buffer reallocations
           } catch (e) { mirrorRenderer = null; }
         }
 
         const animate = () => {
           reqId = requestAnimationFrame(animate);
+          frameCount++;
           const dt = clock.getDelta();
           const r = refs.current;
           const keys = r.keys;
@@ -644,47 +647,34 @@ export const DrivingSimulation = () => {
           frontLightInstances.instanceMatrix.needsUpdate = true;
           rearLightInstances.instanceMatrix.needsUpdate = true;
 
-          // ── Render mirrors via secondary WebGL renderer ───────────────────
+          // ── Render mirrors via secondary WebGL renderer (Staggered & scaled to prevent lag) ──
           if (mirrorRenderer && r._carX !== undefined) {
             const cx = r._carX, cz = r._carZ;
             const dx = Math.sin(r._yaw), dz = -Math.cos(r._yaw);
             const rx = -Math.sin(r._yaw + Math.PI / 2) * 0.4; // driver seat offset
 
-            // Rear mirror: camera behind car, looking back forward
-            const bx = cx - dx * 4, bz = cz - dz * 4;
-            rearCam.position.set(bx + rx, 1.8, bz);
-            rearCam.lookAt(cx + dx * 20 + rx, 1.2, cz + dz * 20); // look forward = what's behind us
+            const mirrorIndex = frameCount % 3;
 
-            // Actually rear mirror should show what's BEHIND = camera looks backward
-            rearCam.position.set(cx + rx, 1.8, cz);
-            rearCam.lookAt(cx - dx * 30 + rx, 1.0, cz - dz * 30);
-
-            if (rearMirrorRef.current) {
-              mirrorRenderer.setSize(rearMirrorRef.current.width, rearMirrorRef.current.height);
+            if (mirrorIndex === 0 && rearMirrorRef.current) {
+              rearCam.position.set(cx + rx, 1.8, cz);
+              rearCam.lookAt(cx - dx * 30 + rx, 1.0, cz - dz * 30);
               mirrorRenderer.render(scene, rearCam);
               const ctx = rearMirrorRef.current.getContext('2d');
-              if (ctx) ctx.drawImage(mirrorRenderer.domElement, 0, 0);
-            }
-
-            // Left mirror: behind-left
-            const perpX = -Math.cos(r._yaw), perpZ = -Math.sin(r._yaw);
-            leftCam.position.set(cx - perpX * 1, 1.4, cz - perpZ * 1);
-            leftCam.lookAt(cx - dx * 20 - perpX * 5, 1.0, cz - dz * 20 - perpZ * 5);
-            if (leftMirrorRef.current) {
-              mirrorRenderer.setSize(leftMirrorRef.current.width, leftMirrorRef.current.height);
+              if (ctx) ctx.drawImage(mirrorRenderer.domElement, 0, 0, rearMirrorRef.current.width, rearMirrorRef.current.height);
+            } else if (mirrorIndex === 1 && leftMirrorRef.current) {
+              const perpX = -Math.cos(r._yaw), perpZ = -Math.sin(r._yaw);
+              leftCam.position.set(cx - perpX * 1, 1.4, cz - perpZ * 1);
+              leftCam.lookAt(cx - dx * 20 - perpX * 5, 1.0, cz - dz * 20 - perpZ * 5);
               mirrorRenderer.render(scene, leftCam);
               const ctx = leftMirrorRef.current.getContext('2d');
-              if (ctx) ctx.drawImage(mirrorRenderer.domElement, 0, 0);
-            }
-
-            // Right mirror: behind-right
-            rightCam.position.set(cx + perpX * 1, 1.4, cz + perpZ * 1);
-            rightCam.lookAt(cx - dx * 20 + perpX * 5, 1.0, cz - dz * 20 + perpZ * 5);
-            if (rightMirrorRef.current) {
-              mirrorRenderer.setSize(rightMirrorRef.current.width, rightMirrorRef.current.height);
+              if (ctx) ctx.drawImage(mirrorRenderer.domElement, 0, 0, leftMirrorRef.current.width, leftMirrorRef.current.height);
+            } else if (mirrorIndex === 2 && rightMirrorRef.current) {
+              const perpX = -Math.cos(r._yaw), perpZ = -Math.sin(r._yaw);
+              rightCam.position.set(cx + perpX * 1, 1.4, cz + perpZ * 1);
+              rightCam.lookAt(cx - dx * 20 + perpX * 5, 1.0, cz - dz * 20 + perpZ * 5);
               mirrorRenderer.render(scene, rightCam);
               const ctx = rightMirrorRef.current.getContext('2d');
-              if (ctx) ctx.drawImage(mirrorRenderer.domElement, 0, 0);
+              if (ctx) ctx.drawImage(mirrorRenderer.domElement, 0, 0, rightMirrorRef.current.width, rightMirrorRef.current.height);
             }
           }
 
