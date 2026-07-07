@@ -12,63 +12,8 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-const seedRandom = (seed) => {
-  let x = Math.sin(seed++) * 10000;
-  return x - Math.floor(x);
-};
-
-const getQuestionTheme = (q) => {
-  return (typeof q.id === 'string' && q.id.startsWith('2.')) ? 2 : 1;
-};
-
-const getBogenQuestions = (bogenId) => {
-  const pools = { 1: [], 2: [] };
-  questions.forEach(q => {
-    const theme = getQuestionTheme(q);
-    pools[theme].push(q);
-  });
-
-  const targets = {
-    1: 20, // 20 Grundstoff
-    2: 10  // 10 Zusatzstoff (Klasse B)
-  };
-
-  let selected = [];
-  let seed = bogenId * 100; // unique seed for this Bogen
-
-  Object.keys(targets).forEach(themeId => {
-    const pool = pools[themeId];
-    const targetCount = targets[themeId];
-    if (pool && pool.length > 0) {
-      // Deterministic shuffle using seed
-      const shuffledPool = [...pool];
-      for (let i = shuffledPool.length - 1; i > 0; i--) {
-        const r = seedRandom(seed + i);
-        seed += 1;
-        const j = Math.floor(r * (i + 1));
-        [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
-      }
-
-      // Avoid duplicates by slicing exactly what we need
-      const selectedForTheme = shuffledPool.slice(0, targetCount);
-      selectedForTheme.forEach((baseQuestion, idx) => {
-        selected.push({
-          ...baseQuestion,
-          id: `${baseQuestion.id}_exam_${themeId}_${idx}`
-        });
-      });
-    }
-  });
-
-  // Deterministic shuffle of the final list
-  for (let i = selected.length - 1; i > 0; i--) {
-    const r = seedRandom(seed + i);
-    seed += 1;
-    const j = Math.floor(r * (i + 1));
-    [selected[i], selected[j]] = [selected[j], selected[i]];
-  }
-
-  return selected;
+const getBogenQuestions = (bogenId, isExtension = false) => {
+  return generateExamQuestions(questions, { seed: bogenId, isExtension });
 };
 
 export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'both' }) => {
@@ -118,6 +63,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
   const [answers, setAnswers] = useState({}); // { questionId: [selectedOptionIds] }
   const [lernenMode, setLernenMode] = useState('practice');
   const [lernenQuestions, setLernenQuestions] = useState([]);
+  const [isExtension, setIsExtension] = useState(false);
 
   // Timer state
   const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
@@ -224,7 +170,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
   // Start the Exam
   const startExam = () => {
-    const exam = generateExamQuestions(questions);
+    const exam = generateExamQuestions(questions, { isExtension });
     setLernenQuestions(exam);
     setLernenMode('exam');
     setExamType('simulation');
@@ -454,6 +400,27 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 <div style={{ fontSize: 'calc(22px * var(--text-scale, 1))', color: '#546e7a', fontWeight: '400' }}>
                   {t.pruefung}
                 </div>
+              </div>
+
+              {/* Extension Toggle */}
+              <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm border border-gray-100 mb-2">
+                <div className="flex flex-col">
+                  <span className="text-[#2b576b] font-medium" style={{ fontSize: 'calc(14px * var(--text-scale, 1))' }}>
+                    {languageMode === 'de' ? 'Erweiterungsprüfung' : (languageMode === 'vi' ? 'Thi nâng bằng (Erweiterung)' : 'Thi nâng bằng / Erweiterung')}
+                  </span>
+                  <span className="text-gray-400" style={{ fontSize: 'calc(11px * var(--text-scale, 1))' }}>
+                    {languageMode === 'de' ? '20 Fragen (max. 6 Fehlerpunkte)' : (languageMode === 'vi' ? '20 câu hỏi (tối đa 6 điểm lỗi)' : '20 câu/Fragen (max 6 điểm lỗi)')}
+                  </span>
+                </div>
+                <label className="relative inline-flex items-center cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={isExtension}
+                    onChange={(e) => setIsExtension(e.target.checked)}
+                    className="sr-only peer"
+                  />
+                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7cb342]"></div>
+                </label>
               </div>
 
               {/* List Items */}
@@ -751,7 +718,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
             <div className="pruefung-footer-btn-group">
               <button
                 onClick={() => {
-                  setLernenQuestions(getBogenQuestions(selectedBogen));
+                  setLernenQuestions(getBogenQuestions(selectedBogen, isExtension));
                   setLernenMode('lesen');
                   setExamState('lernen_active');
                 }}
@@ -761,7 +728,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
               </button>
               <button
                 onClick={() => {
-                  setLernenQuestions(getBogenQuestions(selectedBogen));
+                  setLernenQuestions(getBogenQuestions(selectedBogen, isExtension));
                   setLernenMode('practice');
                   setExamState('lernen_active');
                 }}
@@ -771,7 +738,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
               </button>
               <button
                 onClick={() => {
-                  setLernenQuestions(getBogenQuestions(selectedBogen));
+                  setLernenQuestions(getBogenQuestions(selectedBogen, isExtension));
                   setLernenMode('exam');
                   setExamState('lernen_active');
                   setExamType('bogen');

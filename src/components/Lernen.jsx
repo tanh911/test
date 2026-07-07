@@ -59,7 +59,10 @@ export const Lernen = ({ user, onUpdateUser, onTriggerLogin, onNavigate, languag
   const mobileNavRef = useRef(null);
   const [showVideoExitConfirm, setShowVideoExitConfirm] = useState(false);
   const [examAnswers, setExamAnswers] = useState({});
-  const [timeLeft, setTimeLeft] = useState(2700);
+  const [timeLeft, setTimeLeft] = useState(() => {
+    const isExtension = predefinedQuestions && predefinedQuestions.length === 20;
+    return isExtension ? 1800 : 2700;
+  });
 
   const formatTime = (seconds) => {
     const mins = Math.floor(seconds / 60);

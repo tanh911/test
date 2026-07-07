@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Shield, Users, Trash2, Search, RefreshCw, Ban, CheckCircle, Eye, X, AlertTriangle, BarChart2, BookOpen, Award, Gamepad2, ToggleLeft, ToggleRight, Mail, Send, Loader2 } from 'lucide-react';
+import React, { useState, useEffect, useRef } from 'react';
+import { Shield, Users, Trash2, Search, RefreshCw, Ban, CheckCircle, Eye, X, AlertTriangle, BarChart2, BookOpen, Award, Gamepad2, ToggleLeft, ToggleRight, Mail, Send, Loader2, StopCircle } from 'lucide-react';
 import { sendCustomEmailToUser, sendWelcomeEmail } from '../services/emailService';
 
 const ADMIN_EMAIL = 'bossfc69@gmail.com';
@@ -22,7 +22,14 @@ export function AdminDashboard({ user, onNavigate }) {
   const [emailSubject, setEmailSubject] = useState('');
   const [emailBody, setEmailBody] = useState('');
   const [sendingEmail, setSendingEmail] = useState(false);
-  const [sendingBroadcast, setSendingBroadcast] = useState(false);
+
+  // Trạng thái chọn hàng loạt và tiến trình gửi email
+  const [selectedUids, setSelectedUids] = useState([]);
+  const [recipientType, setRecipientType] = useState('all'); // 'single', 'bulk', 'all', 'custom'
+  const [emailTemplate, setEmailTemplate] = useState('custom'); // 'custom', 'welcome'
+  const [bulkStatus, setBulkStatus] = useState(null); // null hoặc { current, total, success, fail, currentEmail, errors }
+
+  const cancelBulkRef = useRef(false);
 
   const isAdmin = user?.email === ADMIN_EMAIL;
 
@@ -31,97 +38,353 @@ export function AdminDashboard({ user, onNavigate }) {
     setTimeout(() => setToast(null), type === 'error' ? 8000 : 3500);
   };
 
-  const handleSendWelcomeToAllUsers = async () => {
+  const handleSendWelcomeToAllUsers = () => {
     const validUsers = users.filter(u => u.email && u.email.includes('@'));
     if (validUsers.length === 0) {
       showToast('Không tìm thấy người dùng nào có địa chỉ email hợp lệ!', 'error');
       return;
     }
 
-    if (!window.confirm(`Xác nhận gửi Email chào mừng (fuhrerscheinvide.site) tới TẤT CẢ ${validUsers.length} người dùng đã đăng ký?`)) {
-      return;
-    }
+    setBulkStatus(null);
+    cancelBulkRef.current = false;
+    setEmailModalUser(null);
+    setRecipientType('all');
+    setCustomRecipientEmail('');
+    setEmailTemplate('welcome');
+    setEmailSubject('🎉 Cảm ơn bạn đã đăng ký tài khoản tại fuhrerscheinvide.site');
+    setEmailBody('');
+    setShowEmailModal(true);
+  };
 
-    setSendingBroadcast(true);
-    let successCount = 0;
-    let failCount = 0;
-    let lastError = '';
+  const handleToggleSelectUser = (uid) => {
+    setSelectedUids(prev =>
+      prev.includes(uid) ? prev.filter(id => id !== uid) : [...prev, uid]
+    );
+  };
 
-    for (const u of validUsers) {
-      try {
-        const res = await sendWelcomeEmail({
-          recipientEmail: u.email.trim(),
-          displayName: u.displayName || ''
-        });
-        if (res.success) {
-          successCount++;
-        } else {
-          failCount++;
-          if (res.error) lastError = res.error;
-        }
-      } catch (err) {
-        failCount++;
-        lastError = err.message;
-      }
-    }
+  const handleToggleSelectAll = () => {
+    const filteredUids = filtered.map(u => u.id);
+    const allSelected = filteredUids.length > 0 && filteredUids.every(uid => selectedUids.includes(uid));
 
-    setSendingBroadcast(false);
-    if (successCount > 0) {
-      showToast(`🎉 Đã gửi thành công ${successCount}/${validUsers.length} email chào mừng!${failCount > 0 ? ` (${failCount} thất bại)` : ''}`);
+    if (allSelected) {
+      setSelectedUids(prev => prev.filter(uid => !filteredUids.includes(uid)));
     } else {
-      let friendlyErr = lastError;
-      if (lastError.includes('only send to your own email')) {
-        friendlyErr = 'Resend chưa cho phép gửi cho người khác: Bạn cần kiểm tra xem Domain fuhrerscheinvide.site trên resend.com/domains đã hiển thị trạng thái "Verified" (màu xanh) hay chưa.';
-      }
-      showToast(`❌ Gửi thất bại: ${friendlyErr}`, 'error');
-      alert(`[Chi tiết lỗi từ Resend API]\n${lastError || 'Không nhận được phản hồi từ server'}`);
+      setSelectedUids(prev => {
+        const next = [...prev];
+        filteredUids.forEach(uid => {
+          if (!next.includes(uid)) next.push(uid);
+        });
+        return next;
+      });
     }
   };
 
-  const handleOpenEmailModal = (targetUser = null) => {
-    setEmailModalUser(targetUser);
-    setCustomRecipientEmail(targetUser?.email || '');
+  const handleBulkToggleBan = async () => {
+    if (selectedUids.length === 0) return;
+    const selectedUsers = users.filter(u => selectedUids.includes(u.id));
+    const activeCount = selectedUsers.filter(u => !u.banned).length;
+    const banAction = activeCount > 0;
+    const actionText = banAction ? 'KHOÁ' : 'MỞ KHOÁ';
+
+    if (!window.confirm(`Bạn có chắc chắn muốn ${actionText} tài khoản của ${selectedUids.length} người dùng đã chọn?`)) {
+      return;
+    }
+
+    setLoading(true);
+    let successCount = 0;
+    try {
+      const { db } = await import('../lib/firebase');
+      const { doc, updateDoc } = await import('firebase/firestore');
+
+      for (const uid of selectedUids) {
+        try {
+          await updateDoc(doc(db, 'users', uid), { banned: banAction });
+          successCount++;
+        } catch (err) {
+          console.error(`Error banning/unbanning ${uid}:`, err);
+        }
+      }
+
+      setUsers(prev => prev.map(u => selectedUids.includes(u.id) ? { ...u, banned: banAction } : u));
+      setSelectedUids([]);
+      showToast(`Đã ${actionText.toLowerCase()} thành công ${successCount}/${selectedUids.length} tài khoản!`);
+    } catch (e) {
+      showToast('Lỗi: ' + e.message, 'error');
+    }
+    setLoading(false);
+  };
+
+  const handleBulkResetProgress = async () => {
+    if (selectedUids.length === 0) return;
+    if (!window.confirm(`Bạn có chắc chắn muốn RESET TIẾN ĐỘ học và lịch sử thi của ${selectedUids.length} người dùng đã chọn? Hành động này không thể hoàn tác.`)) {
+      return;
+    }
+
+    setLoading(true);
+    let successCount = 0;
+    try {
+      const { db } = await import('../lib/firebase');
+      const { doc, updateDoc } = await import('firebase/firestore');
+
+      for (const uid of selectedUids) {
+        try {
+          await updateDoc(doc(db, 'users', uid), { progress: {}, examHistory: [], savedQuestions: [] });
+          successCount++;
+        } catch (err) {
+          console.error(`Error resetting progress for ${uid}:`, err);
+        }
+      }
+
+      setUsers(prev => prev.map(u => selectedUids.includes(u.id) ? { ...u, progress: {}, examHistory: [], savedQuestions: [] } : u));
+      setSelectedUids([]);
+      showToast(`Đã reset tiến độ học của ${successCount}/${selectedUids.length} người dùng!`);
+    } catch (e) {
+      showToast('Lỗi: ' + e.message, 'error');
+    }
+    setLoading(false);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedUids.length === 0) return;
+    if (!window.confirm(`⚠️ CẢNH BÁO: Bạn có chắc chắn muốn XOÁ VĨNH VIỄN ${selectedUids.length} tài khoản người dùng đã chọn? Hành động này KHÔNG THỂ HOÀN TÁC!`)) {
+      return;
+    }
+
+    setLoading(true);
+    let successCount = 0;
+    try {
+      const { db } = await import('../lib/firebase');
+      const { doc, deleteDoc } = await import('firebase/firestore');
+
+      for (const uid of selectedUids) {
+        try {
+          await deleteDoc(doc(db, 'users', uid));
+          successCount++;
+        } catch (err) {
+          console.error(`Error deleting user ${uid}:`, err);
+        }
+      }
+
+      setUsers(prev => prev.filter(u => !selectedUids.includes(u.id)));
+      setSelectedUids([]);
+      showToast(`Đã xoá thành công ${successCount}/${selectedUids.length} người dùng!`);
+    } catch (e) {
+      showToast('Lỗi: ' + e.message, 'error');
+    }
+    setLoading(false);
+  };
+
+  const handleOpenEmailModal = (target = null) => {
+    setBulkStatus(null);
+    cancelBulkRef.current = false;
+    setEmailTemplate('custom');
+    if (target === 'bulk') {
+      setEmailModalUser(null);
+      setRecipientType('bulk');
+      setCustomRecipientEmail('');
+    } else if (target && typeof target === 'object') {
+      setEmailModalUser(target);
+      setRecipientType('single');
+      setCustomRecipientEmail(target.email || '');
+    } else {
+      setEmailModalUser(null);
+      setRecipientType(selectedUids.length > 0 ? 'bulk' : 'all');
+      setCustomRecipientEmail('');
+    }
     setEmailSubject('');
     setEmailBody('');
     setShowEmailModal(true);
   };
 
+  const runEmailSending = async (targets) => {
+    setSendingEmail(true);
+    setBulkStatus({
+      current: 0,
+      total: targets.length,
+      success: 0,
+      fail: 0,
+      errors: []
+    });
+
+    cancelBulkRef.current = false;
+    let successCount = 0;
+    let failCount = 0;
+    const errorsList = [];
+    let isCancelled = false;
+
+    for (let i = 0; i < targets.length; i++) {
+      if (cancelBulkRef.current) {
+        errorsList.push({ email: 'Hệ thống', error: 'Đã huỷ bởi admin' });
+        isCancelled = true;
+        break;
+      }
+
+      const target = targets[i];
+      setBulkStatus(prev => ({
+        ...prev,
+        current: i + 1,
+        currentEmail: target.email
+      }));
+
+      try {
+        let result;
+        if (emailTemplate === 'welcome') {
+          result = await sendWelcomeEmail({
+            recipientEmail: target.email,
+            displayName: target.name
+          });
+        } else {
+          const bodyContent = emailBody.replace(/\[name\]/g, target.name || 'bạn').replace(/\[email\]/g, target.email);
+          const subjContent = emailSubject.replace(/\[name\]/g, target.name || 'bạn').replace(/\[email\]/g, target.email);
+          result = await sendCustomEmailToUser({
+            recipientEmail: target.email,
+            recipientName: target.name,
+            subject: subjContent || 'Thông báo từ Ban quản trị Führerschein Việt-Đức',
+            messageBody: bodyContent,
+          });
+        }
+
+        if (result.success) {
+          successCount++;
+        } else {
+          failCount++;
+          errorsList.push({ email: target.email, error: result.error || 'Thất bại' });
+        }
+      } catch (err) {
+        failCount++;
+        errorsList.push({ email: target.email, error: err.message });
+      }
+
+      setBulkStatus(prev => ({
+        ...prev,
+        success: successCount,
+        fail: failCount,
+        errors: [...errorsList]
+      }));
+
+      await new Promise(resolve => setTimeout(resolve, 250));
+    }
+
+    setSendingEmail(false);
+    if (isCancelled) {
+      showToast(`⚠️ Đã dừng gửi. Thành công: ${successCount}, Thất bại: ${failCount}`, 'warning');
+    } else if (failCount === 0) {
+      showToast(`🎉 Đã gửi thành công tất cả ${successCount} email!`);
+      setTimeout(() => {
+        setShowEmailModal(false);
+        setBulkStatus(null);
+      }, 2500);
+    } else {
+      showToast(`⚠️ Hoàn thành với một số lỗi. Thành công: ${successCount}, Thất bại: ${failCount}`, 'error');
+    }
+  };
+
   const handleSendEmail = async (e) => {
     e.preventDefault();
-    const recipient = emailModalUser?.email || customRecipientEmail;
-    if (!recipient || !recipient.includes('@')) {
-      showToast('Vui lòng nhập địa chỉ email người nhận hợp lệ!', 'error');
-      return;
-    }
-    if (!emailBody.trim()) {
-      showToast('Vui lòng nhập nội dung email!', 'error');
-      return;
-    }
 
-    setSendingEmail(true);
-    try {
-      const result = await sendCustomEmailToUser({
-        recipientEmail: recipient.trim(),
-        recipientName: emailModalUser?.displayName || '',
-        subject: emailSubject.trim() || 'Thông báo từ Ban quản trị Führerschein Việt-Đức',
-        messageBody: emailBody.trim(),
-      });
-
-      if (result.success) {
-        showToast(`✅ Đã gửi email tới ${recipient} thành công!`);
-        setShowEmailModal(false);
-        setEmailModalUser(null);
-        setCustomRecipientEmail('');
-        setEmailSubject('');
-        setEmailBody('');
-      } else {
-        showToast('Lỗi gửi email: ' + (result.error || 'Thất bại'), 'error');
+    let targets = [];
+    if (recipientType === 'single') {
+      if (!emailModalUser?.email || !emailModalUser.email.includes('@')) {
+        showToast('Email người nhận không hợp lệ!', 'error');
+        return;
       }
-    } catch (err) {
-      showToast('Lỗi: ' + err.message, 'error');
-    } finally {
-      setSendingEmail(false);
+      targets = [{ email: emailModalUser.email.trim(), name: emailModalUser.displayName || '' }];
+    } else if (recipientType === 'bulk') {
+      const selectedUsers = users.filter(u => selectedUids.includes(u.id) && u.email && u.email.includes('@'));
+      if (selectedUsers.length === 0) {
+        showToast('Không có người dùng nào được chọn hoặc không có email hợp lệ!', 'error');
+        return;
+      }
+      targets = selectedUsers.map(u => ({ email: u.email.trim(), name: u.displayName || '' }));
+    } else if (recipientType === 'all') {
+      const validUsers = users.filter(u => u.email && u.email.includes('@'));
+      if (validUsers.length === 0) {
+        showToast('Không tìm thấy người dùng nào có địa chỉ email hợp lệ!', 'error');
+        return;
+      }
+      targets = validUsers.map(u => ({ email: u.email.trim(), name: u.displayName || '' }));
+    } else if (recipientType === 'custom') {
+      if (!customRecipientEmail.trim()) {
+        showToast('Vui lòng nhập địa chỉ email người nhận!', 'error');
+        return;
+      }
+      const parts = customRecipientEmail.split(',').map(p => p.trim()).filter(p => p.includes('@'));
+      if (parts.length === 0) {
+        showToast('Không tìm thấy địa chỉ email hợp lệ nào!', 'error');
+        return;
+      }
+      targets = parts.map(email => ({ email, name: '' }));
     }
+
+    if (targets.length === 0) {
+      showToast('Không có người nhận hợp lệ!', 'error');
+      return;
+    }
+
+    if (targets.length === 1) {
+      setSendingEmail(true);
+      const target = targets[0];
+      try {
+        let result;
+        if (emailTemplate === 'welcome') {
+          result = await sendWelcomeEmail({
+            recipientEmail: target.email,
+            displayName: target.name
+          });
+        } else {
+          const bodyContent = emailBody.replace(/\[name\]/g, target.name || 'bạn').replace(/\[email\]/g, target.email);
+          const subjContent = emailSubject.replace(/\[name\]/g, target.name || 'bạn').replace(/\[email\]/g, target.email);
+          result = await sendCustomEmailToUser({
+            recipientEmail: target.email,
+            recipientName: target.name,
+            subject: subjContent || 'Thông báo từ Ban quản trị Führerschein Việt-Đức',
+            messageBody: bodyContent,
+          });
+        }
+
+        if (result.success) {
+          showToast(`✅ Đã gửi email tới ${target.email} thành công!`);
+          setShowEmailModal(false);
+        } else {
+          showToast('Lỗi gửi email: ' + (result.error || 'Thất bại'), 'error');
+        }
+      } catch (err) {
+        showToast('Lỗi: ' + err.message, 'error');
+      } finally {
+        setSendingEmail(false);
+      }
+      return;
+    }
+
+    if (!window.confirm(`Xác nhận gửi email tới ${targets.length} địa chỉ đã chọn?`)) {
+      return;
+    }
+
+    await runEmailSending(targets);
+  };
+
+  const handleRetryFailed = async () => {
+    if (!bulkStatus || bulkStatus.errors.length === 0) return;
+    const failedEmails = bulkStatus.errors.map(e => e.email).filter(e => e !== 'Hệ thống');
+    const failedTargets = [];
+    failedEmails.forEach(email => {
+      const u = users.find(user => user.email === email);
+      failedTargets.push({
+        email,
+        name: u ? u.displayName || '' : ''
+      });
+    });
+
+    if (failedTargets.length === 0) {
+      showToast('Không có người nhận hợp lệ để thử lại!', 'error');
+      return;
+    }
+
+    if (!window.confirm(`Xác nhận gửi lại email cho ${failedTargets.length} địa chỉ đã thất bại?`)) {
+      return;
+    }
+
+    await runEmailSending(failedTargets);
   };
 
   const fetchUsers = async () => {
@@ -236,7 +499,7 @@ export function AdminDashboard({ user, onNavigate }) {
   ];
 
   return (
-    <div style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #1a1a2e 100%)', padding: '24px', fontFamily: "'Inter', sans-serif" }}>
+    <div className="admin-container" style={{ minHeight: '100vh', background: 'linear-gradient(135deg, #0f0c29 0%, #302b63 50%, #1a1a2e 100%)', padding: '24px', fontFamily: "'Inter', sans-serif" }}>
       {/* Toast */}
       {toast && (
         <div style={{
@@ -262,10 +525,9 @@ export function AdminDashboard({ user, onNavigate }) {
               <p style={{ fontSize: '13px', color: 'rgba(255,255,255,0.5)', margin: 0 }}>Quản lý người dùng hệ thống</p>
             </div>
           </div>
-          <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-            <button onClick={handleSendWelcomeToAllUsers} disabled={sendingBroadcast} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: 'white', fontWeight: '700', cursor: sendingBroadcast ? 'not-allowed' : 'pointer', fontSize: '14px', boxShadow: '0 4px 15px rgba(16,185,129,0.4)', opacity: sendingBroadcast ? 0.7 : 1 }}>
-              {sendingBroadcast ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Mail size={16} />}
-              {sendingBroadcast ? 'Đang gửi...' : `Gửi Mail Chào Mừng Tất Cả (${users.filter(u => u.email && u.email.includes('@')).length})`}
+          <div className="admin-header-actions" style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
+            <button onClick={handleSendWelcomeToAllUsers} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', background: 'linear-gradient(135deg, #10b981, #059669)', border: 'none', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 15px rgba(16,185,129,0.4)' }}>
+              <Mail size={16} /> Gửi Mail Chào Mừng Tất Cả ({users.filter(u => u.email && u.email.includes('@')).length})
             </button>
             <button onClick={() => handleOpenEmailModal(null)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', background: 'linear-gradient(135deg, #3b82f6, #2563eb)', border: 'none', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 15px rgba(59,130,246,0.4)' }}>
               <Mail size={16} /> Soạn Email
@@ -353,9 +615,17 @@ export function AdminDashboard({ user, onNavigate }) {
             </div>
           ) : (
             <div style={{ overflowX: 'auto' }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <table className="responsive-table" style={{ width: '100%', borderCollapse: 'collapse' }}>
                 <thead>
                   <tr style={{ borderBottom: '1px solid rgba(255,255,255,0.1)' }}>
+                    <th style={{ padding: '14px 18px', width: '40px', textAlign: 'center' }}>
+                      <input
+                        type="checkbox"
+                        checked={filtered.length > 0 && filtered.every(u => selectedUids.includes(u.id))}
+                        onChange={handleToggleSelectAll}
+                        style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
+                      />
+                    </th>
                     {['Người dùng', 'Email', 'Tiến độ', 'Bài thi', 'Trạng thái', 'Hành động'].map(h => (
                       <th key={h} style={{ padding: '14px 18px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
@@ -365,12 +635,21 @@ export function AdminDashboard({ user, onNavigate }) {
                   {filtered.map((u, idx) => {
                     const progressCount = Object.keys(u.progress || {}).length;
                     const examCount = (u.examHistory || []).length;
+                    const isSelected = selectedUids.includes(u.id);
                     return (
-                      <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', transition: 'background 0.2s' }}
-                        onMouseEnter={e => e.currentTarget.style.background = 'rgba(255,255,255,0.04)'}
-                        onMouseLeave={e => e.currentTarget.style.background = 'transparent'}
+                      <tr key={u.id} style={{ borderBottom: '1px solid rgba(255,255,255,0.06)', transition: 'background 0.2s', backgroundColor: isSelected ? 'rgba(99,102,241,0.08)' : 'transparent' }}
+                        onMouseEnter={e => e.currentTarget.style.background = isSelected ? 'rgba(99,102,241,0.12)' : 'rgba(255,255,255,0.04)'}
+                        onMouseLeave={e => e.currentTarget.style.background = isSelected ? 'rgba(99,102,241,0.08)' : 'transparent'}
                       >
-                        <td style={{ padding: '14px 18px' }}>
+                        <td className="col-select" data-label="Chọn" style={{ padding: '14px 18px', textAlign: 'center' }}>
+                          <input
+                            type="checkbox"
+                            checked={isSelected}
+                            onChange={() => handleToggleSelectUser(u.id)}
+                            style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
+                          />
+                        </td>
+                        <td data-label="Người dùng" style={{ padding: '14px 18px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                             <div style={{ width: '36px', height: '36px', borderRadius: '10px', background: `hsl(${(idx * 47) % 360}, 60%, 50%)`, display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '15px', fontWeight: '800', color: 'white', flexShrink: 0 }}>
                               {(u.displayName || u.email || '?')[0].toUpperCase()}
@@ -378,23 +657,23 @@ export function AdminDashboard({ user, onNavigate }) {
                             <span style={{ color: 'white', fontWeight: '600', fontSize: '14px' }}>{u.displayName || 'Không tên'}</span>
                           </div>
                         </td>
-                        <td style={{ padding: '14px 18px', color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>{u.email || '—'}</td>
-                        <td style={{ padding: '14px 18px' }}>
+                        <td data-label="Email" style={{ padding: '14px 18px', color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>{u.email || '—'}</td>
+                        <td data-label="Tiến độ" style={{ padding: '14px 18px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#6366f1', fontSize: '13px', fontWeight: '600' }}>
                             <BookOpen size={14} /> {progressCount} câu
                           </div>
                         </td>
-                        <td style={{ padding: '14px 18px' }}>
+                        <td data-label="Bài thi" style={{ padding: '14px 18px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#f59e0b', fontSize: '13px', fontWeight: '600' }}>
                             <Award size={14} /> {examCount} lần
                           </div>
                         </td>
-                        <td style={{ padding: '14px 18px' }}>
+                        <td data-label="Trạng thái" style={{ padding: '14px 18px' }}>
                           <span style={{ padding: '4px 10px', borderRadius: '20px', fontSize: '12px', fontWeight: '700', background: u.banned ? 'rgba(239,68,68,0.2)' : 'rgba(16,185,129,0.2)', color: u.banned ? '#ef4444' : '#10b981' }}>
                             {u.banned ? 'Bị khoá' : 'Hoạt động'}
                           </span>
                         </td>
-                        <td style={{ padding: '14px 18px' }}>
+                        <td data-label="Hành động" style={{ padding: '14px 18px' }}>
                           <div style={{ display: 'flex', gap: '8px' }}>
                             <button title="Gửi Email" onClick={() => handleOpenEmailModal(u)} style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(59,130,246,0.2)', border: 'none', color: '#60a5fa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <Mail size={15} />
@@ -426,7 +705,7 @@ export function AdminDashboard({ user, onNavigate }) {
       {/* User Detail Modal */}
       {selectedUser && (
         <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.7)', backdropFilter: 'blur(8px)', zIndex: 500, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={() => setSelectedUser(null)}>
-          <div style={{ background: 'linear-gradient(135deg, #1e1b4b, #312e81)', borderRadius: '20px', padding: '28px', maxWidth: '500px', width: '100%', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
+          <div className="admin-modal-content" style={{ background: 'linear-gradient(135deg, #1e1b4b, #312e81)', borderRadius: '20px', padding: '28px', maxWidth: '500px', width: '100%', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 30px 80px rgba(0,0,0,0.5)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: '24px' }}>
               <h3 style={{ color: 'white', fontWeight: '800', fontSize: '18px', margin: 0 }}>Chi tiết người dùng</h3>
               <button onClick={() => setSelectedUser(null)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', borderRadius: '8px', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={16} /></button>
@@ -502,10 +781,104 @@ export function AdminDashboard({ user, onNavigate }) {
         </div>
       )}
 
+      {/* Floating Bulk Actions Bar */}
+      {selectedUids.length > 0 && (
+        <div className="floating-bulk-bar" style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          background: 'rgba(30, 27, 75, 0.95)',
+          backdropFilter: 'blur(16px)',
+          border: '1px solid rgba(99, 102, 241, 0.4)',
+          borderRadius: '16px',
+          padding: '12px 24px',
+          display: 'flex',
+          alignItems: 'center',
+          gap: '20px',
+          boxShadow: '0 20px 50px rgba(0, 0, 0, 0.5)',
+          zIndex: 400,
+          animation: 'slideUp 0.3s ease',
+          flexWrap: 'wrap'
+        }}>
+          <span style={{ color: 'white', fontWeight: '700', fontSize: '14px' }}>
+            Đã chọn {selectedUids.length} người dùng
+          </span>
+          <div style={{ display: 'flex', gap: '8px' }}>
+            <button
+              onClick={() => handleOpenEmailModal('bulk')}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '8px 16px', borderRadius: '8px',
+                background: 'linear-gradient(135deg, #3b82f6, #2563eb)',
+                color: 'white', fontWeight: '700', border: 'none',
+                cursor: 'pointer', fontSize: '13px'
+              }}
+            >
+              <Mail size={14} /> Gửi Email
+            </button>
+            
+            <button
+              onClick={handleBulkToggleBan}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '8px 16px', borderRadius: '8px',
+                background: 'rgba(245, 158, 11, 0.2)',
+                border: '1px solid #f59e0b',
+                color: '#f59e0b', fontWeight: '700',
+                cursor: 'pointer', fontSize: '13px'
+              }}
+            >
+              <Ban size={14} /> Khoá / Mở khoá
+            </button>
+
+            <button
+              onClick={handleBulkResetProgress}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '8px 16px', borderRadius: '8px',
+                background: 'rgba(99, 102, 241, 0.2)',
+                border: '1px solid #6366f1',
+                color: '#818cf8', fontWeight: '700',
+                cursor: 'pointer', fontSize: '13px'
+              }}
+            >
+              <RefreshCw size={14} /> Reset Tiến Độ
+            </button>
+
+            <button
+              onClick={handleBulkDelete}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '8px 16px', borderRadius: '8px',
+                background: 'rgba(239, 68, 68, 0.2)',
+                border: '1px solid #ef4444',
+                color: '#f87171', fontWeight: '700',
+                cursor: 'pointer', fontSize: '13px'
+              }}
+            >
+              <Trash2 size={14} /> Xoá
+            </button>
+
+            <button
+              onClick={() => setSelectedUids([])}
+              style={{
+                padding: '8px 12px', borderRadius: '8px',
+                background: 'rgba(255, 255, 255, 0.1)',
+                border: 'none', color: 'rgba(255, 255, 255, 0.7)',
+                fontWeight: '600', cursor: 'pointer', fontSize: '13px'
+              }}
+            >
+              Bỏ chọn
+            </button>
+          </div>
+        </div>
+      )}
+
       {/* Send Email Modal */}
       {showEmailModal && (
-        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', zIndex: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={() => setShowEmailModal(false)}>
-          <div style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #1e293b 100%)', borderRadius: '20px', padding: '28px', maxWidth: '520px', width: '100%', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 30px 80px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.75)', backdropFilter: 'blur(8px)', zIndex: 700, display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }} onClick={() => !sendingEmail && setShowEmailModal(false)}>
+          <div className="admin-modal-content" style={{ background: 'linear-gradient(135deg, #1e1b4b 0%, #1e293b 100%)', borderRadius: '20px', padding: '28px', maxWidth: '520px', width: '100%', border: '1px solid rgba(255,255,255,0.15)', boxShadow: '0 30px 80px rgba(0,0,0,0.6)' }} onClick={e => e.stopPropagation()}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '20px' }}>
               <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
                 <div style={{ width: '40px', height: '40px', borderRadius: '10px', background: 'rgba(59,130,246,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#60a5fa' }}>
@@ -516,56 +889,291 @@ export function AdminDashboard({ user, onNavigate }) {
                   <p style={{ color: 'rgba(255,255,255,0.5)', fontSize: '12px', margin: 0 }}>Qua dịch vụ Resend API</p>
                 </div>
               </div>
-              <button onClick={() => setShowEmailModal(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', borderRadius: '8px', width: '32px', height: '32px', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}><X size={16} /></button>
+              <button disabled={sendingEmail} onClick={() => setShowEmailModal(false)} style={{ background: 'rgba(255,255,255,0.1)', border: 'none', color: 'white', borderRadius: '8px', width: '32px', height: '32px', cursor: sendingEmail ? 'not-allowed' : 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center', opacity: sendingEmail ? 0.5 : 1 }}><X size={16} /></button>
             </div>
 
-            <form onSubmit={handleSendEmail} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+            {bulkStatus ? (
+              /* Tiến trình gửi email hàng loạt */
               <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>Người nhận (Email)</label>
-                <input
-                  type="email"
-                  required
-                  placeholder="nhap_email@example.com"
-                  value={emailModalUser ? emailModalUser.email : customRecipientEmail}
-                  onChange={e => !emailModalUser && setCustomRecipientEmail(e.target.value)}
-                  readOnly={!!emailModalUser?.email}
-                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
-                />
-              </div>
+                <h4 style={{ color: 'white', margin: '0 0 10px 0', fontSize: '16px', fontWeight: '700' }}>
+                  {sendingEmail ? '🚀 Đang gửi email hàng loạt...' : '🏁 Hoàn thành gửi email'}
+                </h4>
+                
+                {/* Stats */}
+                <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: '10px', marginBottom: '16px' }}>
+                  <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                    <div style={{ color: '#6366f1', fontSize: '20px', fontWeight: '800' }}>{bulkStatus.current} / {bulkStatus.total}</div>
+                    <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', marginTop: '2px' }}>Tiến trình</div>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                    <div style={{ color: '#10b981', fontSize: '20px', fontWeight: '800' }}>{bulkStatus.success}</div>
+                    <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', marginTop: '2px' }}>Thành công</div>
+                  </div>
+                  <div style={{ background: 'rgba(255,255,255,0.06)', borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                    <div style={{ color: '#ef4444', fontSize: '20px', fontWeight: '800' }}>{bulkStatus.fail}</div>
+                    <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '11px', marginTop: '2px' }}>Thất bại</div>
+                  </div>
+                </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>Tiêu đề Email</label>
-                <input
-                  type="text"
-                  placeholder="Ví dụ: Thông báo cập nhật tài khoản / Nhắc nhở học tập"
-                  value={emailSubject}
-                  onChange={e => setEmailSubject(e.target.value)}
-                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
-                />
-              </div>
+                {/* Progress Bar */}
+                <div style={{ height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden', marginBottom: '16px' }}>
+                  <div style={{
+                    height: '100%',
+                    background: 'linear-gradient(90deg, #6366f1, #10b981)',
+                    width: `${(bulkStatus.current / bulkStatus.total) * 100}%`,
+                    transition: 'width 0.2s ease'
+                  }} />
+                </div>
 
-              <div>
-                <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>Nội dung Email</label>
-                <textarea
-                  required
-                  rows={6}
-                  placeholder="Nhập nội dung thư thông báo gửi tới người dùng ở đây..."
-                  value={emailBody}
-                  onChange={e => setEmailBody(e.target.value)}
-                  style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontSize: '14px', outline: 'none', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit' }}
-                />
-              </div>
+                {/* Current Target */}
+                {sendingEmail && bulkStatus.currentEmail && (
+                  <div style={{ fontSize: '13px', color: 'rgba(255,255,255,0.6)', marginBottom: '16px', display: 'flex', alignItems: 'center', gap: '8px' }}>
+                    <Loader2 size={14} style={{ animation: 'spin 1s linear infinite' }} />
+                    <span>Gửi tới: <strong style={{ color: 'white' }}>{bulkStatus.currentEmail}</strong>...</span>
+                  </div>
+                )}
 
-              <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
-                <button type="button" onClick={() => setShowEmailModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '14px' }}>
-                  Huỷ
-                </button>
-                <button type="submit" disabled={sendingEmail} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: sendingEmail ? '#93c5fd' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)', border: 'none', color: 'white', fontWeight: '700', cursor: sendingEmail ? 'not-allowed' : 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 15px rgba(59,130,246,0.4)' }}>
-                  {sendingEmail ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={16} />}
-                  {sendingEmail ? 'Đang gửi...' : 'Gửi Email Ngay'}
-                </button>
+                {/* Lỗi chi tiết */}
+                {bulkStatus.errors.length > 0 && (
+                  <div style={{ marginBottom: '20px' }}>
+                    <div style={{ fontSize: '12px', fontWeight: '700', color: '#ef4444', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>Danh sách lỗi ({bulkStatus.errors.length})</div>
+                    <div style={{
+                      background: 'rgba(239, 68, 68, 0.08)',
+                      border: '1px solid rgba(239, 68, 68, 0.25)',
+                      borderRadius: '10px',
+                      maxHeight: '150px',
+                      overflowY: 'auto',
+                      padding: '10px',
+                      fontSize: '12px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '6px'
+                    }}>
+                      {bulkStatus.errors.map((err, idx) => (
+                        <div key={idx} style={{ display: 'flex', justifyContent: 'space-between', color: '#fca5a5' }}>
+                          <span style={{ fontWeight: '600' }}>{err.email}</span>
+                          <span style={{ opacity: 0.85 }}>{err.error}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: '10px' }}>
+                  {sendingEmail ? (
+                    <button
+                      type="button"
+                      onClick={() => {
+                        cancelBulkRef.current = true;
+                        showToast('Đang dừng tiến trình gửi...', 'warning');
+                      }}
+                      style={{
+                        flex: 1, padding: '12px', borderRadius: '12px',
+                        background: 'rgba(239, 68, 68, 0.2)',
+                        border: '1px solid #ef4444',
+                        color: '#f87171', fontWeight: '700',
+                        cursor: 'pointer', fontSize: '14px',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px'
+                      }}
+                    >
+                      <StopCircle size={16} /> Dừng gửi
+                    </button>
+                  ) : (
+                    <>
+                      {bulkStatus.fail > 0 && (
+                        <button
+                          type="button"
+                          onClick={handleRetryFailed}
+                          style={{
+                            flex: 1, padding: '12px', borderRadius: '12px',
+                            background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                            border: 'none', color: 'white', fontWeight: '700',
+                            cursor: 'pointer', fontSize: '14px',
+                            display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                            boxShadow: '0 4px 15px rgba(245,158,11,0.4)'
+                          }}
+                        >
+                          <RefreshCw size={16} /> Thử lại các lỗi ({bulkStatus.fail})
+                        </button>
+                      )}
+                      <button
+                        type="button"
+                        onClick={() => {
+                          setShowEmailModal(false);
+                          setBulkStatus(null);
+                        }}
+                        style={{
+                          flex: 1, padding: '12px', borderRadius: '12px',
+                          background: 'rgba(255, 255, 255, 0.1)',
+                          border: '1px solid rgba(255, 255, 255, 0.15)',
+                          color: 'white', fontWeight: '700',
+                          cursor: 'pointer', fontSize: '14px'
+                        }}
+                      >
+                        Đóng
+                      </button>
+                    </>
+                  )}
+                </div>
               </div>
-            </form>
+            ) : (
+              /* Composer gửi email */
+              <form onSubmit={handleSendEmail} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
+                
+                {/* Chọn đối tượng (Chỉ hiện khi soạn từ header) */}
+                {!emailModalUser && (
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Đối tượng nhận email</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
+                      {[
+                        { type: 'all', label: `Tất cả (${users.filter(u => u.email && u.email.includes('@')).length})` },
+                        ...(selectedUids.length > 0 ? [{ type: 'bulk', label: `Đã chọn (${users.filter(u => selectedUids.includes(u.id) && u.email && u.email.includes('@')).length})` }] : []),
+                        { type: 'custom', label: 'Nhập thủ công' }
+                      ].map(opt => {
+                        const isSel = recipientType === opt.type;
+                        return (
+                          <button
+                            key={opt.type}
+                            type="button"
+                            onClick={() => setRecipientType(opt.type)}
+                            style={{
+                              padding: '10px 12px',
+                              borderRadius: '10px',
+                              border: isSel ? '1px solid #6366f1' : '1px solid rgba(255, 255, 255, 0.1)',
+                              background: isSel ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+                              color: isSel ? '#a5b4fc' : 'rgba(255, 255, 255, 0.7)',
+                              fontWeight: '700',
+                              fontSize: '13px',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s'
+                            }}
+                          >
+                            {opt.label}
+                          </button>
+                        );
+                      })}
+                    </div>
+                  </div>
+                )}
+
+                {/* Hiện khi chọn gửi 1 user */}
+                {recipientType === 'single' && emailModalUser && (
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>Người nhận</label>
+                    <div style={{ padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.1)', color: '#818cf8', fontSize: '14px', fontWeight: '600' }}>
+                      {emailModalUser.displayName ? `${emailModalUser.displayName} <${emailModalUser.email}>` : emailModalUser.email}
+                    </div>
+                  </div>
+                )}
+
+                {/* Nhập thủ công */}
+                {recipientType === 'custom' && (
+                  <div>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>Danh sách Email người nhận</label>
+                    <textarea
+                      required
+                      rows={2}
+                      placeholder="email1@example.com, email2@example.com..."
+                      value={customRecipientEmail}
+                      onChange={e => setCustomRecipientEmail(e.target.value)}
+                      style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontSize: '14px', outline: 'none', boxSizing: 'border-box', resize: 'vertical' }}
+                    />
+                    <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px', display: 'block' }}>Nhập các email cách nhau bởi dấu phẩy.</span>
+                  </div>
+                )}
+
+                {/* Chọn mẫu Email */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Mẫu Email</label>
+                  <div style={{ display: 'flex', gap: '10px' }}>
+                    <button
+                      type="button"
+                      onClick={() => setEmailTemplate('custom')}
+                      style={{
+                        flex: 1,
+                        padding: '10px',
+                        borderRadius: '10px',
+                        border: emailTemplate === 'custom' ? '1px solid #6366f1' : '1px solid rgba(255, 255, 255, 0.1)',
+                        background: emailTemplate === 'custom' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+                        color: emailTemplate === 'custom' ? '#a5b4fc' : 'rgba(255, 255, 255, 0.7)',
+                        fontWeight: '700',
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      Tùy chỉnh nội dung
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setEmailTemplate('welcome')}
+                      style={{
+                        flex: 1,
+                        padding: '10px',
+                        borderRadius: '10px',
+                        border: emailTemplate === 'welcome' ? '1px solid #6366f1' : '1px solid rgba(255, 255, 255, 0.1)',
+                        background: emailTemplate === 'welcome' ? 'rgba(99, 102, 241, 0.15)' : 'rgba(255, 255, 255, 0.04)',
+                        color: emailTemplate === 'welcome' ? '#a5b4fc' : 'rgba(255, 255, 255, 0.7)',
+                        fontWeight: '700',
+                        fontSize: '13px',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s'
+                      }}
+                    >
+                      Thư chào mừng hệ thống
+                    </button>
+                  </div>
+                </div>
+
+                {/* Tiêu đề */}
+                <div>
+                  <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '6px' }}>Tiêu đề Email</label>
+                  <input
+                    type="text"
+                    required
+                    disabled={emailTemplate === 'welcome'}
+                    placeholder="Ví dụ: Cập nhật tài khoản / Thông báo quan trọng"
+                    value={emailTemplate === 'welcome' ? '🎉 Cảm ơn bạn đã đăng ký tài khoản tại fuhrerscheinvide.site' : emailSubject}
+                    onChange={e => setEmailSubject(e.target.value)}
+                    style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: emailTemplate === 'welcome' ? 'rgba(255,255,255,0.5)' : 'white', fontSize: '14px', outline: 'none', boxSizing: 'border-box' }}
+                  />
+                </div>
+
+                {/* Nội dung */}
+                {emailTemplate === 'custom' ? (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '6px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Nội dung Email</label>
+                      <span style={{ fontSize: '11px', color: '#818cf8', fontWeight: '600' }}>Sử dụng [name], [email] để chèn thông tin</span>
+                    </div>
+                    <textarea
+                      required
+                      rows={6}
+                      placeholder="Nhập nội dung thư thông báo gửi tới người dùng ở đây..."
+                      value={emailBody}
+                      onChange={e => setEmailBody(e.target.value)}
+                      style={{ width: '100%', padding: '12px 14px', borderRadius: '10px', background: 'rgba(255,255,255,0.07)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontSize: '14px', outline: 'none', boxSizing: 'border-box', resize: 'vertical', fontFamily: 'inherit' }}
+                    />
+                  </div>
+                ) : (
+                  <div style={{ padding: '16px', borderRadius: '10px', background: 'rgba(255,255,255,0.04)', border: '1px solid rgba(255,255,255,0.08)', fontSize: '13px', color: 'rgba(255,255,255,0.5)', lineHeight: '1.5' }}>
+                    ℹ️ Hệ thống sẽ tự động gửi thư chào mừng chuẩn HTML cho người nhận, chứa hướng dẫn sử dụng và thông tin tài khoản của họ. Bạn không cần nhập nội dung.
+                  </div>
+                )}
+
+                {/* Actions */}
+                <div style={{ display: 'flex', gap: '10px', marginTop: '8px' }}>
+                  <button type="button" onClick={() => setShowEmailModal(false)} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '14px' }}>
+                    Huỷ
+                  </button>
+                  <button type="submit" disabled={sendingEmail} style={{ flex: 1, padding: '12px', borderRadius: '12px', background: sendingEmail ? '#93c5fd' : 'linear-gradient(135deg, #3b82f6, #1d4ed8)', border: 'none', color: 'white', fontWeight: '700', cursor: sendingEmail ? 'not-allowed' : 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px', boxShadow: '0 4px 15px rgba(59,130,246,0.4)' }}>
+                    {sendingEmail ? <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} /> : <Send size={16} />}
+                    {sendingEmail ? 'Đang gửi...' : recipientType !== 'single' && recipientType !== 'custom' ? 'Bắt đầu gửi hàng loạt' : 'Gửi Email Ngay'}
+                  </button>
+                </div>
+              </form>
+            )}
           </div>
         </div>
       )}
@@ -573,6 +1181,7 @@ export function AdminDashboard({ user, onNavigate }) {
       <style>{`
         @keyframes spin { to { transform: rotate(360deg); } }
         @keyframes slideIn { from { opacity: 0; transform: translateX(20px); } to { opacity: 1; transform: translateX(0); } }
+        @keyframes slideUp { from { opacity: 0; transform: translate(-50%, 20px); } to { opacity: 1; transform: translate(-50%, 0); } }
         input::placeholder { color: rgba(255,255,255,0.3); }
       `}</style>
     </div>
