@@ -49,8 +49,22 @@ const InstructionPanel = ({ scenario }) => {
   if (!scenario) return null;
   const colors = { TRAFFIC_LIGHT: '#ef4444', STOP_SIGN: '#dc2626', YIELD: '#f59e0b', SPEED_LIMIT: '#3b82f6', PRIORITY: '#22c55e' };
   return (
-    <div style={{ position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 20, background: 'rgba(0,0,0,0.8)', border: `2px solid ${colors[scenario.type] || '#666'}`, borderRadius: 12, padding: '10px 24px', backdropFilter: 'blur(8px)', textAlign: 'center', maxWidth: 340 }}>
-      <div style={{ color: 'white', fontWeight: 'bold', fontSize: 15 }}>{scenario.warn}</div>
+    <div style={{
+      position: 'absolute', top: 16, left: '50%', transform: 'translateX(-50%)', zIndex: 20,
+      background: 'rgba(12,12,14,0.92)', border: `2px solid ${colors[scenario.type] || '#666'}`,
+      borderRadius: 14, padding: '12px 24px', backdropFilter: 'blur(10px)', textAlign: 'center',
+      maxWidth: 420, boxShadow: '0 8px 32px rgba(0,0,0,0.5)', width: '90%', pointerEvents: 'all'
+    }}>
+      <div style={{ color: 'white', fontWeight: 'bold', fontSize: 15, marginBottom: 8 }}>{scenario.warn}</div>
+      {scenario.theoryRule && (
+        <div style={{
+          borderTop: '1px solid rgba(255,255,255,0.1)', paddingTop: 8, marginTop: 8,
+          textAlign: 'left', fontSize: 12, color: '#ccc', lineHeight: '1.5'
+        }}>
+          <div style={{ color: '#22d3ee', fontWeight: 'bold', marginBottom: 4 }}>💡 Lý thuyết: {scenario.theoryRule.title}</div>
+          <div>{scenario.theoryRule.rule}</div>
+        </div>
+      )}
     </div>
   );
 };
@@ -649,6 +663,13 @@ export const DrivingSimulation = () => {
   const [loadingMsg, setLoadingMsg] = useState('Đang khởi động...');
   const isMobile = 'ontouchstart' in window;
 
+  const [density, setDensity] = useState('moderate');
+  const densityRef = useRef('moderate');
+  const handleDensityChange = (val) => {
+    setDensity(val);
+    densityRef.current = val;
+  };
+
   const refs = useRef({ isDriving: false, speed: 0, steer: 0, keys: {}, distanceTraveled: 0, scenarioIdx: 0, activeScenario: null, scenarioChecked: false, scoreState: initScore() });
 
   useEffect(() => { refs.current.isDriving = isDriving; }, [isDriving]);
@@ -735,7 +756,7 @@ export const DrivingSimulation = () => {
         refs.current._yaw = 0;
 
         // ── Traffic AI ──────────────────────────────────────────────────────
-        const TRAFFIC_COUNT = 24;
+        const MAX_TRAFFIC = 40;
         const trafficColors = [0xcc2222, 0x1133aa, 0xeeeeee, 0x111111, 0x445533, 0xcc8822, 0x4477aa];
         
         // Car Body
@@ -743,7 +764,7 @@ export const DrivingSimulation = () => {
           const m = new THREE.InstancedMesh(
             new THREE.BoxGeometry(1.8, 0.7, 4.4),
             new THREE.MeshStandardMaterial({ color: col, roughness: 0.4, metalness: 0.3 }),
-            Math.ceil(TRAFFIC_COUNT / trafficColors.length)
+            Math.ceil(MAX_TRAFFIC / trafficColors.length)
           );
           scene.add(m);
           return m;
@@ -754,7 +775,7 @@ export const DrivingSimulation = () => {
           const m = new THREE.InstancedMesh(
             new THREE.BoxGeometry(1.5, 0.6, 2.2),
             new THREE.MeshStandardMaterial({ color: 0x0a0a0a, roughness: 0.1, metalness: 0.8 }),
-            Math.ceil(TRAFFIC_COUNT / trafficColors.length)
+            Math.ceil(MAX_TRAFFIC / trafficColors.length)
           );
           scene.add(m);
           return m;
@@ -764,21 +785,21 @@ export const DrivingSimulation = () => {
         const wheelGeo = new THREE.CylinderGeometry(0.35, 0.35, 0.2, 12);
         wheelGeo.rotateZ(Math.PI / 2);
         const wheelMat = new THREE.MeshStandardMaterial({ color: 0x1a1a1a, roughness: 0.9 });
-        const wheelInstances = new THREE.InstancedMesh(wheelGeo, wheelMat, TRAFFIC_COUNT * 4);
+        const wheelInstances = new THREE.InstancedMesh(wheelGeo, wheelMat, MAX_TRAFFIC * 4);
         scene.add(wheelInstances);
 
         // Headlights/Taillights
         const lightGeo = new THREE.BoxGeometry(0.4, 0.2, 0.1);
-        const frontLightInstances = new THREE.InstancedMesh(lightGeo, new THREE.MeshBasicMaterial({ color: 0xffffee }), TRAFFIC_COUNT * 2);
-        const rearLightInstances = new THREE.InstancedMesh(lightGeo, new THREE.MeshBasicMaterial({ color: 0xff0000 }), TRAFFIC_COUNT * 2);
+        const frontLightInstances = new THREE.InstancedMesh(lightGeo, new THREE.MeshBasicMaterial({ color: 0xffffee }), MAX_TRAFFIC * 2);
+        const rearLightInstances = new THREE.InstancedMesh(lightGeo, new THREE.MeshBasicMaterial({ color: 0xff0000 }), MAX_TRAFFIC * 2);
         scene.add(frontLightInstances); scene.add(rearLightInstances);
 
-        // Each AI car state
-        const aiCars = Array.from({ length: TRAFFIC_COUNT }, (_, i) => {
+        // Each AI car state (Max capacity)
+        const aiCars = Array.from({ length: MAX_TRAFFIC }, (_, i) => {
           const isSameDir = Math.random() > 0.5;
           return {
             x: carStartX + (isSameDir ? 2.2 : -2.2), // Same dir on right lane (2.2), opposite on left lane (-2.2)
-            z: carStartZ - 20 - Math.random() * 300,
+            z: carStartZ - 20 - Math.random() * 350,
             speed: 25 + Math.random() * 30, // absolute km/h
             isSameDir,
             yaw: isSameDir ? 0 : Math.PI,
@@ -899,8 +920,30 @@ export const DrivingSimulation = () => {
 
           // ── Update traffic AI ────────────────────────────────────────────
           const colorCount = new Array(trafficColors.length).fill(0);
+          const currentDensity = densityRef.current || 'moderate';
+          const activeCount = currentDensity === 'sparse' ? 8 : currentDensity === 'crowded' ? 40 : 20;
           
           aiCars.forEach(car => {
+            const iIdx = colorCount[car.colorIdx];
+            colorCount[car.colorIdx]++;
+
+            // Hide disabled traffic cars below ground
+            if (car.id >= activeCount) {
+              const hiddenPos = new THREE.Vector3(0, -1000, 0);
+              _quat.setFromAxisAngle(new THREE.Vector3(0, 1, 0), 0);
+              _matrix.compose(hiddenPos, _quat, _scale);
+              trafficInstances[car.colorIdx].setMatrixAt(iIdx, _matrix);
+              roofInstances[car.colorIdx].setMatrixAt(iIdx, _matrix);
+              for (let wI = 0; wI < 4; wI++) {
+                wheelInstances.setMatrixAt(car.id * 4 + wI, _matrix);
+              }
+              frontLightInstances.setMatrixAt(car.id * 2, _matrix);
+              frontLightInstances.setMatrixAt(car.id * 2 + 1, _matrix);
+              rearLightInstances.setMatrixAt(car.id * 2, _matrix);
+              rearLightInstances.setMatrixAt(car.id * 2 + 1, _matrix);
+              return;
+            }
+
             const carMPS = car.speed / 3.6;
             // Move forward along its yaw
             car.x += Math.sin(car.yaw) * carMPS * dt;
@@ -935,8 +978,6 @@ export const DrivingSimulation = () => {
             }
 
             // Matrices
-            const iIdx = colorCount[car.colorIdx];
-            colorCount[car.colorIdx]++;
             _quat.setFromAxisAngle(new THREE.Vector3(0, 1, 0), car.yaw);
             
             // Body
@@ -1070,6 +1111,31 @@ export const DrivingSimulation = () => {
       <button onClick={() => navigate(-1)} style={{ position: 'absolute', top: 16, left: '12%', zIndex: 20, background: 'rgba(0,0,0,0.65)', border: '1px solid #555', borderRadius: '50%', width: 36, height: 36, display: 'flex', alignItems: 'center', justifyContent: 'center', cursor: 'pointer' }}>
         <ArrowLeft size={18} color="white" />
       </button>
+
+      {/* Traffic Density Control Panel */}
+      {!error && !finished && (
+        <div style={{
+          position: 'absolute', top: 16, right: '12%', zIndex: 20,
+          background: 'rgba(0,0,0,0.65)', border: '1px solid #555', borderRadius: 8,
+          padding: '6px 12px', display: 'flex', alignItems: 'center', gap: 8,
+          backdropFilter: 'blur(6px)', pointerEvents: 'all'
+        }}>
+          <span style={{ color: '#aaa', fontSize: 11, fontWeight: 'bold' }}>MẬT ĐỘ XE:</span>
+          <select
+            value={density}
+            onChange={(e) => handleDensityChange(e.target.value)}
+            style={{
+              background: '#222', color: '#fff', border: '1px solid #555',
+              borderRadius: 4, padding: '2px 8px', fontSize: 11, cursor: 'pointer',
+              fontWeight: 'bold', outline: 'none'
+            }}
+          >
+            <option value="sparse">Thưa thớt (8 xe)</option>
+            <option value="moderate">Vừa phải (20 xe)</option>
+            <option value="crowded">Đông đúc (40 xe)</option>
+          </select>
+        </div>
+      )}
 
       {!isDriving && !error && !finished && speed < 1 && (
         <div style={{ position: 'absolute', top: '50%', left: '50%', transform: 'translate(-50%,-50%)', background: 'rgba(0,0,0,0.8)', color: 'white', padding: '24px 36px', borderRadius: 14, textAlign: 'center', border: '1px solid #444', zIndex: 10 }}>
