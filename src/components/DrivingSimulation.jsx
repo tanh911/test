@@ -796,7 +796,7 @@ export const DrivingSimulation = () => {
         const aiCars = Array.from({ length: MAX_TRAFFIC }, (_, i) => {
           const isSameDir = Math.random() > 0.5;
           return {
-            x: carStartX + (isSameDir ? 2.2 : -2.2), // Same dir on right lane (2.2), opposite on left lane (-2.2)
+            x: isSameDir ? 2.2 : -2.2, // Same dir on right lane (2.2), opposite on left lane (-2.2)
             z: carStartZ - 20 - Math.random() * 350,
             speed: 25 + Math.random() * 30, // absolute km/h
             isSameDir,
@@ -942,16 +942,6 @@ export const DrivingSimulation = () => {
               return;
             }
 
-            const carMPS = car.speed / 3.6;
-            // Move forward along its yaw
-            car.x += Math.sin(car.yaw) * carMPS * dt;
-            car.z -= Math.cos(car.yaw) * carMPS * dt;
-            
-            // Scroll traffic with the road in procedural mode to stay locked to the lanes
-            if (r._scenery) {
-              car.z += mps * dt;
-            }
-            
             // Distance check relative to player
             const dx = car.x - (r._carX || 0);
             const dz = car.z - (r._carZ || 0);
@@ -964,6 +954,25 @@ export const DrivingSimulation = () => {
             
             // Project distance onto player's forward vector
             const relFwd = dx * fwdX + dz * fwdZ;
+            const relRight = dx * rightX + dz * rightZ;
+
+            let carMPS = car.speed / 3.6;
+
+            // AI Safety Braking: if same direction, behind player, and close to player path
+            if (car.isSameDir && relFwd > -25 && relFwd < -1.5 && Math.abs(relRight) < 1.5) {
+              const playerMPS = r.speed / 3.6;
+              // Match player speed or stop completely if player is stopped to prevent clipping
+              carMPS = Math.min(carMPS, playerMPS * 0.95);
+            }
+
+            // Move forward along its yaw
+            car.x += Math.sin(car.yaw) * carMPS * dt;
+            car.z -= Math.cos(car.yaw) * carMPS * dt;
+            
+            // Scroll traffic with the road in procedural mode to stay locked to the lanes
+            if (r._scenery) {
+              car.z += mps * dt;
+            }
             
             // Respawn if too far behind/ahead
             if (relFwd < -120 || relFwd > 250 || dist > 300) {
