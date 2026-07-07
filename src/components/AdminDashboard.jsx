@@ -25,9 +25,11 @@ export function AdminDashboard({ user, onNavigate }) {
 
   // Trạng thái chọn hàng loạt và tiến trình gửi email
   const [selectedUids, setSelectedUids] = useState([]);
-  const [recipientType, setRecipientType] = useState('all'); // 'single', 'bulk', 'all', 'custom'
+  const [recipientType, setRecipientType] = useState('list'); // 'single', 'list', 'custom'
   const [emailTemplate, setEmailTemplate] = useState('custom'); // 'custom', 'welcome'
   const [bulkStatus, setBulkStatus] = useState(null); // null hoặc { current, total, success, fail, currentEmail, errors }
+  const [modalSelectedUids, setModalSelectedUids] = useState([]);
+  const [modalSearch, setModalSearch] = useState('');
 
   const cancelBulkRef = useRef(false);
 
@@ -48,8 +50,10 @@ export function AdminDashboard({ user, onNavigate }) {
     setBulkStatus(null);
     cancelBulkRef.current = false;
     setEmailModalUser(null);
-    setRecipientType('all');
+    setRecipientType('list');
     setCustomRecipientEmail('');
+    setModalSelectedUids(validUsers.map(u => u.id));
+    setModalSearch('');
     setEmailTemplate('welcome');
     setEmailSubject('🎉 Cảm ơn bạn đã đăng ký tài khoản tại fuhrerscheinvide.site');
     setEmailBody('');
@@ -178,18 +182,27 @@ export function AdminDashboard({ user, onNavigate }) {
     setBulkStatus(null);
     cancelBulkRef.current = false;
     setEmailTemplate('custom');
+    setModalSearch('');
     if (target === 'bulk') {
       setEmailModalUser(null);
-      setRecipientType('bulk');
+      setRecipientType('list');
       setCustomRecipientEmail('');
+      setModalSelectedUids([...selectedUids]);
     } else if (target && typeof target === 'object') {
       setEmailModalUser(target);
       setRecipientType('single');
       setCustomRecipientEmail(target.email || '');
+      setModalSelectedUids([target.id]);
     } else {
       setEmailModalUser(null);
-      setRecipientType(selectedUids.length > 0 ? 'bulk' : 'all');
+      setRecipientType('list');
       setCustomRecipientEmail('');
+      if (selectedUids.length > 0) {
+        setModalSelectedUids([...selectedUids]);
+      } else {
+        const allValidUids = users.filter(u => u.email && u.email.includes('@')).map(u => u.id);
+        setModalSelectedUids(allValidUids);
+      }
     }
     setEmailSubject('');
     setEmailBody('');
@@ -289,20 +302,13 @@ export function AdminDashboard({ user, onNavigate }) {
         return;
       }
       targets = [{ email: emailModalUser.email.trim(), name: emailModalUser.displayName || '' }];
-    } else if (recipientType === 'bulk') {
-      const selectedUsers = users.filter(u => selectedUids.includes(u.id) && u.email && u.email.includes('@'));
+    } else if (recipientType === 'list') {
+      const selectedUsers = users.filter(u => modalSelectedUids.includes(u.id) && u.email && u.email.includes('@'));
       if (selectedUsers.length === 0) {
-        showToast('Không có người dùng nào được chọn hoặc không có email hợp lệ!', 'error');
+        showToast('Vui lòng chọn ít nhất một người nhận từ danh sách!', 'error');
         return;
       }
       targets = selectedUsers.map(u => ({ email: u.email.trim(), name: u.displayName || '' }));
-    } else if (recipientType === 'all') {
-      const validUsers = users.filter(u => u.email && u.email.includes('@'));
-      if (validUsers.length === 0) {
-        showToast('Không tìm thấy người dùng nào có địa chỉ email hợp lệ!', 'error');
-        return;
-      }
-      targets = validUsers.map(u => ({ email: u.email.trim(), name: u.displayName || '' }));
     } else if (recipientType === 'custom') {
       if (!customRecipientEmail.trim()) {
         showToast('Vui lòng nhập địa chỉ email người nhận!', 'error');
@@ -1021,15 +1027,13 @@ export function AdminDashboard({ user, onNavigate }) {
               /* Composer gửi email */
               <form onSubmit={handleSendEmail} style={{ display: 'flex', flexDirection: 'column', gap: '16px' }}>
                 
-                {/* Chọn đối tượng (Chỉ hiện khi soạn từ header) */}
                 {!emailModalUser && (
                   <div>
-                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Đối tượng nhận email</label>
-                    <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '8px' }}>
+                    <label style={{ display: 'block', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em', marginBottom: '8px' }}>Phương thức chọn người nhận</label>
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '8px', marginBottom: '12px' }}>
                       {[
-                        { type: 'all', label: `Tất cả (${users.filter(u => u.email && u.email.includes('@')).length})` },
-                        ...(selectedUids.length > 0 ? [{ type: 'bulk', label: `Đã chọn (${users.filter(u => selectedUids.includes(u.id) && u.email && u.email.includes('@')).length})` }] : []),
-                        { type: 'custom', label: 'Nhập thủ công' }
+                        { type: 'list', label: 'Chọn từ danh sách' },
+                        { type: 'custom', label: 'Nhập email thủ công' }
                       ].map(opt => {
                         const isSel = recipientType === opt.type;
                         return (
@@ -1053,6 +1057,116 @@ export function AdminDashboard({ user, onNavigate }) {
                           </button>
                         );
                       })}
+                    </div>
+                  </div>
+                )}
+
+                {!emailModalUser && recipientType === 'list' && (
+                  <div>
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                      <label style={{ fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.6)', textTransform: 'uppercase', letterSpacing: '0.05em' }}>
+                        Danh sách người nhận ({modalSelectedUids.length})
+                      </label>
+                      <div style={{ display: 'flex', gap: '8px' }}>
+                        <button
+                          type="button"
+                          onClick={() => setModalSelectedUids(users.filter(u => u.email && u.email.includes('@')).map(u => u.id))}
+                          style={{ background: 'none', border: 'none', color: '#60a5fa', fontSize: '11px', fontWeight: '600', cursor: 'pointer', padding: 0 }}
+                        >
+                          Chọn tất cả
+                        </button>
+                        <span style={{ color: 'rgba(255,255,255,0.3)', fontSize: '11px' }}>|</span>
+                        <button
+                          type="button"
+                          onClick={() => setModalSelectedUids([])}
+                          style={{ background: 'none', border: 'none', color: '#f87171', fontSize: '11px', fontWeight: '600', cursor: 'pointer', padding: 0 }}
+                        >
+                          Bỏ chọn
+                        </button>
+                      </div>
+                    </div>
+
+                    <input
+                      type="text"
+                      placeholder="Tìm kiếm theo tên hoặc email..."
+                      value={modalSearch}
+                      onChange={e => setModalSearch(e.target.value)}
+                      style={{
+                        width: '100%',
+                        padding: '10px 12px',
+                        borderRadius: '10px',
+                        background: 'rgba(255,255,255,0.06)',
+                        border: '1px solid rgba(255,255,255,0.12)',
+                        color: 'white',
+                        fontSize: '13px',
+                        outline: 'none',
+                        marginBottom: '8px',
+                        boxSizing: 'border-box'
+                      }}
+                    />
+
+                    <div style={{
+                      maxHeight: '160px',
+                      overflowY: 'auto',
+                      background: 'rgba(0,0,0,0.2)',
+                      borderRadius: '10px',
+                      border: '1px solid rgba(255,255,255,0.1)',
+                      padding: '6px 10px',
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: '4px'
+                    }}>
+                      {users
+                        .filter(u => u.email && u.email.includes('@'))
+                        .filter(u =>
+                          (u.displayName || '').toLowerCase().includes(modalSearch.toLowerCase()) ||
+                          (u.email || '').toLowerCase().includes(modalSearch.toLowerCase())
+                        )
+                        .map(u => {
+                          const isSel = modalSelectedUids.includes(u.id);
+                          return (
+                            <label
+                              key={u.id}
+                              style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                padding: '6px 8px',
+                                borderRadius: '6px',
+                                cursor: 'pointer',
+                                transition: 'background 0.2s',
+                                background: isSel ? 'rgba(99, 102, 241, 0.08)' : 'transparent',
+                                color: 'white',
+                                fontSize: '13px'
+                              }}
+                              onMouseEnter={e => e.currentTarget.style.background = isSel ? 'rgba(99, 102, 241, 0.12)' : 'rgba(255, 255, 255, 0.04)'}
+                              onMouseLeave={e => e.currentTarget.style.background = isSel ? 'rgba(99, 102, 241, 0.08)' : 'transparent'}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isSel}
+                                onChange={() => {
+                                  setModalSelectedUids(prev =>
+                                    prev.includes(u.id) ? prev.filter(id => id !== u.id) : [...prev, u.id]
+                                  );
+                                }}
+                                style={{ cursor: 'pointer' }}
+                              />
+                              <div style={{ display: 'flex', flexDirection: 'column' }}>
+                                <span style={{ fontWeight: '600' }}>{u.displayName || 'Không tên'}</span>
+                                <span style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>{u.email}</span>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      {users.filter(u => u.email && u.email.includes('@')).filter(u =>
+                        (u.displayName || '').toLowerCase().includes(modalSearch.toLowerCase()) ||
+                        (u.email || '').toLowerCase().includes(modalSearch.toLowerCase())
+                      ).length === 0 && (
+                        <div style={{ color: 'rgba(255,255,255,0.4)', fontSize: '12px', textAlign: 'center', padding: '12px 0' }}>
+                          Không tìm thấy người dùng phù hợp
+                        </div>
+                      )}
                     </div>
                   </div>
                 )}
