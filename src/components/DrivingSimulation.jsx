@@ -1,5 +1,6 @@
 import React, { useEffect, useRef, useState } from 'react';
 import * as THREE from 'three/webgpu';
+import { WebGLRenderer } from 'three';
 import { float, color, time, mix, Fn } from 'three/tsl';
 import { ArrowLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
@@ -471,7 +472,7 @@ export const DrivingSimulation = () => {
 
         if (rearMirrorRef.current) {
           try {
-            mirrorRenderer = new THREE.WebGLRenderer({ antialias: false });
+            mirrorRenderer = new WebGLRenderer({ antialias: false });
             mirrorRenderer.setPixelRatio(1);
             mirrorRenderer.shadowMap.enabled = false;
           } catch (e) { mirrorRenderer = null; }
