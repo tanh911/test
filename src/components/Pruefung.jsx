@@ -368,18 +368,18 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
               </div>
 
               {/* Legend */}
-              <div className="flex justify-center gap-5 mt-1 pb-4">
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: '#7cb342', boxShadow: '0 2px 4px rgba(124, 179, 66, 0.3)' }} />
-                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2' }}>Đã học tốt</span>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '28px', marginTop: '12px', paddingBottom: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#7cb342', boxShadow: '0 2px 4px rgba(124, 179, 66, 0.3)' }} />
+                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2', whiteSpace: 'nowrap' }}>Đã học tốt</span>
                 </div>
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: '#fbc02d', boxShadow: '0 2px 4px rgba(251, 192, 45, 0.3)' }} />
-                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2' }}>Đang học</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#fbc02d', boxShadow: '0 2px 4px rgba(251, 192, 45, 0.3)' }} />
+                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2', whiteSpace: 'nowrap' }}>Đang học</span>
                 </div>
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: '#e53935', boxShadow: '0 2px 4px rgba(229, 57, 53, 0.3)' }} />
-                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2' }}>Hay sai</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#e53935', boxShadow: '0 2px 4px rgba(229, 57, 53, 0.3)' }} />
+                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2', whiteSpace: 'nowrap' }}>Hay sai</span>
                 </div>
               </div>
             </div>
