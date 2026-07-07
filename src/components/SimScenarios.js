@@ -103,7 +103,7 @@ export const SCENARIOS = [
   },
   {
     id: 's8', type: 'SPEED_LIMIT', limit: 100,
-    triggerZ: 1200, resolveZ: 1400,
+    triggerZ: 1200, resolveZ: 1350,
     sign: 'limit_100',
     warn: '🛣️ Đường ngoài đô thị — Tối đa 100 km/h',
     passMsg: '✅ Lái đúng tốc độ!',
@@ -115,6 +115,48 @@ export const SCENARIOS = [
       rule: 'Tốc độ tối đa cho phép đối với ô tô con trên các tuyến đường quốc lộ/tỉnh lộ ngoài đô thị (Landstraße) là 100 km/h nếu không có biển báo giới hạn khác.'
     }
   },
+  {
+    id: 's9', type: 'NO_OVERTAKING',
+    triggerZ: 1400, resolveZ: 1520,
+    sign: 'no_overtaking',
+    warn: '🚫 Biển Cấm Vượt (Überholverbot) — Đi đúng làn đường của bạn!',
+    passMsg: '✅ Giữ làn tốt!',
+    failMsg: '❌ Bạn đã đè vạch/vượt xe trong khu vực cấm vượt! (-20 điểm)',
+    failPenalty: 20,
+    check: (speed, crossedCenter) => !crossedCenter,
+    theoryRule: {
+      title: 'Biển Cấm Vượt (Überholverbot - Zeichen 276)',
+      rule: 'Biển này cấm tất cả các phương tiện nhiều hơn hai bánh (như ô tô con, xe tải) vượt các phương tiện nhiều hơn hai bánh khác. Bạn phải đi đúng làn đường bên phải.'
+    }
+  },
+  {
+    id: 's10', type: 'PEDESTRIAN_CROSSING',
+    triggerZ: 1580, resolveZ: 1650,
+    sign: 'pedestrian',
+    warn: '🚶 Vạch đi bộ qua đường (Zebrastreifen) — Giảm tốc & sẵn sàng phanh!',
+    passMsg: '✅ Đi qua an toàn!',
+    failMsg: '❌ Không giảm tốc độ khi qua vạch đi bộ! (-15 điểm)',
+    failPenalty: 15,
+    check: (speed) => speed <= 30,
+    theoryRule: {
+      title: 'Vạch đi bộ qua đường (Zebrastreifen - Zeichen 293)',
+      rule: 'Tại vạch đi bộ, người đi bộ luôn có quyền ưu tiên tuyệt đối. Bạn phải tiếp cận với tốc độ vừa phải, sẵn sàng phanh dừng nếu có người muốn qua đường.'
+    }
+  },
+  {
+    id: 's11', type: 'RIGHT_BEFORE_LEFT',
+    triggerZ: 1720, resolveZ: 1800,
+    sign: 'right_before_left',
+    warn: '⚠️ Quy tắc Rechts vor Links — Giảm tốc độ quan sát bên phải!',
+    passMsg: '✅ Chú ý tốt!',
+    failMsg: '❌ Không giảm tốc độ tại ngã tư giao cắt! (-15 điểm)',
+    failPenalty: 15,
+    check: (speed) => speed <= 25,
+    theoryRule: {
+      title: 'Nhường đường bên phải trước (Rechts vor Links)',
+      rule: 'Tại các giao lộ không có biển báo ưu tiên hoặc đèn tín hiệu, quy tắc Rechts vor Links mặc định được áp dụng. Bạn luôn phải nhường đường cho xe đi tới từ bên phải.'
+    }
+  }
 ];
 
 export const MAX_SCORE = 100;

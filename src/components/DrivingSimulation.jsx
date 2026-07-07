@@ -583,6 +583,57 @@ function makePrioritySignTexture() {
   return new THREE.CanvasTexture(canvas);
 }
 
+// Helper for No Overtaking sign
+function makeNoOvertakingSignTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128; canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.arc(64, 64, 58, 0, Math.PI * 2); ctx.fill();
+  ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 10; ctx.stroke();
+  
+  // Right car (black)
+  ctx.fillStyle = '#1e293b'; ctx.fillRect(70, 50, 16, 28);
+  ctx.fillStyle = '#0f172a'; ctx.fillRect(73, 58, 10, 12);
+  
+  // Left car (red)
+  ctx.fillStyle = '#e11d48'; ctx.fillRect(42, 50, 16, 28);
+  ctx.fillStyle = '#be123c'; ctx.fillRect(45, 58, 10, 12);
+  return new THREE.CanvasTexture(canvas);
+}
+
+// Helper for Pedestrian crossing sign
+function makePedestrianSignTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128; canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#2563eb'; ctx.fillRect(10, 10, 108, 108);
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.moveTo(64, 18); ctx.lineTo(108, 102); ctx.lineTo(20, 102); ctx.closePath(); ctx.fill();
+  ctx.fillStyle = '#000000';
+  ctx.beginPath(); ctx.arc(64, 46, 6, 0, Math.PI * 2); ctx.fill();
+  ctx.fillRect(61, 54, 6, 22);
+  ctx.strokeStyle = '#000000'; ctx.lineWidth = 3;
+  ctx.beginPath(); ctx.moveTo(56, 60); ctx.lineTo(72, 60);
+  ctx.moveTo(61, 76); ctx.lineTo(54, 94);
+  ctx.moveTo(67, 76); ctx.lineTo(74, 94); ctx.stroke();
+  return new THREE.CanvasTexture(canvas);
+}
+
+// Helper for Right-before-Left sign
+function makeRightBeforeLeftSignTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128; canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath(); ctx.moveTo(64, 10); ctx.lineTo(118, 110); ctx.lineTo(10, 110); ctx.closePath(); ctx.fill();
+  ctx.strokeStyle = '#e11d48'; ctx.lineWidth = 8; ctx.stroke();
+  ctx.strokeStyle = '#000000'; ctx.lineWidth = 10; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(48, 54); ctx.lineTo(80, 86);
+  ctx.moveTo(80, 54); ctx.lineTo(48, 86); ctx.stroke();
+  return new THREE.CanvasTexture(canvas);
+}
+
 // Build standard road signposts
 function makeSignPost(type) {
   const g = new THREE.Group();
@@ -607,6 +658,15 @@ function makeSignPost(type) {
   } else if (type === 'priority') {
     texture = makePrioritySignTexture();
     shapeGeo = new THREE.CylinderGeometry(size / 2, size / 2, 0.04, 4);
+  } else if (type === 'no_overtaking') {
+    texture = makeNoOvertakingSignTexture();
+    shapeGeo = new THREE.CylinderGeometry(size / 2, size / 2, 0.04, 16);
+  } else if (type === 'pedestrian') {
+    texture = makePedestrianSignTexture();
+    shapeGeo = new THREE.BoxGeometry(size, size, 0.04);
+  } else if (type === 'right_before_left') {
+    texture = makeRightBeforeLeftSignTexture();
+    shapeGeo = new THREE.CylinderGeometry(size / 2, size / 2, 0.04, 3);
   } else if (type.startsWith('limit_')) {
     const val = parseInt(type.split('_')[1]) || 50;
     texture = makeSpeedSign(val);
@@ -668,7 +728,28 @@ export const DrivingSimulation = () => {
     densityRef.current = val;
   };
 
-  const refs = useRef({ isDriving: false, speed: 0, steer: 0, keys: {}, distanceTraveled: 0, scenarioIdx: 0, activeScenario: null, scenarioChecked: false, scoreState: initScore() });
+  const [collision, setCollision] = useState(null);
+
+  const handleResumeAfterCollision = () => {
+    setCollision(null);
+    refs.current.collisionOccurred = false;
+    refs.current.steer = 0;
+    refs.current.speed = 0;
+  };
+
+  const refs = useRef({ 
+    isDriving: false, 
+    speed: 0, 
+    steer: 0, 
+    keys: {}, 
+    distanceTraveled: 0, 
+    scenarioIdx: 0, 
+    activeScenario: null, 
+    scenarioChecked: false, 
+    scoreState: initScore(),
+    collisionOccurred: false,
+    crossedCenter: false
+  });
 
   useEffect(() => { refs.current.isDriving = isDriving; }, [isDriving]);
 
@@ -884,6 +965,33 @@ export const DrivingSimulation = () => {
             camera.lookAt(seatX + dirX * lookDist, 1.3, seatZ + dirZ * lookDist);
           }
 
+          // Curb collision check (road drivable width from curb to curb is 11m, centered at X=0, so boundary is at -5.5 and 5.5)
+          const curPlayerX = 2.2 + r.steer * 0.3;
+          if ((curPlayerX - 0.95 < -5.5 || curPlayerX + 0.95 > 5.5) && !r.collisionOccurred) {
+            r.collisionOccurred = true;
+            r.speed = 0;
+            r.isDriving = false;
+            setIsDriving(false);
+            
+            const newSS = {
+              points: Math.max(0, r.scoreState.points - 20),
+              events: [...r.scoreState.events, {
+                msg: '❌ Đâm vào lề đường/vỉa hè! (-20đ)',
+                passed: false,
+                time: Date.now()
+              }]
+            };
+            r.scoreState = newSS;
+            setScore(newSS.points);
+            setEvents(newSS.events);
+            
+            setCollision({
+              type: 'curb',
+              messageVi: '💥 VA CHẠM LỀ ĐƯỜNG! Bánh xe của bạn đã leo lên vỉa hè hoặc đâm vào lề đường.',
+              messageDe: '💥 BORDSTEINKOLLISION! Sie sind gegen den Bordstein gefahren.'
+            });
+          }
+
           // Scenario logic
           if (!finished) {
             const dist = r.distanceTraveled;
@@ -891,11 +999,22 @@ export const DrivingSimulation = () => {
             if (idx < SCENARIOS.length) {
               const sc = SCENARIOS[idx];
               if (dist >= sc.triggerZ && !r.activeScenario) {
-                r.activeScenario = sc; r.scenarioChecked = false;
+                r.activeScenario = sc; 
+                r.scenarioChecked = false;
+                r.crossedCenter = false; // Reset center crossing tracker
                 setActiveScenario(sc);
               }
+              
+              // If currently in a cấm vượt scenario, check if they crossed the dividing line (X < 1.1)
+              if (r.activeScenario && r.activeScenario.type === 'NO_OVERTAKING') {
+                if (curPlayerX < 1.1) {
+                  r.crossedCenter = true;
+                }
+              }
+
               if (r.activeScenario && dist >= sc.resolveZ) {
-                const passed = sc.check(r.speed);
+                // Pass speed and center crossing flag to check
+                const passed = sc.check(r.speed, r.crossedCenter);
                 const newSS = applyEvent(r.scoreState, sc, passed);
                 r.scoreState = newSS;
                 setScore(newSS.points);
@@ -957,6 +1076,37 @@ export const DrivingSimulation = () => {
             const relRight = dx * rightX + dz * rightZ;
 
             let carMPS = car.speed / 3.6;
+
+            // ── Collision Detection with Traffic Cars ──
+            const playerX = 2.2 + r.steer * 0.3;
+            // Bounding box overlap checks
+            const collX = Math.abs(playerX - car.x) < 1.5;
+            const collZ = Math.abs(0 - car.z) < 3.0; // player is at Z=0
+            
+            if (collX && collZ && !r.collisionOccurred) {
+              r.collisionOccurred = true;
+              r.speed = 0;
+              r.isDriving = false;
+              setIsDriving(false);
+              
+              const newSS = {
+                points: Math.max(0, r.scoreState.points - 100),
+                events: [...r.scoreState.events, {
+                  msg: '❌ Tai nạn va chạm với xe ô tô khác! (-100đ - Trượt ngay lập tức)',
+                  passed: false,
+                  time: Date.now()
+                }]
+              };
+              r.scoreState = newSS;
+              setScore(newSS.points);
+              setEvents(newSS.events);
+              
+              setCollision({
+                type: 'car',
+                messageVi: '💥 TAI NẠN VA CHẠM! Bạn đã đâm vào xe ô tô khác đang lưu thông.',
+                messageDe: '💥 KOLLISION! Sie sind mit einem anderen Fahrzeug zusammengestoßen.'
+              });
+            }
 
             // AI Safety Braking: if same direction, behind player, and close to player path
             if (car.isSameDir && relFwd > -25 && relFwd < -1.5 && Math.abs(relRight) < 1.5) {
@@ -1186,8 +1336,67 @@ export const DrivingSimulation = () => {
           <div style={{ fontSize: 40, color: score >= 80 ? '#22c55e' : score >= 60 ? '#f59e0b' : '#ef4444', fontWeight: 'bold', marginBottom: 4 }}>{score} điểm</div>
           <div style={{ color: '#aaa', fontSize: 14, marginBottom: 20 }}>{score >= 80 ? 'Xuất sắc! Bạn đã vượt qua bài thi thực hành.' : score >= 60 ? 'Tạm được, cần cải thiện thêm.' : 'Cần ôn luyện thêm về luật giao thông.'}</div>
           <div style={{ display: 'flex', gap: 12, justifyContent: 'center' }}>
-            <button onClick={() => { refs.current = { isDriving: false, speed: 0, steer: 0, keys: {}, distanceTraveled: 0, scenarioIdx: 0, activeScenario: null, scenarioChecked: false, scoreState: initScore() }; setScore(100); setEvents([]); setFinished(false); setActiveScenario(null); setIsDriving(false); setSpeed(0); }} style={{ padding: '10px 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold' }}>🔄 Chơi lại</button>
+            <button onClick={() => { refs.current = { isDriving: false, speed: 0, steer: 0, keys: {}, distanceTraveled: 0, scenarioIdx: 0, activeScenario: null, scenarioChecked: false, scoreState: initScore(), collisionOccurred: false, crossedCenter: false }; setScore(100); setEvents([]); setFinished(false); setActiveScenario(null); setIsDriving(false); setSpeed(0); setCollision(null); }} style={{ padding: '10px 20px', background: '#3b82f6', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold' }}>🔄 Chơi lại</button>
             <button onClick={() => navigate(-1)} style={{ padding: '10px 20px', background: '#374151', color: 'white', border: 'none', borderRadius: 8, cursor: 'pointer', fontWeight: 'bold' }}>← Quay lại</button>
+          </div>
+        </div>
+      )}
+
+      {collision && (
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          background: 'rgba(220, 38, 38, 0.45)',
+          backdropFilter: 'blur(12px)',
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1000,
+          color: '#ffffff',
+          padding: '24px',
+          textAlign: 'center',
+        }}>
+          <div style={{
+            background: 'rgba(15, 23, 42, 0.95)',
+            border: '2px solid #ef4444',
+            borderRadius: '16px',
+            padding: '32px',
+            maxWidth: '500px',
+            boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.5)',
+            display: 'flex',
+            flexDirection: 'column',
+            gap: '20px',
+          }}>
+            <div style={{ fontSize: '48px' }}>💥</div>
+            <h2 style={{ margin: 0, fontSize: '22px', color: '#f87171', fontWeight: 'bold' }}>
+              {collision.messageVi}
+            </h2>
+            <h3 style={{ margin: 0, fontSize: '16px', color: '#94a3b8', fontStyle: 'italic', fontWeight: 'normal' }}>
+              {collision.messageDe}
+            </h3>
+            <p style={{ fontSize: '13px', color: '#cbd5e1', lineHeight: '1.6', margin: 0 }}>
+              {collision.type === 'car' 
+                ? 'Trong kỳ thi lái xe thực tế tại Đức (Praktische Prüfung), gây va chạm giao thông là lỗi nghiêm trọng (Fahrfehler) dẫn đến đánh trượt lập tức và dừng thi ngay.'
+                : 'Đâm hoặc leo lề đường/vỉa hè là lỗi kỹ thuật lớn. Nếu phạm phải trong bài thi thực hành, bạn sẽ bị giám khảo đánh trượt ngay lập tức.'}
+            </p>
+            <button 
+              onClick={handleResumeAfterCollision}
+              style={{
+                background: '#ef4444',
+                color: '#ffffff',
+                border: 'none',
+                padding: '12px 24px',
+                borderRadius: '8px',
+                fontSize: '15px',
+                fontWeight: 'bold',
+                cursor: 'pointer',
+                transition: 'all 0.2s',
+                marginTop: '10px',
+              }}
+            >
+              Tiếp tục Thực hành / Fortfahren
+            </button>
           </div>
         </div>
       )}
