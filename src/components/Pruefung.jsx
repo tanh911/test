@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-const getBogenQuestions = (bogenId, isExtension = false) => {
-  return generateExamQuestions(questions, { seed: bogenId, isExtension });
+const getBogenQuestions = (bogenId) => {
+  return generateExamQuestions(questions, { seed: bogenId });
 };
 
 export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'both' }) => {
@@ -63,7 +63,6 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
   const [answers, setAnswers] = useState({}); // { questionId: [selectedOptionIds] }
   const [lernenMode, setLernenMode] = useState('practice');
   const [lernenQuestions, setLernenQuestions] = useState([]);
-  const [isExtension, setIsExtension] = useState(false);
 
   // Timer state
   const [timeLeft, setTimeLeft] = useState(1800); // 30 minutes in seconds
@@ -168,9 +167,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
     }
   }, [location.pathname, examState, selectedBogen]);
 
-  // Start the Exam
   const startExam = () => {
-    const exam = generateExamQuestions(questions, { isExtension });
+    const exam = generateExamQuestions(questions);
     setLernenQuestions(exam);
     setLernenMode('exam');
     setExamType('simulation');
@@ -402,26 +400,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                 </div>
               </div>
 
-              {/* Extension Toggle */}
-              <div className="flex items-center justify-between p-4 bg-white rounded-lg shadow-sm border border-gray-100 mb-2">
-                <div className="flex flex-col">
-                  <span className="text-[#2b576b] font-medium" style={{ fontSize: 'calc(14px * var(--text-scale, 1))' }}>
-                    {languageMode === 'de' ? 'Erweiterungsprüfung' : (languageMode === 'vi' ? 'Thi nâng bằng (Erweiterung)' : 'Thi nâng bằng / Erweiterung')}
-                  </span>
-                  <span className="text-gray-400" style={{ fontSize: 'calc(11px * var(--text-scale, 1))' }}>
-                    {languageMode === 'de' ? '20 Fragen (max. 6 Fehlerpunkte)' : (languageMode === 'vi' ? '20 câu hỏi (tối đa 6 điểm lỗi)' : '20 câu/Fragen (max 6 điểm lỗi)')}
-                  </span>
-                </div>
-                <label className="relative inline-flex items-center cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={isExtension}
-                    onChange={(e) => setIsExtension(e.target.checked)}
-                    className="sr-only peer"
-                  />
-                  <div className="w-11 h-6 bg-gray-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:left-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-[#7cb342]"></div>
-                </label>
-              </div>
+
 
               {/* List Items */}
               <div className="flex flex-col gap-3">
@@ -718,7 +697,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
             <div className="pruefung-footer-btn-group">
               <button
                 onClick={() => {
-                  setLernenQuestions(getBogenQuestions(selectedBogen, isExtension));
+                  setLernenQuestions(getBogenQuestions(selectedBogen));
                   setLernenMode('lesen');
                   setExamState('lernen_active');
                 }}
@@ -728,7 +707,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
               </button>
               <button
                 onClick={() => {
-                  setLernenQuestions(getBogenQuestions(selectedBogen, isExtension));
+                  setLernenQuestions(getBogenQuestions(selectedBogen));
                   setLernenMode('practice');
                   setExamState('lernen_active');
                 }}
@@ -738,7 +717,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
               </button>
               <button
                 onClick={() => {
-                  setLernenQuestions(getBogenQuestions(selectedBogen, isExtension));
+                  setLernenQuestions(getBogenQuestions(selectedBogen));
                   setLernenMode('exam');
                   setExamState('lernen_active');
                   setExamType('bogen');
