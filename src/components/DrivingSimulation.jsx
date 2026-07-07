@@ -272,6 +272,176 @@ function makeTrafficLight(isRed) {
   return g;
 }
 
+// Helper to generate dynamic canvas texture for Speed Limit signs
+function makeSpeedSign(limit) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.arc(64, 64, 60, 0, Math.PI * 2);
+  ctx.fill();
+  
+  ctx.strokeStyle = '#ff0000';
+  ctx.lineWidth = 14;
+  ctx.beginPath();
+  ctx.arc(64, 64, 53, 0, Math.PI * 2);
+  ctx.stroke();
+  
+  ctx.fillStyle = '#000000';
+  ctx.font = 'bold 50px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText(limit.toString(), 64, 64);
+  
+  return new THREE.CanvasTexture(canvas);
+}
+
+// Helper to generate dynamic canvas texture for Stop signs
+function makeStopSignTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.fillStyle = '#cc0000';
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const angle = (i * Math.PI) / 4 + Math.PI / 8;
+    const x = 64 + 60 * Math.cos(angle);
+    const y = 64 + 60 * Math.sin(angle);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.strokeStyle = '#ffffff';
+  ctx.lineWidth = 4;
+  ctx.beginPath();
+  for (let i = 0; i < 8; i++) {
+    const angle = (i * Math.PI) / 4 + Math.PI / 8;
+    const x = 64 + 54 * Math.cos(angle);
+    const y = 64 + 54 * Math.sin(angle);
+    if (i === 0) ctx.moveTo(x, y);
+    else ctx.lineTo(x, y);
+  }
+  ctx.closePath();
+  ctx.stroke();
+  
+  ctx.fillStyle = '#ffffff';
+  ctx.font = 'bold 32px Arial';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('STOP', 64, 64);
+  
+  return new THREE.CanvasTexture(canvas);
+}
+
+// Helper to generate dynamic canvas texture for Yield signs
+function makeYieldSignTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(10, 20);
+  ctx.lineTo(118, 20);
+  ctx.lineTo(64, 118);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.strokeStyle = '#ff0000';
+  ctx.lineWidth = 12;
+  ctx.beginPath();
+  ctx.moveTo(10, 20);
+  ctx.lineTo(118, 20);
+  ctx.lineTo(64, 118);
+  ctx.closePath();
+  ctx.stroke();
+  
+  return new THREE.CanvasTexture(canvas);
+}
+
+// Helper to generate dynamic canvas texture for Priority Road signs
+function makePrioritySignTexture() {
+  const canvas = document.createElement('canvas');
+  canvas.width = 128;
+  canvas.height = 128;
+  const ctx = canvas.getContext('2d');
+  
+  ctx.fillStyle = '#ffffff';
+  ctx.beginPath();
+  ctx.moveTo(64, 10);
+  ctx.lineTo(118, 64);
+  ctx.lineTo(64, 118);
+  ctx.lineTo(10, 64);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.fillStyle = '#ffcc00';
+  ctx.beginPath();
+  ctx.moveTo(64, 25);
+  ctx.lineTo(103, 64);
+  ctx.lineTo(64, 103);
+  ctx.lineTo(25, 64);
+  ctx.closePath();
+  ctx.fill();
+  
+  ctx.strokeStyle = '#000000';
+  ctx.lineWidth = 3;
+  ctx.stroke();
+  
+  return new THREE.CanvasTexture(canvas);
+}
+
+// Build standard road signposts
+function makeSignPost(type) {
+  const g = new THREE.Group();
+  
+  const post = new THREE.Mesh(
+    new THREE.CylinderGeometry(0.04, 0.04, 3, 5),
+    new THREE.MeshStandardMaterial({ color: 0x777777 })
+  );
+  post.position.y = 1.5;
+  g.add(post);
+
+  let texture;
+  let size = 0.8;
+  let shapeGeo;
+
+  if (type === 'stop') {
+    texture = makeStopSignTexture();
+    shapeGeo = new THREE.CylinderGeometry(size / 2, size / 2, 0.04, 8);
+  } else if (type === 'yield') {
+    texture = makeYieldSignTexture();
+    shapeGeo = new THREE.CylinderGeometry(size / 2, size / 2, 0.04, 3);
+  } else if (type === 'priority') {
+    texture = makePrioritySignTexture();
+    shapeGeo = new THREE.CylinderGeometry(size / 2, size / 2, 0.04, 4);
+  } else if (type.startsWith('limit_')) {
+    const val = parseInt(type.split('_')[1]) || 50;
+    texture = makeSpeedSign(val);
+    shapeGeo = new THREE.CylinderGeometry(size / 2, size / 2, 0.04, 16);
+  }
+
+  if (shapeGeo && texture) {
+    shapeGeo.rotateX(Math.PI / 2);
+    shapeGeo.rotateY(Math.PI);
+    const boardMat = new THREE.MeshStandardMaterial({ map: texture, roughness: 0.4 });
+    const board = new THREE.Mesh(shapeGeo, boardMat);
+    board.position.y = 2.8;
+    board.position.z = 0.02;
+    g.add(board);
+  }
+
+  return g;
+}
+
 // ── Mobile button style helper ───────────────────────────────────────────────
 const btnStyle = (col) => ({
   background: `rgba(0,0,0,0.6)`,
@@ -359,38 +529,13 @@ export const DrivingSimulation = () => {
         containerRef.current.innerHTML = '';
         containerRef.current.appendChild(renderer.domElement);
 
-        // ── Load OSM city (Munich) ──
-        setLoadingMsg('Đang tải bản đồ Munich từ OpenStreetMap...');
-        let geojson;
-        try {
-          geojson = await fetchOSMData(msg => setLoadingMsg(msg));
-        } catch (osmErr) {
-          console.warn('OSM load failed, using fallback:', osmErr);
-          geojson = null;
-        }
-
+        // ── Procedural Practice Map (Instant & Offline-friendly) ──
         buildGround(scene);
+        const { scenery } = buildWorld(scene);
+        refs.current._scenery = scenery;
+        refs.current._LOOP = 2000;
 
         let carStartX = 0, carStartZ = 0;
-        if (geojson) {
-          setLoadingMsg('Đang vẽ đường phố...');
-          buildRoads(geojson, scene);
-          setLoadingMsg('Đang xây dựng tòa nhà...');
-          buildBuildings(geojson, scene);
-          setLoadingMsg('Đang thêm chi tiết...');
-          buildLaneMarkings(geojson, scene);
-          buildTrees(geojson, scene);
-
-          // Start car on a main road in Munich center
-          const start = lngLatToXZ(11.575, 48.137);
-          carStartX = start.x; carStartZ = start.z;
-        } else {
-          // Fallback to procedural if OSM fails
-          const { scenery } = buildWorld(scene);
-          refs.current._scenery = scenery;
-          refs.current._LOOP = 1000;
-        }
-
         camera.position.set(carStartX, 1.3, carStartZ);
         camera.lookAt(carStartX, 1.3, carStartZ - 50);
         setLoadingMsg(null);
@@ -401,6 +546,15 @@ export const DrivingSimulation = () => {
           tl.position.set(carStartX + 7, 0, carStartZ - s.triggerZ - 5);
           scene.add(tl);
           trafficLights.push({ tl, scenario: s });
+        });
+
+        // Other traffic signs at scenario trigger positions
+        SCENARIOS.filter(s => s.type !== 'TRAFFIC_LIGHT').forEach(s => {
+          if (s.sign) {
+            const sign = makeSignPost(s.sign);
+            sign.position.set(carStartX + 6, 0, carStartZ - s.triggerZ);
+            scene.add(sign);
+          }
         });
 
         refs.current._carX = carStartX;
