@@ -4,6 +4,23 @@ import { sendCustomEmailToUser, sendWelcomeEmail } from '../services/emailServic
 
 const ADMIN_EMAIL = 'bossfc69@gmail.com';
 
+const formatDate = (dateVal) => {
+  if (!dateVal) return '—';
+  try {
+    const d = new Date(dateVal);
+    if (isNaN(d.getTime())) return '—';
+    const day = String(d.getDate()).padStart(2, '0');
+    const month = String(d.getMonth() + 1).padStart(2, '0');
+    const year = d.getFullYear();
+    const hours = String(d.getHours()).padStart(2, '0');
+    const minutes = String(d.getMinutes()).padStart(2, '0');
+    return `${day}/${month}/${year} ${hours}:${minutes}`;
+  } catch (e) {
+    return '—';
+  }
+};
+
+
 export function AdminDashboard({ user, onNavigate }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -400,6 +417,11 @@ export function AdminDashboard({ user, onNavigate }) {
       const { collection, getDocs } = await import('firebase/firestore');
       const snap = await getDocs(collection(db, 'users'));
       const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+      list.sort((a, b) => {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return dateB - dateA;
+      });
       setUsers(list);
       setStats({ total: list.length, active: list.filter(u => u.lastLogin).length, guests: 0 });
     } catch (e) {
@@ -632,7 +654,7 @@ export function AdminDashboard({ user, onNavigate }) {
                         style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
                       />
                     </th>
-                    {['Người dùng', 'Email', 'Tiến độ', 'Bài thi', 'Trạng thái', 'Hành động'].map(h => (
+                    {['Người dùng', 'Email', 'Ngày tham gia', 'Tiến độ', 'Bài thi', 'Trạng thái', 'Hành động'].map(h => (
                       <th key={h} style={{ padding: '14px 18px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
@@ -664,6 +686,7 @@ export function AdminDashboard({ user, onNavigate }) {
                           </div>
                         </td>
                         <td data-label="Email" style={{ padding: '14px 18px', color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>{u.email || '—'}</td>
+                        <td data-label="Ngày tham gia" style={{ padding: '14px 18px', color: 'rgba(255,255,255,0.6)', fontSize: '13px', whiteSpace: 'nowrap' }}>{formatDate(u.createdAt)}</td>
                         <td data-label="Tiến độ" style={{ padding: '14px 18px' }}>
                           <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#6366f1', fontSize: '13px', fontWeight: '600' }}>
                             <BookOpen size={14} /> {progressCount} câu
@@ -724,7 +747,8 @@ export function AdminDashboard({ user, onNavigate }) {
               <div>
                 <div style={{ color: 'white', fontWeight: '700', fontSize: '16px' }}>{selectedUser.displayName || 'Không tên'}</div>
                 <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '13px' }}>{selectedUser.email}</div>
-                <div style={{ marginTop: '4px' }}>
+                <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px', marginTop: '2px' }}>Tham gia: {formatDate(selectedUser.createdAt)}</div>
+                <div style={{ marginTop: '6px' }}>
                   <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', background: selectedUser.banned ? 'rgba(239,68,68,0.25)' : 'rgba(16,185,129,0.25)', color: selectedUser.banned ? '#ef4444' : '#10b981' }}>
                     {selectedUser.banned ? 'Bị khoá' : 'Đang hoạt động'}
                   </span>
