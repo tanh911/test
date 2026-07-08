@@ -19,13 +19,14 @@ function getCleanEmail(str) {
  * Dispatch email via internal API /api/send-email first (to avoid browser CORS & adblocker NetworkError),
  * falling back to direct Resend fetch if the API endpoint is unavailable.
  */
-async function dispatchResendEmail({ to, subject, html, from }) {
+async function dispatchResendEmail({ to, subject, html, from, replyTo }) {
   const cleanFrom = getCleanEmail(from || RESEND_FROM_EMAIL);
   const payload = {
     to: Array.isArray(to) ? to : [to],
     subject,
     html,
-    from: cleanFrom
+    from: cleanFrom,
+    replyTo: replyTo || 'supportsplitvie@gmail.com'
   };
 
   // 1. Thử gửi qua API Route nội bộ /api/send-email (Tránh hoàn toàn CORS & Adblocker trên trình duyệt)
@@ -60,7 +61,13 @@ async function dispatchResendEmail({ to, subject, html, from }) {
         'Authorization': `Bearer ${RESEND_API_KEY}`,
         'Content-Type': 'application/json',
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify({
+        from: payload.from,
+        to: payload.to,
+        subject: payload.subject,
+        html: payload.html,
+        reply_to: payload.replyTo
+      }),
     });
 
     const data = await response.json();
