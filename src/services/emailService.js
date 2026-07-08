@@ -9,10 +9,30 @@ const NOTIFICATION_RECIPIENTS = import.meta.env.VITE_NOTIFICATION_EMAILS
   : [];
 const RESEND_FROM_EMAIL = import.meta.env.VITE_RESEND_FROM_EMAIL || 'no-reply@fuhrerscheinvide.site';
 
-function getCleanEmail(str) {
-  if (!str) return 'no-reply@fuhrerscheinvide.site';
-  const match = str.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
-  return match ? match[1] : 'no-reply@fuhrerscheinvide.site';
+function getFormattedFrom(str) {
+  if (!str) return 'Fuhrerschein Viet-Duc <no-reply@fuhrerscheinvide.site>';
+  const emailMatch = str.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
+  if (!emailMatch) return 'Fuhrerschein Viet-Duc <no-reply@fuhrerscheinvide.site>';
+  const email = emailMatch[1];
+  
+  let name = '';
+  const nameMatch = str.match(/^([^<]+)</);
+  if (nameMatch) {
+    name = nameMatch[1].trim();
+  } else {
+    name = 'Fuhrerschein Viet-Duc';
+  }
+  
+  const asciiName = name
+    .normalize('NFD')
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/đ/g, 'd')
+    .replace(/Đ/g, 'D')
+    .replace(/ü/g, 'u')
+    .replace(/Ü/g, 'U')
+    .replace(/[^\x00-\x7F]/g, '');
+    
+  return `${asciiName} <${email}>`;
 }
 
 /**
@@ -20,7 +40,7 @@ function getCleanEmail(str) {
  * falling back to direct Resend fetch if the API endpoint is unavailable.
  */
 async function dispatchResendEmail({ to, subject, html, from, replyTo }) {
-  const cleanFrom = getCleanEmail(from || RESEND_FROM_EMAIL);
+  const cleanFrom = getFormattedFrom(from || RESEND_FROM_EMAIL);
   const payload = {
     to: Array.isArray(to) ? to : [to],
     subject,
