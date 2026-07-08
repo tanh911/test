@@ -148,7 +148,7 @@ function App() {
   const [fontSizeMode, setFontSizeMode] = useState(() =>
     localStorage.getItem('fuhrerschein_font_size') || 'normal'
   );
-  const [simulatorEnabled, setSimulatorEnabled] = useState(true);
+  const [simulatorEnabled, setSimulatorEnabled] = useState(false);
 
   // Close login modal automatically when user successfully logs in
   useEffect(() => {
@@ -175,9 +175,13 @@ function App() {
     import('./lib/firebase').then(({ db }) => {
       import('firebase/firestore').then(({ doc, onSnapshot }) => {
         unsub = onSnapshot(doc(db, 'settings', 'global'), (snap) => {
-          setSimulatorEnabled(true);
+          if (snap.exists()) {
+            setSimulatorEnabled(!!snap.data().simulatorEnabled);
+          } else {
+            setSimulatorEnabled(false);
+          }
         }, (err) => {
-          setSimulatorEnabled(true);
+          setSimulatorEnabled(false);
         });
       });
     });
