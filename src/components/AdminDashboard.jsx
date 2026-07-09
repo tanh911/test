@@ -661,7 +661,35 @@ export function AdminDashboard({ user, onNavigate }) {
                 </thead>
                 <tbody>
                   {filtered.map((u, idx) => {
-                    const progressCount = Object.keys(u.progress || {}).length;
+                    const calculateProgressStats = (progressObj) => {
+                      if (!progressObj) return { total: 0, today: 0, yesterday: 0, lastDate: null };
+                      const entries = Object.values(progressObj);
+                      let total = entries.length;
+                      let today = 0;
+                      let yesterday = 0;
+                      let maxTime = 0;
+
+                      const now = new Date();
+                      const startOfToday = new Date(now.getFullYear(), now.getMonth(), now.getDate()).getTime();
+                      const startOfYesterday = startOfToday - 24 * 60 * 60 * 1000;
+
+                      entries.forEach(entry => {
+                        if (entry.timestamp) {
+                          const t = new Date(entry.timestamp).getTime();
+                          if (!isNaN(t)) {
+                            if (t > maxTime) maxTime = t;
+                            if (t >= startOfToday) {
+                              today++;
+                            } else if (t >= startOfYesterday) {
+                              yesterday++;
+                            }
+                          }
+                        }
+                      });
+                      return { total, today, yesterday, lastDate: maxTime > 0 ? new Date(maxTime) : null };
+                    };
+                    
+                    const progStats = calculateProgressStats(u.progress);
                     const examCount = (u.examHistory || []).length;
                     const isSelected = selectedUids.includes(u.id);
                     return (
@@ -688,8 +716,20 @@ export function AdminDashboard({ user, onNavigate }) {
                         <td data-label="Email" style={{ padding: '14px 18px', color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>{u.email || '—'}</td>
                         <td data-label="Ngày tham gia" style={{ padding: '14px 18px', color: 'rgba(255,255,255,0.6)', fontSize: '13px', whiteSpace: 'nowrap' }}>{formatDate(u.createdAt)}</td>
                         <td data-label="Tiến độ" style={{ padding: '14px 18px' }}>
-                          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#6366f1', fontSize: '13px', fontWeight: '600' }}>
-                            <BookOpen size={14} /> {progressCount} câu
+                          <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
+                            <div style={{ display: 'flex', alignItems: 'center', gap: '6px', color: '#6366f1', fontSize: '13px', fontWeight: '700' }}>
+                              <BookOpen size={14} /> {progStats.total} câu
+                            </div>
+                            {progStats.lastDate && (
+                              <>
+                                <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)' }}>
+                                  Hôm nay: <span style={{ color: progStats.today > 0 ? '#10b981' : 'inherit', fontWeight: progStats.today > 0 ? '600' : 'normal' }}>+{progStats.today}</span> | Hqua: +{progStats.yesterday}
+                                </div>
+                                <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.4)' }}>
+                                  Cuối: {formatDate(progStats.lastDate)}
+                                </div>
+                              </>
+                            )}
                           </div>
                         </td>
                         <td data-label="Bài thi" style={{ padding: '14px 18px' }}>
