@@ -17,6 +17,7 @@ import { SupportModal } from './components/SupportModal';
 import { WelcomePopup, shouldShowPopup } from './components/WelcomePopup';
 
 const SUPPORT_POPUP_KEY = 'fuhrerschein_support_popup_dismissed';
+const MIN_ACCOUNT_AGE_MS = 3 * 24 * 60 * 60 * 1000; // 3 ngày
 
 // ── Nav config ──────────────────────────────────────────────────────────────
 
@@ -163,13 +164,15 @@ function App() {
     }
   }, [user]);
 
-  // Auto-show support popup: once per month
+  // Auto-show support popup: once per month, only for logged-in users with account >= 3 days old
   useEffect(() => {
-    if (shouldShowPopup()) {
+    if (!user || user.isGuest) return;
+    const accountAge = user.createdAt ? Date.now() - new Date(user.createdAt).getTime() : 0;
+    if (accountAge >= MIN_ACCOUNT_AGE_MS && shouldShowPopup()) {
       const timer = setTimeout(() => setShowSupportPopup(true), 1500);
       return () => clearTimeout(timer);
     }
-  }, []);
+  }, [user?.uid, user?.createdAt]);
 
   useEffect(() => {
     const scale = fontSizeMode === 'large' ? '1.15' : fontSizeMode === 'xlarge' ? '1.3' : '1';
@@ -247,7 +250,8 @@ function App() {
                       examHistory: dbData.examHistory || [],
                       progress: dbData.progress || {},
                       isGuest: false,
-                      uid: firebaseUser.uid
+                      uid: firebaseUser.uid,
+                      createdAt: dbData.createdAt || null,
                     };
                     setUser(updatedUser);
                     localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updatedUser));
@@ -261,7 +265,8 @@ function App() {
                       examHistory: [],
                       progress: {},
                       isGuest: false,
-                      uid: firebaseUser.uid
+                      uid: firebaseUser.uid,
+                      createdAt: new Date().toISOString(),
                     };
                     await setDoc(userRef, {
                       email: newUser.email,
