@@ -25,6 +25,16 @@ service cloud.firestore {
       allow write: if isAdmin();
     }
 
+    // ── Feedback collection (star ratings) ───────────────────────────────────
+    match /feedback/{docId} {
+      // Bất kỳ ai cũng có thể gửi đánh giá (kể cả guest)
+      allow create: if true;
+      // Chỉ admin mới đọc được danh sách đánh giá
+      allow read: if isAdmin();
+      // Không cho sửa/xoá
+      allow update, delete: if false;
+    }
+
     // ── Mặc định: từ chối tất cả ─────────────────────────────────────────────
     match /{document=**} {
       allow read, write: if false;

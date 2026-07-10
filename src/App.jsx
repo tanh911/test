@@ -13,6 +13,10 @@ import { DrivingSimulation } from './components/DrivingSimulation';
 import { AdminDashboard } from './components/AdminDashboard';
 import { verifyToken, clearToken } from './lib/auth';
 import { LogIn, LogOut } from 'lucide-react';
+import { SupportModal } from './components/SupportModal';
+import { WelcomePopup, shouldShowPopup } from './components/WelcomePopup';
+
+const SUPPORT_POPUP_KEY = 'fuhrerschein_support_popup_dismissed';
 
 // ── Nav config ──────────────────────────────────────────────────────────────
 
@@ -149,6 +153,8 @@ function App() {
     localStorage.getItem('fuhrerschein_font_size') || 'normal'
   );
   const [simulatorEnabled, setSimulatorEnabled] = useState(false);
+  const [showSupportPopup, setShowSupportPopup] = useState(false);
+  const [showDonateModal, setShowDonateModal] = useState(false);
 
   // Close login modal automatically when user successfully logs in
   useEffect(() => {
@@ -156,6 +162,14 @@ function App() {
       setShowLoginModal(false);
     }
   }, [user]);
+
+  // Auto-show support popup: once per month
+  useEffect(() => {
+    if (shouldShowPopup()) {
+      const timer = setTimeout(() => setShowSupportPopup(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, []);
 
   useEffect(() => {
     const scale = fontSizeMode === 'large' ? '1.15' : fontSizeMode === 'xlarge' ? '1.3' : '1';
@@ -435,6 +449,23 @@ function App() {
           </div>
         </div>
       )}
+
+      {/* Welcome Popup - monthly, star rating */}
+      <WelcomePopup
+        isOpen={showSupportPopup}
+        languageMode={languageMode}
+        user={user}
+        onClose={() => setShowSupportPopup(false)}
+        onNeverShow={() => setShowSupportPopup(false)}
+        onDonate={() => setShowDonateModal(true)}
+      />
+
+      {/* Full Donation Modal - opened when user clicks Donate in welcome popup */}
+      <SupportModal
+        isOpen={showDonateModal}
+        languageMode={languageMode}
+        onClose={() => setShowDonateModal(false)}
+      />
     </div>
   );
 }

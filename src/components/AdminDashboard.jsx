@@ -4,6 +4,119 @@ import { sendCustomEmailToUser, sendWelcomeEmail } from '../services/emailServic
 
 const ADMIN_EMAIL = 'bossfc69@gmail.com';
 
+// ── Feedback Section ────────────────────────────────────────────────────────
+
+const FeedbackSection = () => {
+  const [feedbacks, setFeedbacks] = useState([]);
+  const [loading, setLoading]     = useState(true);
+
+  useEffect(() => {
+    (async () => {
+      try {
+        const { db } = await import('../lib/firebase');
+        const { collection, getDocs, query, limit } = await import('firebase/firestore');
+        const q = query(collection(db, 'feedback'), limit(100));
+        const snap = await getDocs(q);
+        const list = snap.docs.map(d => ({ id: d.id, ...d.data() }));
+        // Sort client-side by timestamp descending
+        list.sort((a, b) => {
+          const ta = a.timestamp?.toDate?.()?.getTime() ?? 0;
+          const tb = b.timestamp?.toDate?.()?.getTime() ?? 0;
+          return tb - ta;
+        });
+        setFeedbacks(list);
+      } catch (e) {
+        console.warn('feedback fetch:', e);
+      }
+      setLoading(false);
+    })();
+  }, []);
+
+  if (loading) return null;
+  if (feedbacks.length === 0) return (
+    <div style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 24px', marginBottom: '24px' }}>
+      <div style={{ fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '8px' }}>⭐ Đánh giá từ người dùng</div>
+      <div style={{ color: 'rgba(255,255,255,0.3)', fontSize: '13px' }}>Chưa có đánh giá nào.</div>
+    </div>
+  );
+
+  const avg = (feedbacks.reduce((s, f) => s + (f.stars || 0), 0) / feedbacks.length).toFixed(1);
+  const dist = [1, 2, 3, 4, 5].map(s => feedbacks.filter(f => f.stars === s).length);
+  const max  = Math.max(...dist, 1);
+  const recent = feedbacks.slice(0, 5);
+  const starEmoji = s => '⭐'.repeat(s);
+
+  const fmtDate = (ts) => {
+    if (!ts) return '';
+    try {
+      const d = ts.toDate ? ts.toDate() : new Date(ts);
+      return `${d.getDate()}/${d.getMonth()+1}/${d.getFullYear()}`;
+    } catch { return ''; }
+  };
+
+  return (
+    <div style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 24px', marginBottom: '24px' }}>
+      <div style={{ fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.08em', marginBottom: '16px' }}>
+        ⭐ Đánh giá từ người dùng ({feedbacks.length} lượt)
+      </div>
+
+      <div style={{ display: 'flex', gap: '24px', flexWrap: 'wrap', alignItems: 'flex-start' }}>
+
+        {/* Average score */}
+        <div style={{ textAlign: 'center', minWidth: '80px' }}>
+          <div style={{ fontSize: '42px', fontWeight: '800', color: 'white', lineHeight: 1 }}>{avg}</div>
+          <div style={{ fontSize: '18px', marginTop: '4px' }}>{'⭐'.repeat(Math.round(avg))}</div>
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', marginTop: '4px' }}>trên 5 sao</div>
+        </div>
+
+        {/* Distribution bars */}
+        <div style={{ flex: 1, minWidth: '160px', display: 'flex', flexDirection: 'column', gap: '6px', justifyContent: 'center' }}>
+          {[5,4,3,2,1].map(s => (
+            <div key={s} style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.5)', width: '20px', textAlign: 'right' }}>{s}★</div>
+              <div style={{ flex: 1, height: '8px', background: 'rgba(255,255,255,0.1)', borderRadius: '4px', overflow: 'hidden' }}>
+                <div style={{
+                  height: '100%', borderRadius: '4px',
+                  width: `${(dist[s-1] / max) * 100}%`,
+                  background: s >= 4 ? '#10b981' : s === 3 ? '#f59e0b' : '#ef4444',
+                  transition: 'width 0.6s ease',
+                }} />
+              </div>
+              <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.4)', width: '20px' }}>{dist[s-1]}</div>
+            </div>
+          ))}
+        </div>
+
+        {/* Recent reviews */}
+        <div style={{ flex: 1, minWidth: '160px' }}>
+          <div style={{ fontSize: '11px', color: 'rgba(255,255,255,0.35)', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.05em' }}>Gần đây</div>
+          {recent.map(f => (
+            <div key={f.id} style={{ marginBottom: '10px', padding: '8px 10px', background: 'rgba(255,255,255,0.05)', borderRadius: '10px' }}>
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: f.comment ? '5px' : '0' }}>
+                <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+                  <div style={{ width: '26px', height: '26px', borderRadius: '8px', background: 'rgba(255,255,255,0.1)', display: 'flex', alignItems: 'center', justifyContent: 'center', fontSize: '11px', fontWeight: '700', color: 'white' }}>
+                    {(f.displayName || '?')[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <div style={{ fontSize: '12px', color: 'white', fontWeight: '600' }}>{f.displayName || 'Khách'}</div>
+                    <div style={{ fontSize: '10px', color: 'rgba(255,255,255,0.35)' }}>{fmtDate(f.timestamp)}</div>
+                  </div>
+                </div>
+                <div style={{ fontSize: '13px' }}>{'⭐'.repeat(f.stars || 0)}</div>
+              </div>
+              {f.comment && (
+                <div style={{ fontSize: '11.5px', color: 'rgba(255,255,255,0.55)', fontStyle: 'italic', lineHeight: 1.4, paddingLeft: '34px' }}>
+                  "{f.comment}"
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
+  );
+};
+
 const formatDate = (dateVal) => {
   if (!dateVal) return '—';
   try {
@@ -583,6 +696,9 @@ export function AdminDashboard({ user, onNavigate }) {
             </div>
           ))}
         </div>
+
+        {/* Feedback Ratings */}
+        <FeedbackSection />
 
         {/* Feature Controls */}
         <div style={{ background: 'rgba(255,255,255,0.06)', backdropFilter: 'blur(20px)', borderRadius: '18px', border: '1px solid rgba(255,255,255,0.1)', padding: '20px 24px', marginBottom: '24px' }}>

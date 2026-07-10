@@ -1,7 +1,19 @@
-import React from 'react';
-import { X, Heart, Coffee, CreditCard, ExternalLink } from 'lucide-react';
+import React, { useEffect, useState } from 'react';
+import { X, Heart, Coffee, CreditCard, ExternalLink, BellOff } from 'lucide-react';
 
-export const SupportModal = ({ isOpen, onClose, languageMode = 'vi' }) => {
+const STORAGE_KEY = 'fuhrerschein_support_popup_dismissed';
+
+export const SupportModal = ({ isOpen, onClose, onNeverShow, languageMode = 'vi', isAutoPopup = false }) => {
+  const [visible, setVisible] = useState(false);
+
+  useEffect(() => {
+    if (isOpen) {
+      // Delay to trigger CSS entrance animation
+      requestAnimationFrame(() => setVisible(true));
+    } else {
+      setVisible(false);
+    }
+  }, [isOpen]);
   if (!isOpen) return null;
 
   const t = (vi, de) => (languageMode === 'de' ? de : vi);
@@ -27,12 +39,17 @@ export const SupportModal = ({ isOpen, onClose, languageMode = 'vi' }) => {
 
   return (
     <div style={{
-      position: 'fixed', inset: 0, zIndex: 50, display: 'flex', alignItems: 'center', justifyContent: 'center',
-      backgroundColor: 'rgba(0,0,0,0.6)', backdropFilter: 'blur(4px)', padding: '16px'
+      position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', alignItems: 'center', justifyContent: 'center',
+      backgroundColor: visible ? 'rgba(0,0,0,0.6)' : 'rgba(0,0,0,0)',
+      backdropFilter: 'blur(4px)', padding: '16px',
+      transition: 'background-color 0.3s ease'
     }}>
       <div style={{
         backgroundColor: '#ffffff', borderRadius: '16px', width: '100%', maxWidth: '448px',
-        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', display: 'flex', flexDirection: 'column'
+        boxShadow: '0 25px 50px -12px rgba(0, 0, 0, 0.25)', overflow: 'hidden', display: 'flex', flexDirection: 'column',
+        transform: visible ? 'translateY(0) scale(1)' : 'translateY(24px) scale(0.96)',
+        opacity: visible ? 1 : 0,
+        transition: 'transform 0.35s cubic-bezier(0.34,1.56,0.64,1), opacity 0.3s ease'
       }}>
 
         {/* Header */}
@@ -105,16 +122,34 @@ export const SupportModal = ({ isOpen, onClose, languageMode = 'vi' }) => {
         </div>
 
         {/* Footer */}
-        <div style={{ padding: '16px', backgroundColor: '#f9fafb', borderTop: '1px solid #f3f4f6', textAlign: 'center' }}>
-          <button
-            onClick={onClose}
-            style={{
-              padding: '10px 24px', backgroundColor: '#e5e7eb', color: '#374151', fontWeight: 'bold',
-              borderRadius: '8px', border: 'none', fontSize: '14px', cursor: 'pointer'
-            }}
-          >
-            {t('Đóng', 'Schließen')}
-          </button>
+        <div style={{ padding: '16px', backgroundColor: '#f9fafb', borderTop: '1px solid #f3f4f6' }}>
+          <div style={{ display: 'flex', gap: '8px', alignItems: 'center', justifyContent: isAutoPopup ? 'space-between' : 'center' }}>
+            {isAutoPopup && (
+              <button
+                onClick={() => { onNeverShow && onNeverShow(); onClose && onClose(); }}
+                style={{
+                  display: 'flex', alignItems: 'center', gap: '6px',
+                  padding: '8px 14px', backgroundColor: 'transparent', color: '#9ca3af',
+                  borderRadius: '8px', border: '1.5px solid #e5e7eb', fontSize: '13px',
+                  cursor: 'pointer', fontWeight: '500', transition: 'all 0.2s'
+                }}
+                onMouseOver={(e) => { e.currentTarget.style.color = '#374151'; e.currentTarget.style.borderColor = '#9ca3af'; }}
+                onMouseOut={(e) => { e.currentTarget.style.color = '#9ca3af'; e.currentTarget.style.borderColor = '#e5e7eb'; }}
+              >
+                <BellOff size={14} />
+                {t('Không hiển thị lại', 'Nicht mehr anzeigen')}
+              </button>
+            )}
+            <button
+              onClick={onClose}
+              style={{
+                padding: '10px 24px', backgroundColor: '#e5e7eb', color: '#374151', fontWeight: 'bold',
+                borderRadius: '8px', border: 'none', fontSize: '14px', cursor: 'pointer'
+              }}
+            >
+              {t('Để sau', 'Später')}
+            </button>
+          </div>
         </div>
 
       </div>
