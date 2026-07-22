@@ -102,7 +102,18 @@ export const Auth = ({ onLogin, onCancel }) => {
               await signOut(auth);
               
               if (dbData.bannedReason === 'inactivity') {
-                setError('Tài khoản của bạn đã bị khóa tạm thời do không sử dụng trong hơn 1 tuần. Vui lòng liên hệ ban quản trị để được hỗ trợ mở khóa.');
+                setError(
+                  <span>
+                    Tài khoản của bạn đã bị khóa tạm thời do không sử dụng trong hơn 1 tuần.
+                    <br />
+                    <a
+                      href={`mailto:supportsplitvie@gmail.com?subject=Yeu%20cau%20mo%20khoa%20tai%20khoan%20Fuhrerschein%20Viet-Duc&body=Chao%20Ban%20quan%20tri,%0D%0A%0D%0ATai%20khoan%20cua%20toi%20(${dbData.email || 'dang%20nhap'})%20da%20bi%20khoa%20do%20khong%20su%20dung.%0D%0AMong%20Ban%20quan%20tri%20mo%20khoa%20lai%20giup.%0D%0A%0D%0ACam%20on!`}
+                      style={{ color: '#b91c1c', textDecoration: 'underline', fontWeight: 'bold', display: 'inline-block', marginTop: '4px' }}
+                    >
+                      Nhấn vào đây để gửi email yêu cầu mở khóa
+                    </a>
+                  </span>
+                );
               } else {
                 setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ ban quản trị để biết thêm chi tiết.');
               }

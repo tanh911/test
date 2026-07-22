@@ -156,6 +156,7 @@ function App() {
   const [simulatorEnabled, setSimulatorEnabled] = useState(false);
   const [showSupportPopup, setShowSupportPopup] = useState(false);
   const [showDonateModal, setShowDonateModal] = useState(false);
+  const [bannedModal, setBannedModal] = useState(null); // null hoặc { message, email }
 
   // Close login modal automatically when user successfully logs in
   useEffect(() => {
@@ -264,11 +265,12 @@ function App() {
                         setUser({ username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true });
                         localStorage.removeItem('fuhrerschein_active_session');
                         navigate('/');
-                        if (dbData.bannedReason === 'inactivity') {
-                          alert('Tài khoản của bạn đã bị tạm khóa do không sử dụng trong hơn 1 tuần. Vui lòng liên hệ ban quản trị để được hỗ trợ mở khóa.');
-                        } else {
-                          alert('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ ban quản trị để biết thêm chi tiết.');
-                        }
+                        setBannedModal({
+                          message: dbData.bannedReason === 'inactivity'
+                            ? 'Tài khoản của bạn đã bị tạm khóa do không sử dụng trong hơn 1 tuần. Vui lòng liên hệ ban quản trị để được hỗ trợ mở khóa.'
+                            : 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ ban quản trị để biết thêm chi tiết.',
+                          email: dbData.email || firebaseUser.email || ''
+                        });
                         return;
                       }
 
@@ -525,6 +527,47 @@ function App() {
         languageMode={languageMode}
         onClose={() => setShowDonateModal(false)}
       />
+
+      {/* Banned Alert Modal */}
+      {bannedModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div style={{ background: 'white', borderRadius: '18px', padding: '32px 24px', maxWidth: '400px', width: '100%', boxShadow: '0 25px 60px rgba(0,0,0,0.3)', textAlign: 'center', border: '1px solid rgba(0,0,0,0.05)' }}>
+            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔒</div>
+            <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#1f2937', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+              Tài khoản bị tạm khóa
+            </h3>
+            <p style={{ fontSize: '14px', color: '#4b5563', lineHeight: '1.6', marginBottom: '28px', padding: '0 8px' }}>
+              {bannedModal.message}
+            </p>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <a
+                href={`mailto:supportsplitvie@gmail.com?subject=Yeu%20cau%20mo%20khoa%20tai%20khoan%20Fuhrerschein%20Viet-Duc&body=Chao%20Ban%20quan%20tri,%0D%0A%0D%0ATai%20khoan%20cua%20toi%20(${bannedModal.email || 'dang%20nhap'})%20da%20bi%20tam%20khoa%20do%20khong%20su%20dung.%0D%0AMong%20Ban%20quan%20tri%20xem%20xet%20mo%20khoa%20giup%20toi.%0D%0A%0D%0ACam%20on%20nhieu!`}
+                style={{
+                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                  padding: '12px', borderRadius: '10px', border: 'none',
+                  background: 'linear-gradient(135deg, #1a4a5e 0%, #2b6f8a 100%)',
+                  fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: 'white',
+                  textDecoration: 'none', boxShadow: '0 4px 12px rgba(26,74,94,0.2)'
+                }}
+              >
+                ✉️ Liên hệ Admin mở khoá
+              </a>
+              <button
+                onClick={() => setBannedModal(null)}
+                style={{
+                  padding: '12px', borderRadius: '10px', border: '1.5px solid #e5e7eb',
+                  background: 'white', fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: '#4b5563',
+                  transition: 'background 0.15s'
+                }}
+                onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+              >
+                Trở lại
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
