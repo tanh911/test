@@ -612,6 +612,88 @@ export function AdminDashboard({ user, onNavigate }) {
     }
   };
 
+  const handleAutoLockInactiveUsers = async () => {
+    const confirmLock = window.confirm("Bạn có chắc muốn tự động khóa tất cả tài khoản không hoạt động hơn 1 tuần qua?");
+    if (!confirmLock) return;
+
+    setLoading(true);
+    try {
+      const { db } = await import('../lib/firebase');
+      const { doc, writeBatch } = await import('firebase/firestore');
+      
+      const now = Date.now();
+      const oneWeekMs = 7 * 24 * 60 * 60 * 1000;
+
+      // Find inactive users
+      const inactiveUsers = users.filter(u => {
+        if (u.banned) return false; // already banned/locked
+        
+        // Skip admin
+        if (u.email && u.email.trim().toLowerCase() === ADMIN_EMAIL) return false;
+
+        // Get last active time
+        let lastActiveTime = 0;
+        if (u.lastActive) {
+          const t = new Date(u.lastActive).getTime();
+          if (!isNaN(t)) lastActiveTime = t;
+        }
+        if (lastActiveTime === 0 && u.progress) {
+          const entries = Object.values(u.progress);
+          let maxTime = 0;
+          entries.forEach(entry => {
+            if (entry.timestamp) {
+              const t = new Date(entry.timestamp).getTime();
+              if (!isNaN(t) && t > maxTime) maxTime = t;
+            }
+          });
+          lastActiveTime = maxTime;
+        }
+        if (lastActiveTime === 0 && u.createdAt) {
+          const t = new Date(u.createdAt).getTime();
+          if (!isNaN(t)) lastActiveTime = t;
+        }
+
+        if (lastActiveTime === 0) return false; // cannot determine activity time
+
+        return (now - lastActiveTime) > oneWeekMs;
+      });
+
+      if (inactiveUsers.length === 0) {
+        showToast("Không tìm thấy người dùng nào không hoạt động hơn 1 tuần.");
+        setLoading(false);
+        return;
+      }
+
+      const confirmProcess = window.confirm(`Tìm thấy ${inactiveUsers.length} tài khoản không hoạt động. Bắt đầu quá trình khoá tài khoản trên UI?`);
+      if (!confirmProcess) {
+        setLoading(false);
+        return;
+      }
+
+      // Write in chunks of 500
+      const chunkSize = 500;
+      for (let i = 0; i < inactiveUsers.length; i += chunkSize) {
+        const chunk = inactiveUsers.slice(i, i + chunkSize);
+        const batch = writeBatch(db);
+        chunk.forEach(u => {
+          const userRef = doc(db, 'users', u.id);
+          batch.update(userRef, { banned: true, bannedReason: 'inactivity' });
+        });
+        await batch.commit();
+      }
+
+      // Update local state
+      const lockedIds = inactiveUsers.map(u => u.id);
+      setUsers(prev => prev.map(u => lockedIds.includes(u.id) ? { ...u, banned: true, bannedReason: 'inactivity' } : u));
+      
+      showToast(`Đã khoá thành công ${inactiveUsers.length} tài khoản do không hoạt động.`);
+    } catch (err) {
+      console.error(err);
+      showToast("Lỗi khi tự động khóa tài khoản: " + err.message, "error");
+    }
+    setLoading(false);
+  };
+
   const filtered = users.filter(u =>
     (u.displayName || '').toLowerCase().includes(search.toLowerCase()) ||
     (u.email || '').toLowerCase().includes(search.toLowerCase())
@@ -672,6 +754,9 @@ export function AdminDashboard({ user, onNavigate }) {
             </button>
             <button onClick={() => handleOpenEmailModal(null)} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', background: 'linear-gradient(135deg, #3b82f6, #2563eb)', border: 'none', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 15px rgba(59,130,246,0.4)' }}>
               <Mail size={16} /> Soạn Email
+            </button>
+            <button onClick={handleAutoLockInactiveUsers} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', background: 'linear-gradient(135deg, #ef4444, #dc2626)', border: 'none', color: 'white', fontWeight: '700', cursor: 'pointer', fontSize: '14px', boxShadow: '0 4px 15px rgba(239,68,68,0.4)' }}>
+              <Ban size={16} /> Khóa TK Không HĐ (&gt;1 tuần)
             </button>
             <button onClick={fetchUsers} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '10px 18px', borderRadius: '10px', background: 'rgba(255,255,255,0.1)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontWeight: '600', cursor: 'pointer', fontSize: '14px', backdropFilter: 'blur(10px)' }}>
               <RefreshCw size={16} /> Làm mới

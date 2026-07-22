@@ -90,6 +90,26 @@ export const Auth = ({ onLogin, onCancel }) => {
               return;
             }
 
+            // Check if banned/locked in Firestore
+            const { db } = await import('../lib/firebase');
+            const { doc, getDoc } = await import('firebase/firestore');
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists() && userDoc.data().banned) {
+              const dbData = userDoc.data();
+              // Sign out from Firebase auth
+              const { auth } = await import('../lib/firebase');
+              const { signOut } = await import('firebase/auth');
+              await signOut(auth);
+              
+              if (dbData.bannedReason === 'inactivity') {
+                setError('Tài khoản của bạn đã bị khóa tạm thời do không sử dụng trong hơn 1 tuần. Vui lòng liên hệ ban quản trị để được hỗ trợ mở khóa.');
+              } else {
+                setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ ban quản trị để biết thêm chi tiết.');
+              }
+              setLoading(false);
+              return;
+            }
+
             setSuccess('Đăng nhập thành công!');
             sendLoginNotification({
               displayName: user.displayName || user.email.split('@')[0],

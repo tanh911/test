@@ -219,6 +219,9 @@ function App() {
 
   // Session restore & Firebase sync
   useEffect(() => {
+    let authUnsubscribe = null;
+    let docUnsubscribe = null;
+
     const restore = async () => {
       // 1. Check local session first
       const savedSession = localStorage.getItem('fuhrerschein_active_session');
@@ -231,57 +234,103 @@ function App() {
       // 2. Listen to Firebase Auth state
       import('./lib/firebase').then(({ auth, db }) => {
         import('firebase/auth').then(({ onAuthStateChanged }) => {
-          import('firebase/firestore').then(({ doc, getDoc, setDoc }) => {
-            onAuthStateChanged(auth, async (firebaseUser) => {
+          import('firebase/firestore').then(({ doc, setDoc, onSnapshot }) => {
+            authUnsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+              // Unsubscribe from previous doc listener if any
+              if (docUnsubscribe) {
+                docUnsubscribe();
+                docUnsubscribe = null;
+              }
+
               if (firebaseUser) {
                 try {
-                  // User is signed in via Firebase
                   const userRef = doc(db, 'users', firebaseUser.uid);
-                  const docSnap = await getDoc(userRef);
                   
-                  if (docSnap.exists()) {
-                    // Load progress from DB
-                    const dbData = docSnap.data();
-                    const updatedUser = {
-                      username: `firebase_${firebaseUser.uid}`,
-                      displayName: firebaseUser.displayName || 'Học viên',
-                      email: firebaseUser.email || '',
-                      savedQuestions: dbData.savedQuestions || [],
-                      examHistory: dbData.examHistory || [],
-                      progress: dbData.progress || {},
-                      isGuest: false,
-                      uid: firebaseUser.uid,
-                      createdAt: dbData.createdAt || null,
-                    };
-                    setUser(updatedUser);
-                    localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updatedUser));
-                  } else {
-                    // New user, create empty progress in DB
-                    const newUser = {
-                      username: `firebase_${firebaseUser.uid}`,
-                      displayName: firebaseUser.displayName || 'Học viên',
-                      email: firebaseUser.email || '',
-                      savedQuestions: [],
-                      examHistory: [],
-                      progress: {},
-                      isGuest: false,
-                      uid: firebaseUser.uid,
-                      createdAt: new Date().toISOString(),
-                    };
-                    await setDoc(userRef, {
-                      email: newUser.email,
-                      displayName: newUser.displayName,
-                      savedQuestions: newUser.savedQuestions,
-                      examHistory: newUser.examHistory,
-                      progress: newUser.progress,
-                      createdAt: new Date().toISOString()
-                    });
-                    setUser(newUser);
-                    localStorage.setItem('fuhrerschein_active_session', JSON.stringify(newUser));
-                  }
+                  // Setup real-time listener
+                  docUnsubscribe = onSnapshot(userRef, async (docSnap) => {
+                    if (docSnap.exists()) {
+                      const dbData = docSnap.data();
+
+                      if (dbData.banned) {
+                        // Unsubscribe from doc listener to avoid loops
+                        if (docUnsubscribe) {
+                          docUnsubscribe();
+                          docUnsubscribe = null;
+                        }
+                        import('firebase/auth').then(({ signOut }) => {
+                          signOut(auth).catch(err => console.error("Firebase SignOut Error:", err));
+                        });
+                        clearToken();
+                        setUser({ username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true });
+                        localStorage.removeItem('fuhrerschein_active_session');
+                        navigate('/');
+                        if (dbData.bannedReason === 'inactivity') {
+                          alert('Tài khoản của bạn đã bị tạm khóa do không sử dụng trong hơn 1 tuần. Vui lòng liên hệ ban quản trị để được hỗ trợ mở khóa.');
+                        } else {
+                          alert('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ ban quản trị để biết thêm chi tiết.');
+                        }
+                        return;
+                      }
+
+                      // Track lastActive if needed
+                      const now = new Date();
+                      let shouldUpdateLastActive = false;
+                      if (!dbData.lastActive) {
+                        shouldUpdateLastActive = true;
+                      } else {
+                        const lastActiveTime = new Date(dbData.lastActive).getTime();
+                        if (isNaN(lastActiveTime) || (now.getTime() - lastActiveTime > 4 * 60 * 60 * 1000)) {
+                          shouldUpdateLastActive = true;
+                        }
+                      }
+                      if (shouldUpdateLastActive) {
+                        setDoc(userRef, { lastActive: now.toISOString() }, { merge: true }).catch(console.error);
+                      }
+
+                      const updatedUser = {
+                        username: `firebase_${firebaseUser.uid}`,
+                        displayName: firebaseUser.displayName || 'Học viên',
+                        email: firebaseUser.email || '',
+                        savedQuestions: dbData.savedQuestions || [],
+                        examHistory: dbData.examHistory || [],
+                        progress: dbData.progress || {},
+                        isGuest: false,
+                        uid: firebaseUser.uid,
+                        createdAt: dbData.createdAt || null,
+                        lastActive: dbData.lastActive || now.toISOString(),
+                      };
+                      setUser(updatedUser);
+                      localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updatedUser));
+                    } else {
+                      // New user creation
+                      const newUser = {
+                        username: `firebase_${firebaseUser.uid}`,
+                        displayName: firebaseUser.displayName || 'Học viên',
+                        email: firebaseUser.email || '',
+                        savedQuestions: [],
+                        examHistory: [],
+                        progress: {},
+                        isGuest: false,
+                        uid: firebaseUser.uid,
+                        createdAt: new Date().toISOString(),
+                      };
+                      await setDoc(userRef, {
+                        email: newUser.email,
+                        displayName: newUser.displayName,
+                        savedQuestions: newUser.savedQuestions,
+                        examHistory: newUser.examHistory,
+                        progress: newUser.progress,
+                        createdAt: new Date().toISOString()
+                      });
+                      setUser(newUser);
+                      localStorage.setItem('fuhrerschein_active_session', JSON.stringify(newUser));
+                    }
+                  }, (err) => {
+                    console.error("Firestore onSnapshot error:", err);
+                  });
+
                 } catch (err) {
                   console.error("Firebase DB Error:", err);
-                  // Bỏ qua lỗi DB và fallback về local user session nếu không có quyền
                 }
               }
             });
@@ -292,7 +341,12 @@ function App() {
       setUserLoading(false);
     };
     restore();
-  }, []);
+
+    return () => {
+      if (authUnsubscribe) authUnsubscribe();
+      if (docUnsubscribe) docUnsubscribe();
+    };
+  }, [navigate]);
 
   const handleUpdateUser = (updated) => {
     setUser(updated);
