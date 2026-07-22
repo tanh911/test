@@ -12,7 +12,7 @@ import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { DrivingSimulation } from './components/DrivingSimulation';
 import { AdminDashboard } from './components/AdminDashboard';
 import { verifyToken, clearToken } from './lib/auth';
-import { LogIn, LogOut } from 'lucide-react';
+import { LogIn, LogOut, Loader2, CheckCircle2 } from 'lucide-react';
 import { SupportModal } from './components/SupportModal';
 import { WelcomePopup, shouldShowPopup } from './components/WelcomePopup';
 
@@ -156,7 +156,12 @@ function App() {
   const [simulatorEnabled, setSimulatorEnabled] = useState(false);
   const [showSupportPopup, setShowSupportPopup] = useState(false);
   const [showDonateModal, setShowDonateModal] = useState(false);
-  const [bannedModal, setBannedModal] = useState(null); // null hoặc { message, email }
+  const [bannedModal, setBannedModal] = useState(null); // null hoặc { message, email, displayName }
+  const [unlockEmail, setUnlockEmail] = useState('');
+  const [unlockMessage, setUnlockMessage] = useState('');
+  const [unlockSubmitting, setUnlockSubmitting] = useState(false);
+  const [unlockSuccess, setUnlockSuccess] = useState(false);
+  const [unlockError, setUnlockError] = useState('');
 
   // Close login modal automatically when user successfully logs in
   useEffect(() => {
@@ -267,10 +272,18 @@ function App() {
                         navigate('/');
                         setBannedModal({
                           message: dbData.bannedReason === 'inactivity'
-                            ? 'Tài khoản của bạn đã bị tạm khóa do không sử dụng trong hơn 1 tuần. Vui lòng liên hệ ban quản trị để được hỗ trợ mở khóa.'
-                            : 'Tài khoản của bạn đã bị khóa. Vui lòng liên hệ ban quản trị để biết thêm chi tiết.',
-                          email: dbData.email || firebaseUser.email || ''
+                            ? 'Tài khoản của bạn đã bị tạm khóa do không sử dụng trong hơn 1 tuần. Vui lòng gửi yêu cầu dưới đây để Ban quản trị hỗ trợ mở khóa.'
+                            : 'Tài khoản của bạn đã bị khóa. Vui lòng gửi yêu cầu dưới đây để Ban quản trị hỗ trợ mở khóa.',
+                          email: dbData.email || firebaseUser.email || '',
+                          displayName: dbData.displayName || firebaseUser.displayName || ''
                         });
+                        setUnlockEmail(dbData.email || firebaseUser.email || '');
+                        setUnlockMessage(dbData.bannedReason === 'inactivity'
+                          ? 'Tài khoản của tôi bị tạm khóa do không hoạt động trong hơn 1 tuần. Mong Ban quản trị xem xét mở khóa giúp tôi.'
+                          : 'Tài khoản của tôi bị khóa. Mong Ban quản trị xem xét mở khóa giúp tôi.'
+                        );
+                        setUnlockSuccess(false);
+                        setUnlockError('');
                         return;
                       }
 
@@ -349,6 +362,45 @@ function App() {
       if (docUnsubscribe) docUnsubscribe();
     };
   }, [navigate]);
+
+  const handleUnlockSubmit = async (e) => {
+    e.preventDefault();
+    if (!unlockEmail.trim() || !unlockMessage.trim()) {
+      setUnlockError('Vui lòng nhập đầy đủ thông tin.');
+      return;
+    }
+    setUnlockSubmitting(true);
+    setUnlockError('');
+    try {
+      const formspreeId = import.meta.env.VITE_FORMSPREE_ID || 'YOUR_FORMSPREE_ID';
+      const FORMSPREE_ENDPOINT = `https://formspree.io/f/${formspreeId}`;
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          category: 'Yêu cầu mở khóa tài khoản',
+          description: unlockMessage.trim(),
+          userName: bannedModal?.displayName || 'Locked User',
+          userEmail: unlockEmail.trim(),
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        setUnlockSuccess(true);
+      } else {
+        throw new Error('Không thể gửi yêu cầu. Vui lòng thử lại sau.');
+      }
+    } catch (err) {
+      console.error(err);
+      setUnlockError('Lỗi gửi yêu cầu: ' + err.message);
+    } finally {
+      setUnlockSubmitting(false);
+    }
+  };
 
   const handleUpdateUser = (updated) => {
     setUser(updated);
@@ -531,40 +583,112 @@ function App() {
       {/* Banned Alert Modal */}
       {bannedModal && (
         <div style={{ position: 'fixed', inset: 0, zIndex: 2000, backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
-          <div style={{ background: 'white', borderRadius: '18px', padding: '32px 24px', maxWidth: '400px', width: '100%', boxShadow: '0 25px 60px rgba(0,0,0,0.3)', textAlign: 'center', border: '1px solid rgba(0,0,0,0.05)' }}>
-            <div style={{ fontSize: '48px', marginBottom: '16px' }}>🔒</div>
-            <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#1f2937', marginBottom: '12px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
-              Tài khoản bị tạm khóa
-            </h3>
-            <p style={{ fontSize: '14px', color: '#4b5563', lineHeight: '1.6', marginBottom: '28px', padding: '0 8px' }}>
-              {bannedModal.message}
-            </p>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
-              <a
-                href={`mailto:supportsplitvie@gmail.com?subject=Yeu%20cau%20mo%20khoa%20tai%20khoan%20Fuhrerschein%20Viet-Duc&body=Chao%20Ban%20quan%20tri,%0D%0A%0D%0ATai%20khoan%20cua%20toi%20(${bannedModal.email || 'dang%20nhap'})%20da%20bi%20tam%20khoa%20do%20khong%20su%20dung.%0D%0AMong%20Ban%20quan%20tri%20xem%20xet%20mo%20khoa%20giup%20toi.%0D%0A%0D%0ACam%20on%20nhieu!`}
-                style={{
-                  display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
-                  padding: '12px', borderRadius: '10px', border: 'none',
-                  background: 'linear-gradient(135deg, #1a4a5e 0%, #2b6f8a 100%)',
-                  fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: 'white',
-                  textDecoration: 'none', boxShadow: '0 4px 12px rgba(26,74,94,0.2)'
-                }}
-              >
-                ✉️ Liên hệ Admin mở khoá
-              </a>
-              <button
-                onClick={() => setBannedModal(null)}
-                style={{
-                  padding: '12px', borderRadius: '10px', border: '1.5px solid #e5e7eb',
-                  background: 'white', fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: '#4b5563',
-                  transition: 'background 0.15s'
-                }}
-                onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
-                onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
-              >
-                Trở lại
-              </button>
-            </div>
+          <div style={{ background: 'white', borderRadius: '18px', padding: '32px 24px', maxWidth: '420px', width: '100%', boxShadow: '0 25px 60px rgba(0,0,0,0.3)', border: '1px solid rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
+            {unlockSuccess ? (
+              <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                  <CheckCircle2 size={56} color="#10b981" />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#1f2937', marginBottom: '12px', textTransform: 'uppercase' }}>
+                  Đã gửi yêu cầu!
+                </h3>
+                <p style={{ fontSize: '14px', color: '#4b5563', lineHeight: '1.6', marginBottom: '28px' }}>
+                  Yêu cầu mở khóa của bạn đã được gửi tới Ban quản trị thành công. Chúng tôi sẽ xem xét và mở khóa sớm nhất cho bạn.
+                </p>
+                <button
+                  onClick={() => setBannedModal(null)}
+                  style={{
+                    width: '100%', padding: '12px', borderRadius: '10px', border: 'none',
+                    background: 'linear-gradient(135deg, #1a4a5e 0%, #2b6f8a 100%)',
+                    fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: 'white',
+                    boxShadow: '0 4px 12px rgba(26,74,94,0.2)'
+                  }}
+                >
+                  Đóng
+                </button>
+              </div>
+            ) : (
+              <div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔒</div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#1f2937', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                    Tài khoản bị tạm khóa
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#6b7280', lineHeight: '1.5', marginBottom: '20px' }}>
+                    {bannedModal.message}
+                  </p>
+                </div>
+
+                {unlockError && (
+                  <div style={{ padding: '10px 12px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', marginBottom: '16px', fontSize: '13px', color: '#b91c1c', fontWeight: '600' }}>
+                    ⚠️ {unlockError}
+                  </div>
+                )}
+
+                <form onSubmit={handleUnlockSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280', marginBottom: '6px' }}>Email đăng nhập</label>
+                    <input
+                      type="email"
+                      value={unlockEmail}
+                      onChange={(e) => setUnlockEmail(e.target.value)}
+                      placeholder="email@example.com"
+                      required
+                      style={{
+                        width: '100%', padding: '10px 12px', background: '#f9fafb', borderRadius: '8px',
+                        border: '1.5px solid #e5e7eb', fontSize: '14px', fontWeight: '500', color: '#111827',
+                        outline: 'none', boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280', marginBottom: '6px' }}>Nội dung yêu cầu</label>
+                    <textarea
+                      value={unlockMessage}
+                      onChange={(e) => setUnlockMessage(e.target.value)}
+                      placeholder="Nhập lý do cần mở khóa..."
+                      required
+                      rows={3}
+                      style={{
+                        width: '100%', padding: '10px 12px', background: '#f9fafb', borderRadius: '8px',
+                        border: '1.5px solid #e5e7eb', fontSize: '14px', fontWeight: '500', color: '#111827',
+                        outline: 'none', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+                    <button
+                      type="submit"
+                      disabled={unlockSubmitting}
+                      style={{
+                        width: '100%', padding: '12px', borderRadius: '10px', border: 'none',
+                        background: unlockSubmitting ? '#93c5fd' : 'linear-gradient(135deg, #1a4a5e 0%, #2b6f8a 100%)',
+                        color: 'white', fontWeight: '700', fontSize: '14px', cursor: unlockSubmitting ? 'not-allowed' : 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                        boxShadow: '0 4px 12px rgba(26,74,94,0.2)'
+                      }}
+                    >
+                      {unlockSubmitting && <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />}
+                      {unlockSubmitting ? 'Đang gửi...' : 'Gửi yêu cầu mở khóa'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBannedModal(null)}
+                      style={{
+                        width: '100%', padding: '11px', borderRadius: '10px', border: '1.5px solid #e5e7eb',
+                        background: 'white', fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: '#4b5563',
+                        transition: 'background 0.15s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                    >
+                      Trở lại
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
           </div>
         </div>
       )}
