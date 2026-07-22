@@ -47,6 +47,11 @@ const tipCategories = [
         term: 'beobachten (quan sát) / aufpassen (chú ý) / absichern (bảo vệ)',
         effect: '✅ Thường là đáp án ĐÚNG',
         explanation: 'Các hành động kiểm tra an toàn, quan sát gương chiếu hậu, nhìn qua vai và thực hiện các biện pháp phòng ngừa rủi ro.'
+      },
+      {
+        term: 'Gegenlenken (đánh lái ngược hướng trượt) / Auskuppeln (đạp hết côn)',
+        effect: '✅ Thường là đáp án ĐÚNG',
+        explanation: 'Khi xe bị trượt bánh sau (Ausbrechen), phản xạ đúng luôn là đạp hết côn (Auskuppeln) và đánh lái ngược lại hướng xe bị trượt (Gegenlenken) để lấy lại kiểm soát.'
       }
     ]
   },
@@ -90,6 +95,11 @@ const tipCategories = [
         term: 'Quy tắc 2 giây (Zwei-Sekunden-Abstand)',
         formula: 'Chọn 1 cột mốc cố định, xe trước đi qua, đếm 21, 22 mới tới xe mình',
         example: 'Đây là phương pháp thực tế để giữ khoảng cách an toàn ở mọi dải tốc độ, đặc biệt hiệu quả trên cao tốc Autobahn.'
+      },
+      {
+        term: 'Quãng đường phanh trên đường trơn ướt (Nasse Fahrbahn)',
+        formula: 'Bremsweg đường khô x 2',
+        example: 'Nếu đi 50 km/h trên đường khô có Bremsweg là 25m, thì khi đường ướt trơn trượt quãng đường phanh sẽ tăng gấp đôi thành 50 mét.'
       }
     ]
   },
@@ -148,6 +158,16 @@ const tipCategories = [
         term: 'Nồng độ cồn tối đa cho người lái xe bình thường',
         value: 'Dưới 0.5 ‰ (Và 0.0 ‰ nếu xảy ra tai nạn hoặc loạng choạng)',
         explanation: 'Từ 0.5 ‰ trở lên bạn sẽ bị phạt hành chính trực tiếp dù lái xe bình thường. Nếu lái xe không an toàn, mức phạt áp dụng từ 0.3 ‰.'
+      },
+      {
+        term: 'Độ tuổi tối thiểu để học lái xe Klasse B (kèm người giám hộ)',
+        value: '17 tuổi (Begleitetes Fahren ab 17)',
+        explanation: 'Bạn có thể học và thi lý thuyết từ năm 16.5 tuổi, thi thực hành lúc 17 tuổi, nhưng chỉ được phép lái xe khi có người giám hộ đi kèm.'
+      },
+      {
+        term: 'Tốc độ tối đa ngoài đô thị đối với xe kéo rơ-moóc hoặc xe > 3.5t',
+        value: '80 km/h',
+        explanation: 'Trên quốc lộ (Landstraße), các xe ô tô kéo theo rơ-moóc hoặc xe tải nặng trên 3.5 tấn chỉ được phép di chuyển tối đa là 80 km/h.'
       }
     ]
   },
@@ -191,6 +211,16 @@ const tipCategories = [
         term: 'Chướng ngại vật trên làn đường (Hindernis)',
         rule: '👉 Bên nào có chướng ngại vật thì bên đó phải nhường',
         explanation: 'Nếu làn đường của bạn có xe đỗ, công trình hoặc vật cản, bạn phải nhường đường cho xe đi ngược chiều trước khi lách qua.'
+      },
+      {
+        term: 'Quy tắc dây kéo rơ-moóc hoặc kéo xe hỏng (Abschleppen)',
+        rule: '👉 Dây kéo không quá 5 mét & phải có cờ đỏ báo hiệu ở giữa',
+        explanation: 'Khi kéo phương tiện khác bằng dây, khoảng cách giữa hai xe không được quá 5m và bắt buộc phải treo cờ/mảnh vải đỏ ở giữa dây kéo để cảnh báo xe khác không đi xen vào giữa.'
+      },
+      {
+        term: 'Quy tắc khóa kéo (Reißverschlussverfahren)',
+        rule: '👉 Đi sát đến điểm kết thúc làn rồi mới lách so le',
+        explanation: 'Khi một làn đường bị kết thúc hoặc bị chặn, các xe trên làn đó phải đi sát đến tận điểm giao nhau rồi mới lần lượt lách vào làn thông suốt theo quy tắc so le 1-1.'
       }
     ]
   },
@@ -229,6 +259,16 @@ const tipCategories = [
         term: 'Đuôi xe tải / xe buýt nhấp nháy đèn vàng',
         rule: '👉 Không được vượt hoặc vượt cực chậm',
         explanation: 'Nếu xe buýt đang bật đèn Warnblinkanlage (nháy cả 4 xi nhan) tại bến, bạn chỉ được phép đi vượt qua với tốc độ bước bộ (Schrittgeschwindigkeit - 4-7km/h) cho cả 2 chiều đường.'
+      },
+      {
+        term: 'Người đi xe đạp phía trước quay đầu lại nhìn (Blickkontakt)',
+        rule: '👉 Họ chuẩn bị rẽ trái hoặc lách sang làn của bạn',
+        explanation: 'Khi thấy người đi xe đạp đi phía trước quay đầu nhìn lại, đó là dấu hiệu chuẩn bị chuyển hướng hoặc tránh chướng ngại vật. Đáp án đúng luôn yêu cầu bạn giảm tốc độ và chuẩn bị phanh.'
+      },
+      {
+        term: 'Xe đi trước sáng đèn phanh màu đỏ (Rote Bremslichter)',
+        rule: '👉 Giữ khoảng cách, sẵn sàng chân phanh và không vượt',
+        explanation: 'Khi đèn phanh của xe phía trước sáng lên, đó là cảnh báo trực tiếp họ đang giảm tốc. Bạn phải chuẩn bị phanh và không được cố gắng vượt.'
       }
     ]
   },
@@ -277,6 +317,16 @@ const tipCategories = [
         term: 'Thấy chữ: "Immer" (Luôn luôn) hoặc "Nur" (Chỉ)',
         effect: '🚨 CHÚ Ý, THƯỜNG LÀ SAI',
         explanation: 'Những câu khẳng định quá chắc nịch như "luôn luôn phải rẽ" hay "chỉ được phép đi thẳng" hầu hết đều là đáp án lừa.'
+      },
+      {
+        term: 'Thấy chữ: "Ablenken" (Xao nhãng) / "Handy" (Điện thoại)',
+        effect: '🚨 TUYỆT ĐỐI KHÔNG CHỌN',
+        explanation: 'Mọi hành vi sử dụng điện thoại, xao nhãng hoặc thiếu tập trung lúc lái xe đều bị coi là đáp án sai.'
+      },
+      {
+        term: 'Thấy chữ: "Motor abstellen" (Tắt động cơ) khi chờ lâu',
+        effect: '✅ LUÔN LUÔN CHỌN',
+        explanation: 'Tắt máy khi dừng chờ lâu (như khi chắn tàu đóng, hoặc tắc đường dài) để tiết kiệm nhiên liệu và bảo vệ môi trường luôn là đáp án đúng.'
       }
     ]
   }
