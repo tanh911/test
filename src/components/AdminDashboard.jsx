@@ -1,3 +1,4 @@
+import React, { useState, useEffect, useRef } from 'react';
 import { Shield, Users, Trash2, Search, RefreshCw, Ban, CheckCircle, Eye, X, AlertTriangle, BarChart2, BookOpen, Award, Gamepad2, ToggleLeft, ToggleRight, Mail, Send, Loader2, StopCircle, Crown, Sparkles } from 'lucide-react';
 import { sendCustomEmailToUser, sendWelcomeEmail } from '../services/emailService';
 
