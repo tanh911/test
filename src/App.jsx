@@ -313,6 +313,7 @@ function App() {
                         uid: firebaseUser.uid,
                         createdAt: dbData.createdAt || null,
                         lastActive: dbData.lastActive || now.toISOString(),
+                        isPremium: !!dbData.isPremium,
                       };
                       setUser(updatedUser);
                       localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updatedUser));

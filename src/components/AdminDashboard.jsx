@@ -1,5 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
-import { Shield, Users, Trash2, Search, RefreshCw, Ban, CheckCircle, Eye, X, AlertTriangle, BarChart2, BookOpen, Award, Gamepad2, ToggleLeft, ToggleRight, Mail, Send, Loader2, StopCircle } from 'lucide-react';
+import { Shield, Users, Trash2, Search, RefreshCw, Ban, CheckCircle, Eye, X, AlertTriangle, BarChart2, BookOpen, Award, Gamepad2, ToggleLeft, ToggleRight, Mail, Send, Loader2, StopCircle, Crown, Sparkles } from 'lucide-react';
 import { sendCustomEmailToUser, sendWelcomeEmail } from '../services/emailService';
 
 const ADMIN_EMAIL = 'bossfc69@gmail.com';
@@ -138,6 +137,7 @@ export function AdminDashboard({ user, onNavigate }) {
   const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
+  const [filterType, setFilterType] = useState('all'); // 'all', 'premium', 'banned'
   const [selectedUser, setSelectedUser] = useState(null);
   const [deleteConfirm, setDeleteConfirm] = useState(null);
   const [toast, setToast] = useState(null);
@@ -211,6 +211,37 @@ export function AdminDashboard({ user, onNavigate }) {
         return next;
       });
     }
+  };
+
+  const handleBulkTogglePremium = async (targetStatus) => {
+    if (selectedUids.length === 0) return;
+    const actionText = targetStatus ? 'NÂNG CẤP PREMIUM 👑' : 'HỦY PREMIUM';
+    if (!window.confirm(`Bạn có chắc chắn muốn ${actionText} cho ${selectedUids.length} người dùng đã chọn?`)) {
+      return;
+    }
+
+    setLoading(true);
+    let successCount = 0;
+    try {
+      const { db } = await import('../lib/firebase');
+      const { doc, updateDoc } = await import('firebase/firestore');
+
+      for (const uid of selectedUids) {
+        try {
+          await updateDoc(doc(db, 'users', uid), { isPremium: targetStatus });
+          successCount++;
+        } catch (err) {
+          console.error(`Error toggling premium for ${uid}:`, err);
+        }
+      }
+
+      setUsers(prev => prev.map(u => selectedUids.includes(u.id) ? { ...u, isPremium: targetStatus } : u));
+      setSelectedUids([]);
+      showToast(`Đã ${actionText.toLowerCase()} thành công cho ${successCount}/${selectedUids.length} tài khoản!`);
+    } catch (e) {
+      showToast('Lỗi: ' + e.message, 'error');
+    }
+    setLoading(false);
   };
 
   const handleBulkToggleBan = async () => {
@@ -599,6 +630,20 @@ export function AdminDashboard({ user, onNavigate }) {
     }
   };
 
+  const handleTogglePremium = async (uid, currentIsPremium) => {
+    try {
+      const { db } = await import('../lib/firebase');
+      const { doc, updateDoc } = await import('firebase/firestore');
+      const nextState = !currentIsPremium;
+      await updateDoc(doc(db, 'users', uid), { isPremium: nextState });
+      setUsers(prev => prev.map(u => u.id === uid ? { ...u, isPremium: nextState } : u));
+      if (selectedUser?.id === uid) setSelectedUser(prev => ({ ...prev, isPremium: nextState }));
+      showToast(nextState ? '👑 Đã nâng cấp tài khoản lên Premium!' : 'Đã chuyển tài khoản về dạng Thường');
+    } catch (e) {
+      showToast('Lỗi: ' + e.message, 'error');
+    }
+  };
+
   const handleResetProgress = async (uid) => {
     try {
       const { db } = await import('../lib/firebase');
@@ -694,10 +739,14 @@ export function AdminDashboard({ user, onNavigate }) {
     setLoading(false);
   };
 
-  const filtered = users.filter(u =>
-    (u.displayName || '').toLowerCase().includes(search.toLowerCase()) ||
-    (u.email || '').toLowerCase().includes(search.toLowerCase())
-  );
+  const filtered = users.filter(u => {
+    const matchesSearch = (u.displayName || '').toLowerCase().includes(search.toLowerCase()) ||
+                          (u.email || '').toLowerCase().includes(search.toLowerCase());
+    if (!matchesSearch) return false;
+    if (filterType === 'premium') return !!u.isPremium;
+    if (filterType === 'banned') return !!u.banned;
+    return true;
+  });
 
   // ── Access Denied ──
   if (!isAdmin) {
@@ -717,6 +766,7 @@ export function AdminDashboard({ user, onNavigate }) {
 
   const statCards = [
     { icon: <Users size={22} />, label: 'Tổng người dùng', value: stats.total, color: '#6366f1' },
+    { icon: <Crown size={22} />, label: 'Tài khoản Premium', value: users.filter(u => u.isPremium).length, color: '#f59e0b' },
     { icon: <CheckCircle size={22} />, label: 'Có hoạt động', value: stats.active, color: '#10b981' },
     { icon: <Ban size={22} />, label: 'Bị khoá', value: users.filter(u => u.banned).length, color: '#ef4444' },
   ];
@@ -819,15 +869,37 @@ export function AdminDashboard({ user, onNavigate }) {
           </div>
         </div>
 
-        {/* Search */}
-        <div style={{ position: 'relative', marginBottom: '20px' }}>
-          <Search size={17} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
-          <input
-            value={search}
-            onChange={e => setSearch(e.target.value)}
-            placeholder="Tìm theo tên hoặc email..."
-            style={{ width: '100%', padding: '12px 16px 12px 44px', borderRadius: '12px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontSize: '14px', outline: 'none', backdropFilter: 'blur(10px)', boxSizing: 'border-box' }}
-          />
+        {/* Search & Filter */}
+        <div style={{ display: 'flex', gap: '12px', marginBottom: '20px', flexWrap: 'wrap', alignItems: 'center' }}>
+          <div style={{ position: 'relative', flex: 1, minWidth: '240px' }}>
+            <Search size={17} style={{ position: 'absolute', left: '14px', top: '50%', transform: 'translateY(-50%)', color: 'rgba(255,255,255,0.4)' }} />
+            <input
+              value={search}
+              onChange={e => setSearch(e.target.value)}
+              placeholder="Tìm theo tên hoặc email..."
+              style={{ width: '100%', padding: '12px 16px 12px 44px', borderRadius: '12px', background: 'rgba(255,255,255,0.08)', border: '1px solid rgba(255,255,255,0.15)', color: 'white', fontSize: '14px', outline: 'none', backdropFilter: 'blur(10px)', boxSizing: 'border-box' }}
+            />
+          </div>
+          <div style={{ display: 'flex', gap: '6px', background: 'rgba(255,255,255,0.06)', padding: '4px', borderRadius: '12px', border: '1px solid rgba(255,255,255,0.1)' }}>
+            {[
+              { id: 'all', label: `Tất cả (${users.length})` },
+              { id: 'premium', label: `👑 Premium (${users.filter(u => u.isPremium).length})` },
+              { id: 'banned', label: `🚫 Bị khoá (${users.filter(u => u.banned).length})` },
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setFilterType(tab.id)}
+                style={{
+                  padding: '8px 14px', borderRadius: '8px', border: 'none',
+                  background: filterType === tab.id ? 'linear-gradient(135deg, #6366f1, #4f46e5)' : 'transparent',
+                  color: filterType === tab.id ? 'white' : 'rgba(255,255,255,0.6)',
+                  fontWeight: '700', fontSize: '13px', cursor: 'pointer', transition: 'all 0.2s'
+                }}
+              >
+                {tab.label}
+              </button>
+            ))}
+          </div>
         </div>
 
         {/* User Table */}
@@ -855,7 +927,7 @@ export function AdminDashboard({ user, onNavigate }) {
                         style={{ cursor: 'pointer', transform: 'scale(1.2)' }}
                       />
                     </th>
-                    {['Người dùng', 'Email', 'Ngày tham gia', 'Tiến độ', 'Bài thi', 'Trạng thái', 'Hành động'].map(h => (
+                    {['Người dùng', 'Email', 'Loại TK', 'Ngày tham gia', 'Tiến độ', 'Bài thi', 'Trạng thái', 'Hành động'].map(h => (
                       <th key={h} style={{ padding: '14px 18px', textAlign: 'left', fontSize: '12px', fontWeight: '700', color: 'rgba(255,255,255,0.4)', textTransform: 'uppercase', letterSpacing: '0.05em', whiteSpace: 'nowrap' }}>{h}</th>
                     ))}
                   </tr>
@@ -915,6 +987,24 @@ export function AdminDashboard({ user, onNavigate }) {
                           </div>
                         </td>
                         <td data-label="Email" style={{ padding: '14px 18px', color: 'rgba(255,255,255,0.6)', fontSize: '13px' }}>{u.email || '—'}</td>
+                        <td data-label="Loại TK" style={{ padding: '14px 18px' }}>
+                          <button
+                            onClick={() => handleTogglePremium(u.id, u.isPremium)}
+                            title={u.isPremium ? "Nhấp để chuyển về tài khoản Thường" : "Nhấp để nâng cấp lên Premium"}
+                            style={{
+                              display: 'inline-flex', alignItems: 'center', gap: '5px',
+                              padding: '5px 12px', borderRadius: '20px', fontSize: '12px', fontWeight: '800',
+                              border: u.isPremium ? '1px solid rgba(245,158,11,0.6)' : '1px solid rgba(255,255,255,0.15)',
+                              background: u.isPremium ? 'linear-gradient(135deg, rgba(245,158,11,0.25), rgba(217,119,6,0.25))' : 'rgba(255,255,255,0.06)',
+                              color: u.isPremium ? '#fbbf24' : 'rgba(255,255,255,0.6)',
+                              cursor: 'pointer', transition: 'all 0.2s',
+                              boxShadow: u.isPremium ? '0 0 12px rgba(245,158,11,0.25)' : 'none'
+                            }}
+                          >
+                            <Crown size={13} color={u.isPremium ? "#fbbf24" : "currentColor"} />
+                            {u.isPremium ? '👑 Premium' : 'Thường'}
+                          </button>
+                        </td>
                         <td data-label="Ngày tham gia" style={{ padding: '14px 18px', color: 'rgba(255,255,255,0.6)', fontSize: '13px', whiteSpace: 'nowrap' }}>{formatDate(u.createdAt)}</td>
                         <td data-label="Tiến độ" style={{ padding: '14px 18px' }}>
                           <div style={{ display: 'flex', flexDirection: 'column', gap: '4px' }}>
@@ -945,6 +1035,9 @@ export function AdminDashboard({ user, onNavigate }) {
                         </td>
                         <td data-label="Hành động" style={{ padding: '14px 18px' }}>
                           <div style={{ display: 'flex', gap: '8px' }}>
+                            <button title={u.isPremium ? "Hủy Premium" : "Nâng cấp Premium 👑"} onClick={() => handleTogglePremium(u.id, u.isPremium)} style={{ width: '32px', height: '32px', borderRadius: '8px', background: u.isPremium ? 'rgba(245,158,11,0.25)' : 'rgba(255,255,255,0.08)', border: 'none', color: u.isPremium ? '#fbbf24' : 'rgba(255,255,255,0.5)', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+                              <Crown size={15} />
+                            </button>
                             <button title="Gửi Email" onClick={() => handleOpenEmailModal(u)} style={{ width: '32px', height: '32px', borderRadius: '8px', background: 'rgba(59,130,246,0.2)', border: 'none', color: '#60a5fa', cursor: 'pointer', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
                               <Mail size={15} />
                             </button>
@@ -989,7 +1082,10 @@ export function AdminDashboard({ user, onNavigate }) {
                 <div style={{ color: 'white', fontWeight: '700', fontSize: '16px' }}>{selectedUser.displayName || 'Không tên'}</div>
                 <div style={{ color: 'rgba(255,255,255,0.55)', fontSize: '13px' }}>{selectedUser.email}</div>
                 <div style={{ color: 'rgba(255,255,255,0.45)', fontSize: '12px', marginTop: '2px' }}>Tham gia: {formatDate(selectedUser.createdAt)}</div>
-                <div style={{ marginTop: '6px' }}>
+                <div style={{ marginTop: '6px', display: 'flex', gap: '6px', flexWrap: 'wrap' }}>
+                  <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', background: selectedUser.isPremium ? 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(217,119,6,0.3))' : 'rgba(255,255,255,0.1)', color: selectedUser.isPremium ? '#fbbf24' : 'rgba(255,255,255,0.6)', border: selectedUser.isPremium ? '1px solid rgba(245,158,11,0.5)' : 'none' }}>
+                    {selectedUser.isPremium ? '👑 Premium' : 'Thường'}
+                  </span>
                   <span style={{ padding: '2px 10px', borderRadius: '20px', fontSize: '11px', fontWeight: '700', background: selectedUser.banned ? 'rgba(239,68,68,0.25)' : 'rgba(16,185,129,0.25)', color: selectedUser.banned ? '#ef4444' : '#10b981' }}>
                     {selectedUser.banned ? 'Bị khoá' : 'Đang hoạt động'}
                   </span>
@@ -1012,6 +1108,9 @@ export function AdminDashboard({ user, onNavigate }) {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+              <button onClick={() => handleTogglePremium(selectedUser.id, selectedUser.isPremium)} style={{ padding: '12px', borderRadius: '12px', background: selectedUser.isPremium ? 'rgba(245,158,11,0.2)' : 'linear-gradient(135deg, rgba(245,158,11,0.3), rgba(217,119,6,0.3))', border: '1px solid #f59e0b', color: '#fbbf24', fontWeight: '700', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
+                <Crown size={16} /> {selectedUser.isPremium ? 'Chuyển về tài khoản Thường' : 'Nâng cấp tài khoản Premium 👑'}
+              </button>
               <button onClick={() => { const target = selectedUser; setSelectedUser(null); handleOpenEmailModal(target); }} style={{ padding: '12px', borderRadius: '12px', background: 'rgba(59,130,246,0.2)', border: '1px solid #3b82f6', color: '#60a5fa', fontWeight: '700', cursor: 'pointer', fontSize: '14px', display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px' }}>
                 <Mail size={16} /> Gửi Email cho người dùng
               </button>
@@ -1087,6 +1186,33 @@ export function AdminDashboard({ user, onNavigate }) {
               }}
             >
               <Mail size={14} /> Gửi Email
+            </button>
+            
+            <button
+              onClick={() => handleBulkTogglePremium(true)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '8px 16px', borderRadius: '8px',
+                background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                color: 'white', fontWeight: '700', border: 'none',
+                cursor: 'pointer', fontSize: '13px'
+              }}
+            >
+              <Crown size={14} /> Gán Premium
+            </button>
+
+            <button
+              onClick={() => handleBulkTogglePremium(false)}
+              style={{
+                display: 'flex', alignItems: 'center', gap: '6px',
+                padding: '8px 16px', borderRadius: '8px',
+                background: 'rgba(245, 158, 11, 0.15)',
+                border: '1px solid rgba(245, 158, 11, 0.4)',
+                color: '#fbbf24', fontWeight: '700',
+                cursor: 'pointer', fontSize: '13px'
+              }}
+            >
+              Hủy Premium
             </button>
             
             <button
