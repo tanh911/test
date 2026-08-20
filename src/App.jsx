@@ -15,6 +15,7 @@ import { verifyToken, clearToken } from './lib/auth';
 import { LogIn, LogOut, Loader2, CheckCircle2 } from 'lucide-react';
 import { SupportModal } from './components/SupportModal';
 import { WelcomePopup, shouldShowPopup } from './components/WelcomePopup';
+import { BuyFullAccountAlert } from './components/BuyFullAccountAlert';
 
 const SUPPORT_POPUP_KEY = 'fuhrerschein_support_popup_dismissed';
 const MIN_ACCOUNT_AGE_MS = 3 * 24 * 60 * 60 * 1000; // 3 ngày
@@ -118,7 +119,29 @@ const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onSho
               <div className="navbar-user-avatar">
                 {user?.displayName?.[0]?.toUpperCase() || '?'}
               </div>
-              <span className="navbar-user-name">{user?.displayName}</span>
+              <span className="navbar-user-name" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {user?.displayName}
+                {user?.isPremium && (
+                  <span
+                    title="Tài khoản Premium VIP"
+                    style={{
+                      background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                      color: 'white',
+                      fontSize: '10px',
+                      fontWeight: '800',
+                      padding: '2px 7px',
+                      borderRadius: '10px',
+                      boxShadow: '0 2px 8px rgba(245,158,11,0.4)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      lineHeight: '1.2'
+                    }}
+                  >
+                    👑 VIP
+                  </span>
+                )}
+              </span>
               {isAdmin && (
                 <button
                   className="navbar-auth-btn ghost"
@@ -192,8 +215,17 @@ function App() {
     root.style.setProperty('--text-scale', scale);
   }, [fontSizeMode]);
 
-  // Load simulator flag from Firestore (real-time) - Unlocked on simulator branch
+  // Load simulator flag from Firestore (real-time) - Unlocked automatically in local/DEV environment
   useEffect(() => {
+    const isLocal = window.location.hostname === 'localhost' ||
+                    window.location.hostname === '127.0.0.1' ||
+                    import.meta.env.DEV;
+
+    if (isLocal) {
+      setSimulatorEnabled(true);
+      return;
+    }
+
     let unsub = null;
     import('./lib/firebase').then(({ db }) => {
       import('firebase/firestore').then(({ doc, onSnapshot }) => {
@@ -487,6 +519,7 @@ function App() {
           localStorage.setItem('fuhrerschein_font_size', mode);
         }}
       />
+      <BuyFullAccountAlert languageMode={languageMode} user={user} />
 
       {/* Page content */}
       <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
