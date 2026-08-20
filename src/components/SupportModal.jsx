@@ -21,9 +21,9 @@ export const SupportModal = ({ isOpen, onClose, onNeverShow, languageMode = 'vi'
   const supportMethods = [
     {
       id: 'paypal',
-      name: 'PayPal (Account Full 5.99€)',
+      name: 'PayPal (Account Premium 5.99€)',
       icon: <CreditCard size={24} color="#2563eb" />,
-      desc: t('Mua Account Full trọn đời (5.99€) qua PayPal.', 'Vollversion-Account für 5.99€ über PayPal freischalten.'),
+      desc: t('Mua Account Premium trọn đời (5.99€) qua PayPal.', 'Premium-Account für 5.99€ über PayPal freischalten.'),
       link: 'https://www.paypal.com/paypalme/natra3thai4/5.99',
       bg: '#eff6ff', border: '#bfdbfe', hover: '#60a5fa'
     },

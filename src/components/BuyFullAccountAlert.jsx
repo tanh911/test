@@ -62,7 +62,7 @@ export const BuyFullAccountAlert = ({ languageMode = 'vi', user }) => {
           }}
         >
           <Crown size={14} color="#fbbf24" />
-          <span>{t('Mua Account Full (5.99€)', 'Vollversion-Account kaufen (5.99€)')}</span>
+          <span>{t('Mua Account Premium (5.99€)', 'Premium-Account kaufen (5.99€)')}</span>
         </button>
       </div>
     );
@@ -98,12 +98,12 @@ export const BuyFullAccountAlert = ({ languageMode = 'vi', user }) => {
             gap: '4px',
             boxShadow: '0 2px 6px rgba(0,0,0,0.2)'
           }}>
-            <Crown size={13} /> FULL VIP
+            <Crown size={13} /> PREMIUM
           </span>
           <span style={{ fontSize: '13.5px', color: '#f8fafc' }}>
             {t(
-              'Sở hữu Account Full Führerschein trọn đời chỉ 5.99€!',
-              'Holen Sie sich den Führerschein Vollversion-Account für nur 5.99€!'
+              'Sở hữu Account Premium Führerschein trọn đời chỉ 5.99€!',
+              'Holen Sie sich den Führerschein Premium-Account für nur 5.99€!'
             )}
           </span>
         </div>
@@ -246,7 +246,7 @@ export const BuyFullAccountAlert = ({ languageMode = 'vi', user }) => {
               </div>
 
               <h2 style={{ fontSize: '22px', fontWeight: '800', margin: '0 0 6px 0' }}>
-                {t('Nâng Cấp Tài Khoản Full', 'Vollversion-Account Freischalten')}
+                {t('Nâng Cấp Tài Khoản Premium', 'Premium-Account Freischalten')}
               </h2>
               <p style={{ fontSize: '14px', color: '#93c5fd', margin: 0 }}>
                 {t('Giá ưu đãi chỉ 5.99€ qua PayPal', 'Sonderpreis nur 5.99€ via PayPal')}
