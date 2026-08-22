@@ -165,8 +165,11 @@ const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onSho
 
 // ── Main App ────────────────────────────────────────────────────────────────
 
+const GUEST_USER = { username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true };
+
 function App() {
   const [user, setUser] = useState(null);
+  const prevUserRef = React.useRef(null);
   const [userLoading, setUserLoading] = useState(true);
   const [languageMode, setLanguageMode] = useState(() =>
     localStorage.getItem('fuhrerschein_lang_mode') || 'both'
@@ -186,12 +189,17 @@ function App() {
   const [unlockSuccess, setUnlockSuccess] = useState(false);
   const [unlockError, setUnlockError] = useState('');
 
-  // Close login modal automatically when user successfully logs in
+  // Close modal & navigate when user transitions from guest → logged-in
   useEffect(() => {
     if (user && !user.isGuest) {
       setShowLoginModal(false);
+      // Navigate to /training khi mới đăng nhập Firebase (từ guest → logged-in)
+      if (prevUserRef.current?.isGuest && user.uid) {
+        navigate('/training');
+      }
     }
-  }, [user]);
+    prevUserRef.current = user;
+  }, [user?.uid]);
 
   // Auto-show support popup: once per month, only for logged-in users with account >= 3 days old
   useEffect(() => {
@@ -261,23 +269,57 @@ function App() {
     let docUnsubscribe = null;
 
     const restore = async () => {
-      // 1. Check local session first
+      // 1. Chỉ pre-load session cho tài khoản LOCAL (không có uid).
+      // Tài khoản Firebase (có uid) phải đợi onAuthStateChanged xác nhận
+      // để đảm bảo luôn kiểm tra trạng thái banned mới nhất từ Firestore.
       const savedSession = localStorage.getItem('fuhrerschein_active_session');
       if (savedSession) {
-        try { setUser(JSON.parse(savedSession)); } catch {}
+        try {
+          const parsed = JSON.parse(savedSession);
+          if (!parsed.uid) {
+            // Tài khoản local → load ngay
+            setUser(parsed);
+            setUserLoading(false);
+          }
+          // Tài khoản Firebase → đợi onAuthStateChanged, giữ loading = true
+        } catch {
+          setUser(GUEST_USER);
+          setUserLoading(false);
+        }
       } else {
-        setUser({ username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true });
+        setUser(GUEST_USER);
+        setUserLoading(false);
       }
 
       // 2. Listen to Firebase Auth state
       import('./lib/firebase').then(({ auth, db }) => {
         import('firebase/auth').then(({ onAuthStateChanged }) => {
           import('firebase/firestore').then(({ doc, setDoc, onSnapshot }) => {
+            // Fallback: nếu Firebase không phản hồi sau 8 giây, hiển thị guest
+            const loadingTimeout = setTimeout(() => {
+              setUser(prev => prev ?? GUEST_USER);
+              setUserLoading(false);
+            }, 8000);
+
             authUnsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+              clearTimeout(loadingTimeout);
               // Unsubscribe from previous doc listener if any
               if (docUnsubscribe) {
                 docUnsubscribe();
                 docUnsubscribe = null;
+              }
+
+              if (!firebaseUser) {
+                // Không có Firebase session → reset user Firebase về guest
+                setUser(prev => {
+                  if (prev?.uid) {
+                    localStorage.removeItem('fuhrerschein_active_session');
+                    return GUEST_USER;
+                  }
+                  return prev ?? GUEST_USER;
+                });
+                setUserLoading(false);
+                return;
               }
 
               if (firebaseUser) {
@@ -349,6 +391,7 @@ function App() {
                       };
                       setUser(updatedUser);
                       localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updatedUser));
+                      setUserLoading(false);
                     } else {
                       // New user creation
                       const newUser = {
@@ -372,6 +415,7 @@ function App() {
                       });
                       setUser(newUser);
                       localStorage.setItem('fuhrerschein_active_session', JSON.stringify(newUser));
+                      setUserLoading(false);
                     }
                   }, (err) => {
                     console.error("Firestore onSnapshot error:", err);
@@ -386,7 +430,6 @@ function App() {
         });
       });
 
-      setUserLoading(false);
     };
     restore();
 

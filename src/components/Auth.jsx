@@ -121,19 +121,14 @@ export const Auth = ({ onLogin, onCancel }) => {
               return;
             }
 
-            setSuccess('Đăng nhập thành công!');
             sendLoginNotification({
               displayName: user.displayName || user.email.split('@')[0],
               email: user.email,
               loginMethod: 'Email (Firebase)'
             });
-            setTimeout(() => onLogin({
-              uid: user.uid,
-              username: user.email,
-              displayName: user.displayName || user.email.split('@')[0],
-              email: user.email,
-              apiKey: '', savedQuestions: [], examHistory: [], progress: {}
-            }), 500);
+            setSuccess('Đăng nhập thành công!');
+            setLoading(false);
+            // onAuthStateChanged trong App.jsx sẽ tự động set user & navigate
             return;
           } catch (firebaseErr) {
             console.error(firebaseErr);
@@ -396,13 +391,7 @@ export const Auth = ({ onLogin, onCancel }) => {
                   email: user.email || '',
                   loginMethod: 'Google'
                 });
-                onLogin({
-                  uid: user.uid,
-                  username: `google_${user.uid}`,
-                  displayName: user.displayName || 'Google User',
-                  email: user.email || '',
-                  apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: false
-                });
+                // onAuthStateChanged trong App.jsx sẽ tự động set user & navigate
               } catch (err) {
                 console.error(err);
                 const silent = ['auth/popup-closed-by-user', 'auth/cancelled-popup-request', 'auth/popup-blocked'];
@@ -425,13 +414,7 @@ export const Auth = ({ onLogin, onCancel }) => {
                   email: user.email || '',
                   loginMethod: 'Facebook'
                 });
-                onLogin({
-                  uid: user.uid,
-                  username: `fb_${user.uid}`,
-                  displayName: user.displayName || 'Facebook User',
-                  email: user.email || '',
-                  apiKey: '', savedQuestions: [], examHistory: [], progress: {}
-                });
+                // onAuthStateChanged trong App.jsx sẽ tự động set user & navigate
               } catch (err) {
                 console.error(err);
                 if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {
