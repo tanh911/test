@@ -2,7 +2,7 @@
 
 
 export const FlyToModal = ({ showFlyModal, flyX, flyZ, setFlyX, setFlyZ, setShowFlyModal, handleFlyToCoords }) => (
-{showFlyModal && (
+  showFlyModal && (
   <div style={{
     position: 'fixed', inset: 0, zIndex: 3000,
     background: 'rgba(3, 7, 18, 0.85)', backdropFilter: 'blur(8px)',
@@ -83,5 +83,5 @@ export const FlyToModal = ({ showFlyModal, flyX, flyZ, setFlyX, setFlyZ, setShow
       </div>
     </div>
   </div>
-)}
+)
 );
