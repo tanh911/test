@@ -18,7 +18,12 @@ export * from './streetProps.js';
 import {
   canvasTextureCache, getOrCreateCanvasTexture, getSharedTexturedMaterial,
   sharedMaterials, getOrCreateWallMaterial, getOrCreateAwningMaterial,
-  makeGermanStVOSign, createFinishArch, createAutobahnGantry
+  makeGermanStVOSign, createFinishArch, createAutobahnGantry,
+  createControlCenterBuilding, createCornerPole, createEntranceGate,
+  createFloodlightTower, createHillRamp, createLeitpfosten, createParkedDummyCar,
+  createParkingMarkings, createPineTree, createRoadArrow, createSaHinhBanner,
+  createSharkTeethYield, createTireWall, createTotemSign, createTrafficCone,
+  createZebraCrosswalk
 } from './streetProps.js';
 
 export function buildCityWorld(scene, mapType = 'stadt_zentrum', options = {}) {
