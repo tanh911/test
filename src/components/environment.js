@@ -574,7 +574,6 @@ export function buildCityWorld(scene, mapType = 'stadt_zentrum', options = {}) {
   };
 }
 
-// Cây công viên dùng chung cho PARK & PROMENADE (thân + 2 tầng tán lá)
-🛠️ Custom map builder tách sang customMapBuilder.js — re-export giữ tương thích
+// 🛠️ Custom map builder tách sang customMapBuilder.js — re-export giữ tương thích
 import { buildCustomMap, reloadCustomMap } from './customMapBuilder.js';
 export { buildCustomMap, reloadCustomMap };
