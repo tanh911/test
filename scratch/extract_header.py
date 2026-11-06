@@ -25,16 +25,16 @@ s_idx = src.index(start_marker)
 e_idx = src.index(end_marker, s_idx)
 assert src.count(start_marker) == 1
 block = src[s_idx:e_idx].rstrip()
-lines = [ln[6:] if ln.startswith('      ') else ln for ln in block.split(nl)]
-body = nl.join(lines)
+lines = [ln[6:] if ln.startswith('      ') else ln for ln in block.split(NL)]
+body = NL.join(lines)
 props = []
 for k in sorted(known):
     if re.search(r'(?<![\w$.])' + re.escape(k) + r'(?![\w$])', body):
         props.append(k)
-comp = ('// tách từ DrivingSimulation.jsx (refactor phase A3)' + nl) + nl + \
-    'export const SimHeaderBar = ({ ' + ', '.join(props) + ' }) => (' + nl + body + nl + ');' + nl
+comp = ('// tách từ DrivingSimulation.jsx (refactor phase A3)' + NL) + NL + \
+    'export const SimHeaderBar = ({ ' + ', '.join(props) + ' }) => (' + NL + body + NL + ');' + NL
 io.open('src/components/sim/SimHeaderBar.jsx', 'w', encoding='utf-8', newline='').write(comp)
-src2 = src[:s_idx] + '      <SimHeaderBar ' + ' '.join(pr + '={' + pr + '}' for pr in props) + ' />' + nl + src[e_idx:]
+src2 = src[:s_idx] + '      <SimHeaderBar ' + ' '.join(pr + '={' + pr + '}' for pr in props) + ' />' + NL + src[e_idx:]
 io.open(P, 'w', encoding='utf-8', newline='').write(src2)
 print('SimHeaderBar props:', props)
 print('done | lines:', src2.count(NL))
