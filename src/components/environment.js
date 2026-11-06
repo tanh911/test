@@ -575,57 +575,6 @@ export function buildCityWorld(scene, mapType = 'stadt_zentrum', options = {}) {
 }
 
 // Cây công viên dùng chung cho PARK & PROMENADE (thân + 2 tầng tán lá)
-function createParkTree(scale = 1) {
-  const treeGroup = new THREE.Group();
-  const trunkM = new THREE.MeshStandardMaterial({ color: 0x451a03, roughness: 1.0 });
-  const leafM = new THREE.MeshStandardMaterial({ color: 0x15803d, roughness: 0.9 });
-  const leafM2 = new THREE.MeshStandardMaterial({ color: 0x16a34a, roughness: 0.9 });
-
-  const trunk = new THREE.Mesh(new THREE.CylinderGeometry(0.16 * scale, 0.26 * scale, 2.8 * scale, 8), trunkM);
-  trunk.position.y = 1.4 * scale;
-  trunk.castShadow = true;
-  treeGroup.add(trunk);
-
-  const leavesLow = new THREE.Mesh(new THREE.SphereGeometry(1.7 * scale, 8, 8), leafM);
-  leavesLow.position.y = 3.2 * scale;
-  leavesLow.castShadow = true;
-  treeGroup.add(leavesLow);
-
-  const leavesTop = new THREE.Mesh(new THREE.SphereGeometry(1.15 * scale, 8, 8), leafM2);
-  leavesTop.position.y = 4.5 * scale;
-  leavesTop.castShadow = true;
-  treeGroup.add(leavesTop);
-
-  return treeGroup;
-}
-
-// Ghế đá công viên (Parkbank Berlin kiểu băng ghế sơn xanh lá)
-function createParkBench() {
-  const bench = new THREE.Group();
-  const woodM = new THREE.MeshStandardMaterial({ color: 0x2f6b4f, roughness: 0.75 });
-  const legM = new THREE.MeshStandardMaterial({ color: 0x1f2937, roughness: 0.6, metalness: 0.3 });
-
-  const seat = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.07, 0.45), woodM);
-  seat.position.y = 0.45;
-  seat.castShadow = true;
-  bench.add(seat);
-
-  const backrest = new THREE.Mesh(new THREE.BoxGeometry(1.8, 0.45, 0.06), woodM);
-  backrest.position.set(0, 0.72, -0.2);
-  backrest.rotation.x = -0.15;
-  bench.add(backrest);
-
-  [-0.75, 0.75].forEach(bx => {
-    const leg = new THREE.Mesh(new THREE.BoxGeometry(0.07, 0.45, 0.42), legM);
-    leg.position.set(bx, 0.22, 0);
-    bench.add(leg);
-  });
-
-  return bench;
-}
-
-// ── 3. CUSTOM MAP BUILDER (Build từ file JSON MapEditor) ────────────────────────
-
-// 🛠️ Custom map builder tách sang customMapBuilder.js — re-export giữ tương thích
+🛠️ Custom map builder tách sang customMapBuilder.js — re-export giữ tương thích
 import { buildCustomMap, reloadCustomMap } from './customMapBuilder.js';
 export { buildCustomMap, reloadCustomMap };
