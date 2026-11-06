@@ -1,0 +1,101 @@
+{
+  "metadata": {
+    "version": "1.0.0",
+    "description": "Berlin-Mitte Statutory StVO Rules Catalog & Traffic Signs",
+    "jurisdiction": "StVO (Straßenverkehrs-Ordnung)",
+    "city": "Berlin",
+    "district": "Mitte"
+  },
+  "zones": {
+    "zone_scheunenviertel_30": {
+      "id": "zone_scheunenviertel_30",
+      "type": "ZONE_30",
+      "nameDe": "Tempo 30-Zone Scheunenviertel",
+      "nameVi": "Khu vực Tempo-30 Phố cổ Scheunenviertel",
+      "defaultSpeed": 30,
+      "roadIds": [
+        "osm_seg_14",
+        "osm_seg_15",
+        "osm_seg_16"
+      ]
+    },
+    "zone_friedrich_pedestrian": {
+      "id": "zone_friedrich_pedestrian",
+      "type": "PLAY_STREET",
+      "nameDe": "Verkehrsberuhigter Bereich Friedrichstraße Mitte",
+      "nameVi": "Tuyến phố đi bộ êm dịu Friedrichstraße",
+      "defaultSpeed": 10,
+      "roadIds": []
+    }
+  },
+  "rules": [
+    {
+      "id": "rule_speed_30_friedrich_s",
+      "type": "MAX_SPEED",
+      "source": "EXPLICIT_SIGN",
+      "roadId": "osm_seg_14",
+      "direction": "FORWARD",
+      "distanceAlongRoad": 5.0,
+      "appliesToLanes": ["all"],
+      "value": 30,
+      "sign": {
+        "code": "VZ_274",
+        "variant": "30"
+      }
+    },
+    {
+      "id": "rule_stop_friedrich_udl",
+      "type": "STOP",
+      "source": "EXPLICIT_SIGN",
+      "roadId": "osm_seg_14",
+      "direction": "FORWARD",
+      "distanceAlongRoad": 14.0,
+      "junctionId": "j_friedrich_udl",
+      "stopLineId": "stopline_osm_seg_14_end",
+      "appliesToLanes": ["all"],
+      "sign": {
+        "code": "VZ_206"
+      }
+    },
+    {
+      "id": "rule_yield_charlotten",
+      "type": "YIELD",
+      "source": "EXPLICIT_SIGN",
+      "roadId": "osm_seg_1",
+      "direction": "FORWARD",
+      "distanceAlongRoad": 48.0,
+      "junctionId": "j_charlotten_prio",
+      "stopLineId": "stopline_osm_seg_1_end",
+      "appliesToLanes": ["all"],
+      "sign": {
+        "code": "VZ_205"
+      }
+    },
+    {
+      "id": "rule_turn_no_left_udl",
+      "type": "TURN_RESTRICTION",
+      "source": "MAP_EDITOR",
+      "roadId": "osm_seg_14",
+      "direction": "FORWARD",
+      "junctionId": "j_friedrich_udl",
+      "incomingRoadId": "osm_seg_14",
+      "movement": "LEFT",
+      "allowed": false,
+      "sign": {
+        "code": "VZ_209_10"
+      }
+    },
+    {
+      "id": "rule_no_entry_opposite_oneway",
+      "type": "NO_ENTRY",
+      "source": "OSM",
+      "roadId": "osm_seg_1",
+      "direction": "BACKWARD",
+      "distanceAlongRoad": 0.0,
+      "appliesToLanes": ["all"],
+      "sign": {
+        "code": "VZ_267"
+      }
+    }
+  ]
+}

@@ -1,0 +1,50 @@
+{
+  "mapInfo": {
+    "name": "Simple Straight Road",
+    "type": "custom",
+    "maxSpeedLimit": 50,
+    "gridSize": 10
+  },
+  "elements": [
+    {
+      "id": "road_1",
+      "type": "ROAD_STRAIGHT",
+      "x": 57,
+      "z": 10,
+      "rotation": 0,
+      "width": 14,
+      "height": 100
+    },
+    {
+      "id": "sign_speed_1",
+      "type": "SIGN",
+      "x": 64,
+      "z": 15,
+      "rotation": 0,
+      "width": 2,
+      "height": 4,
+      "signType": "SPEED_LIMIT",
+      "value": 50
+    },
+    {
+      "id": "tree_1",
+      "type": "TREE",
+      "x": 40,
+      "z": 30,
+      "rotation": 0,
+      "width": 2,
+      "height": 4
+    },
+    {
+      "id": "tree_2",
+      "type": "TREE",
+      "x": 88,
+      "z": 30,
+      "rotation": 0,
+      "width": 2,
+      "height": 4
+    }
+  ],
+  "roads": [],
+  "createdAt": "2026-08-28T23:15:00.000Z"
+}

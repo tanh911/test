@@ -1,0 +1,137 @@
+{
+  "metadata": {
+    "name": "German Autobahn 3-Lane Training Route",
+    "version": "1.1",
+    "units": "meters",
+    "coordinateSystem": "blender_x_right_y_forward_z_up",
+    "purpose": "driving_training",
+    "routeLengthMeters": 10000,
+    "laneConfiguration": "3 lanes per direction",
+    "note": "Updated for Blender 3D Procedural Generation with correct centerline offsets."
+  },
+  "roadDefaults": {
+    "roadType": "motorway",
+    "lanesPerDirection": 3,
+    "laneWidth": 3.75,
+    "shoulderWidth": 2.5,
+    "medianWidth": 3.5,
+    "defaultSpeedLimit": 130
+  },
+  "roads": [
+    {
+      "id": "A01_mainline_forward",
+      "type": "motorway",
+      "direction": "forward",
+      "lanes": 3,
+      "laneWidth": 3.75,
+      "shoulderWidth": 2.5,
+      "medianWidth": 3.5,
+      "lengthMeters": 10000,
+      "speedLimitDefault": 130,
+      "centerlineOffset": -7.375,
+      "centerline": [
+        {"s": 0, "position": [0.0, 0.0, 0.0]},
+        {"s": 1000, "position": [0.0, 1000.0, 0.0]},
+        {"s": 2000, "position": [0.0, 2000.0, 0.0]},
+        {"s": 3000, "position": [0.0, 3000.0, 0.0]},
+        {"s": 3400, "position": [22.02, 3400.0, 0.0]},
+        {"s": 3800, "position": [85.94, 3800.0, 0.0]},
+        {"s": 4200, "position": [185.5, 4200.0, 0.0]},
+        {"s": 4600, "position": [310.94, 4600.0, 0.0]},
+        {"s": 5000, "position": [450.0, 5000.0, 0.0]},
+        {"s": 6000, "position": [662.13, 6000.0, 0.0]},
+        {"s": 7000, "position": [750.0, 7000.0, 0.0]},
+        {"s": 8000, "position": [541.67, 8000.0, 0.0]},
+        {"s": 9000, "position": [277.78, 9000.0, 0.0]},
+        {"s": 10000, "position": [0.0, 10000.0, 0.0]}
+      ]
+    },
+    {
+      "id": "A01_mainline_backward",
+      "type": "motorway",
+      "direction": "backward",
+      "lanes": 3,
+      "laneWidth": 3.75,
+      "shoulderWidth": 2.5,
+      "medianWidth": 3.5,
+      "lengthMeters": 10000,
+      "speedLimitDefault": 130,
+      "centerlineOffset": 7.375,
+      "centerline": [
+        {"s": 0, "position": [0.0, 0.0, 0.0]},
+        {"s": 1000, "position": [0.0, 1000.0, 0.0]},
+        {"s": 2000, "position": [0.0, 2000.0, 0.0]},
+        {"s": 3000, "position": [0.0, 3000.0, 0.0]},
+        {"s": 3400, "position": [22.02, 3400.0, 0.0]},
+        {"s": 3800, "position": [85.94, 3800.0, 0.0]},
+        {"s": 4200, "position": [185.5, 4200.0, 0.0]},
+        {"s": 4600, "position": [310.94, 4600.0, 0.0]},
+        {"s": 5000, "position": [450.0, 5000.0, 0.0]},
+        {"s": 6000, "position": [662.13, 6000.0, 0.0]},
+        {"s": 7000, "position": [750.0, 7000.0, 0.0]},
+        {"s": 8000, "position": [541.67, 8000.0, 0.0]},
+        {"s": 9000, "position": [277.78, 9000.0, 0.0]},
+        {"s": 10000, "position": [0.0, 10000.0, 0.0]}
+      ]
+    },
+    {
+      "id": "A01_entry_ramp",
+      "type": "motorway_link",
+      "direction": "forward",
+      "lanes": 1,
+      "laneWidth": 3.75,
+      "speedLimitDefault": 80,
+      "geometry": [
+        [-50.0, 0.0, 0.0],
+        [-35.0, 250.0, 0.0],
+        [-20.0, 500.0, 0.0],
+        [-10.0, 750.0, 0.0],
+        [-7.375, 1000.0, 0.0]
+      ]
+    },
+    {
+      "id": "A01_exit_ramp",
+      "type": "motorway_link",
+      "direction": "forward",
+      "lanes": 1,
+      "laneWidth": 3.75,
+      "speedLimitDefault": 80,
+      "geometry": [
+        [-7.375, 8800.0, 0.0],
+        [-20.0, 9000.0, 0.0],
+        [-35.0, 9250.0, 0.0],
+        [-50.0, 9500.0, 0.0],
+        [-70.0, 9750.0, 0.0]
+      ]
+    }
+  ],
+  "sections": [
+    {"id": "S01", "name": "Auffahrt", "startS": 0, "endS": 1000, "speedLimit": 100},
+    {"id": "S02", "name": "Freie Autobahn", "startS": 1000, "endS": 3000, "speedLimit": 130},
+    {"id": "S03", "name": "Kurve und Brücke", "startS": 3000, "endS": 5000, "speedLimit": 120, "bridge": true},
+    {"id": "S04", "name": "Lange Gerade", "startS": 5000, "endS": 7000, "speedLimit": 130},
+    {"id": "S05", "name": "Baustelle", "startS": 7000, "endS": 8200, "speedLimit": 80},
+    {"id": "S06", "name": "Ausfahrt", "startS": 8200, "endS": 10000, "speedLimit": 100}
+  ],
+  "bridges": [
+    {"id": "bridge_01", "startS": 3500, "endS": 4700, "deckY": 7.0, "over": "river", "guardrail": true}
+  ],
+  "constructionZones": [
+    {
+      "id": "bz_01",
+      "startS": 7000,
+      "endS": 8200,
+      "laneNarrowing": true,
+      "temporaryBarriers": true,
+      "description": "3-lane motorway approaches a temporary narrowed work zone"
+    }
+  ],
+  "scenery": {
+    "terrain": "german_countryside",
+    "trees": true,
+    "fields": true,
+    "river": true,
+    "guardrails": true,
+    "reflectorPosts": true
+  }
+}

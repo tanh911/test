@@ -1,0 +1,267 @@
+{
+  "metadata": {
+    "id": "autobahn_training_kleinstadt_a_b_v02",
+    "name": "Autobahn Training v0.2 – Kleinstadt A nach Kleinstadt B",
+    "country": "DE",
+    "roadType": "Autobahn",
+    "version": "2.0",
+    "routeLengthMeters": 8000,
+    "drivingSide": "right",
+    "defaultSpeedLimit": 130,
+    "units": "metric"
+  },
+
+  "cities": [
+    {
+      "id": "city_a",
+      "name": "Kleinstadt A",
+      "position": { "s": -450, "x": 0 },
+      "type": "small_town"
+    },
+    {
+      "id": "city_b",
+      "name": "Kleinstadt B",
+      "position": { "s": 8450, "x": 0 },
+      "type": "small_town"
+    }
+  ],
+
+  "road": {
+    "directions": 2,
+    "lanesPerDirection": 3,
+    "laneWidthMeters": 3.5,
+    "shoulderWidthMeters": 2.5,
+    "medianWidthMeters": 4.0,
+    "outerShoulder": true,
+    "medianBarrier": true,
+    "roadSurface": "asphalt",
+    "laneMarking": "german_autobahn"
+  },
+
+  "lanes": [
+    {
+      "id": "F_L1",
+      "direction": "forward",
+      "type": "driving",
+      "position": "right",
+      "index": 1,
+      "leftLane": "F_L2",
+      "rightLane": "F_SHOULDER",
+      "overtakingLane": false
+    },
+    {
+      "id": "F_L2",
+      "direction": "forward",
+      "type": "driving",
+      "position": "middle",
+      "index": 2,
+      "leftLane": "F_L3",
+      "rightLane": "F_L1",
+      "overtakingLane": false
+    },
+    {
+      "id": "F_L3",
+      "direction": "forward",
+      "type": "driving",
+      "position": "left",
+      "index": 3,
+      "leftLane": null,
+      "rightLane": "F_L2",
+      "overtakingLane": true
+    },
+    {
+      "id": "F_SHOULDER",
+      "direction": "forward",
+      "type": "shoulder",
+      "drivable": false,
+      "emergencyOnly": true
+    },
+    {
+      "id": "B_L1",
+      "direction": "backward",
+      "type": "driving",
+      "position": "right",
+      "index": 1,
+      "leftLane": "B_L2",
+      "rightLane": "B_SHOULDER",
+      "overtakingLane": false
+    },
+    {
+      "id": "B_L2",
+      "direction": "backward",
+      "type": "driving",
+      "position": "middle",
+      "index": 2,
+      "leftLane": "B_L3",
+      "rightLane": "B_L1",
+      "overtakingLane": false
+    },
+    {
+      "id": "B_L3",
+      "direction": "backward",
+      "type": "driving",
+      "position": "left",
+      "index": 3,
+      "leftLane": null,
+      "rightLane": "B_L2",
+      "overtakingLane": true
+    },
+    {
+      "id": "B_SHOULDER",
+      "direction": "backward",
+      "type": "shoulder",
+      "drivable": false,
+      "emergencyOnly": true
+    }
+  ],
+
+  "geometry": {
+    "coordinateSystem": {
+      "type": "linear_s",
+      "origin": "route_start",
+      "sAxis": "forward"
+    },
+    "segments": [
+      { "id": "seg_000", "sStart": 0, "sEnd": 900, "type": "straight", "radiusMeters": null, "direction": "forward" },
+      { "id": "seg_001", "sStart": 900, "sEnd": 1800, "type": "curve", "radiusMeters": 1400, "curveDirection": "left" },
+      { "id": "seg_002", "sStart": 1800, "sEnd": 2800, "type": "straight", "radiusMeters": null, "direction": "forward" },
+      { "id": "seg_003", "sStart": 2800, "sEnd": 3600, "type": "curve", "radiusMeters": 1800, "curveDirection": "right" },
+      { "id": "seg_004", "sStart": 3600, "sEnd": 5000, "type": "straight", "radiusMeters": null, "direction": "forward" },
+      { "id": "seg_005", "sStart": 5000, "sEnd": 5800, "type": "curve", "radiusMeters": 1200, "curveDirection": "left" },
+      { "id": "seg_006", "sStart": 5800, "sEnd": 7000, "type": "straight", "radiusMeters": null, "direction": "forward" },
+      { "id": "seg_007", "sStart": 7000, "sEnd": 8000, "type": "curve", "radiusMeters": 2000, "curveDirection": "right" }
+    ]
+  },
+
+  "ramps": [
+    {
+      "id": "auffahrt_city_a",
+      "type": "entry",
+      "side": "right",
+      "name": "Auffahrt Kleinstadt A",
+      "roadWidth": 3.5,
+      "shoulderWidth": 1.5,
+      "centerline": [
+        { "x": -45, "s": 80 },
+        { "x": -42, "s": 130 },
+        { "x": -35, "s": 200 },
+        { "x": -27, "s": 300 },
+        { "x": -19, "s": 400 },
+        { "x": -14, "s": 500 },
+        { "x": -12.5, "s": 650 }
+      ],
+      "merge": {
+        "targetLane": "F_L1",
+        "mergeStart": 500,
+        "mergeEnd": 650,
+        "type": "acceleration"
+      },
+      "markings": {
+        "beforeMerge": "solid_edge",
+        "merge": "long_dashed",
+        "sperrflaeche": { "startS": 400, "endS": 500 }
+      }
+    },
+    {
+      "id": "ausfahrt_city_b",
+      "type": "exit",
+      "side": "right",
+      "name": "Ausfahrt Kleinstadt B",
+      "roadWidth": 3.5,
+      "shoulderWidth": 1.5,
+      "centerline": [
+        { "x": -12.5, "s": 6800 },
+        { "x": -14.0, "s": 6900 },
+        { "x": -19.0, "s": 7050 },
+        { "x": -27.0, "s": 7200 },
+        { "x": -38.0, "s": 7400 },
+        { "x": -55.0, "s": 7600 }
+      ],
+      "split": {
+        "sourceLane": "F_L1",
+        "splitStart": 6800,
+        "splitEnd": 7050,
+        "type": "deceleration"
+      },
+      "markings": {
+        "beforeSplit": "solid_edge",
+        "split": "long_dashed",
+        "sperrflaeche": { "startS": 7050, "endS": 7200 }
+      }
+    }
+  ],
+
+  "serviceArea": {
+    "id": "raststaette_01",
+    "name": "Raststätte Sonnenhöhe",
+    "side": "right",
+    "sStart": 3500,
+    "sEnd": 4050,
+    "entry": {
+      "id": "service_entry_01",
+      "connectsFrom": "F_L1",
+      "centerline": [
+        { "x": -12.5, "s": 3500 },
+        { "x": -18.0, "s": 3560 },
+        { "x": -35.0, "s": 3620 }
+      ]
+    },
+    "exit": {
+      "id": "service_exit_01",
+      "connectsTo": "F_L1",
+      "centerline": [
+        { "x": -35.0, "s": 3900 },
+        { "x": -18.0, "s": 3970 },
+        { "x": -12.5, "s": 4050 }
+      ]
+    },
+    "internalRoad": {
+      "widthMeters": 7.0,
+      "loopCenterline": [
+        { "x": -35, "s": 3620 },
+        { "x": -55, "s": 3700 },
+        { "x": -75, "s": 3800 },
+        { "x": -55, "s": 3860 },
+        { "x": -35, "s": 3900 }
+      ]
+    },
+    "facilities": [
+      { "id": "gas_station", "type": "tankstelle", "position": { "x": -45, "s": 3720 } },
+      { "id": "restaurant", "type": "restaurant", "position": { "x": -65, "s": 3750 } },
+      { "id": "toilets", "type": "wc", "position": { "x": -65, "s": 3800 } },
+      { "id": "car_parking", "type": "parking", "position": { "x": -45, "s": 3820 } }
+    ]
+  },
+
+  "speedZones": [
+    { "id": "speed_130_01", "sStart": 0, "sEnd": 850, "speedLimit": 130 },
+    { "id": "speed_100_01", "sStart": 850, "sEnd": 1200, "speedLimit": 100, "reason": "curve" },
+    { "id": "speed_130_02", "sStart": 1200, "sEnd": 2550, "speedLimit": 130 },
+    { "id": "speed_100_02", "sStart": 2550, "sEnd": 3000, "speedLimit": 100, "reason": "curve" },
+    { "id": "speed_130_03", "sStart": 3000, "sEnd": 3450, "speedLimit": 130 },
+    { "id": "speed_80_rast", "sStart": 3450, "sEnd": 4050, "speedLimit": 80, "reason": "service_area" },
+    { "id": "speed_130_04", "sStart": 4050, "sEnd": 4850, "speedLimit": 130 },
+    { "id": "speed_100_03", "sStart": 4850, "sEnd": 5300, "speedLimit": 100, "reason": "curve" },
+    { "id": "speed_130_05", "sStart": 5300, "sEnd": 6500, "speedLimit": 130 },
+    { "id": "speed_100_04", "sStart": 6500, "sEnd": 7000, "speedLimit": 100, "reason": "exit_area" },
+    { "id": "speed_80_04", "sStart": 7000, "sEnd": 7600, "speedLimit": 80, "reason": "exit_ramp" },
+    { "id": "speed_100_05", "sStart": 7600, "sEnd": 8000, "speedLimit": 100 }
+  ],
+
+  "structures": [
+    { "id": "bridge_01", "type": "overpass", "s": 2150, "widthMeters": 24, "heightMeters": 5.5, "roadWidthMeters": 8 },
+    { "id": "bridge_02", "type": "overpass", "s": 6100, "widthMeters": 28, "heightMeters": 5.5, "roadWidthMeters": 8 }
+  ],
+
+  "signs": [
+    { "id": "sign_130_01", "type": "speed_limit", "value": 130, "s": 0, "side": "right" },
+    { "id": "sign_100_01", "type": "speed_limit", "value": 100, "s": 850, "side": "right" },
+    { "id": "sign_130_02", "type": "speed_limit", "value": 130, "s": 1200, "side": "right" },
+    { "id": "sign_raststaette", "type": "service_area", "name": "Raststätte Sonnenhöhe", "s": 3350, "side": "right" },
+    { "id": "sign_80_rast", "type": "speed_limit", "value": 80, "s": 3450, "side": "right" },
+    { "id": "sign_130_after_rast", "type": "speed_limit", "value": 130, "s": 4050, "side": "right" },
+    { "id": "sign_exit_01", "type": "exit_advance", "name": "Kleinstadt B", "s": 6300, "side": "right" },
+    { "id": "sign_100_exit", "type": "speed_limit", "value": 100, "s": 6500, "side": "right" },
+    { "id": "sign_80_exit", "type": "speed_limit", "value": 80, "s": 7000, "side": "right" }
+  ]
+}

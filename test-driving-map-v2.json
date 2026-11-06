@@ -1,0 +1,286 @@
+{
+  "version": 2,
+  "metadata": {
+    "name": "Sa hình thi lái xe Đức",
+    "description": "Migrated from V1 on 2026-09-06T20:17:55.546Z",
+    "gridSize": 10
+  },
+  "nodes": [
+    {
+      "id": "node_001",
+      "x": 0,
+      "z": 0,
+      "type": "DEFAULT"
+    },
+    {
+      "id": "node_002",
+      "x": 14,
+      "z": 40,
+      "type": "DEFAULT"
+    },
+    {
+      "id": "node_003",
+      "x": 0,
+      "z": 40,
+      "type": "DEFAULT"
+    },
+    {
+      "id": "node_004",
+      "x": 14,
+      "z": 70,
+      "type": "DEFAULT"
+    },
+    {
+      "id": "node_005",
+      "x": 0,
+      "z": 70,
+      "type": "DEFAULT"
+    },
+    {
+      "id": "node_006",
+      "x": 14,
+      "z": 84,
+      "type": "DEFAULT"
+    },
+    {
+      "id": "node_007",
+      "x": 0,
+      "z": 84,
+      "type": "DEFAULT"
+    },
+    {
+      "id": "node_008",
+      "x": 14,
+      "z": 114,
+      "type": "DEFAULT"
+    },
+    {
+      "id": "node_009",
+      "x": -25,
+      "z": 70,
+      "type": "DEFAULT"
+    },
+    {
+      "id": "node_010",
+      "x": -11,
+      "z": 120,
+      "type": "DEFAULT"
+    },
+    {
+      "id": "node_011",
+      "x": 25,
+      "z": 70,
+      "type": "DEFAULT"
+    },
+    {
+      "id": "node_012",
+      "x": 39,
+      "z": 120,
+      "type": "DEFAULT"
+    }
+  ],
+  "roads": [
+    {
+      "id": "road_001",
+      "startNode": "node_001",
+      "endNode": "node_002",
+      "lanes": 2,
+      "laneWidth": 3.5,
+      "speedLimit": 50,
+      "type": "STRAIGHT",
+      "oneWay": false,
+      "priority": "NORMAL"
+    },
+    {
+      "id": "road_002",
+      "startNode": "node_003",
+      "endNode": "node_004",
+      "lanes": 2,
+      "laneWidth": 3.5,
+      "speedLimit": 50,
+      "type": "STRAIGHT",
+      "oneWay": false,
+      "priority": "NORMAL"
+    },
+    {
+      "id": "road_003",
+      "startNode": "node_005",
+      "endNode": "node_006",
+      "lanes": 4,
+      "laneWidth": 3.5,
+      "speedLimit": 50,
+      "type": "INTERSECTION",
+      "oneWay": false,
+      "priority": "NORMAL"
+    },
+    {
+      "id": "road_004",
+      "startNode": "node_007",
+      "endNode": "node_008",
+      "lanes": 2,
+      "laneWidth": 3.5,
+      "speedLimit": 50,
+      "type": "STRAIGHT",
+      "oneWay": false,
+      "priority": "NORMAL"
+    },
+    {
+      "id": "road_005",
+      "startNode": "node_009",
+      "endNode": "node_010",
+      "lanes": 2,
+      "laneWidth": 3.5,
+      "speedLimit": 50,
+      "type": "STRAIGHT",
+      "oneWay": false,
+      "priority": "NORMAL"
+    },
+    {
+      "id": "road_006",
+      "startNode": "node_011",
+      "endNode": "node_012",
+      "lanes": 2,
+      "laneWidth": 3.5,
+      "speedLimit": 50,
+      "type": "STRAIGHT",
+      "oneWay": false,
+      "priority": "NORMAL"
+    }
+  ],
+  "objects": [
+    {
+      "id": "obj_001",
+      "type": "SIGN",
+      "x": 9,
+      "z": 12,
+      "rotation": 0,
+      "signType": "SPEED_LIMIT",
+      "value": 50,
+      "width": 2,
+      "height": 4
+    },
+    {
+      "id": "obj_002",
+      "type": "SIGN",
+      "x": 9,
+      "z": 52,
+      "rotation": 0,
+      "signType": "SPEED_LIMIT",
+      "value": 50,
+      "width": 2,
+      "height": 4
+    },
+    {
+      "id": "obj_003",
+      "type": "SIGN",
+      "x": 9,
+      "z": 67,
+      "rotation": 0,
+      "signType": "STOP",
+      "width": 2,
+      "height": 4
+    },
+    {
+      "id": "obj_004",
+      "type": "SIGN",
+      "x": -7,
+      "z": 77,
+      "rotation": 90,
+      "signType": "PRIORITY",
+      "width": 2,
+      "height": 4
+    },
+    {
+      "id": "obj_005",
+      "type": "TRAFFIC_LIGHT",
+      "x": 8.5,
+      "z": 72,
+      "rotation": 0,
+      "width": 1,
+      "height": 4
+    },
+    {
+      "id": "obj_006",
+      "type": "ZEBRA",
+      "x": 2,
+      "z": 31,
+      "rotation": 0,
+      "width": 4,
+      "height": 2
+    },
+    {
+      "id": "obj_007",
+      "type": "ZEBRA",
+      "x": 2,
+      "z": 61,
+      "rotation": 0,
+      "width": 4,
+      "height": 2
+    },
+    {
+      "id": "obj_008",
+      "type": "SIDEWALK",
+      "x": -8,
+      "z": 35,
+      "rotation": 0,
+      "width": 2,
+      "height": 70
+    },
+    {
+      "id": "obj_009",
+      "type": "SIDEWALK",
+      "x": 10,
+      "z": 35,
+      "rotation": 0,
+      "width": 2,
+      "height": 70
+    },
+    {
+      "id": "obj_010",
+      "type": "BUILDING",
+      "x": -12,
+      "z": 14,
+      "rotation": 0,
+      "width": 6,
+      "height": 8
+    },
+    {
+      "id": "obj_011",
+      "type": "BUILDING",
+      "x": 18,
+      "z": 24,
+      "rotation": 0,
+      "width": 6,
+      "height": 8
+    },
+    {
+      "id": "obj_012",
+      "type": "BUILDING",
+      "x": -12,
+      "z": 54,
+      "rotation": 0,
+      "width": 6,
+      "height": 8
+    }
+  ],
+  "spawnPoints": [
+    {
+      "id": "spawn_001",
+      "x": 7,
+      "z": 2,
+      "rotation": 0,
+      "laneId": null,
+      "roadId": null,
+      "type": "PLAYER"
+    },
+    {
+      "id": "spawn_002",
+      "x": 6.5,
+      "z": 3.5,
+      "rotation": 0,
+      "laneId": null,
+      "roadId": null,
+      "type": "PLAYER"
+    }
+  ]
+}

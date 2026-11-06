@@ -10,6 +10,7 @@ import { Stats } from './components/Stats';
 import { Settings } from './components/Settings';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
 import { DrivingSimulation } from './components/DrivingSimulation';
+import { MapEditor } from './components/MapEditor';
 import { AdminDashboard } from './components/AdminDashboard';
 import { verifyToken, clearToken } from './lib/auth';
 import { LogIn, LogOut, Loader2, CheckCircle2 } from 'lucide-react';
@@ -179,7 +180,14 @@ function App() {
   const [fontSizeMode, setFontSizeMode] = useState(() =>
     localStorage.getItem('fuhrerschein_font_size') || 'normal'
   );
-  const [simulatorEnabled, setSimulatorEnabled] = useState(false);
+  const [simulatorEnabled, setSimulatorEnabled] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.hostname === 'localhost' ||
+             window.location.hostname === '127.0.0.1' ||
+             !!import.meta.env?.DEV;
+    }
+    return false;
+  });
   const [showSupportPopup, setShowSupportPopup] = useState(false);
   const [showDonateModal, setShowDonateModal] = useState(false);
   const [bannedModal, setBannedModal] = useState(null); // null hoặc { message, email, displayName }
@@ -241,10 +249,10 @@ function App() {
           if (snap.exists()) {
             setSimulatorEnabled(!!snap.data().simulatorEnabled);
           } else {
-            setSimulatorEnabled(false);
+            setSimulatorEnabled(true);
           }
         }, (err) => {
-          setSimulatorEnabled(false);
+          setSimulatorEnabled(true);
         });
       });
     });
@@ -545,8 +553,18 @@ function App() {
     </div>
   );
 
+  const isSimulation = location.pathname === '/simulation';
+  const isSimOrEditor = isSimulation || location.pathname === '/map-editor';
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)' }}>
+    <div style={{
+      height: isSimulation ? '100vh' : undefined,
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      background: 'var(--background)',
+      overflow: isSimulation ? 'hidden' : undefined
+    }}>
       <Navbar
         location={location}
         navigate={navigate}
@@ -562,10 +580,10 @@ function App() {
           localStorage.setItem('fuhrerschein_font_size', mode);
         }}
       />
-      <BuyFullAccountAlert languageMode={languageMode} user={user} />
+      {!isSimOrEditor && <BuyFullAccountAlert languageMode={languageMode} user={user} />}
 
       {/* Page content */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: isSimulation ? 'hidden' : undefined, minHeight: 0 }}>
         <Routes>
           <Route path="/" element={
             <LandingPage
@@ -585,6 +603,7 @@ function App() {
           <Route path="/settings" element={<Settings user={user} onUpdateUser={handleUpdateUser} onLogout={handleLogout} />} />
           <Route path="/privacy" element={<PrivacyPolicy onNavigate={navigate} />} />
           <Route path="/simulation" element={simulatorEnabled ? <DrivingSimulation languageMode={languageMode} /> : <Navigate to="/" replace />} />
+          <Route path="/map-editor" element={<MapEditor />} />
           <Route path="/admin" element={<AdminDashboard user={user} onNavigate={navigate} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>

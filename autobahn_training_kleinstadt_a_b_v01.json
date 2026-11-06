@@ -1,0 +1,747 @@
+{
+  "metadata": {
+    "id": "autobahn_training_kleinstadt_a_b_v01",
+    "name": "Autobahn Training – Kleinstadt A nach Kleinstadt B",
+    "country": "DE",
+    "roadType": "Autobahn",
+    "version": "1.0",
+    "routeLengthMeters": 8000,
+    "drivingSide": "right",
+    "defaultSpeedLimit": 130,
+    "units": "metric"
+  },
+
+  "cities": [
+    {
+      "id": "city_a",
+      "name": "Kleinstadt A",
+      "position": {
+        "s": -450,
+        "x": 0
+      },
+      "type": "small_town"
+    },
+    {
+      "id": "city_b",
+      "name": "Kleinstadt B",
+      "position": {
+        "s": 8450,
+        "x": 0
+      },
+      "type": "small_town"
+    }
+  ],
+
+  "road": {
+    "directions": 2,
+    "lanesPerDirection": 3,
+    "laneWidthMeters": 3.5,
+    "shoulderWidthMeters": 2.5,
+    "medianWidthMeters": 4.0,
+    "outerShoulder": true,
+    "medianBarrier": true,
+    "roadSurface": "asphalt",
+    "laneMarking": "german_autobahn"
+  },
+
+  "lanes": [
+    {
+      "id": "F_L1",
+      "direction": "forward",
+      "type": "driving",
+      "position": "right",
+      "index": 1,
+      "leftLane": "F_L2",
+      "rightLane": "F_SHOULDER",
+      "overtakingLane": false
+    },
+    {
+      "id": "F_L2",
+      "direction": "forward",
+      "type": "driving",
+      "position": "middle",
+      "index": 2,
+      "leftLane": "F_L3",
+      "rightLane": "F_L1",
+      "overtakingLane": false
+    },
+    {
+      "id": "F_L3",
+      "direction": "forward",
+      "type": "driving",
+      "position": "left",
+      "index": 3,
+      "leftLane": null,
+      "rightLane": "F_L2",
+      "overtakingLane": true
+    },
+    {
+      "id": "F_SHOULDER",
+      "direction": "forward",
+      "type": "shoulder",
+      "drivable": false,
+      "emergencyOnly": true
+    },
+
+    {
+      "id": "B_L1",
+      "direction": "backward",
+      "type": "driving",
+      "position": "right",
+      "index": 1,
+      "leftLane": "B_L2",
+      "rightLane": "B_SHOULDER",
+      "overtakingLane": false
+    },
+    {
+      "id": "B_L2",
+      "direction": "backward",
+      "type": "driving",
+      "position": "middle",
+      "index": 2,
+      "leftLane": "B_L3",
+      "rightLane": "B_L1",
+      "overtakingLane": false
+    },
+    {
+      "id": "B_L3",
+      "direction": "backward",
+      "type": "driving",
+      "position": "left",
+      "index": 3,
+      "leftLane": null,
+      "rightLane": "B_L2",
+      "overtakingLane": true
+    },
+    {
+      "id": "B_SHOULDER",
+      "direction": "backward",
+      "type": "shoulder",
+      "drivable": false,
+      "emergencyOnly": true
+    }
+  ],
+
+  "geometry": {
+    "coordinateSystem": {
+      "type": "linear_s",
+      "origin": "route_start",
+      "sAxis": "forward"
+    },
+
+    "segments": [
+      {
+        "id": "seg_000",
+        "sStart": 0,
+        "sEnd": 900,
+        "type": "straight",
+        "radiusMeters": null,
+        "direction": "forward"
+      },
+      {
+        "id": "seg_001",
+        "sStart": 900,
+        "sEnd": 1800,
+        "type": "curve",
+        "radiusMeters": 1400,
+        "curveDirection": "left"
+      },
+      {
+        "id": "seg_002",
+        "sStart": 1800,
+        "sEnd": 2800,
+        "type": "straight",
+        "radiusMeters": null,
+        "direction": "forward"
+      },
+      {
+        "id": "seg_003",
+        "sStart": 2800,
+        "sEnd": 3600,
+        "type": "curve",
+        "radiusMeters": 1800,
+        "curveDirection": "right"
+      },
+      {
+        "id": "seg_004",
+        "sStart": 3600,
+        "sEnd": 5000,
+        "type": "straight",
+        "radiusMeters": null,
+        "direction": "forward"
+      },
+      {
+        "id": "seg_005",
+        "sStart": 5000,
+        "sEnd": 5800,
+        "type": "curve",
+        "radiusMeters": 1200,
+        "curveDirection": "left"
+      },
+      {
+        "id": "seg_006",
+        "sStart": 5800,
+        "sEnd": 7000,
+        "type": "straight",
+        "radiusMeters": null,
+        "direction": "forward"
+      },
+      {
+        "id": "seg_007",
+        "sStart": 7000,
+        "sEnd": 8000,
+        "type": "curve",
+        "radiusMeters": 2000,
+        "curveDirection": "right"
+      }
+    ]
+  },
+
+  "speedZones": [
+    {
+      "id": "speed_130_01",
+      "sStart": 0,
+      "sEnd": 850,
+      "speedLimit": 130
+    },
+    {
+      "id": "speed_100_01",
+      "sStart": 850,
+      "sEnd": 1200,
+      "speedLimit": 100,
+      "reason": "curve"
+    },
+    {
+      "id": "speed_130_02",
+      "sStart": 1200,
+      "sEnd": 2550,
+      "speedLimit": 130
+    },
+    {
+      "id": "speed_100_02",
+      "sStart": 2550,
+      "sEnd": 3000,
+      "speedLimit": 100,
+      "reason": "curve"
+    },
+    {
+      "id": "speed_130_03",
+      "sStart": 3000,
+      "sEnd": 3450,
+      "speedLimit": 130
+    },
+    {
+      "id": "speed_80_rast",
+      "sStart": 3450,
+      "sEnd": 4050,
+      "speedLimit": 80,
+      "reason": "service_area"
+    },
+    {
+      "id": "speed_130_04",
+      "sStart": 4050,
+      "sEnd": 4850,
+      "speedLimit": 130
+    },
+    {
+      "id": "speed_100_03",
+      "sStart": 4850,
+      "sEnd": 5300,
+      "speedLimit": 100,
+      "reason": "curve"
+    },
+    {
+      "id": "speed_130_05",
+      "sStart": 5300,
+      "sEnd": 6500,
+      "speedLimit": 130
+    },
+    {
+      "id": "speed_100_04",
+      "sStart": 6500,
+      "sEnd": 7000,
+      "speedLimit": 100,
+      "reason": "exit_area"
+    },
+    {
+      "id": "speed_80_04",
+      "sStart": 7000,
+      "sEnd": 7600,
+      "speedLimit": 80,
+      "reason": "exit_ramp"
+    },
+    {
+      "id": "speed_100_05",
+      "sStart": 7600,
+      "sEnd": 8000,
+      "speedLimit": 100
+    }
+  ],
+
+  "junctions": [
+    {
+      "id": "junction_city_a",
+      "type": "interchange",
+      "s": 0,
+      "name": "Kleinstadt A Anschlussstelle"
+    },
+    {
+      "id": "junction_rast_entry",
+      "type": "service_entry",
+      "s": 3500,
+      "name": "Raststätte Eingang"
+    },
+    {
+      "id": "junction_rast_exit",
+      "type": "service_exit",
+      "s": 3950,
+      "name": "Raststätte Ausfahrt"
+    },
+    {
+      "id": "junction_city_b",
+      "type": "interchange",
+      "s": 8000,
+      "name": "Kleinstadt B Anschlussstelle"
+    }
+  ],
+
+  "ramps": [
+    {
+      "id": "auffahrt_city_a",
+      "type": "entry",
+      "name": "Auffahrt Kleinstadt A",
+      "sStart": 150,
+      "sEnd": 700,
+      "direction": "forward",
+      "connectsTo": "F_L1",
+      "laneType": "acceleration",
+      "mergeLengthMeters": 550,
+      "speedAtStart": 50,
+      "speedAtMerge": 100
+    },
+    {
+      "id": "ausfahrt_city_b",
+      "type": "exit",
+      "name": "Ausfahrt Kleinstadt B",
+      "sStart": 6900,
+      "sEnd": 7600,
+      "direction": "forward",
+      "splitsFrom": "F_L1",
+      "laneType": "deceleration",
+      "decelerationLengthMeters": 700,
+      "speedAtStart": 100,
+      "speedAtEnd": 60
+    }
+  ],
+
+  "serviceArea": {
+    "id": "raststaette_01",
+    "name": "Raststätte Sonnenhöhe",
+    "sStart": 3500,
+    "sEnd": 4050,
+    "side": "right",
+    "speedLimit": 80,
+
+    "entry": {
+      "id": "service_entry_01",
+      "s": 3500,
+      "type": "exit_from_autobahn",
+      "connectsFrom": "F_L1"
+    },
+
+    "exit": {
+      "id": "service_exit_01",
+      "s": 3950,
+      "type": "merge_to_autobahn",
+      "connectsTo": "F_L1"
+    },
+
+    "internalRoad": {
+      "widthMeters": 7.0,
+      "twoWay": true,
+      "speedLimit": 30
+    },
+
+    "facilities": [
+      {
+        "id": "gas_station",
+        "type": "tankstelle",
+        "position": {
+          "x": 35,
+          "s": 3700
+        }
+      },
+      {
+        "id": "restaurant",
+        "type": "restaurant",
+        "position": {
+          "x": 55,
+          "s": 3700
+        }
+      },
+      {
+        "id": "toilets",
+        "type": "wc",
+        "position": {
+          "x": 55,
+          "s": 3820
+        }
+      },
+      {
+        "id": "car_parking",
+        "type": "parking",
+        "position": {
+          "x": 35,
+          "s": 3820
+        }
+      },
+      {
+        "id": "truck_parking",
+        "type": "truck_parking",
+        "position": {
+          "x": 75,
+          "s": 3820
+        }
+      }
+    ],
+
+    "parking": {
+      "carSpaces": 45,
+      "truckSpaces": 20
+    }
+  },
+
+  "structures": [
+    {
+      "id": "bridge_01",
+      "type": "overpass",
+      "s": 2150,
+      "widthMeters": 24,
+      "heightMeters": 5.5,
+      "roadWidthMeters": 8
+    },
+    {
+      "id": "bridge_02",
+      "type": "overpass",
+      "s": 6100,
+      "widthMeters": 28,
+      "heightMeters": 5.5,
+      "roadWidthMeters": 8
+    }
+  ],
+
+  "signs": [
+    {
+      "id": "sign_130_01",
+      "type": "speed_limit",
+      "value": 130,
+      "s": 0,
+      "side": "right"
+    },
+    {
+      "id": "sign_100_01",
+      "type": "speed_limit",
+      "value": 100,
+      "s": 850,
+      "side": "right"
+    },
+    {
+      "id": "sign_curve_left",
+      "type": "curve_warning",
+      "s": 800,
+      "side": "right",
+      "direction": "left"
+    },
+    {
+      "id": "sign_130_02",
+      "type": "speed_limit",
+      "value": 130,
+      "s": 1200,
+      "side": "right"
+    },
+    {
+      "id": "sign_raststaette_advance",
+      "type": "service_area_advance",
+      "s": 3000,
+      "side": "right",
+      "distanceToService": 500
+    },
+    {
+      "id": "sign_raststaette",
+      "type": "service_area",
+      "name": "Raststätte Sonnenhöhe",
+      "s": 3350,
+      "side": "right"
+    },
+    {
+      "id": "sign_80_rast",
+      "type": "speed_limit",
+      "value": 80,
+      "s": 3450,
+      "side": "right"
+    },
+    {
+      "id": "sign_rast_exit",
+      "type": "service_area_exit",
+      "s": 3950,
+      "side": "right"
+    },
+    {
+      "id": "sign_130_after_rast",
+      "type": "speed_limit",
+      "value": 130,
+      "s": 4050,
+      "side": "right"
+    },
+    {
+      "id": "sign_100_curve_02",
+      "type": "speed_limit",
+      "value": 100,
+      "s": 4850,
+      "side": "right"
+    },
+    {
+      "id": "sign_exit_01",
+      "type": "exit_advance",
+      "name": "Kleinstadt B",
+      "s": 6300,
+      "side": "right",
+      "distanceToExit": 600
+    },
+    {
+      "id": "sign_exit_02",
+      "type": "exit_advance",
+      "name": "Kleinstadt B",
+      "s": 6700,
+      "side": "right",
+      "distanceToExit": 200
+    },
+    {
+      "id": "sign_100_exit",
+      "type": "speed_limit",
+      "value": 100,
+      "s": 6500,
+      "side": "right"
+    },
+    {
+      "id": "sign_80_exit",
+      "type": "speed_limit",
+      "value": 80,
+      "s": 7000,
+      "side": "right"
+    }
+  ],
+
+  "markings": {
+    "laneSeparator": {
+      "type": "dashed",
+      "dashLengthMeters": 6,
+      "gapLengthMeters": 12
+    },
+    "edgeLine": {
+      "type": "solid",
+      "widthMeters": 0.15
+    },
+    "shoulderLine": {
+      "type": "solid",
+      "widthMeters": 0.15
+    },
+    "mergeMarking": {
+      "type": "long_dashed",
+      "dashLengthMeters": 6,
+      "gapLengthMeters": 3
+    }
+  },
+
+  "barriers": {
+    "median": {
+      "type": "steel_guardrail",
+      "continuous": true,
+      "offsetMeters": 1.0
+    },
+    "outer": {
+      "type": "steel_guardrail",
+      "continuous": true,
+      "offsetMeters": 0.5
+    },
+    "ramp": {
+      "type": "steel_guardrail",
+      "continuous": true
+    }
+  },
+
+  "environment": {
+    "terrain": {
+      "type": "rolling_german_countryside",
+      "heightVariationMeters": 8
+    },
+
+    "vegetation": {
+      "type": "mixed",
+      "density": "medium",
+      "trees": true,
+      "grass": true,
+      "bushes": true
+    },
+
+    "buildings": {
+      "nearCity": true,
+      "nearServiceArea": true,
+      "autobahnDistanceMeters": 80
+    },
+
+    "landmarks": [
+      {
+        "type": "farm",
+        "s": 1100,
+        "side": "right"
+      },
+      {
+        "type": "wind_turbines",
+        "s": 2500,
+        "side": "left",
+        "count": 3
+      },
+      {
+        "type": "small_village",
+        "s": 5200,
+        "side": "right"
+      }
+    ]
+  },
+
+  "traffic": {
+    "enabled": true,
+
+    "density": {
+      "overall": "medium",
+      "cars": "medium",
+      "trucks": "medium_high"
+    },
+
+    "lanePreferences": {
+      "trucks": [
+        "F_L1",
+        "B_L1"
+      ],
+      "normalCars": [
+        "F_L1",
+        "F_L2",
+        "B_L1",
+        "B_L2"
+      ],
+      "overtaking": [
+        "F_L3",
+        "B_L3"
+      ]
+    },
+
+    "behaviour": {
+      "keepRight": true,
+      "overtakeOnLeft": true,
+      "useShoulder": false,
+      "respectSpeedLimit": true,
+      "useRamps": true,
+      "useServiceArea": true
+    }
+  },
+
+  "trainingScenarios": [
+    {
+      "id": "scenario_01",
+      "name": "Auffahrt",
+      "startS": 150,
+      "objective": "Enter the Autobahn safely using the acceleration lane",
+      "requiredActions": [
+        "accelerate",
+        "mirror_check",
+        "shoulder_check",
+        "merge"
+      ]
+    },
+    {
+      "id": "scenario_02",
+      "name": "Autobahnfahrt",
+      "startS": 1200,
+      "objective": "Maintain safe speed and lane discipline",
+      "requiredActions": [
+        "keep_right",
+        "observe_speed_limit",
+        "maintain_distance"
+      ]
+    },
+    {
+      "id": "scenario_03",
+      "name": "Raststätte",
+      "startS": 3000,
+      "objective": "Recognize and use the service area",
+      "requiredActions": [
+        "observe_service_sign",
+        "signal",
+        "exit",
+        "reduce_speed",
+        "enter_service_area"
+      ]
+    },
+    {
+      "id": "scenario_04",
+      "name": "Wiedereinfädeln",
+      "startS": 3950,
+      "objective": "Re-enter Autobahn from the Raststätte",
+      "requiredActions": [
+        "accelerate",
+        "mirror_check",
+        "shoulder_check",
+        "merge"
+      ]
+    },
+    {
+      "id": "scenario_05",
+      "name": "Überholen",
+      "startS": 5200,
+      "objective": "Perform a legal overtaking manoeuvre",
+      "requiredActions": [
+        "mirror_check",
+        "signal",
+        "change_to_left_lane",
+        "overtake",
+        "return_right"
+      ]
+    },
+    {
+      "id": "scenario_06",
+      "name": "Ausfahrt",
+      "startS": 6300,
+      "objective": "Prepare and take the correct Autobahn exit",
+      "requiredActions": [
+        "observe_exit_sign",
+        "signal",
+        "move_to_right_lane",
+        "enter_deceleration_lane",
+        "reduce_speed"
+      ]
+    }
+  ],
+
+  "blender": {
+    "generateRoadMesh": true,
+    "generateLaneMarkings": true,
+    "generateGuardrails": true,
+    "generateSigns": true,
+    "generateRamps": true,
+    "generateServiceArea": true,
+    "generateBridges": true,
+    "generateTerrain": true,
+    "generateVegetation": true,
+    "generateBuildings": true,
+
+    "visualTarget": {
+      "style": "realistic_german_autobahn",
+      "targetRealism": 0.8,
+      "avoidGenericHighway": true,
+      "avoidPlaceholderRamps": true,
+      "avoidFloatingObjects": true,
+      "avoidUnconnectedRoads": true
+    }
+  }
+}

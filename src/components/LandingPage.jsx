@@ -438,11 +438,16 @@ export const LandingPage = ({ user, onNavigate, onShowLogin, languageMode = 'bot
               color: simulatorEnabled ? '#2b576b' : '#9ca3af', position: 'relative', overflow: 'hidden'
             }}>
               <div className="flex items-center gap-4">
-                <Gamepad2 size={20} strokeWidth={1.5} color={simulatorEnabled ? '#2b576b' : '#9ca3af'} />
+                <Gamepad2 size={20} strokeWidth={1.5} color={simulatorEnabled ? '#2563eb' : '#9ca3af'} />
                 <span style={{ fontSize: 'calc(14px * var(--text-scale, 1))', fontWeight: '400' }}>
-                  {t('Mô phỏng lái xe', 'Fahrsimulator')}
+                  {t('Lái thử 3D (Simulator)', '3D Fahrsimulator')}
                 </span>
-                {!simulatorEnabled && (
+                {simulatorEnabled ? (
+                  <span style={{
+                    fontSize: '10px', fontWeight: '700', background: '#dbeafe', color: '#1d4ed8',
+                    padding: '2px 7px', borderRadius: '20px', letterSpacing: '0.05em'
+                  }}>MỚI</span>
+                ) : (
                   <span style={{
                     fontSize: '10px', fontWeight: '700', background: '#fef3c7', color: '#d97706',
                     padding: '2px 7px', borderRadius: '20px', letterSpacing: '0.05em', textTransform: 'uppercase'

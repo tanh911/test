@@ -8,7 +8,7 @@ import { customAlert } from '../utils/customAlert';
 import { SupportModal } from './SupportModal';
 import {
   Timer, AlertTriangle, ShieldCheck, ShieldAlert,
-  Check, RefreshCw, Eye, Info, Volume2, List, CheckCircle, ChevronRight, ChevronLeft, BarChart3, X, Star
+  Check, RefreshCw, Eye, Info, Volume2, List, CheckCircle, ChevronRight, ChevronLeft, BarChart3, X, Star, Lock, Crown
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
@@ -613,7 +613,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
             {/* Grid Container */}
             <div className="flex-1 overflow-y-auto p-4 md:p-5 bogen-responsive-grid gap-x-3 md:gap-x-6 gap-y-1.5 md:gap-y-3.5 align-top items-start">
               {currentBoegen.map(b => {
-                const isLocked = false;
+                const isLocked = !user?.isPremium && b > 5;
                 const attempts = getBogenAttempts(b);
 
                 return (
@@ -626,7 +626,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                         setSelectedBogen(b);
                       }
                     }}
-                    className={`flex items-start gap-2.5 p-1 px-2 rounded transition-all text-left ${isLocked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer'
+                    className={`flex items-start gap-2.5 p-1 px-2 rounded transition-all text-left ${isLocked ? 'opacity-50 cursor-pointer bg-gray-50/50 hover:bg-amber-50/30' : 'hover:bg-gray-50 cursor-pointer'
                       }`}
                   >
                     {/* Checkbox */}
@@ -638,7 +638,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                         borderWidth: '1.5px',
                         borderRadius: '2px',
                         backgroundColor: selectedBogen === b ? '#24425A' : 'white',
-                        borderColor: isLocked ? '#e5e7eb' : selectedBogen === b ? '#24425A' : '#6b7280'
+                        borderColor: isLocked ? '#cbd5e1' : selectedBogen === b ? '#24425A' : '#6b7280'
                       }}
                       className="shrink-0 mt-0.5 flex items-center justify-center transition-colors"
                     >
@@ -647,9 +647,10 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
                     {/* Bogen Name & Attempt Squares */}
                     <div className="flex flex-col items-start select-none">
-                      <span className={`text-xs md:text-sm font-semibold leading-tight ${isLocked ? 'text-gray-400' : 'text-gray-700'
+                      <span className={`text-xs md:text-sm font-semibold leading-tight flex items-center gap-1 ${isLocked ? 'text-gray-500' : 'text-gray-700'
                         }`}>
                         Bogen {b}
+                        {isLocked && <Lock size={12} className="text-amber-500 shrink-0" />}
                       </span>
 
                       {/* 3 Progress Squares */}

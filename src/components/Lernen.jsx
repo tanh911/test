@@ -3,7 +3,7 @@ import { useLocation } from 'react-router-dom';
 import { questions } from '../data/questions';
 import { SVGGraphics } from './SVGGraphics';
 import {
-  Info, X, Check, Star, Sparkles, Volume2, ChevronLeft, ChevronRight, SkipBack, SkipForward, FastForward, Rewind, Timer, Search
+  Info, X, Check, CheckCircle, Star, Sparkles, Volume2, ChevronLeft, ChevronRight, SkipBack, SkipForward, FastForward, Rewind, Timer, Search
 } from 'lucide-react';
 import { customAlert } from '../utils/customAlert';
 import { categoryGroups, getCategoryLabel } from '../utils/categoryHelpers';

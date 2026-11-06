@@ -59,8 +59,9 @@ function apiServerPlugin() {
 // https://vite.dev/config/
 export default defineConfig({
   plugins: [react(), apiServerPlugin()],
+  optimizeDeps: {},
   server: {
-    host: '127.0.0.1',
+    host: 'localhost',
     port: 3000,
     strictPort: false,
   },

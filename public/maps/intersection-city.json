@@ -1,0 +1,152 @@
+{
+  "mapInfo": {
+    "name": "City Intersection",
+    "type": "custom",
+    "maxSpeedLimit": 50,
+    "gridSize": 10
+  },
+  "elements": [
+    {
+      "id": "road_north",
+      "type": "ROAD_STRAIGHT",
+      "x": 57,
+      "z": 0,
+      "rotation": 0,
+      "width": 14,
+      "height": 50
+    },
+    {
+      "id": "road_south",
+      "type": "ROAD_STRAIGHT",
+      "x": 57,
+      "z": 64,
+      "rotation": 0,
+      "width": 14,
+      "height": 50
+    },
+    {
+      "id": "road_east",
+      "type": "ROAD_STRAIGHT",
+      "x": 71,
+      "z": 50,
+      "rotation": 90,
+      "width": 14,
+      "height": 50
+    },
+    {
+      "id": "road_west",
+      "type": "ROAD_STRAIGHT",
+      "x": 43,
+      "z": 50,
+      "rotation": 90,
+      "width": 14,
+      "height": 50
+    },
+    {
+      "id": "intersection_center",
+      "type": "INTERSECTION_4WAY",
+      "x": 57,
+      "z": 50,
+      "rotation": 0,
+      "width": 14,
+      "height": 14
+    },
+    {
+      "id": "sign_speed_north",
+      "type": "SIGN",
+      "x": 64,
+      "z": 5,
+      "rotation": 0,
+      "width": 2,
+      "height": 4,
+      "signType": "SPEED_LIMIT",
+      "value": 50
+    },
+    {
+      "id": "sign_stop_south",
+      "type": "SIGN",
+      "x": 64,
+      "z": 108,
+      "rotation": 180,
+      "width": 2,
+      "height": 4,
+      "signType": "STOP"
+    },
+    {
+      "id": "traffic_light_1",
+      "type": "TRAFFIC_LIGHT",
+      "x": 64,
+      "z": 45,
+      "rotation": 0,
+      "width": 1,
+      "height": 4,
+      "initialState": "RED"
+    },
+    {
+      "id": "traffic_light_2",
+      "type": "TRAFFIC_LIGHT",
+      "x": 64,
+      "z": 55,
+      "rotation": 180,
+      "width": 1,
+      "height": 4,
+      "initialState": "GREEN"
+    },
+    {
+      "id": "zebra_1",
+      "type": "ZEBRA",
+      "x": 57,
+      "z": 42,
+      "rotation": 0,
+      "width": 14,
+      "height": 4
+    },
+    {
+      "id": "zebra_2",
+      "type": "ZEBRA",
+      "x": 57,
+      "z": 58,
+      "rotation": 0,
+      "width": 14,
+      "height": 4
+    },
+    {
+      "id": "building_1",
+      "type": "BUILDING",
+      "x": 30,
+      "z": 20,
+      "rotation": 0,
+      "width": 8,
+      "height": 12
+    },
+    {
+      "id": "building_2",
+      "type": "BUILDING",
+      "x": 80,
+      "z": 20,
+      "rotation": 0,
+      "width": 8,
+      "height": 12
+    },
+    {
+      "id": "tree_1",
+      "type": "TREE",
+      "x": 35,
+      "z": 50,
+      "rotation": 0,
+      "width": 2,
+      "height": 4
+    },
+    {
+      "id": "tree_2",
+      "type": "TREE",
+      "x": 85,
+      "z": 50,
+      "rotation": 0,
+      "width": 2,
+      "height": 4
+    }
+  ],
+  "roads": [],
+  "createdAt": "2026-08-28T23:15:00.000Z"
+}
