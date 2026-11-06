@@ -68,5 +68,22 @@ m_after3 = '      <FlyToModal showFlyModal={showFlyModal}'
 src2, pr = extract(src2, '      {showOptionsMenu && (', m_after3, 'SimOptionsMenu', keep_end=True, nl=NL)
 print('SimOptionsMenu props:', pr)
 
+# ── 4. Header bar: không có {cond &&} wrapper — block từ comment đến trước {isDriving && ( ──
+start_marker = '      {/* 🌟 1. UNIFIED SLIM HEADER'
+end_marker = '      {isDriving && ('
+s_idx = unique(src2, start_marker)
+e_idx = unique(src2, end_marker, s_idx)
+block = src2[s_idx:e_idx].rstrip()
+lines = [ln[6:] if ln.startswith('      ') else ln for ln in block.split(nl)]
+body = nl.join(lines)
+props = []
+for k in sorted(known):
+    if re.search(r'(?<![\w$.])' + re.escape(k) + r'(?![\w$])', body):
+        props.append(k)
+comp = ('// tách từ DrivingSimulation.jsx (refactor phase A3)' + nl) + nl +     'export const SimHeaderBar = ({ ' + ', '.join(props) + ' }) => (' + nl + body + nl + ');' + nl
+io.open('src/components/sim/SimHeaderBar.jsx', 'w', encoding='utf-8', newline='').write(comp)
+src2 = src2[:s_idx] + '      <SimHeaderBar ' + ' '.join(pr + '={' + pr + '}' for pr in props) + ' />' + nl + src2[e_idx:]
+print('SimHeaderBar props:', props)
+
 io.open(P, 'w', encoding='utf-8', newline='').write(src2)
 print('done | lines:', src2.count(NL))
