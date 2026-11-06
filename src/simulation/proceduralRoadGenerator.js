@@ -5,7 +5,7 @@ import {
   createSidewalkMaterial
 } from '../components/textures.js';
 import { makeTrafficLight } from '../components/3dObjects.js';
-import { makeGermanStVOSign, createTotemSign } from '../components/environment.js';
+import { makeGermanStVOSign, createTotemSign } from '../components/streetProps.js';
 import { LaneGraphGenerator } from './legal/LaneGraphGenerator.js';
 import { JunctionGeometryBuilder } from './legal/JunctionGeometryBuilder.js';
 

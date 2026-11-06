@@ -7,7 +7,7 @@ import roadGraphTraining from '../simulation/data/road_graph_training.json';
 import { TrafficRuleResolver } from '../simulation/legal/TrafficRuleResolver.js';
 import trafficRulesBerlin from '../simulation/data/traffic_rules_berlin.json';
 import { examinerEngine } from '../simulation/ExaminerRuleEngine.js';
-import { createAutobahnGantry, makeGermanStVOSign, getOrCreateCanvasTexture, getSharedTexturedMaterial, sharedMaterials } from './environment.js';
+import { createAutobahnGantry, makeGermanStVOSign, getOrCreateCanvasTexture, getSharedTexturedMaterial, sharedMaterials } from './streetProps.js';
 import { makeTrafficLight } from './3dObjects.js';
 
 /**

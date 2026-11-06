@@ -4,7 +4,7 @@ import roadGraphLand from '../simulation/data/road_graph_land.json';
 import { TrafficRuleResolver } from '../simulation/legal/TrafficRuleResolver.js';
 import trafficRulesBerlin from '../simulation/data/traffic_rules_berlin.json';
 import { examinerEngine } from '../simulation/ExaminerRuleEngine.js';
-import { makeGermanStVOSign } from './environment.js';
+import { makeGermanStVOSign } from './streetProps.js';
 
 /**
  * 🌲 LANDSTRASSE B2 DISTRICT BUILDER (PBF Map Engine)
