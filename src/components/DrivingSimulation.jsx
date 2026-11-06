@@ -38,148 +38,8 @@ import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js'
 import { SSAOPass } from 'three/addons/postprocessing/SSAOPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { ShaderPass } from 'three/addons/postprocessing/ShaderPass.js';
-
-const GLB_STEER_AXIS = new THREE.Vector3(0, 0, 1);
-
-// 🚀 SCRATCH VECTORS DÙNG CHUNG (preallocated): camera & collision cấp phát lại mỗi frame
-// trước đây → GC spikes gây giật khung hình. Tái sử dụng các temp này (chỉ 1 frame dùng
-// tại một thời điểm nên an toàn tuyệt đối).
-const _camEyeLocal = new THREE.Vector3();
-const _camTargetLocal = new THREE.Vector3();
-const _camTargetOffset = new THREE.Vector3();
-const _collisionCorners = [
-  { x: 0, z: 0 }, { x: 0, z: 0 }, { x: 0, z: 0 }, { x: 0, z: 0 }
-];
-
-/**
- * 🧹 Giải phóng GPU memory khi bỏ một group khỏi scene (chống leak khi chuyển map A→B→A):
- * geometry LUÔN per-build → dispose an toàn; material/texture chỉ dispose khi own=true
- * (GLB loader tạo material mới mỗi lần nạp — còn material procedural dùng shared cache
- * toàn cục (getSharedTexturedMaterial) tuyệt đối KHÔNG được dispose).
- */
-const disposeGroupDeep = (root, ownMaterials = false) => {
-  if (!root) return;
-  root.traverse((o) => {
-    if (o.geometry) o.geometry.dispose();
-    if (ownMaterials && o.material) {
-      const mats = Array.isArray(o.material) ? o.material : [o.material];
-      mats.forEach((m) => {
-        if (!m) return;
-        for (const k of Object.keys(m)) {
-          const v = m[k];
-          if (v && v.isTexture) v.dispose();
-        }
-        m.dispose();
-      });
-    }
-  });
-};
-
-/**
- * 🎯 Chiếu điểm spawn lên TÂM LÀN CÙNG HƯỚNG gần nhất trong LaneGraph (chỉ dùng cho map PBF).
- * Trước đây spawn cố định lệch sang làn ngược chiều ~9.5m → cảm giác "xe và đường rất lệch".
- * @returns {{x, z, rot}} toạ độ world đã snap (giữ nguyên nếu không tìm được lane phù hợp)
- */
-const snapSpawnToLaneCenter = (laneGraph, worldX, worldZ, rot) => {
-  if (!laneGraph || !Array.isArray(laneGraph.lanes)) return { x: worldX, z: worldZ, rot };
-  let best = null;
-  for (const lane of laneGraph.lanes) {
-    const pts = lane.drivableWaypoints || lane.centerline;
-    if (!pts || pts.length < 2) continue;
-    for (let i = 0; i < pts.length - 1; i++) {
-      const ax = pts[i][0], az = pts[i][1];
-      const bx = pts[i + 1][0], bz = pts[i + 1][1];
-      const dx = bx - ax, dz = bz - az;
-      const lenSq = dx * dx + dz * dz;
-      if (lenSq === 0) continue;
-      let t = ((worldX - ax) * dx + (worldZ - az) * dz) / lenSq;
-      t = Math.max(0, Math.min(1, t));
-      const qx = ax + t * dx;
-      const qz = az + t * dz;
-      const d = Math.hypot(worldX - qx, worldZ - qz);
-      if (d > 15) continue;
-      const L = Math.sqrt(lenSq);
-      // Heading của lane theo khung người chơi: forward = (sin rot, -cos rot) = (dx, dz)/L
-      const laneHeading = Math.atan2(dx / L, -dz / L);
-      let diff = Math.abs(rot - laneHeading);
-      while (diff > Math.PI) diff -= Math.PI * 2;
-      if (Math.abs(diff) > Math.PI * 0.3) continue; // chỉ làn CÙNG hướng đi
-      if (!best || d < best.d) best = { d, x: qx, z: qz, rot: laneHeading };
-    }
-  }
-  return best ? { x: best.x, z: best.z, rot: best.rot } : { x: worldX, z: worldZ, rot };
-};
-
-// 🏁 Sa Hình mặc định khép kín (Fahrschule Closed Circuit) — dùng cho khởi tạo và
-// khôi phục khi người chơi xóa Map Custom khỏi Map Editor (luôn trả về object mới
-// để effect hot-swap map nhận thấy sự thay đổi)
-const buildDefaultFahrschuleMap = () => ({
-  mapInfo: {
-    name: 'Sa Hình Thi Lái Xe Khép Kín (Fahrschule Closed Circuit)',
-    type: 'custom',
-    maxSpeedLimit: 50,
-    gridSize: 10,
-    spawnPoint: { x: 3.5, z: 5, rotation: 0 }
-  },
-  elements: [
-    // ── 0. ĐOẠN ĐƯỜNG PHÍA SAU VẠCH XUẤT PHÁT (Gương hậu soi thấy mặt đường) ──
-    { id: 'road_main_behind_1', type: 'ROAD_STRAIGHT', x: 0, z: -60, rotation: 0, width: 14, height: 60 },
-
-    // ── 1. ĐẠI LỘ XUẤT PHÁT (Start Boulevard) ───────────────────────────
-    { id: 'road_main_1', type: 'ROAD_STRAIGHT', x: 0, z: 0, rotation: 0, width: 14, height: 80 },
-    { id: 'parking_bay_1', type: 'PARKING_BAY', x: 14, z: 25, rotation: 0, width: 8, height: 25 },
-    { id: 'sign_speed_50_1', type: 'SIGN', signType: 'SPEED_LIMIT', value: 50, x: 14.5, z: 15, rotation: 0, width: 1.5, height: 3 },
-    { id: 'sign_parking_1', type: 'SIGN', signType: 'PARKING', x: 22.5, z: 22, rotation: 0, width: 1.5, height: 3 },
-    { id: 'lamp_1', type: 'LAMP_POST', x: 15.5, z: 45, rotation: 0, width: 1, height: 6 },
-    { id: 'bldg_left_1', type: 'BUILDING', x: -18, z: 20, rotation: 0, width: 10, height: 16, bldgHeight: 18 },
-    { id: 'bldg_right_1', type: 'BUILDING', x: 24, z: 20, rotation: 0, width: 10, height: 16, bldgHeight: 22 },
-    { id: 'tree_left_1', type: 'TREE', x: -5, z: 10, rotation: 0, width: 2, height: 4 },
-    { id: 'tree_right_1', type: 'TREE', x: 17, z: 10, rotation: 0, width: 2, height: 4 },
-
-    // ── 2. KHÚC CUA 90° SỐ 1 (Turn 1 - North to East) ────────────────────
-    { id: 'curve_1', type: 'ROAD_CURVE_90', x: 0, z: 80, rotation: 90, width: 24, height: 24 },
-
-    // ── 3. NHÁNH ĐƯỜNG ĐÔNG & VẠCH NGƯỜI ĐI BỘ (East Avenue) ─────────────
-    { id: 'road_east_1', type: 'ROAD_STRAIGHT', x: 24, z: 80, rotation: 90, width: 14, height: 60 },
-    { id: 'zebra_1', type: 'ZEBRA', x: 35, z: 80, rotation: 90, width: 14, height: 3 },
-    { id: 'tl_1', type: 'TRAFFIC_LIGHT', x: 35, z: 95, rotation: 0, width: 1, height: 4 },
-    { id: 'sign_speed_30_1', type: 'SIGN', signType: 'SPEED_LIMIT', value: 30, x: 55, z: 95, rotation: 90, width: 1.5, height: 3 },
-
-    // ── 4. BÀI THI CUA CHỮ S / VỆT BÁNH XE (S-Curve Slalom Section) ──────
-    { id: 's_curve_1', type: 'ROAD_S_CURVE', x: 84, z: 80, rotation: 90, width: 14, height: 50, amplitude: 4.5 },
-
-    // ── 5. KHÚC CUA 90° SỐ 2 (Turn 2 - East to South) ────────────────────
-    { id: 'curve_2', type: 'ROAD_CURVE_90', x: 134, z: 80, rotation: 180, width: 24, height: 24 },
-
-    // ── 6. ĐƯỜNG PHÍA ĐÔNG & NGÃ TƯ BIỂN STOP (East Corridor & 4-Way) ─────
-    { id: 'road_south_1', type: 'ROAD_STRAIGHT', x: 146, z: 40, rotation: 0, width: 14, height: 40 },
-    { id: 'inter_4way_1', type: 'INTERSECTION_4WAY', x: 146, z: 0, rotation: 0, width: 14, height: 14 },
-    { id: 'sign_stop_1', type: 'SIGN', signType: 'STOP', x: 161, z: 5, rotation: 0, width: 1.5, height: 3 },
-    { id: 'parking_bay_2', type: 'PARKING_BAY', x: 160, z: 20, rotation: 0, width: 8, height: 25 },
-
-    // ── 7. BÀI THI DỐC ĐỀ-PA (Hill Start Ramp - Anfahren am Berg) ────────
-    { id: 'road_to_hill', type: 'ROAD_STRAIGHT', x: 146, z: -40, rotation: 0, width: 14, height: 40 },
-    { id: 'hill_ramp_1', type: 'HILL_RAMP', x: 149, z: -80, rotation: 0, width: 8, height: 36, maxHeight: 1.1 },
-    { id: 'sign_priority_1', type: 'SIGN', signType: 'PRIORITY', x: 158, z: -60, rotation: 0, width: 1.5, height: 3 },
-
-    // ── 8. KHÚC CUA 90° SỐ 3 (Turn 3 - South to West) ────────────────────
-    { id: 'curve_3', type: 'ROAD_CURVE_90', x: 146, z: -116, rotation: 270, width: 24, height: 24 },
-
-    // ── 9. ĐƯỜNG DẪN ĐẾN VÒNG XUYẾN (Avenue to Roundabout) ───────────────
-    { id: 'road_to_roundabout', type: 'ROAD_STRAIGHT', x: 96, z: -128, rotation: 90, width: 14, height: 50 },
-
-    // ── 10. VÒNG XUYẾN STVO 4 LỐI (4-Way Roundabout / Kreisverkehr) ──────
-    { id: 'roundabout_main', type: 'ROUNDABOUT_4WAY', x: 50, z: -136, rotation: 0, width: 32, height: 32 },
-
-    // ── 11. ĐƯỜNG THOÁT VÒNG XUYẾN & KHÉP KÍN VÒNG SA HÌNH ───────────────
-    { id: 'road_from_roundabout', type: 'ROAD_STRAIGHT', x: 14, z: -128, rotation: 90, width: 14, height: 36 },
-    { id: 'curve_4', type: 'ROAD_CURVE_90', x: 0, z: -116, rotation: 0, width: 24, height: 24 },
-    { id: 'road_connector_close', type: 'ROAD_STRAIGHT', x: 0, z: -92, rotation: 0, width: 14, height: 32 },
-
-    // ── 12. ĐIỂM XUẤT PHÁT (Spawn Point) ────────────────────────────────
-    { id: 'spawn_start', type: 'SPAWN_POINT', x: 3.5, z: 5, rotation: 0, width: 3, height: 6 }
-  ]
-});
+import { GLB_STEER_AXIS, _camEyeLocal, _camTargetLocal, _camTargetOffset, _collisionCorners, disposeGroupDeep, snapSpawnToLaneCenter, DRIVING_TIPS } from './sim/simHelpers.js';
+import { buildDefaultFahrschuleMap } from '../simulation/saHinhDefaultMap.js';
 
 export const DrivingSimulation = ({ languageMode = 'vi' }) => {
   const containerRef = useRef(null);
@@ -210,13 +70,7 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
     return buildDefaultFahrschuleMap();
   });
 
-  const DRIVING_TIPS = [
-    'Mẹo StVO: Gạt cần số về [ D ] để khởi hành, xe đỗ ở [ P ] đạp ga sẽ chỉ rú máy.',
-    'Mẹo StVO: Quan sát gương chiếu hậu và ngoái đầu (Schulterblick) trước khi chuyển hướng.',
-    'Mẹo StVO: Quy tắc "Rechts vor Links" (ưu tiên bên phải) tại các ngã ba, ngã tư không biển báo.',
-    'Mẹo StVO: Dừng xe hoàn toàn trước vạch dừng tại biển STOP ít nhất 3 giây.',
-    'Mẹo StVO: Bật xi-nhan trước khi tấp lề hoặc chuyển làn đường ít nhất 30 mét.'
-  ];
+
 
   // 🚀 LAZY INIT: three.js chỉ khởi tạo khi user bấm "BẮT ĐẦU" — không init khi mount
   // (trước đây init chạy ngay trên mount → build 3269 roads sync → menu đơ vài giây)
