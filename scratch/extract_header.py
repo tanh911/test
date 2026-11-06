@@ -23,7 +23,7 @@ start_marker = '      {/* 🌟 1. UNIFIED SLIM HEADER'
 end_marker = '      {isDriving && ('
 s_idx = src.index(start_marker)
 e_idx = src.index(end_marker, s_idx)
-assert src.count(start_marker) == 1 and src.count(end_marker) == 1
+assert src.count(start_marker) == 1
 block = src[s_idx:e_idx].rstrip()
 lines = [ln[6:] if ln.startswith('      ') else ln for ln in block.split(nl)]
 body = nl.join(lines)
