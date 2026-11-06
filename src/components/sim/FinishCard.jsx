@@ -3,7 +3,6 @@ import { CheckCircle2, AlertOctagon, RotateCcw, Home } from 'lucide-react';
 
 export const FinishCard = ({ finished, score, events, handleRestartExam, navigate }) => (
   finished && (
-finished && (
 <div className="sim-finish-backdrop" style={{ position: 'absolute', inset: 0, background: 'rgba(2, 6, 23, 0.95)', backdropFilter: 'blur(16px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 2000, padding: 24 }}>
   <div className="sim-finish-card" style={{ background: 'linear-gradient(135deg, #0f172a, #1e1b4b)', border: `2px solid ${score >= 70 ? '#10b981' : '#ef4444'}`, borderRadius: 24, padding: 36, maxWidth: 520, width: '100%', textAlign: 'center', boxShadow: '0 30px 80px rgba(0,0,0,0.7)', overflowY: 'auto', maxHeight: '90vh' }}>
     <div style={{ width: 64, height: 64, borderRadius: '50%', background: score >= 70 ? 'rgba(16,185,129,0.2)' : 'rgba(239,68,68,0.2)', display: 'flex', alignItems: 'center', justifyContent: 'center', margin: '0 auto 16px' }}>
