@@ -3,7 +3,6 @@ import { ArrowLeft, Camera, Compass, Eye, HelpCircle, Map, Navigation, Power, Sl
 // tách từ DrivingSimulation.jsx (refactor phase A3)
 
 export const SimHeaderBar = ({ activeScenario, authoritativeSpeedLimit, cameraMode, currentMapId, currentZone, gear, handleToggleEngine, isDriving, isEngineRunning, scenarioIdx, score, setIsDriving, setShowAutobahnOverviewMap, setShowBerlinOverviewMap, setShowGuideModal, setShowInGameTutorial, setShowOptionsMenu, showInGameTutorial, showRearMirror, toggleCameraView, toggleRearMirror }) => (
-{/* 🌟 1. UNIFIED SLIM HEADER (Thanh trạng thái đầu màn hình duy nhất, tối giản & tiếng Việt) */}
 <div className="sim-unified-header" style={{
   position: 'absolute', top: 10, left: 12, right: 12, zIndex: 55,
   display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10,

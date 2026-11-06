@@ -11,7 +11,7 @@ import { useNavigate, useLocation } from 'react-router-dom';
 import { MAPS, SCENARIOS, EXERCISE_CATEGORIES, EXERCISES } from '../simulation/data/index.js';
 import { initScore, applyEvent, MAP_SCENARIOS } from './SimScenarios.js';
 import audioEngine from './soundEngine.js';
-import { ARNavigationBox, VirtualCockpitCluster, AutomaticTransmissionWidget, ScoreHUD, ExaminerPanel, RearCameraOverlay, SmartRearviewMirror } from './uiComponents.jsx';
+import { VirtualCockpitCluster, SmartRearviewMirror } from './uiComponents.jsx';
 import { create3DPlayerCar, createTrafficAICar, makeTrafficLight, drawDigitalCluster, drawSmallClusterScreen, drawInfotainmentScreen } from './3dObjects.js';
 import { createSkyGradientTexture } from './textures.js';
 import { buildCityWorld, buildCustomMap } from './environment.js';
@@ -44,6 +44,10 @@ import { buildDefaultFahrschuleMap } from '../simulation/saHinhDefaultMap.js';
 import { FinishCard } from './sim/FinishCard.jsx';
 import { createLoadMapIntoScene } from './sim/createLoadMapIntoScene.js';
 import { FlyToModal } from './sim/FlyToModal.jsx';
+import { SimHeaderBar } from './sim/SimHeaderBar.jsx';
+import { SimLoadingScreen } from './sim/SimLoadingScreen.jsx';
+import { StartMenu } from './sim/StartMenu.jsx';
+import { SimOptionsMenu } from './sim/SimOptionsMenu.jsx';
 
 export const DrivingSimulation = ({ languageMode = 'vi' }) => {
   const containerRef = useRef(null);
