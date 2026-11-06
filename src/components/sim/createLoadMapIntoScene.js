@@ -1,12 +1,18 @@
 // 🗺️ loadMapIntoScene — tách từ DrivingSimulation.jsx (refactor phase A4)
 // Factory: trả về hàm (mapId, mapData) hot-swap map vào scene hiện có.
+import { BERLIN_FIXED_SPAWN } from '../../simulation/data/berlinDirectives.js';
+import roadGraphData from '../../simulation/data/road_graph.json';
 import { MAPS } from '../../simulation/data/index.js';
 import { MAP_SCENARIOS, SCENARIOS } from '../SimScenarios.js';
 import { buildCityWorld, buildCustomMap } from '../environment.js';
 import { disposeGroupDeep, snapSpawnToLaneCenter } from './simHelpers.js';
 import { detectZoneForMap } from '../SaHinhMinimap.jsx';
+import { TrafficAIManager, buildCorridorsFromMapElements, BERLIN_MITTE_TRAFFIC_CORRIDORS } from '../../simulation/trafficAI.js';
+import { createTrafficAICar, makeTrafficLight } from '../3dObjects.js';
+import * as THREE from 'three';
+import { examinerEngine } from '../../simulation/ExaminerRuleEngine.js';
 
-export const createLoadMapIntoScene = ({ refs, scene, isPerformance, setPlayerCarWorldPos, setCurrentZone }) => (mapId, mapData) => {
+export const createLoadMapIntoScene = ({ refs, scene, isPerformance, setPlayerCarWorldPos, setCurrentZone, roadNetwork, examinerEngine, selectedExercise, playerCar, renderer, camera, setActiveDirective, setExaminerFeedback, setExaminerScore }) => (mapId, mapData) => {
   if (!scene) return;
   // 1. Dọn dẹp scenery cũ
   if (refs.current._scenery) {

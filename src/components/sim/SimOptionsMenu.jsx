@@ -1,3 +1,5 @@
+import audioEngine from '../soundEngine.js';
+
 import { AlertTriangle, Camera, Car, CloudRain, Compass, Eye, Gauge, Lightbulb, Map, Moon, ShieldCheck, Sliders, Sun, Trash2, Volume2, VolumeX } from 'lucide-react';
 
 // tách từ DrivingSimulation.jsx (refactor phase A3)

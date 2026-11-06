@@ -1,3 +1,5 @@
+import audioEngine from '../soundEngine.js';
+
 import { ArrowLeft, Camera, Compass, Eye, HelpCircle, Map, Navigation, Power, Sliders } from 'lucide-react';
 
 // tách từ DrivingSimulation.jsx (refactor phase A3)

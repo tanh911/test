@@ -1397,7 +1397,7 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
         camera.add(cockpitLightL); camera.add(cockpitLightL.target);
 
         // 🗺️ XÂY DỰNG HÀM HOT-SWAP MAP VÀO SCENE (KHÔNG TÁI TẠO WEBGL VÀ KHÔNG LOAD LẠI XE COROLLA)
-        const loadMapIntoScene = createLoadMapIntoScene({ refs, scene, isPerformance, setPlayerCarWorldPos, setCurrentZone });
+        const loadMapIntoScene = createLoadMapIntoScene({ refs, scene, isPerformance, setPlayerCarWorldPos, setCurrentZone, roadNetwork, examinerEngine, selectedExercise, playerCar, renderer, camera, setActiveDirective, setExaminerFeedback, setExaminerScore });
 
         refs.current.loadMapIntoScene = loadMapIntoScene;
         refs.current.setCurrentMapId = setCurrentMapId;
