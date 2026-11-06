@@ -1,7 +1,7 @@
 // 🗺️ loadMapIntoScene — tách từ DrivingSimulation.jsx (refactor phase A4)
 // Factory: trả về hàm (mapId, mapData) hot-swap map vào scene hiện có.
 import { MAPS } from '../../simulation/data/index.js';
-import { MAP_SCENARIOS, SCENARIOS } from '../../SimScenarios.js';
+import { MAP_SCENARIOS, SCENARIOS } from '../SimScenarios.js';
 import { buildCityWorld, buildCustomMap } from '../environment.js';
 import { disposeGroupDeep, snapSpawnToLaneCenter } from './simHelpers.js';
 import { detectZoneForMap } from '../SaHinhMinimap.jsx';
