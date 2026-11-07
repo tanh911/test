@@ -2278,6 +2278,8 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
             audioEngine.setEngineSound(calculatedRpm, r.isDriving && r.isEngineRunning, isThrottle, engineLoad);
             audioEngine.setRoadTireNoise(r.speed, r.isDriving);
             audioEngine.setWindNoise(r.speed);
+            // 🏎️ Tiếng rít lốp theo độ trượt (understeer + ESP can thiệp)
+            audioEngine.setSkidIntensity(Math.max(r._currentSkid || 0, (r.espActive || r.absActive) ? 0.45 : 0));
             audioEngine.setRainAmbiance(isRainMode && r.isDriving);
             audioEngine.setTireSkid(r._currentSkid);
           }
@@ -2668,6 +2670,12 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
             // Lực quán tính nghiêng đầu tài xế theo lực ly tâm khi vào cua (lateral G head tilt)
             camera.up.set(Math.sin((r.chassisRoll || 0) * 0.22), Math.cos((r.chassisRoll || 0) * 0.22), 0);
             camera.position.copy(worldEye);
+            // Rung micro theo mat duong: bien do theo toc do, pha theo quang duong (<= 2cm)
+            const bumpAmp = Math.min(0.02, (r.speed || 0) * 0.0009);
+            if (bumpAmp > 0.002) {
+              camera.position.y += Math.sin((r.distanceTraveled || 0) * 2.1) * bumpAmp
+                + Math.sin((r.distanceTraveled || 0) * 5.3) * bumpAmp * 0.35;
+            }
             camera.lookAt(worldTarget);
           } else if (currentCamMode === 'hood') {
             // ── GÓC NHÌN NẮP CAPO (HOOD) ──
@@ -2721,8 +2729,13 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
               camera.lookAt(lookAtX, 0.65 + rampY, lookAtZ);
             }
           }
-          camera.fov = isNitro ? (cfg.fov || 68) + 8 : (cfg.fov || 68);
-          camera.updateProjectionMatrix();
+          // 🎥 Cảm giác tốc độ: FOV mở dần theo km/h (mượt, không nhảy)
+          const speedKmhFov = (r.speed || 0) * 3.6;
+          const targetFov = (cfg.fov || 68) + Math.min(7, speedKmhFov * 0.055) + (isNitro ? 6 : 0);
+          if (Math.abs((camera.fov || 0) - targetFov) > 0.02) {
+            camera.fov = (camera.fov || cfg.fov || 68) + (targetFov - (camera.fov || cfg.fov || 68)) * Math.min(1.0, 4.0 * dt);
+            camera.updateProjectionMatrix();
+          }
 
           // ── 6. KIỂM TRA VA CHẠM (COLLISION HITBOX DETECTION) ──
           if (!r._disableCollisionCheck) {

@@ -409,7 +409,20 @@ export class SoundEngine {
     this.windGain.gain.setTargetAtTime(targetGain, now, 0.12);
   }
 
-  // ── TIẾNG MƯA RƠI TRÊN NÓC XE ────────────────────────────────────────────
+  // ── TIẾNG RÍT LỐP (tire skid) theo độ trượt — nối với understeer/phanh khẩn cấp ──
+  setSkidIntensity(intensity) {
+    if (!this.ctx || !this.initialized || !this.skidGain) return;
+    const now = this.ctx.currentTime;
+    const v = Math.max(0, Math.min(1, intensity));
+    // Trượt nhẹ: rít khẽ tần số thấp; trượt mạnh: rít gằn cao hơn
+    const targetGain = v * v * 0.085;
+    this.skidGain.gain.setTargetAtTime(Math.max(0.0001, targetGain), now, 0.08);
+    if (this.skidFilter) {
+      this.skidFilter.frequency.setTargetAtTime(600 + v * 500, now, 0.1);
+    }
+  }
+
+
   setRainAmbiance(isRaining) {
     if (!this.ctx || !this.initialized || !this.rainGain) return;
     const now = this.ctx.currentTime;
