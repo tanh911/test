@@ -1590,7 +1590,7 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
             currentGear = 'N';
             tractiveForce = 0;
             engineBraking = 0; // Free coasting in neutral!
-            brakeForce = r.brakeInput * 11200;
+            brakeForce = r.brakeInput * 12800; // N: 8.6 m/s2
             if (rawThrottle > 0.1) {
               const now = Date.now();
               if (!r._lastWarnTime || now - r._lastWarnTime > 2500) {
@@ -1663,7 +1663,7 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
             }
 
             // Service braking force
-            brakeForce = r.brakeInput * 11500;
+            brakeForce = r.brakeInput * 13000; // 8.8 m/s2 = phanh that xe con (36m tu 100 km/h)
           }
 
           // 1.2 Longitudinal Net Force & Acceleration: F = m * a

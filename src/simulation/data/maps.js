@@ -16,6 +16,17 @@ export const MAPS = {
       density: 0.4,
     },
   },
+  landstrasse_b2: {
+    id: 'landstrasse_b2',
+    area: 'LAND',
+    environmentType: 'landstrasse_b2',
+    spawnPoints: {
+      // Vị trí spawn đang hoạt động (trên tuyến B2 đã lái/audit — giữ nguyên hành vi)
+      start: { x: -3033, y: 0, z: 2300, rotation: 54 }
+    },
+    roads: { speedLimit: 100 },
+    traffic: { enabled: true, density: 0.5 },
+  },
   sa_hinh_fahrschule: {
     id: 'sa_hinh_fahrschule',
     area: 'SA_HINH',

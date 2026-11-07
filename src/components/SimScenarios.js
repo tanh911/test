@@ -954,6 +954,9 @@ export const MAP_SCENARIOS = {
 };
 
 // Default SCENARIOS
+// 🛣️ Landstrase B2: dung chung bo tinh huong Land (cung cap giao trinh)
+MAP_SCENARIOS.landstrasse_b2 = MAP_SCENARIOS.landstrasse_wald;
+
 export const SCENARIOS = [
   {
     id: 's1', type: 'SPEED_LIMIT', limit: 50,
