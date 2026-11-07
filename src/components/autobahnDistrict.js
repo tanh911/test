@@ -564,15 +564,17 @@ export function buildAutobahnDistrict(
       // ⚡ Index roads theo endNode MỘT LẦN (trước đây quét O(junction × roads) = 778k)
       const roadsByEnd = new Map();
       for (const r of roadGraphData?.roads || []) {
-        const endOsm = parseInt((r.endNode || '').replace('node_', ''), 10);
-        if (!endOsm) continue;
-        if (!roadsByEnd.has(endOsm)) roadsByEnd.set(endOsm, []);
-        roadsByEnd.get(endOsm).push(r);
+        // Key = END NODE STRING: parseInt('node_-80_40') lam custom graph khong khop junction nao -> 0 den
+        const endKey = r.endNode || '';
+        if (!endKey || !endKey.startsWith('node_')) continue;
+        if (!roadsByEnd.has(endKey)) roadsByEnd.set(endKey, []);
+        roadsByEnd.get(endKey).push(r);
       }
       for (const { j } of sorted) {
         // Các luồng KẾT THÚC tại junction này
         const approaches = [];
-        for (const r of roadsByEnd.get(j.osmNodeId) || []) {
+        const juncNodeKey = (j.id || '').replace('junc_', '') || ('node_' + j.osmNodeId);
+        for (const r of roadsByEnd.get(juncNodeKey) || []) {
           if (!r.centerline || r.centerline.length < 2) continue;
           const cl = r.centerline;
           const prev = cl[cl.length - 2];

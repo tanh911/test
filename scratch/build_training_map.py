@@ -150,7 +150,8 @@ def build_junctions(roads):
                 'x': info['pos'][0], 'z': info['pos'][1],
                 'lat': 0, 'lon': 0, 'degree': len(info['roads']),
                 'roads': info['roads'],
-                'trafficSignals': abs(info['pos'][0] - (-400)) < 3 and abs(info['pos'][1] - 200) < 3,
+                # 🚦 2 giao lộ có đèn: Haupt×Kreuz (-400,200) + Bahnhof×Kreuz (0,200)
+                'trafficSignals': (abs(info['pos'][0] - (-400)) < 3 and abs(info['pos'][1] - 200) < 3) or (abs(info['pos'][0] - 0) < 3 and abs(info['pos'][1] - 200) < 3),
             })
     return junctions
 
