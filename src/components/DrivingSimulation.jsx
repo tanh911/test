@@ -1124,23 +1124,25 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
           format: THREE.RGBAFormat,
           minFilter: THREE.LinearFilter,
           magFilter: THREE.LinearFilter,
+          samples: isPerformance ? 2 : 4
         });
         refs.current.rearRenderTarget = rearRenderTarget;
 
-        // 2. Camera & Render Target gương cánh (Chỉ mở ở mode ultra)
-        if (isUltra) {
+        // 2. Camera & Render Target gương cánh — MỌI quality (trước chỉ ultra
+        //    → normal gương 2 bên đen/lỗi). Samples 4 = MSAA diệt răng cưa.
+        {
           const sideMirrorCamera = new THREE.PerspectiveCamera(44, 256 / 160, 0.2, 100);
           refs.current.sideMirrorCamera = sideMirrorCamera;
 
-          sideMirrorRenderTarget = new THREE.WebGLRenderTarget(1024, 512, {
+          const sw = isPerformance ? 512 : (isUltra ? 1280 : 1024);
+          const sh = isPerformance ? 256 : (isUltra ? 640 : 512);
+          sideMirrorRenderTarget = new THREE.WebGLRenderTarget(sw, sh, {
             format: THREE.RGBAFormat,
             minFilter: THREE.LinearFilter,
             magFilter: THREE.LinearFilter,
+            samples: isPerformance ? 2 : 4
           });
           refs.current.sideMirrorRenderTarget = sideMirrorRenderTarget;
-        } else {
-          refs.current.sideMirrorCamera = null;
-          refs.current.sideMirrorRenderTarget = null;
         }
 
         renderer = new THREE.WebGLRenderer({
