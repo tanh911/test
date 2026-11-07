@@ -1,4 +1,5 @@
 import { Car, Lock, Star } from 'lucide-react';
+import { SIM_PRO_LOCKED, PRO_CONTACT_NOTE } from '../../config/simBusiness.js';
 
 // 🎓 MENU LỘ TRÌNH FAHRSCHUEN — 4 cấp theo giáo trình lái xe Đức (phase: business menu)
 // Cấp 1-2 miễn phí, cấp 3-4 thuộc gói Pro (chỗ để gắn gói kinh doanh sau này).
@@ -100,8 +101,11 @@ const MAP_LABEL = (id) => {
 export const StartMenu = ({ finished, handleStartFreeDrive, isDriving, loadingState, selectedPresetMap, setSelectedPresetMap, showGuideModal, speed }) => {
   if (loadingState.isLoading || showGuideModal || isDriving || finished) return null;
 
+  // 🔓 Dev: SIM_PRO_LOCKED = false → mở hết mọi cấp để test; production flip true
+  const effTiers = TIERS.map(t => ({ ...t, effLocked: t.locked && SIM_PRO_LOCKED }));
+  const effUnlocked = effTiers.filter(t => !t.effLocked).length;
   const sel = ALL_MAPS.find(m => m.id === selectedPresetMap) || ALL_MAPS[0];
-  const selLocked = sel?.tier?.locked;
+  const selLocked = sel?.tier?.locked && SIM_PRO_LOCKED;
   const unlockedCount = TIERS.filter(t => !t.locked).length;
 
   return (
@@ -157,30 +161,31 @@ export const StartMenu = ({ finished, handleStartFreeDrive, isDriving, loadingSt
               padding: '5px 9px', borderRadius: 8, fontSize: 10.5, fontWeight: '700',
               whiteSpace: 'nowrap'
             }}>
-              🔓 Đã mở: {unlockedCount}/4 cấp
+              🔓 Đã mở: {effUnlocked}/4 cấp
             </div>
           </div>
         </div>
 
         {/* 4 Cấp lộ trình */}
         <div style={{ display: 'flex', flexDirection: 'column', gap: 10 }}>
-          {TIERS.map((tier) => {
+          {effTiers.map((tier) => {
             const isTierSel = tier.maps.some(m => m.id === selectedPresetMap);
+            const locked = tier.effLocked;
             return (
               <div key={tier.level} style={{
-                border: isTierSel ? `1.5px solid ${tier.locked ? 'rgba(245, 158, 11, 0.45)' : 'rgba(56, 189, 248, 0.45)'}` : '1px solid rgba(255, 255, 255, 0.08)',
+                border: isTierSel ? `1.5px solid ${locked ? 'rgba(245, 158, 11, 0.45)' : 'rgba(56, 189, 248, 0.45)'}` : '1px solid rgba(255, 255, 255, 0.08)',
                 borderRadius: 12,
                 background: isTierSel ? 'rgba(15, 23, 42, 0.9)' : 'rgba(15, 23, 42, 0.5)',
                 padding: '8px 10px',
-                opacity: tier.locked ? 0.92 : 1
+                opacity: locked ? 0.92 : 1
               }}>
                 {/* Tier header */}
                 <div style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: tier.maps.length > 1 ? 8 : 6 }}>
                   <div style={{
                     width: 22, height: 22, borderRadius: 7,
-                    background: tier.locked ? 'rgba(245, 158, 11, 0.15)' : 'rgba(56, 189, 248, 0.15)',
-                    border: `1.5px solid ${tier.locked ? 'rgba(245, 158, 11, 0.5)' : 'rgba(56, 189, 248, 0.5)'}`,
-                    color: tier.locked ? '#fbbf24' : '#7dd3fc',
+                    background: locked ? 'rgba(245, 158, 11, 0.15)' : 'rgba(56, 189, 248, 0.15)',
+                    border: `1.5px solid ${locked ? 'rgba(245, 158, 11, 0.5)' : 'rgba(56, 189, 248, 0.5)'}`,
+                    color: locked ? '#fbbf24' : '#7dd3fc',
                     display: 'flex', alignItems: 'center', justifyContent: 'center',
                     fontSize: 11, fontWeight: '900', flexShrink: 0
                   }}>
@@ -189,7 +194,7 @@ export const StartMenu = ({ finished, handleStartFreeDrive, isDriving, loadingSt
                   <div style={{ fontSize: 12.5, fontWeight: '800', color: '#f1f5f9', flex: 1 }}>
                     {tier.name} <span style={{ color: '#64748b', fontWeight: '600', fontSize: 10.5 }}>({tier.nameDe})</span>
                   </div>
-                  {tier.locked ? (
+                  {locked ? (
                     <span style={{
                       display: 'flex', alignItems: 'center', gap: 4,
                       background: 'linear-gradient(135deg, rgba(245,158,11,0.18), rgba(245,158,11,0.08))',
@@ -223,7 +228,7 @@ export const StartMenu = ({ finished, handleStartFreeDrive, isDriving, loadingSt
                           setSelectedPresetMap(c.id);
                           handleStartFreeDrive(c.id);
                         }}
-                        title={`Chọn: ${c.name} (${c.pbf})${tier.locked ? ' — Gói Pro' : ''}`}
+                        title={`Chọn: ${c.name} (${c.pbf})${locked ? ' — Gói Pro' : ''}`}
                         style={{
                           background: isSelected ? 'rgba(30, 41, 59, 0.95)' : 'rgba(15, 23, 42, 0.65)',
                           border: isSelected ? `2px solid ${c.color}` : '1px solid rgba(255, 255, 255, 0.1)',
@@ -275,7 +280,7 @@ export const StartMenu = ({ finished, handleStartFreeDrive, isDriving, loadingSt
                           {c.extra && (
                             <div style={{ fontSize: 9.5, color: '#fbbf24', fontWeight: '700' }}>{c.extra}</div>
                           )}
-                          {tier.locked && isSelected && (
+                          {locked && isSelected && (
                             <div style={{ fontSize: 9.5, color: '#fbbf24', fontWeight: '700', display: 'flex', alignItems: 'center', gap: 4 }}>
                               <Lock size={9} /> Thuộc gói Pro — dùng thử beta bên dưới
                             </div>
@@ -320,7 +325,7 @@ export const StartMenu = ({ finished, handleStartFreeDrive, isDriving, loadingSt
           <div style={{
             fontSize: 10.5, color: '#94a3b8', textAlign: 'center', marginTop: -4
           }}>
-            🔒 Bản beta đang mở miễn phí thời gian giới hạn — theo dõi Fanpage để nhận thông báo gói Pro
+            🔒 Bản beta đang mở miễn phí thời gian giới hạn — {PRO_CONTACT_NOTE}
           </div>
         )}
 
