@@ -625,13 +625,19 @@ def main():
                 # 🛣️ VẠCH MÉP 0.18m: code cũ nối mép trái rib[i] → mép trái rib[i+1] →
                 # mép phải rib[i+1] → mép phải rib[i] = BĂNG TRẮNG PHỦ KÍN mặt đường
                 # (asphalt chỉ ló 0.22m mỗi bên → "đường trắng" trên mọi map GLB)
+                # base tâm: vạch mép tại ±(half − 0.22) — code cũ base mép trái
+                # → vạch phải mất, vạch trái lệch vào giữa trên road 2 chiều
+                cx0 = (l0[0] + l0[3]) / 2
+                cz0 = (l0[2] + l0[5]) / 2
+                cx1 = (r0[0] + r0[3]) / 2
+                cz1 = (r0[2] + r0[5]) / 2
                 e0 = edge_offset - 0.09
                 e1 = edge_offset + 0.09
                 acc_white.quad(
-                    (l0[0] + n0x * side * e0, l0[1] + 0.012, l0[2] + n0z * side * e0),
-                    (l0[0] + n0x * side * e1, l0[1] + 0.012, l0[2] + n0z * side * e1),
-                    (r0[0] + n1x * side * e1, r0[1] + 0.012, r0[2] + n1z * side * e1),
-                    (r0[0] + n1x * side * e0, r0[1] + 0.012, r0[2] + n1z * side * e0),
+                    (cx0 + n0x * side * e0, l0[1] + 0.012, cz0 + n0z * side * e0),
+                    (cx0 + n0x * side * e1, l0[1] + 0.012, cz0 + n0z * side * e1),
+                    (cx1 + n1x * side * e1, r0[1] + 0.012, cz1 + n1z * side * e1),
+                    (cx1 + n1x * side * e0, r0[1] + 0.012, cz1 + n1z * side * e0),
                 )
 
         def center_at(fr):
@@ -678,14 +684,20 @@ def main():
                 n0x, n0z = l0[6], l0[7]
                 n1x, n1z = r0[6], r0[7]
                 for side in (-1.0, 1.0):
-                    ax0 = l0[0] + n0x * side * sw_in
-                    az0 = l0[2] + n0z * side * sw_in
-                    ax1 = r0[0] + n1x * side * sw_in
-                    az1 = r0[2] + n1z * side * sw_in
-                    bx1 = r0[0] + n1x * side * sw_out
-                    bz1 = r0[2] + n1z * side * sw_out
-                    bx0 = l0[0] + n0x * side * sw_out
-                    bz0 = l0[2] + n0z * side * sw_out
+                    # 🛣️ base = TÂM đường (l0[0] là MÉP — dùng làm gốc làm cobble
+                    # leo vào giữa đường trên road 2 chiều 2 làn như Hauptstraße)
+                    cx0 = (l0[0] + l0[3]) / 2
+                    cz0 = (l0[2] + l0[5]) / 2
+                    cx1 = (r0[0] + r0[3]) / 2
+                    cz1 = (r0[2] + r0[5]) / 2
+                    ax0 = cx0 + n0x * side * sw_in
+                    az0 = cz0 + n0z * side * sw_in
+                    ax1 = cx1 + n1x * side * sw_in
+                    az1 = cz1 + n1z * side * sw_in
+                    bx1 = cx1 + n1x * side * sw_out
+                    bz1 = cz1 + n1z * side * sw_out
+                    bx0 = cx0 + n0x * side * sw_out
+                    bz0 = cz0 + n0z * side * sw_out
                     acc_walk.quad(
                         (ax0, l0[1] + 0.14, az0), (ax1, r0[1] + 0.14, az1),
                         (bx1, r0[1] + 0.14, bz1), (bx0, l0[1] + 0.14, bz0),
@@ -693,10 +705,10 @@ def main():
                              (bx1 / 2.0, bz1 / 2.0), (bx0 / 2.0, bz0 / 2.0)],
                     )
                     acc_curb.quad(
-                        (l0[0] + n0x * side * half, 0.0, l0[2] + n0z * side * half),
-                        (r0[0] + n1x * side * half, 0.0, r0[2] + n1z * side * half),
-                        (r0[0] + n1x * side * half, 0.15, r0[2] + n1z * side * half),
-                        (l0[0] + n0x * side * half, 0.15, l0[2] + n0z * side * half),
+                        (cx0 + n0x * side * half, 0.0, cz0 + n0z * side * half),
+                        (cx1 + n1x * side * half, 0.0, cz1 + n1z * side * half),
+                        (cx1 + n1x * side * half, 0.15, cz1 + n1z * side * half),
+                        (cx0 + n0x * side * half, 0.15, cz0 + n0z * side * half),
                     )
 
         if hw in ('primary', 'secondary', 'tertiary'):
