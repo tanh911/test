@@ -1116,10 +1116,10 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
         const rearCamera = new THREE.PerspectiveCamera(50, 2.0, 0.2, isPerformance ? 60 : 120);
         refs.current.rearCamera = rearCamera;
 
-        // 🪞 Mirror RT 512×256 (trước 160×80/320×160 → mờ). Mirror chiếm ~200×100 px
-        // trên màn hình → RT 512×256 cho 1:1 hoặc tốt hơn → sắc nét.
-        const mirrorW = isPerformance ? 384 : 512;
-        const mirrorH = isPerformance ? 192 : 256;
+        // 🪞 Mirror RT: 1280×640 ultra / 1024×512 normal / 512×256 performance.
+        // Renderer chạy ở pixelRatio 1.25–1.75 → RT 512 bị upscale → mờ. Nâng độ phân giải gấp 2.
+        const mirrorW = isPerformance ? 512 : (isUltra ? 1280 : 1024);
+        const mirrorH = isPerformance ? 256 : (isUltra ? 640 : 512);
         rearRenderTarget = new THREE.WebGLRenderTarget(mirrorW, mirrorH, {
           format: THREE.RGBAFormat,
           minFilter: THREE.LinearFilter,
@@ -1132,7 +1132,7 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
           const sideMirrorCamera = new THREE.PerspectiveCamera(44, 256 / 160, 0.2, 100);
           refs.current.sideMirrorCamera = sideMirrorCamera;
 
-          sideMirrorRenderTarget = new THREE.WebGLRenderTarget(512, 256, {
+          sideMirrorRenderTarget = new THREE.WebGLRenderTarget(1024, 512, {
             format: THREE.RGBAFormat,
             minFilter: THREE.LinearFilter,
             magFilter: THREE.LinearFilter,
