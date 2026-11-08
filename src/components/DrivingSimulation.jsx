@@ -42,6 +42,7 @@ import './sim/sim.css';
 import { GLB_STEER_AXIS, _camEyeLocal, _camTargetLocal, _camTargetOffset, _collisionCorners, disposeGroupDeep, snapSpawnToLaneCenter, DRIVING_TIPS } from './sim/simHelpers.js';
 import { buildDefaultFahrschuleMap } from '../simulation/saHinhDefaultMap.js';
 import { FinishCard } from './sim/FinishCard.jsx';
+import { BitmapDashboard } from './sim/BitmapDashboard.jsx';
 import { createLoadMapIntoScene } from './sim/createLoadMapIntoScene.js';
 import { FlyToModal } from './sim/FlyToModal.jsx';
 import { SimHeaderBar } from './sim/SimHeaderBar.jsx';
@@ -2671,7 +2672,8 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
             camera.lookAt(r._customCam.tx, r._customCam.ty, r._customCam.tz);
           } else if (currentCamMode === 'cockpit') {
             // ── GÓC NHÌN THỨ 1 (COCKPIT / INTERIOR DRIVER SEAT) ──
-            if (refs.current._cockpit) refs.current._cockpit.visible = true;
+            // Dashboard bitmap 2D thay the cockpit GLB (an di tranh lop doi tap-lo)
+            if (refs.current._cockpit) refs.current._cockpit.visible = false;
             playerCar.visible = true;
 
             const seatX = cfg.seatOffsetX !== undefined ? cfg.seatOffsetX : -0.38;
@@ -3477,6 +3479,20 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
             </div>
           )}
 
+          {cameraMode === 'cockpit' ? (
+            <BitmapDashboard
+              speed={speed}
+              rpm={rpm}
+              gear={gear}
+              speedLimit={authoritativeSpeedLimit}
+              blinkerLeft={blinkerLeft}
+              blinkerRight={blinkerRight}
+              headlights={headlights}
+              handbrake={handbrake}
+              seatBelt={seatBelt}
+              laneWarning={laneWarning}
+            />
+          ) : (
           <VirtualCockpitCluster
             speed={speed}
             rpm={rpm}
@@ -3494,6 +3510,7 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
             speedLimit={authoritativeSpeedLimit}
             onSelectGear={handleSelectGear}
           />
+          )}
 
           {(showRearMirror || gear === 'R') && (
             <SmartRearviewMirror
