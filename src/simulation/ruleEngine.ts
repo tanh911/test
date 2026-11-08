@@ -43,9 +43,14 @@ export class RuleEngine {
   private map: GameMap;
   private controllers: TrafficLightController[];
 
+  readonly instanceId = ++RuleEngine.instanceCounter;
+  static instanceCounter = 0;
+
   constructor(map: GameMap, controllers: TrafficLightController[]) {
     this.map = map;
     this.controllers = controllers;
+    const w = window as unknown as { __reCount?: number };
+    w.__reCount = (w.__reCount ?? 0) + 1;
   }
 
   get bestanden(): boolean {
@@ -63,7 +68,7 @@ export class RuleEngine {
   private add(type: Violation['type'], severity: Severity, message: string, p: PlayerState): void {
     if (this.elapsed - this.lastAt[type] < RATE_LIMIT[type]) return;
     this.lastAt[type] = this.elapsed;
-    this.violations.push({ type, severity, message, x: p.x, z: p.z, t: this.elapsed });
+    this.violations.push({ type, severity, message: message, x: p.x, z: p.z, t: this.elapsed });
   }
 
   /** Road gần điểm p nhất (kèm s chiếu + khoảng cách từ tâm đường) */
@@ -134,10 +139,11 @@ export class RuleEngine {
       }
     }
 
-    // ── va chạm NPC ──
+    // ── va chạm (NPC hoặc công trình) ──
     if (collisions.length) {
-      for (const _c of collisions) {
-        this.add('collision', 'major', 'Va chạm với xe khác', p);
+      for (const c of collisions) {
+        const msg = c === 'building' ? 'Va chạm công trình' : 'Va chạm với xe khác';
+        this.add('collision', 'major', msg, p);
       }
       collisions.length = 0;
     }

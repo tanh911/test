@@ -5,6 +5,7 @@ import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { GameMap, MapRoad } from './mapLoader';
 import { pointAtS, roadById } from './mapLoader';
+import { spawnFromMap } from './vehicle';
 import { roadsAtNode, polylineLength } from './roadMesh';
 import type { TrafficLightController, LightPhase } from './trafficLights';
 
@@ -76,14 +77,22 @@ export class NPCController {
     }
     if (!this.templates.length) return;
 
-    // spawn rải rác trên các road có đủ chiều dài
+    // spawn rải rác trên các road có đủ chiều dài — TRÁNH vùng spawn player (25 m)
+    const playerSpawn = spawnFromMap(this.map);
     const roads = this.map.roads.filter(r => polylineLength(r.points) > 30);
-    for (let i = 0; i < count && roads.length; i++) {
+    let placed = 0;
+    let attempts = 0;
+    while (placed < count && attempts < count * 10 && roads.length) {
+      attempts++;
       const road = roads[Math.floor(Math.random() * roads.length)];
       const len = polylineLength(road.points);
       const s = 10 + Math.random() * Math.max(1, len - 20);
-      const npc = this.makeNpc(road, s, Math.random() < 0.5 ? 1 : -1, i);
+      const dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+      const pt = pointAtS(road, s);
+      if (Math.hypot(pt.x - playerSpawn.x, pt.z - playerSpawn.z) < 25) continue;
+      const npc = this.makeNpc(road, s, dir, placed);
       this.npcs.push(npc);
+      placed++;
     }
     this.ready = true;
   }

@@ -34,6 +34,8 @@ export interface VehicleHandle {
   group: THREE.Group;
   state: VehicleState;
   update: (dt: number, input: VehicleInput) => void;
+  /** áp lại pose từ state (sau va chạm đẩy vị trí) */
+  syncPose: () => void;
   /** pose ghế lái cho camera cabin (local −0.38 = LHD) */
   seatPose: () => { x: number; y: number; z: number; yaw: number };
   dispose: () => void;
@@ -112,6 +114,9 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
         state.x += Math.sin(state.heading) * state.speed * dt;
         state.z += Math.cos(state.heading) * state.speed * dt;
       }
+      applyPose();
+    },
+    syncPose() {
       applyPose();
     },
     seatPose() {

@@ -7,6 +7,7 @@ import { buildWorld } from './worldBuilder';
 import { ChunkManager } from './chunkManager';
 import { createVehicle, spawnFromMap, type VehicleHandle, type VehicleInput } from './vehicle';
 import { NPCController } from './npc';
+import { buildingRects, resolveStatics } from './collisions';
 import { RuleEngine, type Violation } from '../simulation/ruleEngine';
 
 export interface SimStats {
@@ -175,6 +176,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   let npcs: NPCController | null = null;
   let ruleEngine: RuleEngine | null = null;
   const npcCollisions: string[] = [];
+  const staticRects = buildingRects(map);
   if (driveMode) {
     camera.rotation.order = 'YXZ';
     const driveKey = (e: KeyboardEvent, down: boolean) => {
@@ -200,6 +202,16 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           brake: keys.has('KeyS') ? 1 : 0,
           steer: keys.has('KeyD') ? 1 : keys.has('KeyA') ? -1 : 0
         });
+        // va chạm công trình: dừng xe + ghi lỗi major (AABB nhà, radius 0.9)
+        for (const r of staticRects) {
+          if (vehicle.state.x > r.minX - 0.9 && vehicle.state.x < r.maxX + 0.9 &&
+              vehicle.state.z > r.minZ - 0.9 && vehicle.state.z < r.maxZ + 0.9) {
+            vehicle.state.speed = 0;
+            vehicle.syncPose();
+            if (npcCollisions[npcCollisions.length - 1] !== 'building') npcCollisions.push('building');
+            break;
+          }
+        }
         const sp = vehicle.seatPose();
         camera.position.set(sp.x, sp.y, sp.z);
         camera.rotation.set(-0.03, sp.yaw, 0);
