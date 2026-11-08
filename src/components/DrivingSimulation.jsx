@@ -1112,6 +1112,39 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
         const ambientFill = new THREE.AmbientLight(0xffffff, 1.0);
         scene.add(ambientFill);
 
+        // Cloud layer: soft-blob sprites follow camera (infinite distance, slow drift)
+        const cloudGroup = new THREE.Group();
+        cloudGroup.name = 'cloudGroup';
+        {
+          const cloudCanvas = document.createElement('canvas');
+          cloudCanvas.width = 256; cloudCanvas.height = 128;
+          const cctx = cloudCanvas.getContext('2d');
+          if (cctx) {
+            const blob = (cx, cy, r, a) => {
+              const g = cctx.createRadialGradient(cx, cy, 0, cx, cy, r);
+              g.addColorStop(0, 'rgba(255,255,255,' + a + ')');
+              g.addColorStop(1, 'rgba(255,255,255,0)');
+              cctx.fillStyle = g;
+              cctx.fillRect(cx - r, cy - r, r * 2, r * 2);
+            };
+            blob(128, 74, 56, 0.95); blob(92, 82, 42, 0.8); blob(168, 84, 44, 0.82);
+            blob(120, 56, 34, 0.9); blob(150, 64, 30, 0.75);
+          }
+          const cloudTex = new THREE.CanvasTexture(cloudCanvas);
+          const cloudMat = new THREE.SpriteMaterial({ map: cloudTex, transparent: true, depthWrite: false, opacity: 0.85, fog: false });
+          for (let ci = 0; ci < 14; ci++) {
+            const spr = new THREE.Sprite(cloudMat);
+            const sc = 380 + (ci % 4) * 160;
+            spr.scale.set(sc, sc * 0.42, 1);
+            const ang = (ci / 14) * Math.PI * 2;
+            const dist = 900 + (ci % 5) * 260;
+            spr.position.set(Math.cos(ang) * dist, 260 + (ci % 6) * 42, Math.sin(ang) * dist);
+            spr.userData.drift = 0.35 + (ci % 3) * 0.14;
+            cloudGroup.add(spr);
+          }
+          scene.add(cloudGroup);
+        }
+
         // 1. Camera & Render Target phục vụ gương chiếu hậu trong cabin
         const rearCamera = new THREE.PerspectiveCamera(50, 2.0, 0.2, isPerformance ? 60 : 120);
         refs.current.rearCamera = rearCamera;
@@ -2735,6 +2768,16 @@ export const DrivingSimulation = ({ languageMode = 'vi' }) => {
           if (Math.abs((camera.fov || 0) - targetFov) > 0.02) {
             camera.fov = (camera.fov || cfg.fov || 68) + (targetFov - (camera.fov || cfg.fov || 68)) * Math.min(1.0, 4.0 * dt);
             camera.updateProjectionMatrix();
+          }
+
+          // Cloud drift + follow camera (infinite sky)
+          if (cloudGroup) {
+            cloudGroup.position.set(camera.position.x, 0, camera.position.z);
+            for (const spr of cloudGroup.children) {
+              spr.position.x += (spr.userData.drift || 0.4) * dt;
+              if (spr.position.x > 2400) spr.position.x = -2400;
+            }
+            cloudGroup.visible = weatherMode === 'day';
           }
 
           // ── 6. KIỂM TRA VA CHẠM (COLLISION HITBOX DETECTION) ──
