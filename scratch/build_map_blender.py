@@ -859,7 +859,7 @@ def main():
             tx_, tz_ = tx_ / tl, tz_ / tl
             sign = 1.0 if atEnd else -1.0  # lùi vào trong tuyến
             # ── Stop bar: dải 0.5m cách mút 4m, full width ──
-            bl = max(0.35, min(2.0, half - 0.2))
+            bl = max(0.35, half - 0.2)  # phủ full làn chiều tới
             for (qq, dd) in ((0, 4.0), (1, 3.5)):
                 pxq = exC - tx_ * sign * dd
                 pzq = ezC - tz_ * sign * dd
