@@ -1,8 +1,10 @@
 // 🧱 sidewalk.ts — vỉa hè + bó vỉa (Protocol mục 4.3)
 // Mỗi đoạn 4 m: mặt trên PHẲNG tại y=h + mặt curb đứng (0 → h) phía trong.
 // Chỗ zebra: hạ mặt (ramp) dài 1.5 m xuống 0.03 m để qua đường cho người đi bộ.
+// Pad góc giao lộ: ô vuông SW×SW nối vỉa hè 2 nhánh quanh góc (cùng màu/y → không z-fight nhìn thấy).
 import type { GameMap, MapRoad } from './mapLoader';
-import { polylineLength, pointWithNormalAtS, roadHalfWidth, roadSkipZones } from './roadMesh';
+import type { Quad } from './roadMesh';
+import { polylineLength, pointWithNormalAtS, roadHalfWidth, roadSkipZones, roadsAtNode } from './roadMesh';
 
 export interface SidewalkPiece {
   /** 4 đỉnh mặt trên (thứ tự: inner0 → outer0 → outer1 → inner1), y = height */
@@ -73,4 +75,76 @@ export function sidewalkPavingColor(x: number, z: number): [number, number, numb
   const alt = (Math.floor(x / 0.6) + Math.floor(z / 0.6)) % 2 === 0 ? 0.03 : 0;
   const v = base + alt;
   return [v, v, v * 0.98];
+}
+
+export interface CornerPad {
+  top: Quad;
+  /** curb cho 2 cạnh trong (quay về 2 đường) */
+  curbs: Quad[];
+}
+
+/**
+ * Pad vỉa hè 4 góc giao lộ: ô SW×SW từ mép đường A & B ra ngoài,
+ * nối liền vỉa hè 2 nhánh quanh góc — không còn khoảng cỏ ở góc giao lộ.
+ */
+export function sidewalkCornerPads(map: GameMap): CornerPad[] {
+  const pads: CornerPad[] = [];
+  for (const ix of map.intersections) {
+    const node = map.nodes.find(n => n.id === ix.nodeId);
+    if (!node) continue;
+    const roads = roadsAtNode(map, ix.nodeId);
+    if (roads.length < 2) continue;
+    const half = Math.max(...roads.map(r => roadHalfWidth(r.road)));
+
+    // chuẩn hóa pháp tuyến sector cho từng road tại node
+    // n(road) = (−dz, dx) — edge dương; sector chọn bằng dot với bisector giữa 2 road liền kề
+    type Entry = { road: MapRoad; d: [number, number]; n: [number, number]; ang: number };
+    const entries: Entry[] = roads.map(({ road, dirX, dirZ }) => ({
+      road,
+      d: [dirX, dirZ],
+      n: [-dirZ, dirX],
+      ang: Math.atan2(dirZ, dirX)
+    })).sort((a, b) => a.ang - b.ang);
+
+    const norm2pi = (a: number) => ((a % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+    for (let k = 0; k < entries.length; k++) {
+      const A = entries[k];
+      const B = entries[(k + 1) % entries.length];
+      const bis = A.ang + (norm2pi(B.ang - A.ang)) / 2;
+      const bx = Math.cos(bis);
+      const bz = Math.sin(bis);
+      // pháp tuyến phía sector của mỗi road
+      const nA: [number, number] = (A.n[0] * bx + A.n[1] * bz) >= 0 ? A.n : [-A.n[0], -A.n[1]];
+      const nB: [number, number] = (B.n[0] * bx + B.n[1] * bz) >= 0 ? B.n : [-B.n[0], -B.n[1]];
+      // C1 = góc pad gần node nhất; u dọc road B (=nA), v dọc road A (=nB)
+      const c1x = node.x + nA[0] * half + nB[0] * half;
+      const c1z = node.z + nA[1] * half + nB[1] * half;
+      const ux = nA[0] * SIDEWALK_W;
+      const uz = nA[1] * SIDEWALK_W;
+      const vx = nB[0] * SIDEWALK_W;
+      const vz = nB[1] * SIDEWALK_W;
+      const top: Quad = {
+        a: [c1x, SIDEWALK_H, c1z],
+        b: [c1x + ux, SIDEWALK_H, c1z + uz],
+        c: [c1x + ux + vx, SIDEWALK_H, c1z + uz + vz],
+        d: [c1x + vx, SIDEWALK_H, c1z + vz]
+      };
+      // curb cạnh C1→C1+u (nằm trên mép road B): mặt hướng về road B (−nB) → đảo winding
+      const curbB: Quad = {
+        a: [c1x + ux, 0, c1z + uz],
+        b: [c1x, 0, c1z],
+        c: [c1x, SIDEWALK_H, c1z],
+        d: [c1x + ux, SIDEWALK_H, c1z + uz]
+      };
+      // curb cạnh C1→C1+v (nằm trên mép road A): mặt hướng về road A (+nA·(−1)?) — winding as-is
+      const curbA: Quad = {
+        a: [c1x, 0, c1z],
+        b: [c1x + vx, 0, c1z + vz],
+        c: [c1x + vx, SIDEWALK_H, c1z + vz],
+        d: [c1x, SIDEWALK_H, c1z]
+      };
+      pads.push({ top, curbs: [curbB, curbA] });
+    }
+  }
+  return pads;
 }

@@ -1,4 +1,4 @@
-// 🌍 world builder tổng hợp — Protocol Prompt 2: đường + ngã tư + vạch + vỉa hè
+// 🌍 world builder tổng hợp — Protocol Prompt 2-4: đường + giao lộ + vạch + vỉa hè + nhà + props
 import * as THREE from 'three';
 import type { GameMap, MapIntersection } from './mapLoader';
 import { loadGameMap, nodeById } from './mapLoader';
@@ -6,9 +6,11 @@ import { palette } from '../art/palette';
 import { ChunkBuilder } from './chunkBuilder';
 import { roadRibbonQuads, junctionPatchQuads, roadsAtNode, junctionHalfExtent, roadSkipZones } from './roadMesh';
 import { roadMarkingQuads } from './roadMarkings';
-import { sidewalkBoxes } from './sidewalk';
+import { sidewalkBoxes, sidewalkCornerPads } from './sidewalk';
 import { placeSigns } from './trafficSigns';
 import { placeTrafficLights, applyLightVisuals, TrafficLightController } from './trafficLights';
+import { allBuildingQuads } from './buildings';
+import { placeProps, type PropsResult } from './props';
 import type { Quad } from './roadMesh';
 
 const MAT_LOOKUP: Record<string, string> = {
@@ -62,6 +64,7 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldMeshResul
   // ── 3.5 Biển báo StVO ──
   placeSigns(scene, map);
   const { controllers, lightsGroup } = placeTrafficLights(scene, map);
+  const props = placeProps(scene, map);
 
   // ── 4. Vỉa hè: mặt trên phẳng + mặt curb đứng ──
   for (const road of map.roads) {
@@ -73,6 +76,17 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldMeshResul
         cb.addQuad({ a: c0, b: c1, c: c2, d: c3 }, 'sidewalk');
       }
     }
+  }
+
+  // ── 4.5 Pad vỉa hè 4 góc giao lộ ──
+  for (const pad of sidewalkCornerPads(map)) {
+    cb.addQuad(pad.top, 'sidewalk');
+    for (const curb of pad.curbs) cb.addQuad(curb, 'sidewalk');
+  }
+
+  // ── 4.6 Nhà phố (vertex color facade + cửa sổ + AO) ──
+  for (const bq of allBuildingQuads(map)) {
+    cb.addQuad(bq.quad, 'building', bq.colors);
   }
 
   // ── 5. Build meshes theo chunk+material ──
@@ -87,7 +101,8 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldMeshResul
       polygonOffsetFactor: -2,
       polygonOffsetUnits: -2
     }),
-    sidewalk: new THREE.MeshLambertMaterial({ color: palette.sidewalk, vertexColors: false })
+    sidewalk: new THREE.MeshLambertMaterial({ color: palette.sidewalk }),
+    building: new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })
   };
 
   const meshes = cb.build();
@@ -96,6 +111,7 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldMeshResul
     const mat = materials[m.material] || materials.road;
     const mesh = new THREE.Mesh(m.geometry, mat);
     mesh.receiveShadow = true;
+    if (m.material === 'building') mesh.castShadow = true; // nhà đổ bóng xuống đường
     mesh.name = `chunk_${m.chunkKey}_${m.material}`;
     group.add(mesh);
     const posAttr = m.geometry.getAttribute('position');
@@ -119,6 +135,7 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldMeshResul
       for (const m of meshes) m.geometry.dispose();
       scene.remove(group);
       scene.remove(lightsGroup);
+      props.dispose();
     }
   };
 }

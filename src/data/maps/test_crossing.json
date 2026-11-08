@@ -216,7 +216,7 @@
     {
       "roadId": "r1",
       "side": "left",
-      "s": 0,
+      "s": 8,
       "length": 40,
       "floors": 5,
       "style": "altbau",
@@ -225,7 +225,7 @@
     {
       "roadId": "r1",
       "side": "right",
-      "s": 0,
+      "s": 8,
       "length": 40,
       "floors": 4,
       "style": "backstein",
@@ -234,11 +234,56 @@
     {
       "roadId": "r2",
       "side": "left",
-      "s": 0,
+      "s": 8,
       "length": 40,
       "floors": 4,
       "style": "neubau",
       "seed": 3
+    },
+    {
+      "roadId": "r2",
+      "side": "right",
+      "s": 8,
+      "length": 36,
+      "floors": 5,
+      "style": "altbau",
+      "seed": 21
+    },
+    {
+      "roadId": "r3",
+      "side": "left",
+      "s": 8,
+      "length": 45,
+      "floors": 5,
+      "style": "altbau",
+      "seed": 31
+    },
+    {
+      "roadId": "r3",
+      "side": "right",
+      "s": 8,
+      "length": 45,
+      "floors": 3,
+      "style": "backstein",
+      "seed": 32
+    },
+    {
+      "roadId": "r4",
+      "side": "left",
+      "s": 8,
+      "length": 45,
+      "floors": 4,
+      "style": "neubau",
+      "seed": 41
+    },
+    {
+      "roadId": "r4",
+      "side": "right",
+      "s": 8,
+      "length": 45,
+      "floors": 4,
+      "style": "altbau",
+      "seed": 42
     }
   ],
   "props": [
@@ -265,6 +310,60 @@
       "roadId": "r2",
       "s": 20,
       "side": "left"
+    },
+    {
+      "type": "parked_car_static",
+      "roadId": "r1",
+      "s": 15,
+      "side": "right"
+    },
+    {
+      "type": "parked_car_static",
+      "roadId": "r1",
+      "s": 24,
+      "side": "right"
+    },
+    {
+      "type": "parked_car_static",
+      "roadId": "r1",
+      "s": 33,
+      "side": "right"
+    },
+    {
+      "type": "bollard",
+      "roadId": "r1",
+      "s": 9,
+      "side": "right"
+    },
+    {
+      "type": "trash_bin",
+      "roadId": "r2",
+      "s": 12,
+      "side": "left"
+    },
+    {
+      "type": "litfasssaeule",
+      "roadId": "r3",
+      "s": 30,
+      "side": "right"
+    },
+    {
+      "type": "street_lamp",
+      "roadId": "r3",
+      "s": 45,
+      "side": "left"
+    },
+    {
+      "type": "bike_rack",
+      "roadId": "r4",
+      "s": 20,
+      "side": "left"
+    },
+    {
+      "type": "parkscheinautomat",
+      "roadId": "r1",
+      "s": 12,
+      "side": "right"
     }
   ],
   "spawns": {
