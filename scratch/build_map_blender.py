@@ -135,6 +135,39 @@ def paint_roof(buf, w, h):
     buf[3::4] = 1.0
 
 
+def paint_facade_tint(tint, seed):
+    def _p(buf, w, h):
+        paint_facade(buf, w, h, tint)
+    return _p
+
+
+def paint_roof_gray(buf, w, h):
+    """Mái xám đá (phiên bản roof tint xám)"""
+    rng = np.random.default_rng(29)
+    px = np.full((h, w, 3), 0.14)
+    tw, th = 32, 18
+    for row in range(h // th + 1):
+        y0 = row * th + 2
+        y1 = min(h, y0 + th - 2)
+        if y0 >= h:
+            break
+        off = (row % 2) * (tw // 2)
+        for x0 in range(-tw, w + tw, tw):
+            xx0, xx1 = x0 + off, x0 + off + tw - 2
+            if xx1 <= 0 or xx0 >= w or y1 <= y0:
+                continue
+            v = float(np.clip(0.38 + rng.normal(0, 0.05), 0.28, 0.52))
+            px[y0:y1, max(0, xx0):min(w, xx1), 0] = v
+            px[y0:y1, max(0, xx0):min(w, xx1), 1] = v * 1.02
+            px[y0:y1, max(0, xx0):min(w, xx1), 2] = v * 1.06
+    px += rng.normal(0, 0.02, (h, w, 3))
+    px = np.clip(px, 0, 1)
+    buf[0::4] = px.reshape(-1, 3)[:, 0]
+    buf[1::4] = px.reshape(-1, 3)[:, 1]
+    buf[2::4] = px.reshape(-1, 3)[:, 2]
+    buf[3::4] = 1.0
+
+
 def paint_brick(buf, w, h):
     """Gạch chạy mạch so le + mạch vữa sáng."""
     rng = np.random.default_rng(53)
@@ -480,6 +513,11 @@ def main():
     img_cobble = make_image('V2_TexCobble', 256, 256, paint_cobble)
     img_shop = make_image('V2_TexShopfront', 256, 128, paint_shopfront)
     img_brick = make_image('V2_TexGach', 256, 256, paint_brick)
+    img_facade3 = make_image('V2_TexFacadeWhite', 256, 256, paint_facade_tint(np.array([0.88, 0.87, 0.82]), 12))
+    img_facade4 = make_image('V2_TexFacadeYellow', 256, 256, paint_facade_tint(np.array([0.92, 0.82, 0.55]), 13))
+    img_facade5 = make_image('V2_TexFacadeTerra', 256, 256, paint_facade_tint(np.array([0.85, 0.62, 0.5]), 14))
+    img_facade6 = make_image('V2_TexFacadeSage', 256, 256, paint_facade_tint(np.array([0.68, 0.78, 0.62]), 15))
+    img_roof2 = make_image('V2_TexRoofGray', 128, 128, paint_roof_gray)
     img_tree = make_image('V2_TexCayBill', 256, 256, paint_tree)
 
     MATS = {
@@ -500,6 +538,11 @@ def main():
         'curb': mat('V2_Curb', (0.44, 0.47, 0.50), 0.85),
         'junc': mat_tex('V2_GiaoLoCobble', img_cobble, 0.95),
         'wall_brick': mat_tex('V2_NhaGachTex', img_brick, 0.9),
+        'wall_white': mat_tex('V2_NhaTexWhite', img_facade3, 0.88),
+        'wall_yellow': mat_tex('V2_NhaTexYellow', img_facade4, 0.88),
+        'wall_terra': mat_tex('V2_NhaTexTerra', img_facade5, 0.88),
+        'wall_sage': mat_tex('V2_NhaTexSage', img_facade6, 0.88),
+        'roof_gray': mat_tex('V2_MaiTexXam', img_roof2, 0.9),
         'roof_flat': mat('V2_MaiBang', (0.16, 0.17, 0.18), 0.95),
         'tree': mat_tex_alpha('V2_CayBillTex', img_tree, 0.95),
         'hedge': mat('V2_RaoCay', (0.12, 0.30, 0.10), 1.0),
@@ -552,6 +595,11 @@ def main():
     acc_wheel = MeshAcc('V2_XeLop', MATS['wheel'])
     _car_accs = (acc_car_white, acc_car_dark, acc_car_silver, acc_car_red, acc_car_blue)
     acc_brick = MeshAcc('V2_NhaGach', MATS['wall_brick'], use_uv=True)
+    acc_wall3 = MeshAcc('V2_NhaTrang', MATS['wall_white'], use_uv=True)
+    acc_wall4 = MeshAcc('V2_NhaVang', MATS['wall_yellow'], use_uv=True)
+    acc_wall5 = MeshAcc('V2_NhaDat', MATS['wall_terra'], use_uv=True)
+    acc_wall6 = MeshAcc('V2_NhaSage', MATS['wall_sage'], use_uv=True)
+    acc_roof2 = MeshAcc('V2_MaiXam', MATS['roof_gray'], use_uv=True)
     acc_roof_flat = MeshAcc('V2_MaiBang', MATS['roof_flat'])
     acc_tree = MeshAcc('V2_CayBill', MATS['tree'], use_uv=True)
     acc_hedge = MeshAcc('V2_RaoCayRunh', MATS['hedge'])
@@ -955,10 +1003,18 @@ def main():
             continue
         h = b.get('height') or 9.0
         r_pick = rng.random()
-        if r_pick < 0.45:
+        if r_pick < 0.26:
             acc = acc_wall
-        elif r_pick < 0.82:
+        elif r_pick < 0.46:
             acc = acc_wall2
+        elif r_pick < 0.58:
+            acc = acc_wall3
+        elif r_pick < 0.70:
+            acc = acc_wall4
+        elif r_pick < 0.80:
+            acc = acc_wall5
+        elif r_pick < 0.88:
+            acc = acc_wall6
         else:
             acc = acc_brick
         for i in range(len(pts)):
@@ -1012,8 +1068,9 @@ def main():
                 rzc = (minz_ + maxz_) / 2
                 e0, e1 = minz_ - over, maxz_ + over
                 slope = math.hypot((e1 - e0) / 2.0, 3.0)
+                _roofA = acc_roof if rng.random() < 0.55 else acc_roof2
                 for ze in (e0, e1):
-                    acc_roof.quad(
+                    _roofA.quad(
                         (rx0, h, ze), (rx1, h, ze),
                         (rx1, h + 3.0, rzc), (rx0, h + 3.0, rzc),
                         uvs=[(0, 0), ((rx1 - rx0) / 2.2, 0), ((rx1 - rx0) / 2.2, slope / 2.2), (0, slope / 2.2)],
@@ -1033,8 +1090,9 @@ def main():
                 rxc = (minx_ + maxx_) / 2
                 e0, e1 = minx_ - over, maxx_ + over
                 slope = math.hypot((e1 - e0) / 2.0, 3.0)
+                _roofB = acc_roof if rng.random() < 0.55 else acc_roof2
                 for xe in (e0, e1):
-                    acc_roof.quad(
+                    _roofB.quad(
                         (xe, h, rz0), (xe, h, rz1),
                         (rxc, h + 3.0, rz1), (rxc, h + 3.0, rz0),
                         uvs=[(0, 0), ((rz1 - rz0) / 2.2, 0), ((rz1 - rz0) / 2.2, slope / 2.2), (0, slope / 2.2)],
@@ -1193,7 +1251,8 @@ def main():
                 acc_bridge, acc_pier, acc_pole, acc_lamp, acc_guard,
                 acc_shop, acc_car_white, acc_car_dark, acc_car_silver, acc_car_red,
                 acc_car_blue, acc_wheel,
-                acc_brick, acc_roof_flat, acc_tree, acc_hedge]:
+                acc_brick, acc_roof_flat, acc_tree, acc_hedge,
+                acc_wall3, acc_wall4, acc_wall5, acc_wall6, acc_roof2]:
         acc.commit()
     print('all meshes committed')
 
