@@ -9,8 +9,6 @@ import { Help } from './components/Help';
 import { Stats } from './components/Stats';
 import { Settings } from './components/Settings';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
-import { DrivingSimulation } from './components/DrivingSimulation';
-import { MapEditor } from './components/MapEditor';
 import { AdminDashboard } from './components/AdminDashboard';
 import { verifyToken, clearToken } from './lib/auth';
 import { LogIn, LogOut, Loader2, CheckCircle2 } from 'lucide-react';
@@ -553,8 +551,7 @@ function App() {
     </div>
   );
 
-  const isSimulation = location.pathname === '/simulation';
-  const isSimOrEditor = isSimulation || location.pathname === '/map-editor';
+  const isSimOrEditor = location.pathname === '/map-editor';
 
   return (
     <div style={{
@@ -602,8 +599,6 @@ function App() {
           <Route path="/help" element={<Help user={user} languageMode={languageMode} onNavigate={(p, opts) => navigate(p, opts)} />} />
           <Route path="/settings" element={<Settings user={user} onUpdateUser={handleUpdateUser} onLogout={handleLogout} />} />
           <Route path="/privacy" element={<PrivacyPolicy onNavigate={navigate} />} />
-          <Route path="/simulation" element={simulatorEnabled ? <DrivingSimulation languageMode={languageMode} /> : <Navigate to="/" replace />} />
-          <Route path="/map-editor" element={<MapEditor />} />
           <Route path="/admin" element={<AdminDashboard user={user} onNavigate={navigate} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
