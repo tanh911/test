@@ -115,6 +115,8 @@ export function createSimScene(container: HTMLElement, mapJson: unknown): SimSce
   sun.shadow.camera.top = 120;
   sun.shadow.camera.bottom = -120;
   sun.shadow.camera.far = 500;
+  sun.shadow.bias = -0.0004;      // chống shadow acne trên tường nhà
+  sun.shadow.normalBias = 0.03;   // đẩy shadow theo normal — hết sọc chéo
   scene.add(sun);
   scene.add(sun.target);
 

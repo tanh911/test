@@ -1,5 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { createSimScene, type SimSceneHandle } from '../world/simScene';
+import { loadDemoAssets } from '../world/demoAssets';
 import testCrossingMap from '../data/maps/test_crossing.json';
 
 // 🧪 Trang dev cho simulator v2 (Prompt 1) — camera bay tự do xem map.json
@@ -10,11 +11,16 @@ export const SimDevPage = () => {
 
   useEffect(() => {
     if (!containerRef.current || handleRef.current) return;
-    handleRef.current = createSimScene(containerRef.current, testCrossingMap);
+    const handle = createSimScene(containerRef.current, testCrossingMap);
+    handleRef.current = handle;
     // dev hook: Playwright/screenshot dùng teleport camera
-    (window as unknown as { __simScene?: SimSceneHandle }).__simScene = handleRef.current;
+    (window as unknown as { __simScene?: SimSceneHandle }).__simScene = handle;
+    // G4 verify: load GLB assets vào scene
+    let demo: Awaited<ReturnType<typeof loadDemoAssets>> | null = null;
+    loadDemoAssets(handle.scene, handle.map).then(d => { demo = d; });
     return () => {
-      handleRef.current?.dispose();
+      demo?.dispose();
+      handle.dispose();
       handleRef.current = null;
       delete (window as unknown as { __simScene?: SimSceneHandle }).__simScene;
     };
