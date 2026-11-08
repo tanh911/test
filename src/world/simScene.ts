@@ -1,4 +1,4 @@
-// 🎬 Khung scene simulator v2 — Protocol Prompt 1+6+7: scene + ánh sáng + chunk streaming + xe người chơi
+// 🎬 Khung scene simulator v2 — Prompt 1-9: scene + chunk streaming + xe người chơi + NPC + rule engine
 import * as THREE from 'three';
 import { palette } from '../art/palette';
 import { loadGameMap, type GameMap } from './mapLoader';
@@ -6,6 +6,8 @@ import { createTerrain, createSkybox, applyFog } from './terrain';
 import { buildWorld } from './worldBuilder';
 import { ChunkManager } from './chunkManager';
 import { createVehicle, spawnFromMap, type VehicleHandle, type VehicleInput } from './vehicle';
+import { NPCController } from './npc';
+import { RuleEngine, type Violation } from '../simulation/ruleEngine';
 
 export interface SimStats {
   drawCalls: number;
@@ -13,6 +15,13 @@ export interface SimStats {
   cellsLoaded: number;
   cellsTotal: number;
   quads: number;
+}
+
+export interface RuleState {
+  violations: Violation[];
+  bestanden: boolean;
+  summary: string;
+  speedKmh: number;
 }
 
 export interface SimSceneOptions {
@@ -27,6 +36,7 @@ export interface SimSceneHandle {
   map: GameMap;
   vehicle: VehicleHandle | null;
   getStats: () => SimStats;
+  getRuleState: () => RuleState | null;
   dispose: () => void;
   /** gọi mỗi frame từ host (React) — cập nhật camera bay/xe + render */
   update: (dt: number) => void;
@@ -162,6 +172,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
 
   // 🚙 Drive mode: WASD lái xe (dùng chung `keys` module), camera ghế lái
   let vehicle: VehicleHandle | null = null;
+  let npcs: NPCController | null = null;
+  let ruleEngine: RuleEngine | null = null;
+  const npcCollisions: string[] = [];
   if (driveMode) {
     camera.rotation.order = 'YXZ';
     const driveKey = (e: KeyboardEvent, down: boolean) => {
@@ -171,6 +184,10 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     window.addEventListener('keydown', e => driveKey(e, true));
     window.addEventListener('keyup', e => driveKey(e, false));
     createVehicle(scene, map).then(v => { vehicle = v; });
+    ruleEngine = new RuleEngine(map, world.controllers);
+    // NPC traffic (nạp GLB nền, không chặn render)
+    npcs = new NPCController(map, scene);
+    npcs.init(world.controllers, 8);
   }
 
   const tick = (now: number) => {
@@ -186,10 +203,13 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         const sp = vehicle.seatPose();
         camera.position.set(sp.x, sp.y, sp.z);
         camera.rotation.set(-0.03, sp.yaw, 0);
+        // NPC + rule engine
+        npcs?.update(dt, { player: { x: vehicle.state.x, z: vehicle.state.z }, controllers: world.controllers, collisions: npcCollisions });
+        ruleEngine?.update(dt, { x: vehicle.state.x, z: vehicle.state.z, heading: vehicle.state.heading, speed: vehicle.state.speed }, npcCollisions);
       } else {
         // chờ GLB load — camera tạm tại spawn
         const s = spawnFromMap(map);
-        camera.position.set(s.x, 1.08, s.z);
+        camera.position.set(s.x, 1.18, s.z);
         camera.rotation.set(-0.03, s.heading + Math.PI, 0);
       }
     } else {
@@ -224,10 +244,20 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
       cellsTotal: chunkStats.cellsTotal,
       quads: world.stats.quads
     }),
+    getRuleState: (): RuleState | null => {
+      if (!ruleEngine || !vehicle) return null;
+      return {
+        violations: ruleEngine.violations.slice(-5),
+        bestanden: ruleEngine.bestanden,
+        summary: ruleEngine.summary,
+        speedKmh: Math.max(0, Math.round(vehicle.state.speed * 3.6))
+      };
+    },
     dispose: () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
       vehicle?.dispose();
+      npcs?.dispose();
       chunkMgr.dispose();
       world.dispose();
       renderer.dispose();

@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
-import { createSimScene, type SimSceneHandle, type SimStats } from '../world/simScene';
+import { createSimScene, type SimSceneHandle, type SimStats, type RuleState } from '../world/simScene';
 import { loadDemoAssets } from '../world/demoAssets';
 import { generateBigMap } from '../data/maps/bigMap';
 import testCrossingMap from '../data/maps/test_crossing.json';
@@ -36,6 +36,7 @@ export const SimDevPage = () => {
 
   const [debugVisible, setDebugVisible] = useState(true);
   const [stats, setStats] = useState<SimStats | null>(null);
+  const [rule, setRule] = useState<RuleState | null>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -53,6 +54,7 @@ export const SimDevPage = () => {
       const h = handleRef.current;
       if (!h) return;
       setStats(h.getStats());
+      setRule(h.getRuleState());
     }, 500);
     return () => clearInterval(t);
   }, []);
@@ -81,6 +83,42 @@ export const SimDevPage = () => {
           </span>
         )}
       </div>
+
+      {driveMode && (
+        <>
+          {/* Tốc độ */}
+          <div style={{
+            position: 'absolute', bottom: 24, right: 24,
+            background: 'rgba(7,11,20,0.85)', color: '#f1f5f9',
+            border: '1px solid rgba(148,163,184,0.3)', borderRadius: 12,
+            padding: '10px 18px', textAlign: 'center'
+          }}>
+            <div style={{ fontSize: 34, fontWeight: 800, lineHeight: 1 }}>{rule?.speedKmh ?? 0}</div>
+            <div style={{ fontSize: 11, color: '#94a3b8' }}>km/h</div>
+          </div>
+          {/* Kết quả thi */}
+          <div style={{
+            position: 'absolute', top: 12, right: 12,
+            background: 'rgba(7,11,20,0.85)', color: '#f1f5f9',
+            border: `1px solid ${rule && !rule.bestanden ? 'rgba(239,68,68,0.6)' : 'rgba(74,222,128,0.6)'}`,
+            borderRadius: 10, padding: '10px 14px', fontSize: 13, fontFamily: 'monospace',
+            minWidth: 260, pointerEvents: 'none'
+          }}>
+            <b style={{ color: rule && !rule.bestanden ? '#ef4444' : '#4ade80' }}>
+              {rule?.summary ?? 'BESTANDEN'}
+            </b>
+            {rule && rule.violations.length > 0 && (
+              <div style={{ marginTop: 6, fontSize: 12, color: '#cbd5e1' }}>
+                {rule.violations.slice().reverse().map((v, i) => (
+                  <div key={i} style={{ color: v.severity === 'major' ? '#f87171' : '#fbbf24' }}>
+                    {v.severity === 'major' ? '⛔' : '⚠'} {v.message}
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        </>
+      )}
     </div>
   );
 };
