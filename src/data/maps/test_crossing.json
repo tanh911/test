@@ -1,0 +1,88 @@
+{
+  "version": 1,
+  "nodes": [
+    { "id": "n1", "x": 0, "z": 0, "type": "intersection" },
+    { "id": "n2", "x": 80, "z": 0, "type": "end" },
+    { "id": "n3", "x": 0, "z": -80, "type": "end" },
+    { "id": "n4", "x": -80, "z": 0, "type": "end" },
+    { "id": "n5", "x": 0, "z": 80, "type": "end" }
+  ],
+  "roads": [
+    {
+      "id": "r1",
+      "from": "n1", "to": "n2",
+      "points": [[0, 0], [40, 0], [80, 0]],
+      "lanesForward": 1, "lanesBackward": 1,
+      "laneWidth": 3.0,
+      "sidewalk": { "left": true, "right": true },
+      "bikeLane": { "left": false, "right": false },
+      "parking": { "left": "parallel", "right": "none" },
+      "speedLimit": 50,
+      "priority": "equal",
+      "surface": "asphalt"
+    },
+    {
+      "id": "r2",
+      "from": "n1", "to": "n3",
+      "points": [[0, 0], [0, -80]],
+      "lanesForward": 1, "lanesBackward": 1,
+      "laneWidth": 3.0,
+      "sidewalk": { "left": true, "right": true },
+      "bikeLane": { "left": false, "right": false },
+      "parking": { "left": "none", "right": "parallel" },
+      "speedLimit": 50,
+      "priority": "equal",
+      "surface": "asphalt"
+    },
+    {
+      "id": "r3",
+      "from": "n4", "to": "n1",
+      "points": [[-80, 0], [0, 0]],
+      "lanesForward": 1, "lanesBackward": 1,
+      "laneWidth": 3.0,
+      "sidewalk": { "left": true, "right": true },
+      "bikeLane": { "left": false, "right": false },
+      "parking": { "left": "none", "right": "none" },
+      "speedLimit": 50,
+      "priority": "equal",
+      "surface": "asphalt"
+    },
+    {
+      "id": "r4",
+      "from": "n5", "to": "n1",
+      "points": [[0, 80], [0, 0]],
+      "lanesForward": 1, "lanesBackward": 1,
+      "laneWidth": 3.0,
+      "sidewalk": { "left": true, "right": true },
+      "bikeLane": { "left": false, "right": false },
+      "parking": { "left": "none", "right": "none" },
+      "speedLimit": 50,
+      "priority": "equal",
+      "surface": "asphalt"
+    }
+  ],
+  "intersections": [
+    {
+      "nodeId": "n1",
+      "rule": "right_before_left",
+      "trafficLight": null,
+      "crosswalks": ["r1"]
+    }
+  ],
+  "signs": [
+    { "type": "102", "roadId": "r1", "s": 75, "side": "right" },
+    { "type": "350", "roadId": "r1", "s": 76, "side": "right" }
+  ],
+  "buildings": [
+    { "roadId": "r1", "side": "left", "s": 0, "length": 40, "floors": 5, "style": "altbau", "seed": 12 },
+    { "roadId": "r1", "side": "right", "s": 0, "length": 40, "floors": 4, "style": "backstein", "seed": 7 },
+    { "roadId": "r2", "side": "left", "s": 0, "length": 40, "floors": 4, "style": "neubau", "seed": 3 }
+  ],
+  "props": [
+    { "type": "street_lamp", "roadId": "r1", "s": 20, "side": "right" },
+    { "type": "tree", "roadId": "r1", "s": 30, "side": "right" },
+    { "type": "tree", "roadId": "r1", "s": 55, "side": "left" },
+    { "type": "bench", "roadId": "r2", "s": 20, "side": "left" }
+  ],
+  "spawns": { "player": { "roadId": "r3", "s": 10, "lane": 0 } }
+}
