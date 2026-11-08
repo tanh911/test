@@ -161,8 +161,18 @@ export class ProceduralRoadGenerator {
       color: 0xffffff,
       roughness: 0.8,
       metalness: 0.05,
+      vertexColors: true,
       side: THREE.DoubleSide
     });
+    // Facade palette Duc (vertex tint per building)
+    this.facadePalette = [
+      [1.0, 1.0, 1.0],
+      [1.0, 0.93, 0.72],
+      [1.0, 0.78, 0.62],
+      [0.78, 0.9, 0.74],
+      [0.94, 0.8, 0.72],
+      [0.82, 0.88, 0.94]
+    ];
     this.roofMat = new THREE.MeshStandardMaterial({
       color: 0x94a3b8,
       roughness: 0.5,
@@ -324,7 +334,8 @@ export class ProceduralRoadGenerator {
     const railBedBuffers = { vertices: [], uvs: [], indices: [] };
     const steelRailBuffers = { vertices: [], indices: [] };
     const parkBuffers = { vertices: [], uvs: [], indices: [] };
-    const buildingBuffers = { vertices: [], uvs: [], indices: [] };
+    const buildingBuffers = { vertices: [], uvs: [], indices: [], colors: [] };
+    let facadeTintIdx = 0;
     const roofBuffers = { vertices: [], indices: [] };
 
     // Calculate b63_x center for Werler Str B63 overpass bridge height calculations (matching Blender model)
@@ -1078,6 +1089,8 @@ export class ProceduralRoadGenerator {
             }
           }
 
+          const tint = this.facadePalette[facadeTintIdx % this.facadePalette.length];
+          facadeTintIdx++;
           for (let i = 0; i < pts.length; i++) {
             const p1 = pts[i];
             const p2 = pts[(i + 1) % pts.length];
@@ -1089,6 +1102,7 @@ export class ProceduralRoadGenerator {
               p2[0], height, p2[1],
               p1[0], height, p1[1]
             );
+            for (let ci = 0; ci < 4; ci++) buildingBuffers.colors.push(tint[0], tint[1], tint[2]);
             // UV theo mét thực: u dọc theo chiều dài tường, v theo tầng (3m/tầng)
             const wallLen = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
             buildingBuffers.uvs.push(
@@ -1105,6 +1119,8 @@ export class ProceduralRoadGenerator {
         } else if (Number.isFinite(lm.x) && Number.isFinite(lm.z)) {
           const h = 18;
           const w = 3.5;
+          const boxTint = this.facadePalette[facadeTintIdx % this.facadePalette.length];
+          facadeTintIdx++;
           const bBase = buildingBuffers.vertices.length / 3;
           buildingBuffers.vertices.push(
             lm.x - w, 0, lm.z - w,
@@ -1140,6 +1156,7 @@ export class ProceduralRoadGenerator {
               0, h / FACADE_TILE_H
             );
           }
+          for (let cv = 0; cv < 16; cv++) buildingBuffers.colors.push(boxTint[0], boxTint[1], boxTint[2]);
         }
       });
     }
@@ -1366,6 +1383,9 @@ export class ProceduralRoadGenerator {
       buildGeo.setAttribute('position', new THREE.Float32BufferAttribute(buildingBuffers.vertices, 3));
       if (buildingBuffers.uvs.length === buildingBuffers.vertices.length / 3 * 2) {
         buildGeo.setAttribute('uv', new THREE.Float32BufferAttribute(buildingBuffers.uvs, 2));
+      }
+      if (buildingBuffers.colors.length === buildingBuffers.vertices.length) {
+        buildGeo.setAttribute('color', new THREE.Float32BufferAttribute(buildingBuffers.colors, 3));
       }
       buildGeo.setIndex(buildingBuffers.indices);
       buildGeo.computeVertexNormals();
