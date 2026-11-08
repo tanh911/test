@@ -1,4 +1,4 @@
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { createSimScene, type SimSceneHandle } from '../world/simScene';
 import testCrossingMap from '../data/maps/test_crossing.json';
 
@@ -17,6 +17,33 @@ export const SimDevPage = () => {
     };
   }, []);
 
+  const [debugVisible, setDebugVisible] = useState(true);
+  const [stats, setStats] = useState<{ drawCalls: number; triangles: number; chunks: number } | null>(null);
+
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if (e.code === 'F3') {
+        e.preventDefault();
+        setDebugVisible(v => !v);
+      }
+    };
+    window.addEventListener('keydown', onKey);
+    return () => window.removeEventListener('keydown', onKey);
+  }, []);
+
+  useEffect(() => {
+    const t = setInterval(() => {
+      const h = handleRef.current;
+      if (!h) return;
+      setStats({
+        drawCalls: h.renderer.info.render.calls,
+        triangles: h.renderer.info.render.triangles,
+        chunks: h.stats?.chunks ?? 0
+      });
+    }, 500);
+    return () => clearInterval(t);
+  }, []);
+
   const nodes = (testCrossingMap as { nodes: unknown[] }).nodes.length;
   const roads = (testCrossingMap as { roads: unknown[] }).roads.length;
 
@@ -32,7 +59,12 @@ export const SimDevPage = () => {
       }}>
         <b style={{ color: '#7dd3fc' }}>SIM v2 · Prompt 1 — khung dự án</b><br />
         Nodes: {nodes} · Roads: {roads}<br />
-        Kéo chuột = quay · WASD = di chuyển · Q/E = xuống/lên · Shift = nhanh
+        Kéo chuột = quay · WASD = di chuyển · Q/E = xuống/lên · Shift = nhanh<br />
+        {debugVisible && stats && (
+          <span style={{ color: '#4ade80' }}>
+            Draws: {stats.drawCalls} · Tris: {stats.triangles} · Chunks: {stats.chunks}
+          </span>
+        )}
       </div>
     </div>
   );

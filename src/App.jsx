@@ -556,12 +556,12 @@ function App() {
 
   return (
     <div style={{
-      height: isSimulation ? '100vh' : undefined,
+      height: undefined,
       minHeight: '100vh',
       display: 'flex',
       flexDirection: 'column',
       background: 'var(--background)',
-      overflow: isSimulation ? 'hidden' : undefined
+      overflow: undefined
     }}>
       <Navbar
         location={location}
@@ -581,7 +581,7 @@ function App() {
       {!isSimOrEditor && <BuyFullAccountAlert languageMode={languageMode} user={user} />}
 
       {/* Page content */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: isSimulation ? 'hidden' : undefined, minHeight: 0 }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: undefined, minHeight: 0 }}>
         <Routes>
           <Route path="/" element={
             <LandingPage

@@ -4,6 +4,7 @@ import * as THREE from 'three';
 import { palette } from '../art/palette';
 import { loadGameMap, type GameMap } from './mapLoader';
 import { createTerrain, createSkybox, applyFog } from './terrain';
+import { buildWorld } from './worldBuilder';
 
 export interface SimSceneHandle {
   scene: THREE.Scene;
@@ -109,23 +110,10 @@ export function createSimScene(container: HTMLElement, mapJson: unknown): SimSce
   createSkybox(scene);
   applyFog(scene);
 
-  // ── Debug: markers các node + tim đường từ map.json (tạm thời — roadMesh là Prompt 2) ──
-  const markers = new THREE.Group();
-  markers.name = 'mapDebugMarkers';
-  const nodeGeo = new THREE.SphereGeometry(0.6, 10, 8);
-  const nodeMat = new THREE.MeshBasicMaterial({ color: 0xf2c230 });
-  for (const n of map.nodes) {
-    const m = new THREE.Mesh(nodeGeo, nodeMat);
-    m.position.set(n.x, 0.4, n.z);
-    markers.add(m);
-  }
-  const lineMat = new THREE.LineBasicMaterial({ color: 0xf2f2f0 });
-  for (const rd of map.roads) {
-    const pts = rd.points.map(([x, z]) => new THREE.Vector3(x, 0.1, z));
-    const line = new THREE.Line(new THREE.BufferGeometry().setFromPoints(pts), lineMat);
-    markers.add(line);
-  }
-  scene.add(markers);
+  // 🌍 World meshes (Prompt 2): đường + ngã tư + vạch + vỉa hè từ map.json
+  const world = buildWorld(scene, map);
+  const debugMarkers = new THREE.Group();
+  void debugMarkers;
 
   let raf = 0;
   let last = performance.now();
@@ -154,9 +142,11 @@ export function createSimScene(container: HTMLElement, mapJson: unknown): SimSce
     camera,
     renderer,
     map,
+    stats: world.stats,
     dispose: () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
+      world.dispose();
       renderer.dispose();
       if (renderer.domElement.parentElement === container) {
         container.removeChild(renderer.domElement);
