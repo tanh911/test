@@ -9,18 +9,20 @@ import testCrossingMap from '../data/maps/test_crossing.json';
 export const SimDevPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<SimSceneHandle | null>(null);
-  const bigMap = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('big') === '1';
+  const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
+  const bigMap = params?.get('big') === '1';
+  const driveMode = params?.get('drive') === '1';
 
   useEffect(() => {
     if (!containerRef.current || handleRef.current) return;
     const mapJson = bigMap ? generateBigMap() : testCrossingMap;
-    const handle = createSimScene(containerRef.current, mapJson);
+    const handle = createSimScene(containerRef.current, mapJson, { drive: driveMode });
     handleRef.current = handle;
     // dev hook: Playwright/screenshot dùng teleport camera
     (window as unknown as { __simScene?: SimSceneHandle }).__simScene = handle;
-    // G4 verify: load GLB assets (map nhỏ thôi — map lớn chỉ đo draw calls)
+    // G4 verify: load GLB assets (map nhỏ, không drive — drive đã có xe player)
     let demo: Awaited<ReturnType<typeof loadDemoAssets>> | null = null;
-    if (!bigMap) {
+    if (!bigMap && !driveMode) {
       loadDemoAssets(handle.scene, handle.map).then(d => { demo = d; });
     }
     return () => {
@@ -68,9 +70,11 @@ export const SimDevPage = () => {
         padding: '10px 14px', fontSize: 13, fontFamily: 'monospace',
         pointerEvents: 'none'
       }}>
-        <b style={{ color: '#7dd3fc' }}>SIM v2 · {bigMap ? 'BIG MAP 2km × 2km (G5)' : 'Prompt 1 — khung dự án'}</b><br />
+        <b style={{ color: '#7dd3fc' }}>SIM v2 · {driveMode ? 'LÁI XE (W/A/S/D)' : bigMap ? 'BIG MAP 2km × 2km (G5)' : 'Prompt 1 — khung dự án'}</b><br />
         Nodes: {nodes} · Roads: {roads}<br />
-        Kéo chuột = quay · WASD = di chuyển · Q/E = xuống/lên · Shift = nhanh<br />
+        {driveMode
+          ? <>W = ga · S = phanh/lùi · A/D = lái trái/phải</>
+          : <>Kéo chuột = quay · WASD = di chuyển · Q/E = xuống/lên · Shift = nhanh</>}<br />
         {debugVisible && stats && (
           <span style={{ color: '#4ade80' }}>
             Draws: {stats.drawCalls} · Tris: {stats.triangles} · Cells: {stats.cellsLoaded}/{stats.cellsTotal} · Quads: {stats.quads}

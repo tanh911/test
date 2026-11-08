@@ -221,13 +221,14 @@ def make_player_car():
             parts.append(cyl('wheel', 0.32, 0.24, (x, y, 0.32), M_TIRE, verts=10, rot=(0, math.pi / 2, 0)))
             parts.append(cyl('rim', 0.18, 0.26, (x, y, 0.32), M_RIM, verts=8, rot=(0, math.pi / 2, 0)))
 
-    # ── nội thất: dashboard + vô lăng + 2 ghế (cabin kính trong suốt → nhìn thấy) ──
-    parts.append(box('dash', (1.5, 0.42, 0.28), (0, 0.78, 1.02), M_DASH))
-    parts.append(torus('steering', 0.19, 0.028, (0.38, 0.62, 1.02), M_TRIM, rot=(1.15, 0, 0)))
-    parts.append(box('seat_base_l', (0.5, 0.52, 0.16), (0.38, -0.25, 0.95), M_SEAT))
-    parts.append(box('seat_back_l', (0.5, 0.14, 0.6), (0.38, -0.52, 1.28), M_SEAT))
-    parts.append(box('seat_base_r', (0.5, 0.52, 0.16), (-0.38, -0.25, 0.95), M_SEAT))
-    parts.append(box('seat_back_r', (0.5, 0.14, 0.6), (-0.38, -0.52, 1.28), M_SEAT))
+    # ── nội thất: dashboard + vô lăng + 2 ghế — GHI SỐ LÁI TRÁI (LHD Đức, x âm) ──
+    # Blender z (cao) thấp hơn mắt lái (~1.15 glTF) để không che tầm nhìn ra windshield
+    parts.append(box('dash', (1.5, 0.42, 0.24), (0, 0.82, 0.85), M_DASH))
+    parts.append(torus('steering', 0.19, 0.028, (-0.38, 0.66, 0.88), M_TRIM, rot=(1.15, 0, 0)))
+    parts.append(box('seat_base_driver', (0.5, 0.52, 0.16), (-0.38, -0.25, 0.95), M_SEAT))
+    parts.append(box('seat_back_driver', (0.5, 0.14, 0.6), (-0.38, -0.52, 1.28), M_SEAT))
+    parts.append(box('seat_base_pass', (0.5, 0.52, 0.16), (0.38, -0.25, 0.95), M_SEAT))
+    parts.append(box('seat_back_pass', (0.5, 0.14, 0.6), (0.38, -0.52, 1.28), M_SEAT))
 
     return join(parts, 'car_player')
 

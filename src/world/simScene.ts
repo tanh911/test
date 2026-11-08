@@ -1,10 +1,11 @@
-// 🎬 Khung scene simulator v2 — Protocol Prompt 1+6: scene + ánh sáng + camera bay + chunk streaming
+// 🎬 Khung scene simulator v2 — Protocol Prompt 1+6+7: scene + ánh sáng + chunk streaming + xe người chơi
 import * as THREE from 'three';
 import { palette } from '../art/palette';
 import { loadGameMap, type GameMap } from './mapLoader';
 import { createTerrain, createSkybox, applyFog } from './terrain';
 import { buildWorld } from './worldBuilder';
 import { ChunkManager } from './chunkManager';
+import { createVehicle, spawnFromMap, type VehicleHandle, type VehicleInput } from './vehicle';
 
 export interface SimStats {
   drawCalls: number;
@@ -14,14 +15,20 @@ export interface SimStats {
   quads: number;
 }
 
+export interface SimSceneOptions {
+  /** chế độ lái xe: WASD điều khiển xe, camera cabin (mặc định: camera bay tự do) */
+  drive?: boolean;
+}
+
 export interface SimSceneHandle {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
   map: GameMap;
+  vehicle: VehicleHandle | null;
   getStats: () => SimStats;
   dispose: () => void;
-  /** gọi mỗi frame từ host (React) — cập nhật camera bay + render */
+  /** gọi mỗi frame từ host (React) — cập nhật camera bay/xe + render */
   update: (dt: number) => void;
 }
 
@@ -95,15 +102,18 @@ function bindFlyControls(dom: HTMLElement, camera: THREE.PerspectiveCamera): () 
   };
 }
 
-export function createSimScene(container: HTMLElement, mapJson: unknown): SimSceneHandle {
+export function createSimScene(container: HTMLElement, mapJson: unknown, opts: SimSceneOptions = {}): SimSceneHandle {
   const map = loadGameMap(mapJson);
+  const driveMode = !!opts.drive;
 
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(palette.skyHorizon);
 
   const camera = new THREE.PerspectiveCamera(60, container.clientWidth / Math.max(1, container.clientHeight), 0.1, 1500);
-  camera.position.set(40, 45, 130);
-  bindFlyControls(container, camera);
+  if (!driveMode) {
+    camera.position.set(40, 45, 130);
+    bindFlyControls(container, camera);
+  }
 
   const renderer = new THREE.WebGLRenderer({ antialias: true, powerPreference: 'high-performance' });
   renderer.setSize(container.clientWidth, container.clientHeight);
@@ -150,10 +160,41 @@ export function createSimScene(container: HTMLElement, mapJson: unknown): SimSce
   let chunkStats = { cellsLoaded: 0, cellsTotal: 0, meshes: 0 };
   const fly = (camera as THREE.PerspectiveCamera & { userData: { _flyUpdate?: (dt: number) => void } }).userData;
 
+  // 🚙 Drive mode: WASD lái xe (dùng chung `keys` module), camera ghế lái
+  let vehicle: VehicleHandle | null = null;
+  if (driveMode) {
+    camera.rotation.order = 'YXZ';
+    const driveKey = (e: KeyboardEvent, down: boolean) => {
+      if (down) keys.add(e.code);
+      else keys.delete(e.code);
+    };
+    window.addEventListener('keydown', e => driveKey(e, true));
+    window.addEventListener('keyup', e => driveKey(e, false));
+    createVehicle(scene, map).then(v => { vehicle = v; });
+  }
+
   const tick = (now: number) => {
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
-    fly._flyUpdate?.(dt);
+    if (driveMode) {
+      if (vehicle) {
+        vehicle.update(dt, {
+          throttle: keys.has('KeyW') ? 1 : 0,
+          brake: keys.has('KeyS') ? 1 : 0,
+          steer: keys.has('KeyD') ? 1 : keys.has('KeyA') ? -1 : 0
+        });
+        const sp = vehicle.seatPose();
+        camera.position.set(sp.x, sp.y, sp.z);
+        camera.rotation.set(-0.03, sp.yaw, 0);
+      } else {
+        // chờ GLB load — camera tạm tại spawn
+        const s = spawnFromMap(map);
+        camera.position.set(s.x, 1.08, s.z);
+        camera.rotation.set(-0.03, s.heading + Math.PI, 0);
+      }
+    } else {
+      fly._flyUpdate?.(dt);
+    }
     world.update(dt);
     chunkStats = chunkMgr.update(camera.position.x, camera.position.z);
     renderer.render(scene, camera);
@@ -175,6 +216,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown): SimSce
     camera,
     renderer,
     map,
+    get vehicle() { return vehicle; },
     getStats: (): SimStats => ({
       drawCalls: renderer.info.render.calls,
       triangles: renderer.info.render.triangles,
@@ -185,6 +227,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown): SimSce
     dispose: () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
+      vehicle?.dispose();
       chunkMgr.dispose();
       world.dispose();
       renderer.dispose();
