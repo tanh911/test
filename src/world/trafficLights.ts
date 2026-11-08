@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import type { GameMap, MapIntersection } from './mapLoader';
 import { nodeById } from './mapLoader';
+import { chunkKeyFor } from './chunkBuilder';
 
 export type LightPhase = 'red' | 'red_yellow' | 'green' | 'yellow';
 
@@ -89,10 +90,15 @@ export function createTrafficLightMesh(): THREE.Group {
 
 // ── Đặt đèn tự động từ intersections[] có trafficLight ──
 // Mỗi approach (luồng xe ĐẾN node) = 1 đèn đứng bên PHẢI luồng, mặt quay về xe đang tới.
-export function placeTrafficLights(scene: THREE.Scene, map: GameMap): { controllers: TrafficLightController[]; lightsGroup: THREE.Group } {
+// Trả lightsByCell: đèn gắn theo chunk cell → chunkManager nạp/hủy theo camera (G5).
+export function placeTrafficLights(scene: THREE.Scene, map: GameMap): {
+  controllers: TrafficLightController[];
+  lightsByCell: Map<string, THREE.Group[]>;
+  allLightGroups: THREE.Group[];
+} {
   const controllers: TrafficLightController[] = [];
-  const lightsGroup = new THREE.Group();
-  lightsGroup.name = 'trafficLights_v2';
+  const lightsByCell = new Map<string, THREE.Group[]>();
+  const allLightGroups: THREE.Group[] = [];
 
   for (const ix of map.intersections as MapIntersection[]) {
     if (!ix.trafficLight) continue;
@@ -130,38 +136,37 @@ export function placeTrafficLights(scene: THREE.Scene, map: GameMap): { controll
         const rnz = ap.fx;
         const tl = createTrafficLightMesh();
         // góc gần bên phải: lùi 1 reach dọc flow (đúng cạnh vạch dừng) + lệch phải ngoài mép đường
-        tl.position.set(
-          node.x - ap.fx * reach + rnx * (half + 2.2),
-          0,
-          node.z - ap.fz * reach + rnz * (half + 2.2)
-        );
+        const lx = node.x - ap.fx * reach + rnx * (half + 2.2);
+        const lz = node.z - ap.fz * reach + rnz * (half + 2.2);
+        tl.position.set(lx, 0, lz);
         // Mặt đèn hướng NGƯỢC flow (nhìn thấy từ xe đang tới)
         tl.rotation.y = Math.atan2(-ap.fx, -ap.fz);
         tl.userData.controller = controller;
-        lightsGroup.add(tl);
+        allLightGroups.push(tl);
+        const cellKey = chunkKeyFor(lx, lz);
+        if (!lightsByCell.has(cellKey)) lightsByCell.set(cellKey, []);
+        lightsByCell.get(cellKey)!.push(tl);
       }
     }
   }
 
-  scene.add(lightsGroup);
-  return { controllers, lightsGroup };
+  return { controllers, lightsByCell, allLightGroups };
 }
 
 // ── Áp visual theo pha (gọi mỗi frame — chỉ đổi màu material) ──
-export function applyLightVisuals(lights: THREE.Group | null): void {
-  if (!lights) return;
-  lights.children.forEach(tl => {
-    const ctrl = (tl as THREE.Group).userData.controller as TrafficLightController | undefined;
-    if (!ctrl) return;
+export function applyLightVisuals(lightGroups: THREE.Group[]): void {
+  for (const tl of lightGroups) {
+    const ctrl = tl.userData.controller as TrafficLightController | undefined;
+    if (!ctrl) continue;
     const phase = ctrl.currentPhase;
-    const red = (tl as THREE.Group).userData._redLamp as THREE.Mesh | undefined;
-    const yel = (tl as THREE.Group).userData._yelLamp as THREE.Mesh | undefined;
-    const grn = (tl as THREE.Group).userData._grnLamp as THREE.Mesh | undefined;
-    const poleRed = (tl as THREE.Group).userData._poleRed as THREE.Mesh | undefined;
+    const red = tl.userData._redLamp as THREE.Mesh | undefined;
+    const yel = tl.userData._yelLamp as THREE.Mesh | undefined;
+    const grn = tl.userData._grnLamp as THREE.Mesh | undefined;
+    const poleRed = tl.userData._poleRed as THREE.Mesh | undefined;
 
     if (red) (red.material as THREE.MeshBasicMaterial).color.set(phase === 'red' ? 0xef4444 : phase === 'red_yellow' ? 0x7f1d1d : 0x450a0a);
     if (yel) (yel.material as THREE.MeshBasicMaterial).color.set(phase === 'yellow' ? 0xfbbf24 : phase === 'red_yellow' ? 0x92400e : 0x451a03);
     if (grn) (grn.material as THREE.MeshBasicMaterial).color.set(phase === 'green' ? 0x22c55e : 0x052e16);
     if (poleRed) (poleRed.material as THREE.MeshBasicMaterial).color.set(phase === 'red' ? 0xef4444 : 0x450a0a);
-  });
+  }
 }

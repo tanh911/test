@@ -1,16 +1,25 @@
-// 🎬 Khung scene simulator v2 — Protocol Prompt 1 (khung dự án, chưa làm xe)
-// Scene + ánh sáng (mục 5) + terrain/skybox + camera bay tự do + đọc map.json
+// 🎬 Khung scene simulator v2 — Protocol Prompt 1+6: scene + ánh sáng + camera bay + chunk streaming
 import * as THREE from 'three';
 import { palette } from '../art/palette';
 import { loadGameMap, type GameMap } from './mapLoader';
 import { createTerrain, createSkybox, applyFog } from './terrain';
 import { buildWorld } from './worldBuilder';
+import { ChunkManager } from './chunkManager';
+
+export interface SimStats {
+  drawCalls: number;
+  triangles: number;
+  cellsLoaded: number;
+  cellsTotal: number;
+  quads: number;
+}
 
 export interface SimSceneHandle {
   scene: THREE.Scene;
   camera: THREE.PerspectiveCamera;
   renderer: THREE.WebGLRenderer;
   map: GameMap;
+  getStats: () => SimStats;
   dispose: () => void;
   /** gọi mỗi frame từ host (React) — cập nhật camera bay + render */
   update: (dt: number) => void;
@@ -125,13 +134,20 @@ export function createSimScene(container: HTMLElement, mapJson: unknown): SimSce
   createSkybox(scene);
   applyFog(scene);
 
-  // 🌍 World meshes (Prompt 2): đường + ngã tư + vạch + vỉa hè từ map.json
+  // 🌍 World data (Prompt 2-4) + chunk streaming (Prompt 6)
   const world = buildWorld(scene, map);
+  const chunkMgr = new ChunkManager(world.chunkData, scene, {
+    loadRadius: 300,
+    unloadRadius: 420,
+    materials: world.materials,
+    extras: world.extras
+  });
   const debugMarkers = new THREE.Group();
   void debugMarkers;
 
   let raf = 0;
   let last = performance.now();
+  let chunkStats = { cellsLoaded: 0, cellsTotal: 0, meshes: 0 };
   const fly = (camera as THREE.PerspectiveCamera & { userData: { _flyUpdate?: (dt: number) => void } }).userData;
 
   const tick = (now: number) => {
@@ -139,6 +155,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown): SimSce
     last = now;
     fly._flyUpdate?.(dt);
     world.update(dt);
+    chunkStats = chunkMgr.update(camera.position.x, camera.position.z);
     renderer.render(scene, camera);
     raf = requestAnimationFrame(tick);
   };
@@ -158,10 +175,17 @@ export function createSimScene(container: HTMLElement, mapJson: unknown): SimSce
     camera,
     renderer,
     map,
-    stats: world.stats,
+    getStats: (): SimStats => ({
+      drawCalls: renderer.info.render.calls,
+      triangles: renderer.info.render.triangles,
+      cellsLoaded: chunkStats.cellsLoaded,
+      cellsTotal: chunkStats.cellsTotal,
+      quads: world.stats.quads
+    }),
     dispose: () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
+      chunkMgr.dispose();
       world.dispose();
       renderer.dispose();
       if (renderer.domElement.parentElement === container) {

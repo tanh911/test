@@ -20,10 +20,16 @@ const MAT_LOOKUP: Record<string, string> = {
   sidewalk: 'sidewalk'
 };
 
-export interface WorldMeshResult {
-  group: THREE.Group;
+export interface WorldHandle {
+  /** dữ liệu quad per-cell — chunkManager build mesh lazy theo camera */
+  chunkData: ChunkBuilder;
+  /** materials cho chunkManager */
+  materials: Record<string, THREE.Material>;
+  /** object phụ (biển/đèn) gắn theo cell — chunkManager add/remove theo camera */
+  extras: Map<string, THREE.Object3D[]>;
   controllers: TrafficLightController[];
-  stats: { drawCalls: number; triangles: number; chunks: number };
+  stats: { cells: number; quads: number };
+  update: (dt: number) => void;
   dispose: () => void;
 }
 
@@ -31,7 +37,7 @@ function pushQuads(cb: ChunkBuilder, quads: Quad[], material: Parameters<ChunkBu
   for (const q of quads) cb.addQuad(q, material);
 }
 
-export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldMeshResult {
+export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldHandle {
   const map: GameMap = loadGameMap(mapJson);
   const cb = new ChunkBuilder();
 
@@ -61,10 +67,13 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldMeshResul
     pushQuads(cb, quads, 'white');
   }
 
-  // ── 3.5 Biển báo StVO ──
-  placeSigns(scene, map);
-  const { controllers, lightsGroup } = placeTrafficLights(scene, map);
+  // ── 3.5 Biển báo StVO + đèn giao thông — gắn theo cell cho chunkManager ──
+  const { signsByCell, allSignGroups } = placeSigns(map);
+  const { controllers, lightsByCell, allLightGroups } = placeTrafficLights(scene, map);
   const props = placeProps(scene, map);
+  const extras = new Map<string, THREE.Object3D[]>();
+  for (const [k, v] of signsByCell) extras.set(k, [...(extras.get(k) ?? []), ...v]);
+  for (const [k, v] of lightsByCell) extras.set(k, [...(extras.get(k) ?? []), ...v]);
 
   // ── 4. Vỉa hè: mặt trên phẳng + mặt curb đứng ──
   for (const road of map.roads) {
@@ -89,9 +98,7 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldMeshResul
     cb.addQuad(bq.quad, 'building', bq.colors);
   }
 
-  // ── 5. Build meshes theo chunk+material ──
-  const group = new THREE.Group();
-  group.name = 'worldMeshes';
+  // ── 5. Materials cho chunkManager (mesh build lazy theo camera) ──
   const materials: Record<string, THREE.Material> = {
     road: new THREE.MeshLambertMaterial({ color: palette.asphalt }),
     road_worn: new THREE.MeshLambertMaterial({ color: palette.asphaltWorn }),
@@ -105,36 +112,23 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldMeshResul
     building: new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })
   };
 
-  const meshes = cb.build();
-  let triangles = 0;
-  for (const m of meshes) {
-    const mat = materials[m.material] || materials.road;
-    const mesh = new THREE.Mesh(m.geometry, mat);
-    mesh.receiveShadow = true;
-    if (m.material === 'building') mesh.castShadow = true; // nhà đổ bóng xuống đường
-    mesh.name = `chunk_${m.chunkKey}_${m.material}`;
-    group.add(mesh);
-    const posAttr = m.geometry.getAttribute('position');
-    triangles += m.geometry.index ? m.geometry.index.count / 3 : posAttr.count / 3;
-  }
-
-  scene.add(group);
+  let quads = cb.quadCount;
 
   let controllerTimer = 0;
   return {
-    group,
+    chunkData: cb,
+    materials,
+    extras,
     controllers,
-    stats: { drawCalls: meshes.length, triangles: Math.round(triangles), chunks: cb.chunkCount },
+    stats: { cells: cb.cellCount, quads },
     update(dt: number) {
       controllerTimer += dt;
       void controllerTimer;
       controllers.forEach(c => c.update(dt));
-      applyLightVisuals(lightsGroup);
+      applyLightVisuals(allLightGroups);
+      void allSignGroups;
     },
     dispose() {
-      for (const m of meshes) m.geometry.dispose();
-      scene.remove(group);
-      scene.remove(lightsGroup);
       props.dispose();
     }
   };

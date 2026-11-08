@@ -4,6 +4,7 @@
 import * as THREE from 'three';
 import type { GameMap, MapSign } from './mapLoader';
 import { roadById, pointAtS, roadFullWidth } from './mapLoader';
+import { chunkKeyFor } from './chunkBuilder';
 
 interface SignDef {
   code: string;
@@ -296,9 +297,13 @@ function createSignAtlasTexture(signType: string, value?: number): THREE.CanvasT
 }
 
 // ── Đặt biển từ signs[] trong JSON ──
-export function placeSigns(scene: THREE.Scene, map: GameMap): THREE.Group {
-  const group = new THREE.Group();
-  group.name = 'StVO_Signs';
+// Trả signsByCell: biển gắn theo chunk cell → chunkManager nạp/hủy theo camera (G5)
+export function placeSigns(map: GameMap): {
+  signsByCell: Map<string, THREE.Group[]>;
+  allSignGroups: THREE.Group[];
+} {
+  const signsByCell = new Map<string, THREE.Group[]>();
+  const allSignGroups: THREE.Group[] = [];
 
   for (const sign of map.signs as MapSign[]) {
     const road = roadById(map, sign.roadId);
@@ -315,13 +320,16 @@ export function placeSigns(scene: THREE.Scene, map: GameMap): THREE.Group {
     const signX = pt.x + rx * sideOffset;
     const signZ = pt.z + rz * sideOffset;
 
+    // 1 group = cột + mặt biển (nạp/hủy cùng cell)
+    const g = new THREE.Group();
+    g.name = `stvo_sign_${sign.type}_${sign.s}`;
+
     // Cột trụ 2.2 m xám
     const poleGeo = new THREE.CylinderGeometry(0.04, 0.04, 2.2, 6);
     const poleMat = new THREE.MeshLambertMaterial({ color: 0x9a9a96 });
     const pole = new THREE.Mesh(poleGeo, poleMat);
     pole.position.set(signX, 1.1, signZ);
-    pole.name = `sign_pole_${sign.type}_${sign.s}`;
-    group.add(pole);
+    g.add(pole);
 
     // Mặt biển: plane + texture
     const def = SIGN_DEFS[sign.type] || SIGN_DEFS['101'];
@@ -338,12 +346,15 @@ export function placeSigns(scene: THREE.Scene, map: GameMap): THREE.Group {
     signMesh.position.set(signX, 2.2 - def.height / 2, signZ);
     signMesh.rotation.y = pt.heading + Math.PI; // mặt về hướng -heading
     signMesh.userData.signType = sign.type;
-    signMesh.name = `stvo_sign_${sign.type}_${sign.s}`;
-    group.add(signMesh);
+    g.add(signMesh);
+
+    allSignGroups.push(g);
+    const cellKey = chunkKeyFor(signX, signZ);
+    if (!signsByCell.has(cellKey)) signsByCell.set(cellKey, []);
+    signsByCell.get(cellKey)!.push(g);
   }
 
-  scene.add(group);
-  return group;
+  return { signsByCell, allSignGroups };
 }
 
 export { SIGN_DEFS };

@@ -1,33 +1,39 @@
 import { useEffect, useRef, useState } from 'react';
-import { createSimScene, type SimSceneHandle } from '../world/simScene';
+import { createSimScene, type SimSceneHandle, type SimStats } from '../world/simScene';
 import { loadDemoAssets } from '../world/demoAssets';
+import { generateBigMap } from '../data/maps/bigMap';
 import testCrossingMap from '../data/maps/test_crossing.json';
 
-// 🧪 Trang dev cho simulator v2 (Prompt 1) — camera bay tự do xem map.json
-// Route: /sim-dev — không có trong nav production
+// 🧪 Trang dev cho simulator v2 — route /sim-dev (không có trong nav production)
+// ?big=1 — map lưới 2km×2km để verify chunk streaming (G5)
 export const SimDevPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<SimSceneHandle | null>(null);
+  const bigMap = typeof window !== 'undefined' && new URLSearchParams(window.location.search).get('big') === '1';
 
   useEffect(() => {
     if (!containerRef.current || handleRef.current) return;
-    const handle = createSimScene(containerRef.current, testCrossingMap);
+    const mapJson = bigMap ? generateBigMap() : testCrossingMap;
+    const handle = createSimScene(containerRef.current, mapJson);
     handleRef.current = handle;
     // dev hook: Playwright/screenshot dùng teleport camera
     (window as unknown as { __simScene?: SimSceneHandle }).__simScene = handle;
-    // G4 verify: load GLB assets vào scene
+    // G4 verify: load GLB assets (map nhỏ thôi — map lớn chỉ đo draw calls)
     let demo: Awaited<ReturnType<typeof loadDemoAssets>> | null = null;
-    loadDemoAssets(handle.scene, handle.map).then(d => { demo = d; });
+    if (!bigMap) {
+      loadDemoAssets(handle.scene, handle.map).then(d => { demo = d; });
+    }
     return () => {
       demo?.dispose();
       handle.dispose();
       handleRef.current = null;
       delete (window as unknown as { __simScene?: SimSceneHandle }).__simScene;
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const [debugVisible, setDebugVisible] = useState(true);
-  const [stats, setStats] = useState<{ drawCalls: number; triangles: number; chunks: number } | null>(null);
+  const [stats, setStats] = useState<SimStats | null>(null);
 
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
@@ -44,17 +50,13 @@ export const SimDevPage = () => {
     const t = setInterval(() => {
       const h = handleRef.current;
       if (!h) return;
-      setStats({
-        drawCalls: h.renderer.info.render.calls,
-        triangles: h.renderer.info.render.triangles,
-        chunks: h.stats?.chunks ?? 0
-      });
+      setStats(h.getStats());
     }, 500);
     return () => clearInterval(t);
   }, []);
 
-  const nodes = (testCrossingMap as { nodes: unknown[] }).nodes.length;
-  const roads = (testCrossingMap as { roads: unknown[] }).roads.length;
+  const nodes = bigMap ? 441 : (testCrossingMap as { nodes: unknown[] }).nodes.length;
+  const roads = bigMap ? 'grid' : (testCrossingMap as { roads: unknown[] }).roads.length;
 
   return (
     <div style={{ width: '100%', height: '100vh', position: 'relative', background: '#0b0f19' }}>
@@ -66,12 +68,12 @@ export const SimDevPage = () => {
         padding: '10px 14px', fontSize: 13, fontFamily: 'monospace',
         pointerEvents: 'none'
       }}>
-        <b style={{ color: '#7dd3fc' }}>SIM v2 · Prompt 1 — khung dự án</b><br />
+        <b style={{ color: '#7dd3fc' }}>SIM v2 · {bigMap ? 'BIG MAP 2km × 2km (G5)' : 'Prompt 1 — khung dự án'}</b><br />
         Nodes: {nodes} · Roads: {roads}<br />
         Kéo chuột = quay · WASD = di chuyển · Q/E = xuống/lên · Shift = nhanh<br />
         {debugVisible && stats && (
           <span style={{ color: '#4ade80' }}>
-            Draws: {stats.drawCalls} · Tris: {stats.triangles} · Chunks: {stats.chunks}
+            Draws: {stats.drawCalls} · Tris: {stats.triangles} · Cells: {stats.cellsLoaded}/{stats.cellsTotal} · Quads: {stats.quads}
           </span>
         )}
       </div>

@@ -17,14 +17,16 @@ function hexRGB(hex: string): RGB {
 }
 
 // ── helper dựng geometry từ primitives, tô vertex color theo bộ phận ──
+// Icosahedron là non-indexed, box/cylinder indexed → quy về non-indexed hết cho mergeGeometries
 function colored(geo: THREE.BufferGeometry, c: RGB): THREE.BufferGeometry {
-  const count = geo.attributes.position.count;
+  const g = geo.index ? geo.toNonIndexed() : geo;
+  const count = g.attributes.position.count;
   const colors = new Float32Array(count * 3);
   for (let i = 0; i < count; i++) {
     colors[i * 3] = c[0]; colors[i * 3 + 1] = c[1]; colors[i * 3 + 2] = c[2];
   }
-  geo.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
-  return geo;
+  g.setAttribute('color', new THREE.Float32BufferAttribute(colors, 3));
+  return g;
 }
 function at(geo: THREE.BufferGeometry, x: number, y: number, z: number): THREE.BufferGeometry {
   geo.translate(x, y, z);
