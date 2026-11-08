@@ -18,17 +18,17 @@ export interface Quad {
   d: [number, number, number];
 }
 
-/** quad nối 2 điểm trên tim đường, trải rộng ±w theo pháp tuyến */
+/** quad dọc đường từ s0→s1, tâm lệch centerOffset theo pháp tuyến, rộng 2×halfW */
 function spanQuad(
-  pts: [number, number][], s0: number, s1: number, w: number
+  pts: [number, number][], s0: number, s1: number, centerOffset: number, halfW: number
 ): Quad {
   const p0 = pointWithNormalAtS(pts, s0);
   const p1 = pointWithNormalAtS(pts, s1);
   return {
-    a: [p0.x - p0.nx * w, MARKING_Y, p0.z - p0.nz * w],
-    b: [p0.x + p0.nx * w, MARKING_Y, p0.z + p0.nz * w],
-    c: [p1.x + p1.nx * w, MARKING_Y, p1.z + p1.nz * w],
-    d: [p1.x - p1.nx * w, MARKING_Y, p1.z - p1.nz * w]
+    a: [p0.x + p0.nx * (centerOffset - halfW), MARKING_Y, p0.z + p0.nz * (centerOffset - halfW)],
+    b: [p0.x + p0.nx * (centerOffset + halfW), MARKING_Y, p0.z + p0.nz * (centerOffset + halfW)],
+    c: [p1.x + p1.nx * (centerOffset + halfW), MARKING_Y, p1.z + p1.nz * (centerOffset + halfW)],
+    d: [p1.x + p1.nx * (centerOffset - halfW), MARKING_Y, p1.z + p1.nz * (centerOffset - halfW)]
   };
 }
 
@@ -44,51 +44,51 @@ export function centerDashes(road: MapRoad, skip: Array<[number, number]>, stopS
   let s = 2;
   while (s + DASH_ON < hardEnd) {
     if (!inZones(s, skip) && !inZones(s + DASH_ON, skip)) {
-      out.push(spanQuad(road.points, s, s + DASH_ON, MARK_W));
+      out.push(spanQuad(road.points, s, s + DASH_ON, 0, MARK_W / 2));
     }
     s += DASH_ON + DASH_OFF;
   }
   return out;
 }
 
-/** Vạch mép liền (Z. 295) 2 bên — cắt tại vùng junction */
+/** Vạch mép liền (Z. 295) 2 bên — offset ±(half−0.2), cắt tại vùng junction + trước vạch dừng */
 export function edgeLines(road: MapRoad, half: number, skip: Array<[number, number]>, stopS: number | null): Quad[] {
   const out: Quad[] = [];
   const len = polylineLength(road.points);
   const step = 2;
   const end = stopS !== null ? stopS : len;
+  const off = half - 0.2;
+  // đoạn vẽ được: [0, end] trừ skip zones
+  const segs: Array<[number, number]> = [];
+  let cur = 0;
+  for (const [a, b] of skip) {
+    if (b <= 0 || a >= end) continue;
+    if (a > cur) segs.push([cur, Math.min(a, end)]);
+    cur = Math.max(cur, b);
+  }
+  if (cur < end) segs.push([cur, end]);
   for (const side of [-1, 1] as const) {
-    let prevS: number | null = null;
-    for (let s = 0; s <= end; s += step) {
-      const blocked = inZones(s, skip) || s > end;
-      if (!blocked && prevS === null) prevS = s;
-      else if (!blocked && prevS !== null && s + step > end) {
-        out.push(spanQuad(road.points, prevS, s, halfW(road, half, side, s)));
-        prevS = null;
-      } else if (blocked && prevS !== null) {
-        out.push(spanQuad(road.points, prevS, s, halfW(road, half, side, s)));
-        prevS = null;
+    for (const [a, b] of segs) {
+      for (let s = a; s < b; s += step) {
+        out.push(spanQuad(road.points, s, Math.min(s + step, b), side * off, MARK_W / 2));
       }
     }
-    if (prevS !== null) out.push(spanQuad(road.points, prevS, end, halfW(road, half, side, end)));
   }
   return out;
 }
 
-function halfW(road: MapRoad, half: number, side: 1 | -1, s: number): number {
-  void road; void side; void s;
-  return MARK_W; // vạch mép rộng 0.12, đặt tại offset half
-}
-
-/** Vạch dừng Haltlinie (Z. 294): cách mép ngã tư 2 m, full chiều tới */
+/** Vạch dừng Haltlinie (Z. 294): cách mép ngã tư 2 m, CHỈ nửa phải của luồng tới, dày 0.4 m */
 export function stopLine(road: MapRoad, half: number, stopS: number): Quad {
-  const p = pointWithNormalAtS(road.points, stopS);
-  const w = half - 0.15;
+  const p0 = pointWithNormalAtS(road.points, stopS);
+  const p1 = pointWithNormalAtS(road.points, stopS + 0.4);
+  // nửa phải: từ tim đường (0.1) đến mép phải luồng (half − 0.15); +n = phải flow
+  const w0 = 0.1;
+  const w1 = half - 0.15;
   return {
-    a: [p.x - p.nx * w, MARKING_Y, p.z - p.nz * w],
-    b: [p.x + p.nx * w, MARKING_Y, p.z + p.nz * w],
-    c: [p.x + p.nx * w, MARKING_Y, p.z + p.nz * w],
-    d: [p.x - p.nx * w, MARKING_Y, p.z - p.nz * w]
+    a: [p0.x + p0.nx * w0, MARKING_Y, p0.z + p0.nz * w0],
+    b: [p0.x + p0.nx * w1, MARKING_Y, p0.z + p0.nz * w1],
+    c: [p1.x + p1.nx * w1, MARKING_Y, p1.z + p1.nz * w1],
+    d: [p1.x + p1.nx * w0, MARKING_Y, p1.z + p1.nz * w0]
   };
 }
 
@@ -109,19 +109,18 @@ export function sharkTeeth(road: MapRoad, stopS: number): Quad[] {
   return out;
 }
 
-/** Zebrastreifen (Z. 293): sọc rộng 0.5 m, cách 0.5 m, dài 3 m (bắc qua đường) */
+/** Zebrastreifen (Z. 293): sọc rộng 0.5 m cách 0.5 m, dài 3 m (bắc qua đường) */
 export function zebraCrossing(road: MapRoad, half: number, centerS: number): Quad[] {
   const out: Quad[] = [];
   const pA = pointWithNormalAtS(road.points, centerS - ZEBRA_LEN / 2);
   const pB = pointWithNormalAtS(road.points, centerS + ZEBRA_LEN / 2);
-  const stripes = Math.floor((half * 2) / (ZEBRA_STRIPE_W + ZEBRA_LEN / ZEBRA_LEN)) || 1;
-  void stripes;
-  for (let off = -half + ZEBRA_STRIPE_W; off < half; off += ZEBRA_STRIPE_W * 2) {
+  const halfStripe = ZEBRA_STRIPE_W / 2;
+  for (let off = -half + halfStripe; off < half; off += ZEBRA_STRIPE_W * 2) {
     out.push({
-      a: [pA.x + pA.nx * (off - ZEBRA_STRIPE_W), MARKING_Y, pA.z + pA.nz * (off - ZEBRA_STRIPE_W)],
-      b: [pA.x + pA.nx * (off + ZEBRA_STRIPE_W), MARKING_Y, pA.z + pA.nz * (off + ZEBRA_STRIPE_W)],
-      c: [pB.x + pB.nx * (off + ZEBRA_STRIPE_W), MARKING_Y, pB.z + pB.nz * (off + ZEBRA_STRIPE_W)],
-      d: [pB.x + pB.nx * (off - ZEBRA_STRIPE_W), MARKING_Y, pB.z + pB.nz * (off - ZEBRA_STRIPE_W)]
+      a: [pA.x + pA.nx * (off - halfStripe), MARKING_Y, pA.z + pA.nz * (off - halfStripe)],
+      b: [pA.x + pA.nx * (off + halfStripe), MARKING_Y, pA.z + pA.nz * (off + halfStripe)],
+      c: [pB.x + pB.nx * (off + halfStripe), MARKING_Y, pB.z + pB.nz * (off + halfStripe)],
+      d: [pB.x + pB.nx * (off - halfStripe), MARKING_Y, pB.z + pB.nz * (off - halfStripe)]
     });
   }
   return out;
@@ -162,10 +161,11 @@ export function roadMarkingQuads(map: GameMap, road: MapRoad, skip: Array<[numbe
   for (const ix of map.intersections) {
     if (road.from !== ix.nodeId && road.to !== ix.nodeId) continue;
     const atEnd = road.to === ix.nodeId;
+    // Stop line CHỈ cho luồng ĐẾN giao lộ (approach = road.to === node)
     const stopAt = atEnd ? len - half - STOP_LINE_DIST : half + STOP_LINE_DIST;
-    if (ix.trafficLight) { stopKind = 'light'; stopS = stopAt; }
-    else if (ix.rule === 'stop') { stopKind = 'stop'; stopS = stopAt; }
-    else if (ix.rule === 'yield') { stopKind = 'yield'; stopS = stopAt; }
+    if (atEnd && ix.trafficLight) { stopKind = 'light'; stopS = stopAt; }
+    else if (atEnd && ix.rule === 'stop') { stopKind = 'stop'; stopS = stopAt; }
+    else if (atEnd && ix.rule === 'yield') { stopKind = 'yield'; stopS = stopAt; }
     if (ix.crosswalks.includes(road.id)) {
       zebraCenter = atEnd ? len - half - ZEBRA_LEN / 2 - 1 : half + ZEBRA_LEN / 2 + 1;
     }

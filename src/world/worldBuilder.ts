@@ -6,7 +6,9 @@ import { palette } from '../art/palette';
 import { ChunkBuilder } from './chunkBuilder';
 import { roadRibbonQuads, junctionPatchQuads, roadsAtNode, junctionHalfExtent, roadSkipZones } from './roadMesh';
 import { roadMarkingQuads } from './roadMarkings';
-import { sidewalkBoxes, sidewalkPavingColor } from './sidewalk';
+import { sidewalkBoxes } from './sidewalk';
+import { placeSigns } from './trafficSigns';
+import { placeTrafficLights, applyLightVisuals, TrafficLightController } from './trafficLights';
 import type { Quad } from './roadMesh';
 
 const MAT_LOOKUP: Record<string, string> = {
@@ -18,6 +20,7 @@ const MAT_LOOKUP: Record<string, string> = {
 
 export interface WorldMeshResult {
   group: THREE.Group;
+  controllers: TrafficLightController[];
   stats: { drawCalls: number; triangles: number; chunks: number };
   dispose: () => void;
 }
@@ -56,22 +59,19 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldMeshResul
     pushQuads(cb, quads, 'white');
   }
 
-  // ── 4. Vỉa hè ──
+  // ── 3.5 Biển báo StVO ──
+  placeSigns(scene, map);
+  const { controllers, lightsGroup } = placeTrafficLights(scene, map);
+
+  // ── 4. Vỉa hè: mặt trên phẳng + mặt curb đứng ──
   for (const road of map.roads) {
-    for (const box of sidewalkBoxes(road, map)) {
-      const [c0, c1, c2, c3] = box.corners;
-      const quad: Quad = { a: c0, b: c1, c: c2, d: c3 };
-      // mặt + cạnh ngoài
-      cb.addQuad(quad, 'sidewalk');
-      const outerQuad: Quad = {
-        a: c1, b: c1, c: c2, d: c2
-      };
-      void outerQuad;
-      // vertex color cho mặt trên (xen kẽ gạch lát)
-      const cx = (c0[0] + c1[0] + c2[0] + c3[0]) / 4;
-      const cz = (c0[2] + c1[2] + c2[2] + c3[2]) / 4;
-      const col = sidewalkPavingColor(cx, cz);
-      void col;
+    for (const piece of sidewalkBoxes(road, map)) {
+      const [t0, t1, t2, t3] = piece.top;
+      cb.addQuad({ a: t0, b: t1, c: t2, d: t3 }, 'sidewalk');
+      if (piece.curb) {
+        const [c0, c1, c2, c3] = piece.curb;
+        cb.addQuad({ a: c0, b: c1, c: c2, d: c3 }, 'sidewalk');
+      }
     }
   }
 
@@ -104,15 +104,22 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldMeshResul
 
   scene.add(group);
 
-  const dispose = () => {
-    for (const m of meshes) m.geometry.dispose();
-    scene.remove(group);
-  };
-
+  let controllerTimer = 0;
   return {
     group,
+    controllers,
     stats: { drawCalls: meshes.length, triangles: Math.round(triangles), chunks: cb.chunkCount },
-    dispose
+    update(dt: number) {
+      controllerTimer += dt;
+      void controllerTimer;
+      controllers.forEach(c => c.update(dt));
+      applyLightVisuals(lightsGroup);
+    },
+    dispose() {
+      for (const m of meshes) m.geometry.dispose();
+      scene.remove(group);
+      scene.remove(lightsGroup);
+    }
   };
 }
 

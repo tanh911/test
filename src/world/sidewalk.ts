@@ -1,10 +1,14 @@
 // 🧱 sidewalk.ts — vỉa hè + bó vỉa (Protocol mục 4.3)
+// Mỗi đoạn 4 m: mặt trên PHẲNG tại y=h + mặt curb đứng (0 → h) phía trong.
+// Chỗ zebra: hạ mặt (ramp) dài 1.5 m xuống 0.03 m để qua đường cho người đi bộ.
 import type { GameMap, MapRoad } from './mapLoader';
 import { polylineLength, pointWithNormalAtS, roadHalfWidth, roadSkipZones } from './roadMesh';
 
-export interface SidewalkBox {
-  /** 4 đỉnh đáy (thứ tự hợp dấu): bên trong road → bên ngoài */
-  corners: [number, number, number][];
+export interface SidewalkPiece {
+  /** 4 đỉnh mặt trên (thứ tự: inner0 → outer0 → outer1 → inner1), y = height */
+  top: [number, number, number][];
+  /** 4 đỉnh mặt curb đứng (inner0@0 → inner0@h → inner1@h → inner1@0) — null nếu ramp */
+  curb: [number, number, number][] | null;
   height: number;
 }
 
@@ -14,15 +18,14 @@ const RAMP_H = 0.03;
 const RAMP_LEN = 1.5;
 
 /**
- * Vỉa hè mỗi bên: hộp kéo dài theo mép đường, cao 0.15, rộng 2.5.
- * Chỗ zebra: hạ vỉa (ramp) dài 1.5 m.
- * Cao độ: hộp từ y=0 (đáy) đến y=0.15 (mặt); ramp chỉ tới y=0.03.
+ * Vỉa hè mỗi bên: dải rộng 2.5 m dọc mép đường, mặt phẳng cao 0.15 m.
+ * Ramp tại zebra: hạ còn 0.03 m (không có curb).
  */
-export function sidewalkBoxes(road: MapRoad, map: GameMap): SidewalkBox[] {
+export function sidewalkBoxes(road: MapRoad, map: GameMap): SidewalkPiece[] {
   const half = roadHalfWidth(road);
   const len = polylineLength(road.points);
   const skip = roadSkipZones(road, map);
-  const boxes: SidewalkBox[] = [];
+  const pieces: SidewalkPiece[] = [];
 
   // tìm zebra centers (từ intersection crosswalks)
   const zebraCenters: number[] = [];
@@ -40,23 +43,28 @@ export function sidewalkBoxes(road: MapRoad, map: GameMap): SidewalkBox[] {
       const nextS = Math.min(s + step, end);
       const isRamp = zebraCenters.some(zc => s < zc + RAMP_LEN / 2 && nextS > zc - RAMP_LEN / 2);
       const h = isRamp ? RAMP_H : SIDEWALK_H;
-      const inRamp0 = isRamp && s < zebraCenters[0]! + 0;
-      void inRamp0;
       const inner0 = pointWithNormalAtS(road.points, s);
       const inner1 = pointWithNormalAtS(road.points, nextS);
-      const corners: [number, number, number][] = [
-        [inner0.x + inner0.nx * side * half, 0, inner0.z + inner0.nz * side * half],
-        [inner0.x + inner0.nx * side * (half + SIDEWALK_W), h, inner0.z + inner0.nz * side * (half + SIDEWALK_W)],
-        [inner1.x + inner1.nx * side * (half + SIDEWALK_W), h, inner1.z + inner1.nz * side * (half + SIDEWALK_W)],
-        [inner1.x + inner1.nx * side * half, 0, inner1.z + inner1.nz * side * half]
-      ];
-      boxes.push({ corners, height: h });
+      const ix0 = inner0.x + inner0.nx * side * half;
+      const iz0 = inner0.z + inner0.nz * side * half;
+      const ox0 = inner0.x + inner0.nx * side * (half + SIDEWALK_W);
+      const oz0 = inner0.z + inner0.nz * side * (half + SIDEWALK_W);
+      const ix1 = inner1.x + inner1.nx * side * half;
+      const iz1 = inner1.z + inner1.nz * side * half;
+      const ox1 = inner1.x + inner1.nx * side * (half + SIDEWALK_W);
+      const oz1 = inner1.z + inner1.nz * side * (half + SIDEWALK_W);
+      // winding để normal hướng đúng: top hướng lên, curb hướng về mặt đường
+      const top: [number, number, number][] = side === 1
+        ? [[ix0, h, iz0], [ox0, h, oz0], [ox1, h, oz1], [ix1, h, iz1]]
+        : [[ix0, h, iz0], [ix1, h, iz1], [ox1, h, oz1], [ox0, h, oz0]];
+      const curb: [number, number, number][] | null = isRamp ? null : (side === 1
+        ? [[ix0, 0, iz0], [ix0, h, iz0], [ix1, h, iz1], [ix1, 0, iz1]]
+        : [[ix0, h, iz0], [ix0, 0, iz0], [ix1, 0, iz1], [ix1, h, iz1]]);
+      pieces.push({ top, curb, height: h });
       s = nextS;
     }
-    void SIDEWALK_W;
   }
-  void RAMP_LEN;
-  return boxes;
+  return pieces;
 }
 
 /** Vertex color xen kẽ nhẹ cho mặt vỉa hè (giống gạch lát) */

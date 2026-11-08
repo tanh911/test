@@ -110,8 +110,9 @@ export function roadRibbonQuads(
 }
 
 /**
- * Đa giác ngã tư tại node: đỉnh = giao điểm các offset line của roads tới,
- * bo góc bán kính 6 m (Protocol mục 4.1).
+ * Đa giác ngã tư tại node: đỉnh = giao điểm các EDGE line (mép đường) của
+ * cặp road liền kề, bo góc bán kính `cornerRadius` (Protocol mục 4.1).
+ * reach = half lớn nhất + 1 → khớp roadSkipZones (ribbon kết thúc đúng mép patch).
  */
 export function junctionPatchQuads(
   nodeX: number,
@@ -120,43 +121,59 @@ export function junctionPatchQuads(
   cornerRadius = 6,
   arcSegments = 4
 ): Quad[] {
-  // offset line mỗi road: đi qua điểm node + dir*half, hướng dir, lệch pháp tuyến half
-  type Line = { px: number; pz: number; dx: number; dz: number };
-  const lines: Line[] = connectedRoads.map(({ road, dirX, dirZ }) => {
-    const half = roadHalfWidth(road);
+  if (connectedRoads.length < 2) return [];
+  // reach = half lớn nhất + 1.5: đè qua mép ribbon (skip +0.5) 1 m để che khe AA seam.
+  // Patch nâng y=0.005 (trên đường y=0, dưới vạch y=0.01) → không z-fight vùng overlap.
+  const reach = Math.max(...connectedRoads.map(r => roadHalfWidth(r.road))) + 1.5;
+  const PATCH_Y = 0.005;
+
+  // 2 edge line mỗi road (tọa độ cục bộ so với node): qua node ± n*reach, hướng dir
+  // n = (-dz, dx) = pháp tuyến trái của dir
+  type Edge = { d: [number, number]; pos: [number, number]; neg: [number, number] };
+  const edges = connectedRoads.map(({ dirX, dirZ }) => {
+    const nx = -dirZ;
+    const nz = dirX;
     return {
-      px: nodeX + dirX * half,
-      pz: nodeZ + dirZ * half,
-      dx: dirX,
-      dz: dirZ
+      d: [dirX, dirZ] as [number, number],
+      pos: [nx * reach, nz * reach] as [number, number],
+      neg: [-nx * reach, -nz * reach] as [number, number]
     };
   });
-  if (lines.length < 2) return [];
 
-  // sắp theo góc để biết cặp liền kề
-  const angled = lines
-    .map((l, i) => ({ l, ang: Math.atan2(l.dz, l.dx), i }))
+  // sắp theo góc tăng dần (CCW theo atan2(dz,dx))
+  const order = edges
+    .map((e, i) => ({ e, ang: Math.atan2(e.d[1], e.d[0]) }))
     .sort((a, b) => a.ang - b.ang);
 
-  // giao điểm offset line cặp liền kề → đỉnh đa giác
+  const norm2pi = (a: number) => ((a % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
+
+  // giao điểm edge line cặp liền kề → đỉnh đa giác (chọn đỉnh trong sector giữa 2 dir)
   const corners: [number, number][] = [];
-  const n = angled.length;
-  for (let k = 0; k < n; k++) {
-    const L1 = angled[k].l;
-    const L2 = angled[(k + 1) % n].l;
-    const den = L1.dx * L2.dz - L1.dz * L2.dx;
+  const nEdges = order.length;
+  for (let k = 0; k < nEdges; k++) {
+    const A = order[k].e;
+    const B = order[(k + 1) % nEdges].e;
+    // bisector sector (xử lý wrap góc)
+    const bis = order[k].ang + (norm2pi(order[(k + 1) % nEdges].ang - order[k].ang)) / 2;
+    const bx = Math.cos(bis);
+    const bz = Math.sin(bis);
+    // edge phía sector: dot(n, bisector)
+    const nAx = -A.d[1]; const nAz = A.d[0];
+    const nBx = -B.d[1]; const nBz = B.d[0];
+    const pA = (nAx * bx + nAz * bz) >= 0 ? A.pos : A.neg;
+    const pB = (nBx * bx + nBz * bz) >= 0 ? B.pos : B.neg;
+    const den = A.d[0] * B.d[1] - A.d[1] * B.d[0];
     if (Math.abs(den) < 1e-6) {
-      // song song (hiếm) — lấy điểm node + dir*half của L1
-      corners.push([L1.px, L1.pz]);
+      corners.push([(pA[0] + pB[0]) / 2, (pA[1] + pB[1]) / 2]);
       continue;
     }
-    const t = ((L2.px - L1.px) * L2.dz - (L2.pz - L1.pz) * L2.dx) / den;
-    corners.push([L1.px + L1.dx * t, L1.pz + L1.dz * t]);
+    const t = ((pB[0] - pA[0]) * B.d[1] - (pB[1] - pA[1]) * B.d[0]) / den;
+    corners.push([pA[0] + A.d[0] * t, pA[1] + A.d[1] * t]);
   }
 
-  // tâm đa giác (fan origin cho tam giác)
-  const cx = corners.reduce((s, c) => s + c[0], 0) / corners.length;
-  const cz = corners.reduce((s, c) => s + c[1], 0) / corners.length;
+  // tâm đa giác (fan origin cho tam giác) — cục bộ so với node
+  const lcx = corners.reduce((s, c) => s + c[0], 0) / corners.length;
+  const lcz = corners.reduce((s, c) => s + c[1], 0) / corners.length;
 
   // bo góc: mỗi đỉnh cắt bằng arc bán kính `cornerRadius`
   const poly: [number, number][] = [];
@@ -164,7 +181,7 @@ export function junctionPatchQuads(
     const prevC = corners[(k - 1 + corners.length) % corners.length];
     const curC = corners[k];
     const nextC = corners[(k + 1) % corners.length];
-    // điểm cắt arc trên 2 cạnh: lùi từ đỉnh về phía mỗi cạnh 6m
+    // điểm cắt arc trên 2 cạnh: lùi từ đỉnh về phía mỗi cạnh
     const cutFrom = (from: [number, number], to: [number, number], dist: number): [number, number] => {
       const dx = to[0] - from[0];
       const dz = to[1] - from[1];
@@ -181,25 +198,26 @@ export function junctionPatchQuads(
       const mx = p1[0] + (p2[0] - p1[0]) * t;
       const mz = p1[1] + (p2[1] - p1[1]) * t;
       // đẩy điểm ra xa tâm để arc cong ra ngoài (xấp xỉ vòng tròn)
-      const dx = mx - cx;
-      const dz = mz - cz;
+      const dx = mx - lcx;
+      const dz = mz - lcz;
       const l = Math.hypot(dx, dz) || 1;
       const target = l + (cornerRadius - dist) * 0.35;
-      poly.push([cx + (dx / l) * target, cz + (dz / l) * target]);
+      poly.push([lcx + (dx / l) * target, lcz + (dz / l) * target]);
     }
     poly.push(p2);
   }
 
-  // fan quads: tâm → từng cạnh
+  // fan quads: tâm → từng cạnh (đưa về tọa độ thế giới)
+  // winding b↔c đảo để normal hướng LÊN (+Y) — poly theo thứ tự góc tăng dần
   const quads: Quad[] = [];
   for (let k = 0; k < poly.length; k++) {
     const pA = poly[k];
     const pB = poly[(k + 1) % poly.length];
     quads.push({
-      a: [cx, 0, cz],
-      b: [pA[0], 0, pA[1]],
-      c: [pB[0], 0, pB[1]],
-      d: [cx, 0, cz]
+      a: [nodeX + lcx, PATCH_Y, nodeZ + lcz],
+      b: [nodeX + pB[0], PATCH_Y, nodeZ + pB[1]],
+      c: [nodeX + pA[0], PATCH_Y, nodeZ + pA[1]],
+      d: [nodeX + lcx, PATCH_Y, nodeZ + lcz]
     });
   }
   return quads;
@@ -238,7 +256,9 @@ export function intersectionsOf(map: GameMap): MapIntersection[] {
   return map.intersections;
 }
 
-/** Skip zones cho 1 road: vùng junction ở 2 đầu (đừng vẽ vạch trong đó) */
+/** Skip zones cho 1 road: vùng junction ở 2 đầu (đừng vẽ vạch trong đó).
+ * extent = half + 0.5: ribbon kết thúc 0.5 m TRONG patch (patch reach half+1.5,
+ * y=0.005 đè trên ribbon y=0) → không có khe cỏ ở mép giao lộ. */
 export function roadSkipZones(road: MapRoad, map: GameMap): Array<[number, number]> {
   const zones: Array<[number, number]> = [];
   const len = polylineLength(road.points);
@@ -246,7 +266,7 @@ export function roadSkipZones(road: MapRoad, map: GameMap): Array<[number, numbe
     const nodeId = road[end];
     const node = map.nodes.find((n) => n.id === nodeId);
     if (!node || node.type !== 'intersection') continue;
-    const extent = junctionHalfExtent(map, nodeId) + 1;
+    const extent = junctionHalfExtent(map, nodeId) + 0.5;
     if (end === 'from') zones.push([0, extent]);
     else zones.push([len - extent, len]);
   }

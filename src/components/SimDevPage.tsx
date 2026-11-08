@@ -11,9 +11,12 @@ export const SimDevPage = () => {
   useEffect(() => {
     if (!containerRef.current || handleRef.current) return;
     handleRef.current = createSimScene(containerRef.current, testCrossingMap);
+    // dev hook: Playwright/screenshot dùng teleport camera
+    (window as unknown as { __simScene?: SimSceneHandle }).__simScene = handleRef.current;
     return () => {
       handleRef.current?.dispose();
       handleRef.current = null;
+      delete (window as unknown as { __simScene?: SimSceneHandle }).__simScene;
     };
   }, []);
 

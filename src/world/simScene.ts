@@ -24,7 +24,7 @@ function bindFlyControls(dom: HTMLElement, camera: THREE.PerspectiveCamera): () 
   let dragging = false;
   let lastX = 0;
   let lastY = 0;
-  let yaw = Math.PI; // nhìn về -Z
+  let yaw = 0; // nhìn về −Z (forward = (−sin yaw, 0, −cos yaw))
   let pitch = -0.2;
 
   const onMouseDown = (e: MouseEvent) => { dragging = true; lastX = e.clientX; lastY = e.clientY; };
@@ -46,17 +46,12 @@ function bindFlyControls(dom: HTMLElement, camera: THREE.PerspectiveCamera): () 
 
   camera.rotation.order = 'YXZ';
 
-  return () => {
-    window.removeEventListener('keydown', onKeyDown);
-    window.removeEventListener('keyup', onKeyUp);
-    dom.removeEventListener('mousedown', onMouseDown);
-    window.removeEventListener('mousemove', onMouseMove);
-    window.removeEventListener('mouseup', onMouseUp);
-    camera.userData._flyUpdate = null;
+  const flyCam = camera as THREE.PerspectiveCamera & {
+    userData: { _flyUpdate?: ((dt: number) => void) | null; _setPose?: (yaw: number, pitch: number) => void }
   };
 
   // gắn hàm cập nhật camera mỗi frame qua userData
-  (camera as THREE.PerspectiveCamera & { userData: { _flyUpdate?: (dt: number) => void } }).userData._flyUpdate = (dt: number) => {
+  flyCam.userData._flyUpdate = (dt: number) => {
     const speed = keys.has('ShiftLeft') ? 60 : 18;
     const dir = new THREE.Vector3();
     if (keys.has('KeyW')) dir.z -= 1;
@@ -70,6 +65,24 @@ function bindFlyControls(dom: HTMLElement, camera: THREE.PerspectiveCamera): () 
       camera.position.addScaledVector(dir, speed * dt);
     }
     camera.rotation.set(pitch, yaw, 0);
+  };
+
+  // đặt pose tuyệt đối (dev/test dùng — đồng bộ state yaw/pitch nội bộ)
+  flyCam.userData._setPose = (yawNew: number, pitchNew: number) => {
+    yaw = yawNew;
+    pitch = pitchNew;
+    dragging = false;
+    camera.rotation.set(pitch, yaw, 0);
+  };
+
+  return () => {
+    window.removeEventListener('keydown', onKeyDown);
+    window.removeEventListener('keyup', onKeyUp);
+    dom.removeEventListener('mousedown', onMouseDown);
+    window.removeEventListener('mousemove', onMouseMove);
+    window.removeEventListener('mouseup', onMouseUp);
+    flyCam.userData._flyUpdate = null;
+    flyCam.userData._setPose = undefined;
   };
 }
 
@@ -123,6 +136,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown): SimSce
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
     fly._flyUpdate?.(dt);
+    world.update(dt);
     renderer.render(scene, camera);
     raf = requestAnimationFrame(tick);
   };
