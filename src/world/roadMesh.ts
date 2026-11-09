@@ -281,7 +281,7 @@ export function roadSkipZones(road: MapRoad, map: GameMap): Array<[number, numbe
   return zones;
 }
 
-/** Nen duong (asphalt_worn) day duoi moi nut intersection, ban kinh 1.6 x K_max.
+/** Nen duong (asphalt_worn) day duoi moi nut intersection, ban kinh 1.15 x K_max.
  * To mau road_worn, y = -0.02 (duoi mat duong) de che tat ca khe con sot:
  * khong co khe nao trong bo dem nay con thay duoc co — thay vao do la nen toi
  * (asphalt_worn), du cho game lai xe. */
@@ -295,7 +295,7 @@ export function junctionBackgroundQuads(
   for (const { road } of connectedRoads) {
     kMax = Math.max(kMax, roadHalfWidth(road));
   }
-  const r = kMax * 1.6;
+  const r = kMax * 1.15;
   const PATCH_Y = -0.02;
   const segs = 32;
   const quads: Quad[] = [];

@@ -4,7 +4,7 @@ import type { GameMap, MapIntersection } from './mapLoader';
 import { loadGameMap, nodeById } from './mapLoader';
 import { palette } from '../art/palette';
 import { ChunkBuilder } from './chunkBuilder';
-import { roadRibbonQuads, junctionPatchQuads, junctionBackgroundQuads, roadsAtNode, junctionHalfExtent, roadSkipZones, roundaboutIslandQuads } from './roadMesh';
+import { roadRibbonQuads, junctionPatchQuads, junctionBackgroundQuads, roadsAtNode, roadHalfWidth, junctionHalfExtent, roadSkipZones, roundaboutIslandQuads } from './roadMesh';
 import { roadMarkingQuads } from './roadMarkings';
 import { sidewalkBoxes, sidewalkCornerPads } from './sidewalk';
 import { placeSigns } from './trafficSigns';
@@ -67,13 +67,8 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldHandle {
 
   // ── 3. Vạch kẻ ──
   for (const road of map.roads) {
-    const maxHalf = Math.max(
-      ...map.intersections
-        .filter(ix => road.from === ix.nodeId || road.to === ix.nodeId)
-        .map(ix => junctionHalfExtent(map, ix.nodeId)),
-      (road.lanesForward + road.lanesBackward) * road.laneWidth / 2
-    );
-    const quads = roadMarkingQuads(map, road, roadSkipZones(road, map), maxHalf);
+    const half = roadHalfWidth(road); // vạch mép/zebra của chính road này, không dùng độ rộng road lớn ở đầu kia
+    const quads = roadMarkingQuads(map, road, roadSkipZones(road, map), half);
     pushQuads(cb, quads, 'white');
   }
 
