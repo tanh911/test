@@ -4,13 +4,14 @@ import type { GameMap, MapIntersection } from './mapLoader';
 import { loadGameMap, nodeById } from './mapLoader';
 import { palette } from '../art/palette';
 import { ChunkBuilder } from './chunkBuilder';
-import { roadRibbonQuads, junctionPatchQuads, roadsAtNode, junctionHalfExtent, roadSkipZones } from './roadMesh';
+import { roadRibbonQuads, junctionPatchQuads, junctionBackgroundQuads, roadsAtNode, junctionHalfExtent, roadSkipZones, roundaboutIslandQuads } from './roadMesh';
 import { roadMarkingQuads } from './roadMarkings';
 import { sidewalkBoxes, sidewalkCornerPads } from './sidewalk';
 import { placeSigns } from './trafficSigns';
 import { placeTrafficLights, applyLightVisuals, TrafficLightController } from './trafficLights';
 import { allBuildingQuads } from './buildings';
 import { placeProps, type PropsResult } from './props';
+import { PedestrianController } from './pedestrianController';
 import type { Quad } from './roadMesh';
 
 const MAT_LOOKUP: Record<string, string> = {
@@ -28,6 +29,7 @@ export interface WorldHandle {
   /** object phụ (biển/đèn) gắn theo cell — chunkManager add/remove theo camera */
   extras: Map<string, THREE.Object3D[]>;
   controllers: TrafficLightController[];
+  pedestrians: PedestrianController | null;
   stats: { cells: number; quads: number };
   update: (dt: number) => void;
   dispose: () => void;
@@ -52,7 +54,15 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldHandle {
     const node = nodeById(map, ix.nodeId);
     if (!node) continue;
     const roads = roadsAtNode(map, ix.nodeId);
-    pushQuads(cb, junctionPatchQuads(node.x, node.z, roads), 'road_worn');
+    pushQuads(cb, junctionPatchQuads(node.x, node.z, roads).quads, 'road_worn');
+
+    // ── 2.5 Đảo giao thông (island) tại nút vòng xuyến ──
+    if (ix.rule === 'roundabout') {
+      pushQuads(cb, roundaboutIslandQuads(node.x, node.z, map, ix.nodeId), 'road_worn');
+    }
+
+    // Nen duong day duoi nut intersection (che khe con sot)
+    pushQuads(cb, junctionBackgroundQuads(node.x, node.z, roads), 'road_worn');
   }
 
   // ── 3. Vạch kẻ ──
@@ -74,6 +84,10 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldHandle {
   const extras = new Map<string, THREE.Object3D[]>();
   for (const [k, v] of signsByCell) extras.set(k, [...(extras.get(k) ?? []), ...v]);
   for (const [k, v] of lightsByCell) extras.set(k, [...(extras.get(k) ?? []), ...v]);
+
+  // ── Người đi bộ (đi dọc vỉa hè, qua zebra) ──
+  const pedestrians = new PedestrianController(scene, map);
+  pedestrians.init();
 
   // ── 4. Vỉa hè: mặt trên phẳng + mặt curb đứng ──
   for (const road of map.roads) {
@@ -120,16 +134,19 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldHandle {
     materials,
     extras,
     controllers,
+    pedestrians,
     stats: { cells: cb.cellCount, quads },
     update(dt: number) {
       controllerTimer += dt;
       void controllerTimer;
       controllers.forEach(c => c.update(dt));
       applyLightVisuals(allLightGroups);
+      pedestrians?.update(dt);
       void allSignGroups;
     },
     dispose() {
       props.dispose();
+      pedestrians?.dispose();
     }
   };
 }

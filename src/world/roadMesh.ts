@@ -1,9 +1,10 @@
 // 🛣️ roadMesh.ts — mặt đường + đa giác ngã tư (Protocol mục 4.1)
 // Đầu vào: GameMap; đầu ra: quad dữ liệu đưa vào ChunkBuilder (mục 7).
 // Quy ước trục (mục 1): y=0 mặt đường, 1 unit = 1 m.
-import * as THREE from 'three';
-import type { GameMap, MapRoad, MapIntersection } from './mapLoader';
-import { roadFullWidth } from './mapLoader';
+// Điểm nội suy dùng chung từ mapLoader.roadCurve (getPointAt đều theo cung) —
+// ribbon/markings/sidewalk dùng CÙNG điểm + chiều dài → không trôi trên đường cong.
+import type { GameMap, MapRoad } from './mapLoader';
+import { roadCurve, roadLength, roadPointAt } from './mapLoader';
 
 export interface Quad {
   a: [number, number, number];
@@ -12,28 +13,13 @@ export interface Quad {
   d: [number, number, number];
 }
 
-/** Resample polyline mỗi `step` mét (Catmull-Rom mượt qua điểm góc) */
-export function resamplePoints(points: [number, number][], step = 2): [number, number][] {
-  const v3 = points.map(([x, z]) => new THREE.Vector3(x, 0, z));
-  
-  const curve = new THREE.CatmullRomCurve3(v3, false, 'catmullrom', 0.5);
-  const len = curve.getLength();
-  const n = Math.max(2, Math.ceil(len / step));
-  const out: [number, number][] = [];
-  for (let i = 0; i <= n; i++) {
-    const p = curve.getPoint(i / n);
-    out.push([p.x, p.z]);
-  }
-  return out;
-}
-
-
 /** half-width của road (một nửa tổng chiều rộng) */
 export function roadHalfWidth(road: MapRoad): number {
-  return roadFullWidth(road) / 2;
+  const full = (road.lanesForward + road.lanesBackward) * road.laneWidth;
+  return full / 2;
 }
 
-/** Độ dài polyline */
+/** Chiều dài polyline (tổng các đoạn) */
 export function polylineLength(points: [number, number][]): number {
   let len = 0;
   for (let i = 1; i < points.length; i++) {
@@ -76,148 +62,168 @@ export function pointWithNormalAtS(
 }
 
 /**
- * Dải mặt đường cho 1 road — trả về danh sách quad (2 tam giác/quad) đúng chiều rộng.
- * `skipZones`: khoảng cách s cần bỏ (junction/zebra overlap), dạng [start,end][].
+ * Dải mặt đường cho 1 road — CẮT ĐÚNG tại ranh giới skip zone (G1-2):
+ * không bỏ cả quad; quad chạm ranh giới được nội suy điểm biên chính xác.
  */
 export function roadRibbonQuads(
   road: MapRoad,
-  skipZones: Array<[number, number]> = [],
-  sampleStep = 2
+  skipZones: Array<[number, number]> = []
 ): Quad[] {
   const half = roadHalfWidth(road);
-  const pts = resamplePoints(road.points, sampleStep);
+  const curve = roadCurve(road);
+  const L = curve.length;
   const quads: Quad[] = [];
-  const inSkip = (s: number) => skipZones.some(([a, b]) => s >= a && s <= b);
-  let prev: { x: number; z: number; nx: number; nz: number } | null = null;
-  let prevS = 0;
-  let s = 0;
-  for (let i = 0; i < pts.length; i++) {
-    if (i > 0) s += Math.hypot(pts[i][0] - pts[i - 1][0], pts[i][1] - pts[i - 1][1]);
-    const cur = pointWithNormalAtS(pts, s);
-    if (prev && !inSkip(prevS) && !inSkip(s)) {
-      quads.push({
-        a: [prev.x - prev.nx * half, 0, prev.z - prev.nz * half],
-        b: [prev.x + prev.nx * half, 0, prev.z + prev.nz * half],
-        c: [cur.x + cur.nx * half, 0, cur.z + cur.nz * half],
-        d: [cur.x - cur.nx * half, 0, cur.z - cur.nz * half]
-      });
-    }
-    prev = cur;
-    prevS = s;
+
+  // khoảng nhìn thấy = [0, L] trừ skip zones
+  const vis: Array<[number, number]> = [];
+  let cur = 0;
+  for (const [a, b] of skipZones) {
+    if (b <= 0 || a >= L) continue;
+    if (a > cur) vis.push([cur, Math.min(a, L)]);
+    cur = Math.max(cur, b);
   }
-  void roadRibbonQuads; // giữ hàm tự tham chiếu cho doc
+  if (cur < L) vis.push([cur, L]);
+
+  const step = curve.step;
+  const emit = (pa: { x: number; z: number; nx: number; nz: number }, pb: { x: number; z: number; nx: number; nz: number }) => {
+    quads.push({
+      a: [pa.x - pa.nx * half, 0, pa.z - pa.nz * half],
+      b: [pa.x + pa.nx * half, 0, pa.z + pa.nz * half],
+      c: [pb.x + pb.nx * half, 0, pb.z + pb.nz * half],
+      d: [pb.x - pb.nx * half, 0, pb.z - pb.nz * half]
+    });
+  };
+
+  for (const [va, vb] of vis) {
+    let pa = roadPointAt(road, va);
+    let lastS = va;
+    // đi qua các sample điểm nội tuyến (step đều theo cung)
+    for (let s = Math.ceil(va / step) * step; s < vb - 1e-6; s += step) {
+      if (s <= lastS + 1e-6) continue;
+      const pb = roadPointAt(road, s);
+      emit(pa, pb);
+      pa = pb;
+      lastS = s;
+    }
+    if (vb - lastS > 1e-4) {
+      const pb = roadPointAt(road, vb); // biên cuối chính xác
+      emit(pa, pb);
+    }
+  }
   return quads;
 }
 
 /**
- * Đa giác ngã tư tại node: đỉnh = giao điểm các EDGE line (mép đường) của
- * cặp road liền kề, bo góc bán kính `cornerRadius` (Protocol mục 4.1).
- * reach = half lớn nhất + 1 → khớp roadSkipZones (ribbon kết thúc đúng mép patch).
+ * Đa giác ngã tư — G1-3: BAO LỒI (convex hull) chỉ từ góc PHÍA TRƯỚC miệng nhánh:
+ * mỗi nhánh cho đúng 2 góc d·K + n·K và d·K − n·K với K = roadHalfWidth + 0.75
+ * (CHỒNG LẤN 0,75 m lên ribbon — khớp với pad vỉa hè kéo vào 0,5 m: mọi khe
+ * cỏ giữa các lớp phủ ≤ 0,05 m; ranh giới skip zone của roadSkipZones khớp K này),
+ * cộng thêm điểm node (0,0). KHÔNG thêm góc sau d·(−K) ± n·K: vùng −d thuộc
+ * chính ribbon của road đó (skip zone nội suy biên chính xác tại K), góc sau
+ * chỉ làm hull phình ra mà không phủ miệng nhánh nào. Nhựa tổng thể LỒI,
+ * không phóng ra ngoài: mọi đỉnh là node hoặc cách node ≤ √2 · K_max
+ * (K_max = max K của các nhánh).
+ * Trả về quads (fan quanh node) + poly TOẠ ĐỘ CỤC BỘ (so với node) cho test.
  */
 export function junctionPatchQuads(
   nodeX: number,
   nodeZ: number,
-  connectedRoads: Array<{ road: MapRoad; dirX: number; dirZ: number }>,
-  cornerRadius = 6,
-  arcSegments = 4
-): Quad[] {
-  if (connectedRoads.length < 2) return [];
-  // reach = half lớn nhất + 1.5: đè qua mép ribbon (skip +0.5) 1 m để che khe AA seam.
-  // Patch nâng y=0.005 (trên đường y=0, dưới vạch y=0.01) → không z-fight vùng overlap.
-  const reach = Math.max(...connectedRoads.map(r => roadHalfWidth(r.road))) + 1.5;
+  connectedRoads: Array<{ road: MapRoad; dirX: number; dirZ: number }>
+): { quads: Quad[]; poly: Array<[number, number]> } {
+  if (connectedRoads.length < 2) return { quads: [], poly: [] };
   const PATCH_Y = 0.005;
 
-  // 2 edge line mỗi road (tọa độ cục bộ so với node): qua node ± n*reach, hướng dir
-  // n = (-dz, dx) = pháp tuyến trái của dir
-  type Edge = { d: [number, number]; pos: [number, number]; neg: [number, number] };
-  const edges = connectedRoads.map(({ dirX, dirZ }) => {
-    const nx = -dirZ;
-    const nz = dirX;
-    return {
-      d: [dirX, dirZ] as [number, number],
-      pos: [nx * reach, nz * reach] as [number, number],
-      neg: [-nx * reach, -nz * reach] as [number, number]
-    };
-  });
+  // arm: d = hướng ra ngoài node, n = PHẢI flowout (−dz, dx), K = half-width + 0.75
+  const arms = connectedRoads.map(({ road, dirX, dirZ }) => ({
+    d: [dirX, dirZ] as [number, number],
+    n: [-dirZ, dirX] as [number, number],
+    K: roadHalfWidth(road) + 0.75
+  }));
 
-  // sắp theo góc tăng dần (CCW theo atan2(dz,dx))
-  const order = edges
-    .map((e, i) => ({ e, ang: Math.atan2(e.d[1], e.d[0]) }))
-    .sort((a, b) => a.ang - b.ang);
-
-  const norm2pi = (a: number) => ((a % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
-
-  // giao điểm edge line cặp liền kề → đỉnh đa giác (chọn đỉnh trong sector giữa 2 dir)
-  const corners: [number, number][] = [];
-  const nEdges = order.length;
-  for (let k = 0; k < nEdges; k++) {
-    const A = order[k].e;
-    const B = order[(k + 1) % nEdges].e;
-    // bisector sector (xử lý wrap góc)
-    const bis = order[k].ang + (norm2pi(order[(k + 1) % nEdges].ang - order[k].ang)) / 2;
-    const bx = Math.cos(bis);
-    const bz = Math.sin(bis);
-    // edge phía sector: dot(n, bisector)
-    const nAx = -A.d[1]; const nAz = A.d[0];
-    const nBx = -B.d[1]; const nBz = B.d[0];
-    const pA = (nAx * bx + nAz * bz) >= 0 ? A.pos : A.neg;
-    const pB = (nBx * bx + nBz * bz) >= 0 ? B.pos : B.neg;
-    const den = A.d[0] * B.d[1] - A.d[1] * B.d[0];
-    if (Math.abs(den) < 1e-6) {
-      corners.push([(pA[0] + pB[0]) / 2, (pA[1] + pB[1]) / 2]);
-      continue;
-    }
-    const t = ((pB[0] - pA[0]) * B.d[1] - (pB[1] - pA[1]) * B.d[0]) / den;
-    corners.push([pA[0] + A.d[0] * t, pA[1] + A.d[1] * t]);
+  // 2 góc PHÍA TRƯỚC của mỗi miệng nhánh (toạ độ cục bộ so với node) → bao lồi.
+  // Không thêm góc sau d·(−K) ± n·K — vùng −d thuộc ribbon của chính road đó.
+  const corners: Array<[number, number]> = [];
+  for (const A of arms) {
+    corners.push([A.d[0] * A.K + A.n[0] * A.K, A.d[1] * A.K + A.n[1] * A.K]);
+    corners.push([A.d[0] * A.K - A.n[0] * A.K, A.d[1] * A.K - A.n[1] * A.K]);
   }
+  corners.push([0, 0]);
+  const hull = convexHull2D(corners); // CCW theo x·z
+  if (hull.length < 3) return { quads: [], poly: [] };
 
-  // tâm đa giác (fan origin cho tam giác) — cục bộ so với node
-  const lcx = corners.reduce((s, c) => s + c[0], 0) / corners.length;
-  const lcz = corners.reduce((s, c) => s + c[1], 0) / corners.length;
-
-  // bo góc: mỗi đỉnh cắt bằng arc bán kính `cornerRadius`
-  const poly: [number, number][] = [];
-  for (let k = 0; k < corners.length; k++) {
-    const prevC = corners[(k - 1 + corners.length) % corners.length];
-    const curC = corners[k];
-    const nextC = corners[(k + 1) % corners.length];
-    // điểm cắt arc trên 2 cạnh: lùi từ đỉnh về phía mỗi cạnh
-    const cutFrom = (from: [number, number], to: [number, number], dist: number): [number, number] => {
-      const dx = to[0] - from[0];
-      const dz = to[1] - from[1];
-      const l = Math.hypot(dx, dz) || 1;
-      return [from[0] + (dx / l) * dist, from[1] + (dz / l) * dist];
-    };
-    const dist = Math.min(cornerRadius, Math.hypot(curC[0] - prevC[0], curC[1] - prevC[1]) * 0.45);
-    const p1 = cutFrom(curC, prevC, dist);
-    const p2 = cutFrom(curC, nextC, dist);
-    poly.push(p1);
-    // arc nội suy quanh đỉnh
-    for (let a = 1; a < arcSegments; a++) {
-      const t = a / arcSegments;
-      const mx = p1[0] + (p2[0] - p1[0]) * t;
-      const mz = p1[1] + (p2[1] - p1[1]) * t;
-      // đẩy điểm ra xa tâm để arc cong ra ngoài (xấp xỉ vòng tròn)
-      const dx = mx - lcx;
-      const dz = mz - lcz;
-      const l = Math.hypot(dx, dz) || 1;
-      const target = l + (cornerRadius - dist) * 0.35;
-      poly.push([lcx + (dx / l) * target, lcz + (dz / l) * target]);
-    }
-    poly.push(p2);
-  }
-
-  // fan quads: tâm → từng cạnh (đưa về tọa độ thế giới)
-  // winding b↔c đảo để normal hướng LÊN (+Y) — poly theo thứ tự góc tăng dần
+  // fan quanh node — winding đảo b↔c để normal hướng LÊN (hull CCW theo x·z)
   const quads: Quad[] = [];
-  for (let k = 0; k < poly.length; k++) {
-    const pA = poly[k];
-    const pB = poly[(k + 1) % poly.length];
+  for (let k = 0; k < hull.length; k++) {
+    const pA = hull[k];
+    const pB = hull[(k + 1) % hull.length];
     quads.push({
-      a: [nodeX + lcx, PATCH_Y, nodeZ + lcz],
+      a: [nodeX, PATCH_Y, nodeZ],
       b: [nodeX + pB[0], PATCH_Y, nodeZ + pB[1]],
       c: [nodeX + pA[0], PATCH_Y, nodeZ + pA[1]],
-      d: [nodeX + lcx, PATCH_Y, nodeZ + lcz]
+      d: [nodeX, PATCH_Y, nodeZ]
+    });
+  }
+  // poly trả về toạ độ cục bộ (so với node) cho test
+  return { quads, poly: hull };
+}
+
+/**
+ * Bao lồi 2D (monotone chain) trên mặt phẳng (x, z).
+ * Trả về CCW theo x·z (cross = x1·z2 − z1·x2 > 0 khi đi vòng hỗ).
+ */
+export function convexHull2D(points: Array<[number, number]>): Array<[number, number]> {
+  if (points.length <= 2) return points.slice();
+  const p = points.slice().sort((q, r) => (q[0] === r[0] ? q[1] - r[1] : q[0] - r[0]));
+  const cross = (o: [number, number], a: [number, number], b: [number, number]) =>
+    (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]);
+  const lower: Array<[number, number]> = [];
+  for (const v of p) {
+    while (lower.length >= 2 && cross(lower[lower.length - 2], lower[lower.length - 1], v) <= 0) {
+      lower.pop();
+    }
+    lower.push(v);
+  }
+  const upper: Array<[number, number]> = [];
+  for (let i = p.length - 1; i >= 0; i--) {
+    const v = p[i];
+    while (upper.length >= 2 && cross(upper[upper.length - 2], upper[upper.length - 1], v) <= 0) {
+      upper.pop();
+    }
+    upper.push(v);
+  }
+  const hull = lower.slice(0, -1).concat(upper.slice(0, -1));
+  const crossSum = hull.reduce((acc, q, i) => {
+    const r = hull[(i + 1) % hull.length];
+    return acc + q[0] * r[1] - q[1] * r[0];
+  }, 0);
+  if (crossSum < 0) hull.reverse();
+  return hull;
+}
+
+/** Đảo giao thông (island) tại nút vòng xuyến: disk đầy màu asphalt_worn khác,
+ *  bán kính = junctionHalfExtent + 2, để lane ring đi xung quanh ngoài. */
+export function roundaboutIslandQuads(
+  nodeX: number,
+  nodeZ: number,
+  map: GameMap,
+  nodeId: string,
+  radiusAdd = 2
+): Quad[] {
+  const ix = map.intersections.find((i) => i.nodeId === nodeId);
+  if (!ix || ix.rule !== 'roundabout') return [];
+  const half = junctionHalfExtent(map, nodeId);
+  const r = half + radiusAdd;
+  const PATCH_Y = 0.005;
+  const segs = 24;
+  const quads: Quad[] = [];
+  for (let k = 0; k < segs; k++) {
+    const a0 = (k / segs) * Math.PI * 2;
+    const a1 = ((k + 1) / segs) * Math.PI * 2;
+    quads.push({
+      a: [nodeX + Math.cos(a0) * r, PATCH_Y, nodeZ + Math.sin(a0) * r],
+      b: [nodeX + Math.cos(a1) * r, PATCH_Y, nodeZ + Math.sin(a1) * r],
+      c: [nodeX, PATCH_Y, nodeZ],
+      d: [nodeX, PATCH_Y, nodeZ]
     });
   }
   return quads;
@@ -252,23 +258,56 @@ export function junctionHalfExtent(map: GameMap, nodeId: string): number {
   return max;
 }
 
-export function intersectionsOf(map: GameMap): MapIntersection[] {
-  return map.intersections;
-}
-
-/** Skip zones cho 1 road: vùng junction ở 2 đầu (đừng vẽ vạch trong đó).
- * extent = half + 0.5: ribbon kết thúc 0.5 m TRONG patch (patch reach half+1.5,
- * y=0.005 đè trên ribbon y=0) → không có khe cỏ ở mép giao lộ. */
+/** Skip zones cho 1 road: vùng junction ở 2 đầu.
+ *  extent = roadHalfWidth(road) + 0.75: ribbon kết thúc đúng tại miệng patch
+ *  của chính road đó (patch miệng K = half + 0.75, patch ở y=0.005 đè nhẹ lên
+ *  ribbon y=0) → không khe, không xương cá, không z-fight.
+ *  Với vòng xuyến (Kreisverkehr): extent lớn hơn (junctionHalfExtent + 4) để
+ *  để trống lane ring + island. */
 export function roadSkipZones(road: MapRoad, map: GameMap): Array<[number, number]> {
   const zones: Array<[number, number]> = [];
-  const len = polylineLength(road.points);
+  const len = roadLength(road);
+  const half = roadHalfWidth(road);
   for (const end of ['from', 'to'] as const) {
     const nodeId = road[end];
     const node = map.nodes.find((n) => n.id === nodeId);
     if (!node || node.type !== 'intersection') continue;
-    const extent = junctionHalfExtent(map, nodeId) + 0.5;
+    const ix = map.intersections.find((i) => i.nodeId === nodeId);
+    const isRoundabout = ix?.rule === 'roundabout';
+    const extent = isRoundabout ? junctionHalfExtent(map, nodeId) + 4 : half + 0.75;
     if (end === 'from') zones.push([0, extent]);
     else zones.push([len - extent, len]);
   }
   return zones;
+}
+
+/** Nen duong (asphalt_worn) day duoi moi nut intersection, ban kinh 1.6 x K_max.
+ * To mau road_worn, y = -0.02 (duoi mat duong) de che tat ca khe con sot:
+ * khong co khe nao trong bo dem nay con thay duoc co — thay vao do la nen toi
+ * (asphalt_worn), du cho game lai xe. */
+export function junctionBackgroundQuads(
+  nodeX: number,
+  nodeZ: number,
+  connectedRoads: Array<{ road: MapRoad; dirX: number; dirZ: number }>
+): Quad[] {
+  if (connectedRoads.length < 2) return [];
+  let kMax = 0;
+  for (const { road } of connectedRoads) {
+    kMax = Math.max(kMax, roadHalfWidth(road));
+  }
+  const r = kMax * 1.6;
+  const PATCH_Y = -0.02;
+  const segs = 32;
+  const quads: Quad[] = [];
+  for (let k = 0; k < segs; k++) {
+    const a0 = (k / segs) * Math.PI * 2;
+    const a1 = ((k + 1) / segs) * Math.PI * 2;
+    quads.push({
+      a: [nodeX + Math.cos(a0) * r, PATCH_Y, nodeZ + Math.sin(a0) * r],
+      b: [nodeX + Math.cos(a1) * r, PATCH_Y, nodeZ + Math.sin(a1) * r],
+      c: [nodeX, PATCH_Y, nodeZ],
+      d: [nodeX, PATCH_Y, nodeZ]
+    });
+  }
+  return quads;
 }
