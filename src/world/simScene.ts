@@ -5,10 +5,12 @@ import { loadGameMap, type GameMap } from './mapLoader';
 import { createTerrain, createSkybox, applyFog } from './terrain';
 import { buildWorld } from './worldBuilder';
 import { ChunkManager } from './chunkManager';
-import { createVehicle, spawnFromMap, type VehicleHandle, type VehicleInput } from './vehicle';
+import { createVehicle, spawnFromMap, type VehicleHandle } from './vehicle';
 import { NPCController } from './npc';
-import { buildingRects, resolveStatics } from './collisions';
+import { buildingRects } from './collisions';
 import { RuleEngine, type Violation } from '../simulation/ruleEngine';
+import { nodeById } from './mapLoader';
+import type { LightPhase } from './trafficLights';
 
 export interface SimStats {
   drawCalls: number;
@@ -16,6 +18,7 @@ export interface SimStats {
   cellsLoaded: number;
   cellsTotal: number;
   quads: number;
+  fps: number; // trung bình trượt 1 giây
 }
 
 export interface RuleState {
@@ -23,6 +26,23 @@ export interface RuleState {
   bestanden: boolean;
   summary: string;
   speedKmh: number;
+  signal: 'left' | 'right' | null; // xi-nhan người chơi — HUD mũi tên đọc từ đây
+  gear: 'P' | 'R' | 'N' | 'D'; // số sân hiện tại
+  violationsBySeverity: { major: Violation[]; minor: Violation[] }; // báo cáo chi tiết Fahrprüfung
+  elapsedTime: number; // thời gian thi (giây)
+}
+
+// 🗺️ MiniMap (Prompt 10): top-down quanh player, đọc mỗi frame riêng
+export interface MapLightState {
+  x: number;
+  z: number;
+  phase: LightPhase; // 'red' | 'red_yellow' | 'green' | 'yellow' → màu chấm đèn
+}
+
+export interface MapState {
+  player: { x: number; z: number; heading: number; signal: 'left' | 'right' | null } | null;
+  npcs: Array<{ x: number; z: number; heading: number }>;
+  lights: MapLightState[];
 }
 
 export interface SimSceneOptions {
@@ -38,6 +58,8 @@ export interface SimSceneHandle {
   vehicle: VehicleHandle | null;
   getStats: () => SimStats;
   getRuleState: () => RuleState | null;
+  /** dữ liệu mini-map (player-centered top-down) — đọc mỗi frame từ RAF của MiniMap */
+  getMapState: () => MapState;
   dispose: () => void;
   /** gọi mỗi frame từ host (React) — cập nhật camera bay/xe + render */
   update: (dt: number) => void;
@@ -120,7 +142,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(palette.skyHorizon);
 
-  const camera = new THREE.PerspectiveCamera(60, container.clientWidth / Math.max(1, container.clientHeight), 0.1, 1500);
+  const camera = new THREE.PerspectiveCamera(60, container.clientWidth / Math.max(1, container.clientHeight), 0.3, 1500);
   if (!driveMode) {
     camera.position.set(40, 45, 130);
     bindFlyControls(container, camera);
@@ -166,9 +188,24 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   const debugMarkers = new THREE.Group();
   void debugMarkers;
 
+  // 🗺️ mini-map: vị trí các giao lộ có đèn GIAO THÔNG (precompute 1 lần, phase đọc runtime)
+  const lightNodes = world.controllers.map(c => {
+    const n = nodeById(map, c.nodeId);
+    return { x: n?.x ?? 0, z: n?.z ?? 0, phase: () => c.currentPhase };
+  });
+
   let raf = 0;
   let last = performance.now();
   let chunkStats = { cellsLoaded: 0, cellsTotal: 0, meshes: 0 };
+  // FPS counter: trung bình trượt 1 giây
+  let fps = 0;
+  let fpsFrames = 0;
+  let fpsLast = performance.now();
+  // Camera mode: 'cabin' (mặc định), 'outside' (third-person), 'mirror', 'shoulder'
+  let camMode = 'cabin';
+  let shoulderHold = 0; // thời gian giữ phím C (giây)
+  let keyMPrev = false;
+  let keyVPrev = false;
   const fly = (camera as THREE.PerspectiveCamera & { userData: { _flyUpdate?: (dt: number) => void } }).userData;
 
   // 🚙 Drive mode: WASD lái xe (dùng chung `keys` module), camera ghế lái
@@ -197,11 +234,6 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     last = now;
     if (driveMode) {
       if (vehicle) {
-        vehicle.update(dt, {
-          throttle: keys.has('KeyW') ? 1 : 0,
-          brake: keys.has('KeyS') ? 1 : 0,
-          steer: keys.has('KeyD') ? 1 : keys.has('KeyA') ? -1 : 0
-        });
         // va chạm công trình: dừng xe + ghi lỗi major (AABB nhà, radius 0.9)
         for (const r of staticRects) {
           if (vehicle.state.x > r.minX - 0.9 && vehicle.state.x < r.maxX + 0.9 &&
@@ -217,7 +249,88 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         camera.rotation.set(-0.03, sp.yaw, 0);
         // NPC + rule engine
         npcs?.update(dt, { player: { x: vehicle.state.x, z: vehicle.state.z }, controllers: world.controllers, collisions: npcCollisions });
-        ruleEngine?.update(dt, { x: vehicle.state.x, z: vehicle.state.z, heading: vehicle.state.heading, speed: vehicle.state.speed }, npcCollisions);
+        // ── số sân: 1=P, 2=R, 3=N, 4=D ──
+        let gear: 'P' | 'R' | 'N' | 'D' | undefined;
+        if (keys.has('Digit1')) gear = 'P';
+        else if (keys.has('Digit2')) gear = 'R';
+        else if (keys.has('Digit3')) gear = 'N';
+        else if (keys.has('Digit4')) gear = 'D';
+        ruleEngine?.update(dt, {
+          x: vehicle.state.x,
+          z: vehicle.state.z,
+          heading: vehicle.state.heading,
+          speed: vehicle.state.speed,
+          signal: vehicle.signal, // phục vụ vi phạm 'nosignal' (quên xi-nhan khi rẽ)
+          stopped: Math.abs(vehicle.state.speed) < 0.15, // xe đã dừng hẳn (dùng cho stop sign)
+          inCrosswalk: false // sẽ cập nhật khi phát hiện player trong vùng zebra
+        }, npcCollisions);
+        vehicle?.update(dt, {
+          throttle: keys.has('KeyW') ? 1 : 0,
+          brake: keys.has('KeyS') ? 1 : 0,
+          steer: keys.has('KeyD') ? 1 : keys.has('KeyA') ? -1 : 0,
+          gear,
+          signalLeft: keys.has('KeyQ'),
+          signalRight: keys.has('KeyE')
+        });
+        // ── Camera mode: M = gương, C giữ = qua vai, V = camera ngoài ──
+        if (keys.has('KeyM') && !keyMPrev) {
+          camMode = camMode === 'cabin' ? 'mirror' : 'cabin';
+          keyMPrev = true;
+        } else if (!keys.has('KeyM')) {
+          keyMPrev = false;
+        }
+        if (keys.has('KeyV') && !keyVPrev) {
+          camMode = camMode === 'outside' ? 'cabin' : 'outside';
+          keyVPrev = true;
+        } else if (!keys.has('KeyV')) {
+          keyVPrev = false;
+        }
+        if (keys.has('KeyC')) {
+          shoulderHold += dt;
+          if (shoulderHold >= 0.5) camMode = 'shoulder';
+        } else {
+          shoulderHold = 0;
+          if (camMode === 'shoulder') camMode = 'cabin';
+        }
+        // Áp dụng camera theo mode
+        if (camMode === 'outside') {
+          // Camera bên ngoài, phía sau xe
+          const dist = 6;
+          const h = vehicle.state.heading + Math.PI;
+          camera.position.set(
+            vehicle.state.x - Math.sin(h) * dist,
+            3,
+            vehicle.state.z - Math.cos(h) * dist
+          );
+          camera.lookAt(vehicle.state.x, 1, vehicle.state.z);
+        } else if (camMode === 'mirror') {
+          // Gương phía sau: camera nhạy về phía sau xe
+          const dist = 1.5;
+          const h = vehicle.state.heading + Math.PI;
+          camera.position.set(
+            vehicle.state.x - Math.sin(h) * dist,
+            1.2,
+            vehicle.state.z - Math.cos(h) * dist
+          );
+          camera.lookAt(vehicle.state.x + Math.sin(h) * 10, 1, vehicle.state.z + Math.cos(h) * 10);
+        } else if (camMode === 'shoulder') {
+          // Qua vai phải
+          const dist = 2;
+          const h = vehicle.state.heading + Math.PI;
+          const rx = Math.cos(h) * 1.2;
+          const rz = Math.sin(h) * 1.2;
+          camera.position.set(
+            vehicle.state.x - Math.sin(h) * dist + rx,
+            2,
+            vehicle.state.z - Math.cos(h) * dist + rz
+          );
+          camera.lookAt(vehicle.state.x + Math.sin(h) * 8, 1.5, vehicle.state.z + Math.cos(h) * 8);
+        } else {
+          // Cabin (mặc định)
+          const sp = vehicle.seatPose();
+          camera.position.set(sp.x, sp.y, sp.z);
+          camera.rotation.set(-0.03, sp.yaw, 0);
+        }
       } else {
         // chờ GLB load — camera tạm tại spawn
         const s = spawnFromMap(map);
@@ -230,6 +343,14 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     world.update(dt);
     chunkStats = chunkMgr.update(camera.position.x, camera.position.z);
     renderer.render(scene, camera);
+    // FPS trung bình trượt 1 giây
+    fpsFrames++;
+    const nowFps = performance.now();
+    if (nowFps - fpsLast >= 1000) {
+      fps = fpsFrames;
+      fpsFrames = 0;
+      fpsLast = nowFps;
+    }
     raf = requestAnimationFrame(tick);
   };
   raf = requestAnimationFrame(tick);
@@ -243,6 +364,45 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   };
   window.addEventListener('resize', onResize);
 
+  // ── Chế độ debug (phím G): tô mỗi material một màu rực, in quad count ──
+  let debugMode = false;
+  const debugColors: Record<string, number> = {
+    road: 0xff0000,      // đỏ
+    road_worn: 0x00ff00, // xanh lá
+    white: 0x0000ff,     // xanh dương
+    sidewalk: 0xff00ff,  // magenta
+    building: 0xffff00   // vàng
+  };
+
+  function applyDebugColors() {
+    for (const [key, mat] of Object.entries(world.materials)) {
+      if (debugMode && debugColors[key] !== undefined) {
+        (mat as any).color.setHex(debugColors[key]);
+      } else if (!debugMode) {
+        if (key === 'road') (mat as any).color.setHex(parseInt(palette.asphalt.slice(1), 16));
+        if (key === 'road_worn') (mat as any).color.setHex(parseInt(palette.asphaltWorn.slice(1), 16));
+        if (key === 'white') (mat as any).color.setHex(parseInt(palette.lineWhite.slice(1), 16));
+        if (key === 'sidewalk') (mat as any).color.setHex(parseInt(palette.sidewalk.slice(1), 16));
+        if (key === 'building') (mat as any).color.setHex(0xffffff);
+      }
+    }
+    if (debugMode) {
+      console.log('[DEBUG] Materials:', Object.keys(world.materials).join(', '));
+      console.log('[DEBUG] Total quads:', world.stats.quads);
+      console.log('[DEBUG] Cells:', world.stats.cells);
+    }
+  }
+
+  function onDebugKey(e: KeyboardEvent) {
+    if (e.code === 'KeyG') {
+      e.preventDefault();
+      debugMode = !debugMode;
+      applyDebugColors();
+      console.log(`[DEBUG] mode=${debugMode ? 'ON' : 'OFF'}`);
+    }
+  }
+  window.addEventListener('keydown', onDebugKey);
+
   return {
     scene,
     camera,
@@ -254,7 +414,8 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
       triangles: renderer.info.render.triangles,
       cellsLoaded: chunkStats.cellsLoaded,
       cellsTotal: chunkStats.cellsTotal,
-      quads: world.stats.quads
+      quads: world.stats.quads,
+      fps
     }),
     getRuleState: (): RuleState | null => {
       if (!ruleEngine || !vehicle) return null;
@@ -262,12 +423,36 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         violations: ruleEngine.violations.slice(-5),
         bestanden: ruleEngine.bestanden,
         summary: ruleEngine.summary,
-        speedKmh: Math.max(0, Math.round(vehicle.state.speed * 3.6))
+        speedKmh: Math.max(0, Math.round(vehicle.state.speed * 3.6)),
+        signal: vehicle.signal,
+        gear: vehicle.state.gear,
+        violationsBySeverity: ruleEngine.violationsBySeverity,
+        elapsedTime: ruleEngine.elapsed
       };
+    },
+    // 🗺️ mini-map: gom snapshot mỗi frame từ RAF riêng của MiniMap — không dùng chung RAF render
+    getMapState: (): MapState => {
+      const player = vehicle
+        ? {
+            x: vehicle.state.x,
+            z: vehicle.state.z,
+            heading: vehicle.state.heading,
+            signal: vehicle.signal
+          }
+        : null;
+      const npcDots = (npcs?.npcs ?? []).map(n => ({
+        x: n.group.position.x,
+        z: n.group.position.z,
+        // GLB NPC mặt −Z → heading = ry − π (khớp convention pose() h + π)
+        heading: n.group.rotation.y - Math.PI
+      }));
+      const lights = lightNodes.map(l => ({ x: l.x, z: l.z, phase: l.phase() }));
+      return { player, npcs: npcDots, lights };
     },
     dispose: () => {
       cancelAnimationFrame(raf);
       window.removeEventListener('resize', onResize);
+      window.removeEventListener('keydown', onDebugKey);
       vehicle?.dispose();
       npcs?.dispose();
       chunkMgr.dispose();
