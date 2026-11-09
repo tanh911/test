@@ -110,6 +110,20 @@ export function sidewalkCornerPads(map: GameMap): CornerPad[] {
     for (let k = 0; k < entries.length; k++) {
       const A = entries[k];
       const B = entries[(k + 1) % entries.length];
+
+      // ---- BỎ PAD KHI NHÁNH NHÔN / GÓC HỚP QUÁ NHỎ (pad lơ lửng trên cỏ) ----
+      // Góc giữa 2 nhánh (rad). < 35° (≈ 0.61 rad) → hai mép ribbon dính sát, pad sẽ lơ lửng.
+      const dotAB = Math.max(-1, Math.min(1, A.d[0] * B.d[0] + A.d[1] * B.d[1]));
+      const angleAB = Math.acos(dotAB);
+      if (angleAB < 0.61) continue; // < 35°
+
+      // Khoảng cách giữa 2 mép ribbon tại node (cạnh bao lồi của góc). < 1.5 m → pad quá hẹp.
+      const edgeLen = Math.hypot(
+        (A.n[0] - B.n[0]) * half,
+        (A.n[1] - B.n[1]) * half
+      );
+      if (edgeLen < 1.5) continue;
+
       const bis = A.ang + (norm2pi(B.ang - A.ang)) / 2;
       const bx = Math.cos(bis);
       const bz = Math.sin(bis);
