@@ -295,7 +295,7 @@ export function junctionBackgroundQuads(
   for (const { road } of connectedRoads) {
     kMax = Math.max(kMax, roadHalfWidth(road));
   }
-  const r = kMax * 1.15;
+  const r = kMax * 1.15; // 1.15 x K_max: che khe, khong loi ra vai he
   const PATCH_Y = -0.02;
   const segs = 32;
   const quads: Quad[] = [];
