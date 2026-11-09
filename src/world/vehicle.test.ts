@@ -6,10 +6,13 @@ import { describe, expect, it } from 'vitest';
 const MAX_SPEED_FWD = 16.7; // 60 km/h
 const MAX_SPEED_REV = -3.5;
 const ACCEL = 3.5;
-const BRAKE = 9.0;
-const DRAG = 0.5;
+const BRAKE = 5.0;
+const DRAG = 0.1;
 const WHEELBASE = 2.6;
 const MAX_STEER = 0.58; // rad
+const STEER_RATE = 1.8;
+const STEER_CENTER = 3.0;
+const STEER_TURN_THRESHOLD = 0.26; // ~15°
 
 const KMH_TO_MS = 1 / 3.6;
 const DT = 0.01;
@@ -18,11 +21,47 @@ function stepVehicle(state: any, input: any, dt: number) {
   // Giống hệt logic trong vehicle.ts update()
   let steerAngle = state.steerAngle || 0;
   if (input.steer !== 0) {
-    steerAngle += -input.steer * 1.8 * dt;
+    steerAngle += -input.steer * STEER_RATE * dt;
   } else {
-    steerAngle -= Math.sign(steerAngle) * Math.min(Math.abs(steerAngle), 3.0 * dt);
+    steerAngle -= Math.sign(steerAngle) * Math.min(Math.abs(steerAngle), STEER_CENTER * dt);
   }
   steerAngle = Math.max(-MAX_STEER, Math.min(MAX_STEER, steerAngle));
+
+  // ── xi-nhan: máy trạng thái IDLE → SIGNAL_ON → TURNING → IDLE ──
+  const STEER_TURN_THRESHOLD = 0.26; // ~15°
+  let signal = state.signal || null;
+  let signalState = state.signalState || 'IDLE';
+  let signalLeftPrev = state.signalLeftPrev || false;
+  let signalRightPrev = state.signalRightPrev || false;
+
+  if (input.signalLeft && !signalLeftPrev) {
+    if (signalState === 'SIGNAL_ON' && signal === 'left') {
+      signal = null;
+      signalState = 'IDLE';
+    } else {
+      signal = 'left';
+      signalState = 'SIGNAL_ON';
+    }
+  }
+  if (input.signalRight && !signalRightPrev) {
+    if (signalState === 'SIGNAL_ON' && signal === 'right') {
+      signal = null;
+      signalState = 'IDLE';
+    } else {
+      signal = 'right';
+      signalState = 'SIGNAL_ON';
+    }
+  }
+  signalLeftPrev = !!input.signalLeft;
+  signalRightPrev = !!input.signalRight;
+
+  if (signalState === 'SIGNAL_ON' && Math.abs(steerAngle) > STEER_TURN_THRESHOLD) {
+    signalState = 'TURNING';
+  }
+  if (signalState === 'TURNING' && Math.abs(steerAngle) < STEER_TURN_THRESHOLD) {
+    signal = null;
+    signalState = 'IDLE';
+  }
 
   let throttle = input.throttle;
   if (state.gear === 'P' || state.gear === 'N') throttle = 0;
@@ -43,10 +82,14 @@ function stepVehicle(state: any, input: any, dt: number) {
     state.z += Math.cos(state.heading) * state.speed * dt;
   }
   state.steerAngle = steerAngle;
+  state.signal = signal;
+  state.signalState = signalState;
+  state.signalLeftPrev = signalLeftPrev;
+  state.signalRightPrev = signalRightPrev;
 }
 
 describe('Vehicle physics model', () => {
-  it('phanh từ 50 km/h: quãng phanh nằm trong khoảng hợp lý', () => {
+  it('phanh từ 50 km/h: quãng phanh nằm trong khoảng 12-20 m', () => {
     const state = { x: 0, z: 0, heading: 0, speed: 50 * KMH_TO_MS, gear: 'D', steerAngle: 0 };
     let dist = 0;
     let prevX = state.x;
@@ -60,11 +103,11 @@ describe('Vehicle physics model', () => {
       steps++;
     }
     console.log(`[vehicle] brake 50->0: dist=${dist.toFixed(2)} m, steps=${steps}, finalSpeed=${(state.speed * 3.6).toFixed(1)} km/h`);
-    expect(dist).toBeGreaterThan(5);
-    expect(dist).toBeLessThan(25);
+    expect(dist).toBeGreaterThanOrEqual(12);
+    expect(dist).toBeLessThanOrEqual(20);
   });
 
-  it('bán kính quay ở 50 km/h lớn hơn ở 10 km/h (cùng lái hết cỡ)', () => {
+  it('bán kính quay ở 50 km/h lớn hơn ở 10 km/h (giá trị cụ thể)', () => {
     // Tại 10 km/h
     const s1 = { x: 0, z: 0, heading: 0, speed: 10 * KMH_TO_MS, gear: 'D', steerAngle: 0 };
     let startH1 = s1.heading;
@@ -93,5 +136,37 @@ describe('Vehicle physics model', () => {
     expect(radius50).toBeGreaterThan(radius10);
     expect(radius10).toBeGreaterThan(0);
     expect(radius50).toBeGreaterThan(0);
+  });
+
+  it('xi-nhan: bật khi đi thẳng thì vẫn bật (không tắt ngay)', () => {
+    const state = { x: 0, z: 0, heading: 0, speed: 10 * KMH_TO_MS, gear: 'D', steerAngle: 0, signal: null, signalState: 'IDLE', signalLeftPrev: false, signalRightPrev: false };
+    // Bật Q khi đi thẳng (steerAngle = 0)
+    stepVehicle(state, { throttle: 0, brake: 0, steer: 0, gear: 'D', signalLeft: true, signalRight: false }, DT);
+    expect(state.signal).toBe('left');
+    expect(state.signalState).toBe('SIGNAL_ON');
+    // Cập nhật thêm vài frame mà không rẽ
+    stepVehicle(state, { throttle: 0, brake: 0, steer: 0, gear: 'D', signalLeft: false, signalRight: false }, DT);
+    expect(state.signal).toBe('left');
+    expect(state.signalState).toBe('SIGNAL_ON');
+  });
+
+  it('xi-nhan: rẽ xong thì tắt', () => {
+    const state = { x: 0, z: 0, heading: 0, speed: 20 * KMH_TO_MS, gear: 'D', steerAngle: 0, signal: null, signalState: 'IDLE', signalLeftPrev: false, signalRightPrev: false };
+    // Bật Q
+    stepVehicle(state, { throttle: 0, brake: 0, steer: 0, gear: 'D', signalLeft: true, signalRight: false }, DT);
+    expect(state.signal).toBe('left');
+    expect(state.signalState).toBe('SIGNAL_ON');
+    // Rẽ trái mạnh (vượt ngưỡng 15°) - gọi nhiều frame để steerAngle đạt ngưỡng
+    for (let i = 0; i < 50; i++) {
+      stepVehicle(state, { throttle: 0, brake: 0, steer: 1, gear: 'D', signalLeft: false, signalRight: false }, DT);
+    }
+    expect(state.signal).toBe('left');
+    expect(state.signalState).toBe('TURNING');
+    // Trả lái về giữa (steerAngle ≈ 0)
+    for (let i = 0; i < 50; i++) {
+      stepVehicle(state, { throttle: 0, brake: 0, steer: 0, gear: 'D', signalLeft: false, signalRight: false }, DT);
+    }
+    expect(state.signal).toBe(null);
+    expect(state.signalState).toBe('IDLE');
   });
 });

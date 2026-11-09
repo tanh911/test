@@ -27,8 +27,8 @@ export interface VehicleState {
 const MAX_SPEED_FWD = 16.7; // 60 km/h
 const MAX_SPEED_REV = -3.5;
 const ACCEL = 3.5;
-const BRAKE = 9.0;
-const DRAG = 0.5;
+const BRAKE = 5.0;
+const DRAG = 0.1;
 const WHEELBASE = 2.6;
 const MAX_STEER = 0.58;      // ~33°
 const STEER_RATE = 1.8;      // rad/s khi giữ phím
@@ -123,7 +123,6 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
   let signalT = 0;      // thời gian nhấp nháy đã trôi (chỉ tăng khi signal bật)
   let signalLeftPrev = false;
   let signalRightPrev = false;
-  let wasTurning = false; // đang rẽ, chờ vô lăng về giữa để tắt xi-nhan
 
   const applyPose = () => {
     group.position.set(state.x, 0, state.z);
@@ -179,25 +178,44 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
       }
 
       // ── xi-nhan do người chơi điều khiển: Q trái, E phải, bấm lại tắt ──
-      // Tự tắt khi vô lăng về giữa sau khi rẽ (steerAngle quay về gần 0).
-      if (input.signalLeft && !signalLeftPrev) {
-        signal = signal === 'left' ? null : 'left';
-      }
-      if (input.signalRight && !signalRightPrev) {
-        signal = signal === 'right' ? null : 'right';
-      }
-      signalLeftPrev = !!input.signalLeft;
-      signalRightPrev = !!input.signalRight;
+      // Máy trạng thái:
+      //   IDLE       → người bật Q/E → SIGNAL_ON
+  //   SIGNAL_ON  → vô lăng vượt ±15° → TURNING
+  //   TURNING    → vô lăng quay về dưới ±15° → IDLE (signal tắt)
+  // Người bật lại cùng nút → tắt ngay (IDLE).
+  let signalState: 'IDLE' | 'SIGNAL_ON' | 'TURNING' = 'IDLE';
 
-      // Tự tắt khi vô lăng về giữa sau khi rẽ (steerAngle ≈ 0 và vừa rẽ).
-      if (signal !== null && Math.abs(steerAngle) < 0.05 && wasTurning) {
-        signal = null;
-        wasTurning = false;
-      }
-      if (Math.abs(steerAngle) > STEER_SIGNAL_ON) {
-        wasTurning = true; // đang rẽ, chờ vô lăng về giữa để tắt
-      }
-      if (signal) signalT += dt;
+  if (input.signalLeft && !signalLeftPrev) {
+    if (signalState === 'SIGNAL_ON' && signal === 'left') {
+      signal = null;
+      signalState = 'IDLE';
+    } else {
+      signal = 'left';
+      signalState = 'SIGNAL_ON';
+    }
+  }
+  if (input.signalRight && !signalRightPrev) {
+    if (signalState === 'SIGNAL_ON' && signal === 'right') {
+      signal = null;
+      signalState = 'IDLE';
+    } else {
+      signal = 'right';
+      signalState = 'SIGNAL_ON';
+    }
+  }
+  signalLeftPrev = !!input.signalLeft;
+  signalRightPrev = !!input.signalRight;
+
+  // Tự tắt khi vô lăng quay về dưới ngưỡng sau khi đã rẽ vượt ngưỡng.
+  const STEER_TURN_THRESHOLD = 0.26; // ~15°
+  if (signalState === 'SIGNAL_ON' && Math.abs(steerAngle) > STEER_TURN_THRESHOLD) {
+    signalState = 'TURNING';
+  }
+  if (signalState === 'TURNING' && Math.abs(steerAngle) < STEER_TURN_THRESHOLD) {
+    signal = null;
+    signalState = 'IDLE';
+  }
+  if (signal) signalT += dt;
 
       // ── đèn nhấp nháy (chỉ rẽ mới có draw call) ──
       const blinkOn = signal !== null && (signalT % BLINK_PERIOD) < BLINK_PERIOD / 2;
