@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest';
 import * as THREE from 'three';
 import { buildJunctionMesh, roadHalfWidth, roadsAtNode } from './roadMesh';
 import type { GameMap, MapRoad } from './mapLoader';
-import { loadGameMap } from './mapLoader';
+import { loadGameMap, nodeById } from './mapLoader';
 import muenchenJson from '../data/maps/muenchen-altstadt-clean.json';
 
 function makeMockRoad(id: string, from: string, to: string, lanesForward: number, lanesBackward: number, laneWidth: number, len = 50): MapRoad {

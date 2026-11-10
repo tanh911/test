@@ -334,22 +334,29 @@ export function buildJunctionMesh(
   for (const edge of curbEdges) {
     const { p1, p2, out1, out2 } = edge;
 
-    // Mặt trên phẳng của vỉa hè (chuẩn hóa cross < 0)
-    const swCross = (p2[0] - p1[0]) * (out2[1] - p1[1]) - (p2[1] - p1[1]) * (out2[0] - p1[0]);
-    if (swCross > 0) {
-      sidewalkQuads.push({
-        a: [p1[0], SIDEWALK_H, p1[1]],
-        b: [out1[0], SIDEWALK_H, out1[1]],
-        c: [out2[0], SIDEWALK_H, out2[1]],
-        d: [p2[0], SIDEWALK_H, p2[1]]
-      });
-    } else {
-      sidewalkQuads.push({
-        a: [p1[0], SIDEWALK_H, p1[1]],
-        b: [p2[0], SIDEWALK_H, p2[1]],
-        c: [out2[0], SIDEWALK_H, out2[1]],
-        d: [out1[0], SIDEWALK_H, out1[1]]
-      });
+    // Mặt trên phẳng của vỉa hè — tách 2 tam giác, MỖI tam giác chuẩn hóa cross < 0
+    // (đảo cả quad trapezoid không đảm bảo dấu cross của tam giác đầu khi quad lõm)
+    const swTris: Array<Array<[number, number]>> = [
+      [p1, p2, out2],
+      [p1, out2, out1]
+    ];
+    for (const t of swTris) {
+      const c = (t[1][0] - t[0][0]) * (t[2][1] - t[0][1]) - (t[1][1] - t[0][1]) * (t[2][0] - t[0][0]);
+      if (c > 0) {
+        sidewalkQuads.push({
+          a: [t[0][0], SIDEWALK_H, t[0][1]],
+          b: [t[2][0], SIDEWALK_H, t[2][1]],
+          c: [t[1][0], SIDEWALK_H, t[1][1]],
+          d: [t[1][0], SIDEWALK_H, t[1][1]]
+        });
+      } else {
+        sidewalkQuads.push({
+          a: [t[0][0], SIDEWALK_H, t[0][1]],
+          b: [t[1][0], SIDEWALK_H, t[1][1]],
+          c: [t[2][0], SIDEWALK_H, t[2][1]],
+          d: [t[2][0], SIDEWALK_H, t[2][1]]
+        });
+      }
     }
 
     // Mặt curb đứng — normal quay về PHẦ ĐƯỜNG (ngược hướng outward) để nhìn từ xe thấy mặt curb
