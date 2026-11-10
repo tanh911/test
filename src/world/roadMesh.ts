@@ -256,18 +256,24 @@ export function buildJunctionMesh(
       perimeter.push(cornerPt);
 
       // 2 cạnh góc bo: L_A -> cornerPt và cornerPt -> R_B
-      // Pháp tuyến hướng ra ngoài vỉa hè (bên phải của vector đi E1 -> E2)
-      const e1x = cornerPt[0] - A.L[0], e1z = cornerPt[1] - A.L[1];
-      const l1 = Math.hypot(e1x, e1z) || 1;
-      const n1x = e1z / l1, n1z = -e1x / l1;
+      // Normal outward lấy từ CHÍNH các điểm *_out của arm (A.L_out - A.L,
+      // B.R_out - B.R) — đảm bảo hướng RA KHỎI lòng đường. Công thức (ez,-ex)
+      // theo hướng duyệt cạnh ĐỔI DẤU tùy từng cặp arm → cOut đâm vào lòng
+      // đường tạo "móng vuốt" vỉa hè đè nhựa (bug đã chụp ảnh).
+      const n1x = A.L_out[0] - A.L[0], n1z = A.L_out[1] - A.L[1];
+      const n1l = Math.hypot(n1x, n1z) || 1;
+      const n2x = B.R_out[0] - B.R[0], n2z = B.R_out[1] - B.R[1];
+      const n2l = Math.hypot(n2x, n2z) || 1;
 
-      const e2x = B.R[0] - cornerPt[0], e2z = B.R[1] - cornerPt[1];
-      const l2 = Math.hypot(e2x, e2z) || 1;
-      const n2x = e2z / l2, n2z = -e2x / l2;
-
-      // Điểm miter bên ngoài vỉa hè tại cornerPt
-      const bisNx = (n1x + n2x) / 2, bisNz = (n1z + n2z) / 2;
-      const bisLen = Math.hypot(bisNx, bisNz) || 1;
+      // Điểm miter bên ngoài vỉa hè tại cornerPt theo phân giác 2 normal;
+      // 2 normal đối đầu (n1+n2 ≈ 0) → lùi về hướng ra xa node
+      let bisNx = (n1x / n1l + n2x / n2l) / 2, bisNz = (n1z / n1l + n2z / n2l) / 2;
+      let bisLen = Math.hypot(bisNx, bisNz);
+      if (bisLen < 0.1) {
+        bisNx = cornerPt[0] - nodeX;
+        bisNz = cornerPt[1] - nodeZ;
+        bisLen = Math.hypot(bisNx, bisNz) || 1;
+      }
       const cOut: [number, number] = [
         cornerPt[0] + (bisNx / bisLen) * SIDEWALK_W,
         cornerPt[1] + (bisNz / bisLen) * SIDEWALK_W
