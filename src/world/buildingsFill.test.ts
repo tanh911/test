@@ -44,15 +44,13 @@ describe('planCityBlockFill — lấp gap dọc phố + hàng courtyard', () => 
 
   it('sinh đủ lượng nhà fill trên map München', () => {
     expect(plan.stats.front).toBe(1224);
-    expect(plan.stats.gapFilled).toBeGreaterThanOrEqual(15); // gap fillable (block hẹp phần lớn đã kín 2 phía)
+    expect(plan.stats.gapFilled).toBeGreaterThanOrEqual(20); // gap fillable (block hẹp phần lớn đã kín 2 phía)
     expect(plan.stats.rowsAdded).toBeGreaterThan(500);       // 678 hàng courtyard — nguồn khối lượng chính
     expect(plan.rows.length).toBeGreaterThan(550);
     expect(plan.stats.rejected).toBeGreaterThan(0); // có chặn thật
   });
 
   it('không nhà fill nào đè mặt asphalt bất kỳ (dist tới swath ≥ 0.3 m)', () => {
-    const violations: string[] = [];
-    let worst = { d: Infinity, roadId: '', row: '' };
     for (const row of plan.rows) {
       const road = roadById(map, row.roadId);
       if (!road) continue;
@@ -68,14 +66,11 @@ describe('planCityBlockFill — lấp gap dọc phố + hàng courtyard', () => 
           const z = p.z + p.nz * side * off;
           for (let ri = 0; ri < map.roads.length; ri++) {
             const d = distToRoadSwath(x, z, map.roads[ri], ri);
-            if (d < worst.d) worst = { d, roadId: map.roads[ri].id, row: `${row.roadId}/${row.side}/${row.s.toFixed(0)}` };
-            if (d < 0.3 - 1e-6 && violations.length < 5) violations.push(`${row.roadId}/${row.side}/s=${row.s.toFixed(0)}/dOff=${row.depthOff} vs ${map.roads[ri].id} d=${d.toFixed(2)}`);
             expect(d).toBeGreaterThanOrEqual(0.3 - 1e-6);
           }
         }
       }
     }
-    void worst;
   }, 60000);
 
   it('các nhà fill không đè lên nhau (đối chiếu mức strip, loại cặp cùng nhà)', () => {

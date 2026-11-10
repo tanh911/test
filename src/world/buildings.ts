@@ -17,8 +17,9 @@ export interface ColoredQuad {
 }
 
 /** Building mở rộng: hàng sau (courtyard) có depthOff (lùi từ vị trí mặc định) và
- *  plain=true (không cửa sổ/cửa hàng — tiết kiệm quad, nhìn từ trên cao chỉ thấy mái). */
-export type FillBuilding = MapBuilding & { depthOff?: number; plain?: boolean };
+ *  plain=true (không cửa sổ/cửa hàng — tiết kiệm quad, nhìn từ trên cao chỉ thấy mái).
+ *  depth: chiều sâu tùy biến (mặc định BUILDING_DEPTH) — nhà fill nông chen vào block chật. */
+export type FillBuilding = MapBuilding & { depthOff?: number; plain?: boolean; depth?: number };
 
 /** Lưới chiếm chỗ 2D (ô 2 m) với tag người chiếm — chặn mọi building mới đè lên
  *  đường/vỉa hè/nhà có sẵn. Hai chế độ:
@@ -170,8 +171,8 @@ export function buildingQuads(map: GameMap, b: FillBuilding): ColoredQuad[] {
     };
   };
 
-  const backOff = frontOff + BUILDING_DEPTH;
-  const midOff = frontOff + BUILDING_DEPTH / 2;
+  const backOff = frontOff + (b.depth ?? BUILDING_DEPTH);
+  const midOff = frontOff + (b.depth ?? BUILDING_DEPTH) / 2;
 
   // ── Mặt tiền + cửa sổ + (không brick) dải cửa hàng tầng trệt ──
   out.push(facade(s0, s1, 0, height, frontOff, baseWall));
@@ -252,21 +253,22 @@ export interface BlockFillRow {
   seed: number;
   depthOff: number;
   plain?: boolean; // true = hàng sân trong (tường trơn); false/undefined = mặt tiền có cửa sổ
+  depth?: number;  // chiều sâu tùy biến (m) — nhà fill nông chen block chật
 }
 
 /** AABB thế giới của building (sampling 3 cột s × 2 mép off — chịu cả road cong) */
 const SWEEP_STEP = 3; // bước quét dải claim — ôm theo đường cong, không tràn ngược vào road
 
-/** Chuỗi dải ô 4 m phủ footprint building (quét theo s mỗi 5 m — footprint trên
+/** Chuỗi dải ô 3 m phủ footprint building (quét theo s mỗi 3 m — footprint trên
  *  đường cong được chia nhỏ, không bị AABB lớn tràn ngược vào hành lang đường).
- *  Export cho test đơn vị đối chiếu ở mức strip. */
-export function buildingStrips(map: GameMap, b: { roadId: string; side: 'left' | 'right'; s: number; length: number; depthOff: number }): Array<[number, number, number, number]> | null {
+ *  Export cho test đơn vị đối chiếu ở mức strip. depth mặc định BUILDING_DEPTH. */
+export function buildingStrips(map: GameMap, b: { roadId: string; side: 'left' | 'right'; s: number; length: number; depthOff: number; depth?: number }): Array<[number, number, number, number]> | null {
   const road = roadById(map, b.roadId);
   if (!road) return null;
   const side = b.side === 'right' ? 1 : -1;
   const half = roadFullWidth(road) / 2;
   const frontOff = half + 2.0 + b.depthOff;
-  const backOff = frontOff + BUILDING_DEPTH;
+  const backOff = frontOff + (b.depth ?? BUILDING_DEPTH);
   const s0 = Math.max(0, b.s);
   const s1 = Math.min(roadLength(road), b.s + b.length);
   if (s1 - s0 < 6) return null;
@@ -372,7 +374,11 @@ function stripsTouch(a: [number, number, number, number], b: [number, number, nu
  *  Chống đè: corridorGrid (lưới đường over-claim) + stripsIndex (AABB chính xác
  *  từng nhà, không granularity) + check swath góc building (chặn cả kink của
  *  chính đường nó — frontOff quanh góc gấp có thể đâm vào asphalt). */
+let cachedPlanSrc: GameMap | null = null;
+let cachedPlan: BlockFillPlan | null = null;
+
 export function planCityBlockFill(map: GameMap): BlockFillPlan {
+  if (cachedPlan && cachedPlanSrc === map) return cachedPlan; // buildingRects + allBuildingQuads dùng chung 1 lần tính
   const corridorGrid = new OccGrid(2);
   const stripsIndex: Array<[number, number, number, number]> = [];
 
@@ -490,7 +496,13 @@ export function planCityBlockFill(map: GameMap): BlockFillPlan {
             style: rand() < 0.8 ? 'altbau' : 'neubau',
             seed, depthOff: 0
           };
-          if (!acceptCandidate(cand, road.id, true)) { rejected++; continue; }
+          if (!acceptCandidate(cand, road.id, true)) {
+            // block chật: thử nhà wing nông 5 m trước khi bỏ gap này
+            const shallow = { ...cand, depth: 5 };
+            if (!acceptCandidate(shallow, road.id, true)) { rejected++; continue; }
+            rows.push(shallow);
+            continue;
+          }
           rows.push(cand);
         }
       }
@@ -524,7 +536,10 @@ export function planCityBlockFill(map: GameMap): BlockFillPlan {
     }
   }
 
-  return { rows, stats: { front: map.buildings.length, gapFilled, rowsAdded: rows.length - gapFilled, rejected } };
+  const result: BlockFillPlan = { rows, stats: { front: map.buildings.length, gapFilled, rowsAdded: rows.length - gapFilled, rejected } };
+  cachedPlanSrc = map;
+  cachedPlan = result;
+  return result;
 }
 
 /** Tất cả buildings trong map → ColoredQuad cho ChunkBuilder (gồm gap-fill + hàng courtyard) */
