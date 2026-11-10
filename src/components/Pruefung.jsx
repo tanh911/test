@@ -8,67 +8,12 @@ import { customAlert } from '../utils/customAlert';
 import { SupportModal } from './SupportModal';
 import {
   Timer, AlertTriangle, ShieldCheck, ShieldAlert,
-  Check, RefreshCw, Eye, Info, Volume2, List, CheckCircle, ChevronRight, ChevronLeft, BarChart3, X, Star
+  Check, RefreshCw, Eye, Info, Volume2, List, CheckCircle, ChevronRight, ChevronLeft, BarChart3, X, Star, Lock, Crown
 } from 'lucide-react';
 import confetti from 'canvas-confetti';
 
-const seedRandom = (seed) => {
-  let x = Math.sin(seed++) * 10000;
-  return x - Math.floor(x);
-};
-
-const getQuestionTheme = (q) => {
-  return (typeof q.id === 'string' && q.id.startsWith('2.')) ? 2 : 1;
-};
-
 const getBogenQuestions = (bogenId) => {
-  const pools = { 1: [], 2: [] };
-  questions.forEach(q => {
-    const theme = getQuestionTheme(q);
-    pools[theme].push(q);
-  });
-
-  const targets = {
-    1: 20, // 20 Grundstoff
-    2: 10  // 10 Zusatzstoff (Klasse B)
-  };
-
-  let selected = [];
-  let seed = bogenId * 100; // unique seed for this Bogen
-
-  Object.keys(targets).forEach(themeId => {
-    const pool = pools[themeId];
-    const targetCount = targets[themeId];
-    if (pool && pool.length > 0) {
-      // Deterministic shuffle using seed
-      const shuffledPool = [...pool];
-      for (let i = shuffledPool.length - 1; i > 0; i--) {
-        const r = seedRandom(seed + i);
-        seed += 1;
-        const j = Math.floor(r * (i + 1));
-        [shuffledPool[i], shuffledPool[j]] = [shuffledPool[j], shuffledPool[i]];
-      }
-
-      // Avoid duplicates by slicing exactly what we need
-      const selectedForTheme = shuffledPool.slice(0, targetCount);
-      selectedForTheme.forEach((baseQuestion, idx) => {
-        selected.push({
-          ...baseQuestion,
-          id: `${baseQuestion.id}_exam_${themeId}_${idx}`
-        });
-      });
-    }
-  });
-
-  // Deterministic shuffle of the final list
-  for (let i = selected.length - 1; i > 0; i--) {
-    const r = seedRandom(seed + i);
-    seed += 1;
-    const j = Math.floor(r * (i + 1));
-    [selected[i], selected[j]] = [selected[j], selected[i]];
-  }
-
-  return selected;
+  return generateExamQuestions(questions, { seed: bogenId });
 };
 
 export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'both' }) => {
@@ -222,7 +167,6 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
     }
   }, [location.pathname, examState, selectedBogen]);
 
-  // Start the Exam
   const startExam = () => {
     const exam = generateExamQuestions(questions);
     setLernenQuestions(exam);
@@ -424,18 +368,18 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
               </div>
 
               {/* Legend */}
-              <div className="flex justify-center gap-5 mt-1 pb-4">
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: '#7cb342', boxShadow: '0 2px 4px rgba(124, 179, 66, 0.3)' }} />
-                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2' }}>Đã học tốt</span>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: '28px', marginTop: '12px', paddingBottom: '16px' }}>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#7cb342', boxShadow: '0 2px 4px rgba(124, 179, 66, 0.3)' }} />
+                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2', whiteSpace: 'nowrap' }}>Đã học tốt</span>
                 </div>
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: '#fbc02d', boxShadow: '0 2px 4px rgba(251, 192, 45, 0.3)' }} />
-                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2' }}>Đang học</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#fbc02d', boxShadow: '0 2px 4px rgba(251, 192, 45, 0.3)' }} />
+                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2', whiteSpace: 'nowrap' }}>Đang học</span>
                 </div>
-                <div className="flex flex-col items-center gap-1.5">
-                  <div className="w-3.5 h-3.5 rounded-full" style={{ backgroundColor: '#e53935', boxShadow: '0 2px 4px rgba(229, 57, 53, 0.3)' }} />
-                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2' }}>Hay sai</span>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '6px' }}>
+                  <div style={{ width: '14px', height: '14px', borderRadius: '50%', backgroundColor: '#e53935', boxShadow: '0 2px 4px rgba(229, 57, 53, 0.3)' }} />
+                  <span style={{ fontSize: 'calc(11px * var(--text-scale, 1))', fontWeight: 'bold', color: '#546e7a', textAlign: 'center', lineHeight: '1.2', whiteSpace: 'nowrap' }}>Hay sai</span>
                 </div>
               </div>
             </div>
@@ -455,6 +399,8 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                   {t.pruefung}
                 </div>
               </div>
+
+
 
               {/* List Items */}
               <div className="flex flex-col gap-3">
@@ -667,7 +613,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
             {/* Grid Container */}
             <div className="flex-1 overflow-y-auto p-4 md:p-5 bogen-responsive-grid gap-x-3 md:gap-x-6 gap-y-1.5 md:gap-y-3.5 align-top items-start">
               {currentBoegen.map(b => {
-                const isLocked = false;
+                const isLocked = !user?.isPremium && b > 5;
                 const attempts = getBogenAttempts(b);
 
                 return (
@@ -680,7 +626,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                         setSelectedBogen(b);
                       }
                     }}
-                    className={`flex items-start gap-2.5 p-1 px-2 rounded transition-all text-left ${isLocked ? 'opacity-40 cursor-not-allowed' : 'hover:bg-gray-50 cursor-pointer'
+                    className={`flex items-start gap-2.5 p-1 px-2 rounded transition-all text-left ${isLocked ? 'opacity-50 cursor-pointer bg-gray-50/50 hover:bg-amber-50/30' : 'hover:bg-gray-50 cursor-pointer'
                       }`}
                   >
                     {/* Checkbox */}
@@ -692,7 +638,7 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
                         borderWidth: '1.5px',
                         borderRadius: '2px',
                         backgroundColor: selectedBogen === b ? '#24425A' : 'white',
-                        borderColor: isLocked ? '#e5e7eb' : selectedBogen === b ? '#24425A' : '#6b7280'
+                        borderColor: isLocked ? '#cbd5e1' : selectedBogen === b ? '#24425A' : '#6b7280'
                       }}
                       className="shrink-0 mt-0.5 flex items-center justify-center transition-colors"
                     >
@@ -701,9 +647,10 @@ export const Pruefung = ({ user, onUpdateUser, onTriggerLogin, languageMode = 'b
 
                     {/* Bogen Name & Attempt Squares */}
                     <div className="flex flex-col items-start select-none">
-                      <span className={`text-xs md:text-sm font-semibold leading-tight ${isLocked ? 'text-gray-400' : 'text-gray-700'
+                      <span className={`text-xs md:text-sm font-semibold leading-tight flex items-center gap-1 ${isLocked ? 'text-gray-500' : 'text-gray-700'
                         }`}>
                         Bogen {b}
+                        {isLocked && <Lock size={12} className="text-amber-500 shrink-0" />}
                       </span>
 
                       {/* 3 Progress Squares */}

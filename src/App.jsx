@@ -9,10 +9,16 @@ import { Help } from './components/Help';
 import { Stats } from './components/Stats';
 import { Settings } from './components/Settings';
 import { PrivacyPolicy } from './components/PrivacyPolicy';
-import { DrivingSimulation } from './components/DrivingSimulation';
+import { SimDevPage } from './components/SimDevPage.jsx';
 import { AdminDashboard } from './components/AdminDashboard';
 import { verifyToken, clearToken } from './lib/auth';
-import { LogIn, LogOut } from 'lucide-react';
+import { LogIn, LogOut, Loader2, CheckCircle2 } from 'lucide-react';
+import { SupportModal } from './components/SupportModal';
+import { WelcomePopup, shouldShowPopup } from './components/WelcomePopup';
+import { BuyFullAccountAlert } from './components/BuyFullAccountAlert';
+
+const SUPPORT_POPUP_KEY = 'fuhrerschein_support_popup_dismissed';
+const MIN_ACCOUNT_AGE_MS = 3 * 24 * 60 * 60 * 1000; // 3 ngày
 
 // ── Nav config ──────────────────────────────────────────────────────────────
 
@@ -113,7 +119,29 @@ const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onSho
               <div className="navbar-user-avatar">
                 {user?.displayName?.[0]?.toUpperCase() || '?'}
               </div>
-              <span className="navbar-user-name">{user?.displayName}</span>
+              <span className="navbar-user-name" style={{ display: 'inline-flex', alignItems: 'center', gap: '6px' }}>
+                {user?.displayName}
+                {user?.isPremium && (
+                  <span
+                    title="Tài khoản Premium VIP"
+                    style={{
+                      background: 'linear-gradient(135deg, #f59e0b, #d97706)',
+                      color: 'white',
+                      fontSize: '10px',
+                      fontWeight: '800',
+                      padding: '2px 7px',
+                      borderRadius: '10px',
+                      boxShadow: '0 2px 8px rgba(245,158,11,0.4)',
+                      display: 'inline-flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      lineHeight: '1.2'
+                    }}
+                  >
+                    👑 VIP
+                  </span>
+                )}
+              </span>
               {isAdmin && (
                 <button
                   className="navbar-auth-btn ghost"
@@ -137,8 +165,11 @@ const Navbar = ({ location, navigate, languageMode, setLanguageMode, user, onSho
 
 // ── Main App ────────────────────────────────────────────────────────────────
 
+const GUEST_USER = { username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true };
+
 function App() {
   const [user, setUser] = useState(null);
+  const prevUserRef = React.useRef(null);
   const [userLoading, setUserLoading] = useState(true);
   const [languageMode, setLanguageMode] = useState(() =>
     localStorage.getItem('fuhrerschein_lang_mode') || 'both'
@@ -148,13 +179,44 @@ function App() {
   const [fontSizeMode, setFontSizeMode] = useState(() =>
     localStorage.getItem('fuhrerschein_font_size') || 'normal'
   );
+  const [simulatorEnabled, setSimulatorEnabled] = useState(() => {
+    if (typeof window !== 'undefined') {
+      return window.location.hostname === 'localhost' ||
+             window.location.hostname === '127.0.0.1' ||
+             !!import.meta.env?.DEV;
+    }
+    return false;
+  });
+  const [showSupportPopup, setShowSupportPopup] = useState(false);
+  const [showDonateModal, setShowDonateModal] = useState(false);
+  const [bannedModal, setBannedModal] = useState(null); // null hoặc { message, email, displayName }
+  const [unlockEmail, setUnlockEmail] = useState('');
+  const [unlockMessage, setUnlockMessage] = useState('');
+  const [unlockSubmitting, setUnlockSubmitting] = useState(false);
+  const [unlockSuccess, setUnlockSuccess] = useState(false);
+  const [unlockError, setUnlockError] = useState('');
 
-  // Close login modal automatically when user successfully logs in
+  // Close modal & navigate when user transitions from guest → logged-in
   useEffect(() => {
     if (user && !user.isGuest) {
       setShowLoginModal(false);
+      // Navigate to /training khi mới đăng nhập Firebase (từ guest → logged-in)
+      if (prevUserRef.current?.isGuest && user.uid) {
+        navigate('/training');
+      }
     }
-  }, [user]);
+    prevUserRef.current = user;
+  }, [user?.uid]);
+
+  // Auto-show support popup: once per month, only for logged-in users with account >= 3 days old
+  useEffect(() => {
+    if (!user || user.isGuest) return;
+    const accountAge = user.createdAt ? Date.now() - new Date(user.createdAt).getTime() : 0;
+    if (accountAge >= MIN_ACCOUNT_AGE_MS && shouldShowPopup()) {
+      const timer = setTimeout(() => setShowSupportPopup(true), 1500);
+      return () => clearTimeout(timer);
+    }
+  }, [user?.uid, user?.createdAt]);
 
   useEffect(() => {
     const scale = fontSizeMode === 'large' ? '1.15' : fontSizeMode === 'xlarge' ? '1.3' : '1';
@@ -168,72 +230,206 @@ function App() {
     root.style.setProperty('--text-scale', scale);
   }, [fontSizeMode]);
 
+  // Load simulator flag from Firestore (real-time) - Unlocked automatically in local/DEV environment
+  useEffect(() => {
+    const isLocal = window.location.hostname === 'localhost' ||
+                    window.location.hostname === '127.0.0.1' ||
+                    import.meta.env.DEV;
+
+    if (isLocal) {
+      setSimulatorEnabled(true);
+      return;
+    }
+
+    let unsub = null;
+    import('./lib/firebase').then(({ db }) => {
+      import('firebase/firestore').then(({ doc, onSnapshot }) => {
+        unsub = onSnapshot(doc(db, 'settings', 'global'), (snap) => {
+          if (snap.exists()) {
+            setSimulatorEnabled(!!snap.data().simulatorEnabled);
+          } else {
+            setSimulatorEnabled(true);
+          }
+        }, (err) => {
+          setSimulatorEnabled(true);
+        });
+      });
+    });
+    return () => { if (unsub) unsub(); };
+  }, []);
+
   const navigate = useNavigate();
   const location = useLocation();
 
+  // Handle SPA fallback redirect if coming from 404.html
+  useEffect(() => {
+    const redirectPath = sessionStorage.getItem('spa_redirect_path');
+    if (redirectPath) {
+      sessionStorage.removeItem('spa_redirect_path');
+      navigate(redirectPath, { replace: true });
+    }
+  }, [navigate]);
+
   // Session restore & Firebase sync
   useEffect(() => {
+    let authUnsubscribe = null;
+    let docUnsubscribe = null;
+
     const restore = async () => {
-      // 1. Check local session first
+      // 1. Chỉ pre-load session cho tài khoản LOCAL (không có uid).
+      // Tài khoản Firebase (có uid) phải đợi onAuthStateChanged xác nhận
+      // để đảm bảo luôn kiểm tra trạng thái banned mới nhất từ Firestore.
       const savedSession = localStorage.getItem('fuhrerschein_active_session');
       if (savedSession) {
-        try { setUser(JSON.parse(savedSession)); } catch {}
+        try {
+          const parsed = JSON.parse(savedSession);
+          if (!parsed.uid) {
+            // Tài khoản local → load ngay
+            setUser(parsed);
+            setUserLoading(false);
+          }
+          // Tài khoản Firebase → đợi onAuthStateChanged, giữ loading = true
+        } catch {
+          setUser(GUEST_USER);
+          setUserLoading(false);
+        }
       } else {
-        setUser({ username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true });
+        setUser(GUEST_USER);
+        setUserLoading(false);
       }
 
       // 2. Listen to Firebase Auth state
       import('./lib/firebase').then(({ auth, db }) => {
         import('firebase/auth').then(({ onAuthStateChanged }) => {
-          import('firebase/firestore').then(({ doc, getDoc, setDoc }) => {
-            onAuthStateChanged(auth, async (firebaseUser) => {
+          import('firebase/firestore').then(({ doc, setDoc, onSnapshot }) => {
+            // Fallback: nếu Firebase không phản hồi sau 8 giây, hiển thị guest
+            const loadingTimeout = setTimeout(() => {
+              setUser(prev => prev ?? GUEST_USER);
+              setUserLoading(false);
+            }, 8000);
+
+            authUnsubscribe = onAuthStateChanged(auth, async (firebaseUser) => {
+              clearTimeout(loadingTimeout);
+              // Unsubscribe from previous doc listener if any
+              if (docUnsubscribe) {
+                docUnsubscribe();
+                docUnsubscribe = null;
+              }
+
+              if (!firebaseUser) {
+                // Không có Firebase session → reset user Firebase về guest
+                setUser(prev => {
+                  if (prev?.uid) {
+                    localStorage.removeItem('fuhrerschein_active_session');
+                    return GUEST_USER;
+                  }
+                  return prev ?? GUEST_USER;
+                });
+                setUserLoading(false);
+                return;
+              }
+
               if (firebaseUser) {
                 try {
-                  // User is signed in via Firebase
                   const userRef = doc(db, 'users', firebaseUser.uid);
-                  const docSnap = await getDoc(userRef);
                   
-                  if (docSnap.exists()) {
-                    // Load progress from DB
-                    const dbData = docSnap.data();
-                    const updatedUser = {
-                      username: `firebase_${firebaseUser.uid}`,
-                      displayName: firebaseUser.displayName || 'Học viên',
-                      email: firebaseUser.email || '',
-                      savedQuestions: dbData.savedQuestions || [],
-                      examHistory: dbData.examHistory || [],
-                      progress: dbData.progress || {},
-                      isGuest: false,
-                      uid: firebaseUser.uid
-                    };
-                    setUser(updatedUser);
-                    localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updatedUser));
-                  } else {
-                    // New user, create empty progress in DB
-                    const newUser = {
-                      username: `firebase_${firebaseUser.uid}`,
-                      displayName: firebaseUser.displayName || 'Học viên',
-                      email: firebaseUser.email || '',
-                      savedQuestions: [],
-                      examHistory: [],
-                      progress: {},
-                      isGuest: false,
-                      uid: firebaseUser.uid
-                    };
-                    await setDoc(userRef, {
-                      email: newUser.email,
-                      displayName: newUser.displayName,
-                      savedQuestions: newUser.savedQuestions,
-                      examHistory: newUser.examHistory,
-                      progress: newUser.progress,
-                      createdAt: new Date().toISOString()
-                    });
-                    setUser(newUser);
-                    localStorage.setItem('fuhrerschein_active_session', JSON.stringify(newUser));
-                  }
+                  // Setup real-time listener
+                  docUnsubscribe = onSnapshot(userRef, async (docSnap) => {
+                    if (docSnap.exists()) {
+                      const dbData = docSnap.data();
+
+                      if (dbData.banned) {
+                        // Unsubscribe from doc listener to avoid loops
+                        if (docUnsubscribe) {
+                          docUnsubscribe();
+                          docUnsubscribe = null;
+                        }
+                        import('firebase/auth').then(({ signOut }) => {
+                          signOut(auth).catch(err => console.error("Firebase SignOut Error:", err));
+                        });
+                        clearToken();
+                        setUser({ username: 'guest', displayName: 'Khách Học Thử', email: '', apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: true });
+                        localStorage.removeItem('fuhrerschein_active_session');
+                        navigate('/');
+                        setBannedModal({
+                          message: dbData.bannedReason === 'inactivity'
+                            ? 'Tài khoản của bạn đã bị tạm khóa do không sử dụng trong hơn 1 tuần. Vui lòng gửi yêu cầu dưới đây để Ban quản trị hỗ trợ mở khóa.'
+                            : 'Tài khoản của bạn đã bị khóa. Vui lòng gửi yêu cầu dưới đây để Ban quản trị hỗ trợ mở khóa.',
+                          email: dbData.email || firebaseUser.email || '',
+                          displayName: dbData.displayName || firebaseUser.displayName || ''
+                        });
+                        setUnlockEmail(dbData.email || firebaseUser.email || '');
+                        setUnlockMessage(dbData.bannedReason === 'inactivity'
+                          ? 'Tài khoản của tôi bị tạm khóa do không hoạt động trong hơn 1 tuần. Mong Ban quản trị xem xét mở khóa giúp tôi.'
+                          : 'Tài khoản của tôi bị khóa. Mong Ban quản trị xem xét mở khóa giúp tôi.'
+                        );
+                        setUnlockSuccess(false);
+                        setUnlockError('');
+                        return;
+                      }
+
+                      // Track lastActive if needed
+                      const now = new Date();
+                      let shouldUpdateLastActive = false;
+                      if (!dbData.lastActive) {
+                        shouldUpdateLastActive = true;
+                      } else {
+                        const lastActiveTime = new Date(dbData.lastActive).getTime();
+                        if (isNaN(lastActiveTime) || (now.getTime() - lastActiveTime > 4 * 60 * 60 * 1000)) {
+                          shouldUpdateLastActive = true;
+                        }
+                      }
+                      if (shouldUpdateLastActive) {
+                        setDoc(userRef, { lastActive: now.toISOString() }, { merge: true }).catch(console.error);
+                      }
+
+                      const updatedUser = {
+                        username: `firebase_${firebaseUser.uid}`,
+                        displayName: firebaseUser.displayName || 'Học viên',
+                        email: firebaseUser.email || '',
+                        savedQuestions: dbData.savedQuestions || [],
+                        examHistory: dbData.examHistory || [],
+                        progress: dbData.progress || {},
+                        isGuest: false,
+                        uid: firebaseUser.uid,
+                        createdAt: dbData.createdAt || null,
+                        lastActive: dbData.lastActive || now.toISOString(),
+                        isPremium: !!dbData.isPremium,
+                      };
+                      setUser(updatedUser);
+                      localStorage.setItem('fuhrerschein_active_session', JSON.stringify(updatedUser));
+                      setUserLoading(false);
+                    } else {
+                      // New user creation
+                      const newUser = {
+                        username: `firebase_${firebaseUser.uid}`,
+                        displayName: firebaseUser.displayName || 'Học viên',
+                        email: firebaseUser.email || '',
+                        savedQuestions: [],
+                        examHistory: [],
+                        progress: {},
+                        isGuest: false,
+                        uid: firebaseUser.uid,
+                        createdAt: new Date().toISOString(),
+                      };
+                      await setDoc(userRef, {
+                        email: newUser.email,
+                        displayName: newUser.displayName,
+                        savedQuestions: newUser.savedQuestions,
+                        examHistory: newUser.examHistory,
+                        progress: newUser.progress,
+                        createdAt: new Date().toISOString()
+                      });
+                      setUser(newUser);
+                      localStorage.setItem('fuhrerschein_active_session', JSON.stringify(newUser));
+                      setUserLoading(false);
+                    }
+                  }, (err) => {
+                    console.error("Firestore onSnapshot error:", err);
+                  });
+
                 } catch (err) {
                   console.error("Firebase DB Error:", err);
-                  // Bỏ qua lỗi DB và fallback về local user session nếu không có quyền
                 }
               }
             });
@@ -241,10 +437,53 @@ function App() {
         });
       });
 
-      setUserLoading(false);
     };
     restore();
-  }, []);
+
+    return () => {
+      if (authUnsubscribe) authUnsubscribe();
+      if (docUnsubscribe) docUnsubscribe();
+    };
+  }, [navigate]);
+
+  const handleUnlockSubmit = async (e) => {
+    e.preventDefault();
+    if (!unlockEmail.trim() || !unlockMessage.trim()) {
+      setUnlockError('Vui lòng nhập đầy đủ thông tin.');
+      return;
+    }
+    setUnlockSubmitting(true);
+    setUnlockError('');
+    try {
+      const formspreeId = import.meta.env.VITE_FORMSPREE_ID || 'YOUR_FORMSPREE_ID';
+      const FORMSPREE_ENDPOINT = `https://formspree.io/f/${formspreeId}`;
+      const response = await fetch(FORMSPREE_ENDPOINT, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Accept': 'application/json'
+        },
+        body: JSON.stringify({
+          category: 'Yêu cầu mở khóa tài khoản',
+          description: unlockMessage.trim(),
+          userName: bannedModal?.displayName || 'Locked User',
+          userEmail: unlockEmail.trim(),
+          timestamp: new Date().toISOString()
+        })
+      });
+
+      if (response.ok) {
+        setUnlockSuccess(true);
+      } else {
+        throw new Error('Không thể gửi yêu cầu. Vui lòng thử lại sau.');
+      }
+    } catch (err) {
+      console.error(err);
+      setUnlockError('Lỗi gửi yêu cầu: ' + err.message);
+    } finally {
+      setUnlockSubmitting(false);
+    }
+  };
 
   const handleUpdateUser = (updated) => {
     setUser(updated);
@@ -313,8 +552,17 @@ function App() {
     </div>
   );
 
+  const isSimOrEditor = location.pathname === '/map-editor';
+
   return (
-    <div style={{ minHeight: '100vh', display: 'flex', flexDirection: 'column', background: 'var(--background)' }}>
+    <div style={{
+      height: undefined,
+      minHeight: '100vh',
+      display: 'flex',
+      flexDirection: 'column',
+      background: 'var(--background)',
+      overflow: undefined
+    }}>
       <Navbar
         location={location}
         navigate={navigate}
@@ -330,9 +578,10 @@ function App() {
           localStorage.setItem('fuhrerschein_font_size', mode);
         }}
       />
+      {!isSimOrEditor && <BuyFullAccountAlert languageMode={languageMode} user={user} />}
 
       {/* Page content */}
-      <main style={{ flex: 1, display: 'flex', flexDirection: 'column' }}>
+      <main style={{ flex: 1, display: 'flex', flexDirection: 'column', overflow: undefined, minHeight: 0 }}>
         <Routes>
           <Route path="/" element={
             <LandingPage
@@ -341,6 +590,7 @@ function App() {
               onShowLogin={() => setShowLoginModal(true)}
               languageMode={languageMode}
               onLanguageChange={(mode) => { setLanguageMode(mode); localStorage.setItem('fuhrerschein_lang_mode', mode); }}
+              simulatorEnabled={simulatorEnabled}
             />
           } />
           <Route path="/training" element={<TrainingDashboard user={user} onUpdateUser={handleUpdateUser} onNavigate={(p, opts) => navigate(p, opts)} onShowLogin={() => setShowLoginModal(true)} languageMode={languageMode} />} />
@@ -350,7 +600,8 @@ function App() {
           <Route path="/help" element={<Help user={user} languageMode={languageMode} onNavigate={(p, opts) => navigate(p, opts)} />} />
           <Route path="/settings" element={<Settings user={user} onUpdateUser={handleUpdateUser} onLogout={handleLogout} />} />
           <Route path="/privacy" element={<PrivacyPolicy onNavigate={navigate} />} />
-          <Route path="/simulation" element={<DrivingSimulation languageMode={languageMode} />} />
+          <Route path="/simulation" element={<SimDevPage />} />
+          <Route path="/sim-dev" element={<SimDevPage />} />
           <Route path="/admin" element={<AdminDashboard user={user} onNavigate={navigate} />} />
           <Route path="*" element={<Navigate to="/" replace />} />
         </Routes>
@@ -402,6 +653,136 @@ function App() {
                 {languageMode === 'de' ? 'Ja, abmelden' : (languageMode === 'vi' ? 'Có, đăng xuất' : 'Có / Ja')}
               </button>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Welcome Popup - monthly, star rating */}
+      <WelcomePopup
+        isOpen={showSupportPopup}
+        languageMode={languageMode}
+        user={user}
+        onClose={() => setShowSupportPopup(false)}
+        onNeverShow={() => setShowSupportPopup(false)}
+        onDonate={() => setShowDonateModal(true)}
+      />
+
+      {/* Full Donation Modal - opened when user clicks Donate in welcome popup */}
+      <SupportModal
+        isOpen={showDonateModal}
+        languageMode={languageMode}
+        onClose={() => setShowDonateModal(false)}
+      />
+
+      {/* Banned Alert Modal */}
+      {bannedModal && (
+        <div style={{ position: 'fixed', inset: 0, zIndex: 2000, backgroundColor: 'rgba(0,0,0,0.65)', backdropFilter: 'blur(8px)', display: 'flex', alignItems: 'center', justifyContent: 'center', padding: '24px' }}>
+          <div style={{ background: 'white', borderRadius: '18px', padding: '32px 24px', maxWidth: '420px', width: '100%', boxShadow: '0 25px 60px rgba(0,0,0,0.3)', border: '1px solid rgba(0,0,0,0.05)', boxSizing: 'border-box' }}>
+            {unlockSuccess ? (
+              <div style={{ textAlign: 'center', padding: '16px 0' }}>
+                <div style={{ display: 'flex', justifyContent: 'center', marginBottom: '16px' }}>
+                  <CheckCircle2 size={56} color="#10b981" />
+                </div>
+                <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#1f2937', marginBottom: '12px', textTransform: 'uppercase' }}>
+                  Đã gửi yêu cầu!
+                </h3>
+                <p style={{ fontSize: '14px', color: '#4b5563', lineHeight: '1.6', marginBottom: '28px' }}>
+                  Yêu cầu mở khóa của bạn đã được gửi tới Ban quản trị thành công. Chúng tôi sẽ xem xét và mở khóa sớm nhất cho bạn.
+                </p>
+                <button
+                  onClick={() => setBannedModal(null)}
+                  style={{
+                    width: '100%', padding: '12px', borderRadius: '10px', border: 'none',
+                    background: 'linear-gradient(135deg, #1a4a5e 0%, #2b6f8a 100%)',
+                    fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: 'white',
+                    boxShadow: '0 4px 12px rgba(26,74,94,0.2)'
+                  }}
+                >
+                  Đóng
+                </button>
+              </div>
+            ) : (
+              <div>
+                <div style={{ textAlign: 'center' }}>
+                  <div style={{ fontSize: '48px', marginBottom: '12px' }}>🔒</div>
+                  <h3 style={{ fontSize: '18px', fontWeight: '800', color: '#1f2937', marginBottom: '8px', textTransform: 'uppercase', letterSpacing: '0.02em' }}>
+                    Tài khoản bị tạm khóa
+                  </h3>
+                  <p style={{ fontSize: '13px', color: '#6b7280', lineHeight: '1.5', marginBottom: '20px' }}>
+                    {bannedModal.message}
+                  </p>
+                </div>
+
+                {unlockError && (
+                  <div style={{ padding: '10px 12px', background: '#fef2f2', border: '1px solid #fecaca', borderRadius: '8px', marginBottom: '16px', fontSize: '13px', color: '#b91c1c', fontWeight: '600' }}>
+                    ⚠️ {unlockError}
+                  </div>
+                )}
+
+                <form onSubmit={handleUnlockSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '14px' }}>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280', marginBottom: '6px' }}>Email đăng nhập</label>
+                    <input
+                      type="email"
+                      value={unlockEmail}
+                      onChange={(e) => setUnlockEmail(e.target.value)}
+                      placeholder="email@example.com"
+                      required
+                      style={{
+                        width: '100%', padding: '10px 12px', background: '#f9fafb', borderRadius: '8px',
+                        border: '1.5px solid #e5e7eb', fontSize: '14px', fontWeight: '500', color: '#111827',
+                        outline: 'none', boxSizing: 'border-box'
+                      }}
+                    />
+                  </div>
+                  <div>
+                    <label style={{ display: 'block', fontSize: '11px', fontWeight: '700', textTransform: 'uppercase', letterSpacing: '0.05em', color: '#6b7280', marginBottom: '6px' }}>Nội dung yêu cầu</label>
+                    <textarea
+                      value={unlockMessage}
+                      onChange={(e) => setUnlockMessage(e.target.value)}
+                      placeholder="Nhập lý do cần mở khóa..."
+                      required
+                      rows={3}
+                      style={{
+                        width: '100%', padding: '10px 12px', background: '#f9fafb', borderRadius: '8px',
+                        border: '1.5px solid #e5e7eb', fontSize: '14px', fontWeight: '500', color: '#111827',
+                        outline: 'none', resize: 'none', boxSizing: 'border-box', fontFamily: 'inherit'
+                      }}
+                    />
+                  </div>
+
+                  <div style={{ display: 'flex', flexDirection: 'column', gap: '8px', marginTop: '6px' }}>
+                    <button
+                      type="submit"
+                      disabled={unlockSubmitting}
+                      style={{
+                        width: '100%', padding: '12px', borderRadius: '10px', border: 'none',
+                        background: unlockSubmitting ? '#93c5fd' : 'linear-gradient(135deg, #1a4a5e 0%, #2b6f8a 100%)',
+                        color: 'white', fontWeight: '700', fontSize: '14px', cursor: unlockSubmitting ? 'not-allowed' : 'pointer',
+                        display: 'flex', alignItems: 'center', justifyContent: 'center', gap: '8px',
+                        boxShadow: '0 4px 12px rgba(26,74,94,0.2)'
+                      }}
+                    >
+                      {unlockSubmitting && <Loader2 size={16} style={{ animation: 'spin 1s linear infinite' }} />}
+                      {unlockSubmitting ? 'Đang gửi...' : 'Gửi yêu cầu mở khóa'}
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setBannedModal(null)}
+                      style={{
+                        width: '100%', padding: '11px', borderRadius: '10px', border: '1.5px solid #e5e7eb',
+                        background: 'white', fontWeight: '700', fontSize: '14px', cursor: 'pointer', color: '#4b5563',
+                        transition: 'background 0.15s'
+                      }}
+                      onMouseEnter={(e) => e.currentTarget.style.background = '#f9fafb'}
+                      onMouseLeave={(e) => e.currentTarget.style.background = 'white'}
+                    >
+                      Trở lại
+                    </button>
+                  </div>
+                </form>
+              </div>
+            )}
           </div>
         </div>
       )}

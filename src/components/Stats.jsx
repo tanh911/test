@@ -7,6 +7,7 @@ import {
 import { ChevronLeft } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { getCategoryLabel } from '../utils/categoryHelpers';
+import { getMediaUrl } from '../utils/mediaHelpers';
 export const Stats = ({ user, onUpdateUser }) => {
   const navigate = useNavigate();
   const [selectedSavedQ, setSelectedSavedQ] = useState(null);
@@ -393,10 +394,11 @@ export const Stats = ({ user, onUpdateUser }) => {
               {selectedSavedQ.video && (
                 <div className="flex justify-center border-2 border-gray-200 bg-black p-1 rounded-xl overflow-hidden shadow-sm">
                   <video
-                    src={selectedSavedQ.video}
+                    src={getMediaUrl(selectedSavedQ.video)}
                     controls
+                    muted
                     className="w-full h-auto max-h-[180px]"
-                    poster={selectedSavedQ.image || undefined}
+                    poster={getMediaUrl(selectedSavedQ.image) || undefined}
                   />
                 </div>
               )}
@@ -404,7 +406,7 @@ export const Stats = ({ user, onUpdateUser }) => {
               {selectedSavedQ.image && !selectedSavedQ.video && (
                 <div className="flex justify-center border-2 border-gray-200 bg-black p-1 rounded-xl overflow-hidden shadow-sm">
                   <img
-                    src={selectedSavedQ.image}
+                    src={getMediaUrl(selectedSavedQ.image)}
                     alt="Question Visual"
                     className="w-full h-auto max-h-[180px] object-contain"
                   />

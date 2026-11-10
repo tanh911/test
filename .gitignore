@@ -27,3 +27,11 @@ dist-ssr
 .env
 .env.*
 !.env.example
+
+# Temp & scratch artifacts
+scratch/
+files/
+files.zip
+head-*.ts
+*.txt
+*.tsc

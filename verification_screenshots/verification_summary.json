@@ -1,0 +1,38 @@
+{
+  "timestamp": "2026-09-23T20:12:01.530Z",
+  "screenshots": [
+    "verify-A-overview.png",
+    "verify-B-debug.png",
+    "verify-C-junction.png",
+    "verify-D-cockpit.png"
+  ],
+  "tests": {
+    "test1_trafficLights": {
+      "status": "PASS",
+      "controllersCount": 231,
+      "initialStateSample": "[junc_2] GREEN|RED",
+      "updatedStateSample": "[junc_2] RED|GREEN"
+    },
+    "test2_signCount": {
+      "status": "PASS",
+      "signCount": 81
+    },
+    "test3_priorityResolver": {
+      "status": "PASS",
+      "junctionId": "junc_1",
+      "priorityResult": {
+        "canProceed": true,
+        "yieldTo": null,
+        "ruleCode": "VORFAHRT_OK",
+        "messageVi": "Được phép di chuyển an toàn",
+        "messageDe": "Vorfahrt frei"
+      }
+    },
+    "test4_performance": {
+      "status": "PASS",
+      "avgFps": 23.1,
+      "drawCalls": 1876,
+      "triangles": 2320030
+    }
+  }
+}

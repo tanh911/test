@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { ShieldCheck, User, Mail, LogOut, Settings as SettingsIcon, AlertTriangle, Save, ChevronLeft } from 'lucide-react';
+import { ShieldCheck, User, Mail, LogOut, Settings as SettingsIcon, AlertTriangle, Save, ChevronLeft, Crown } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 
 export const Settings = ({ user, onUpdateUser, onLogout }) => {
@@ -283,6 +283,42 @@ export const Settings = ({ user, onUpdateUser, onLogout }) => {
             <User size={20} color="#2b6f8a" /> Thông tin cá nhân
           </h2>
           
+          {/* Account Type Card */}
+          <div style={{
+            padding: '16px 20px',
+            borderRadius: '16px',
+            marginBottom: '24px',
+            background: user?.isPremium ? 'linear-gradient(135deg, rgba(245,158,11,0.12), rgba(217,119,6,0.08))' : '#f8fafc',
+            border: `1px solid ${user?.isPremium ? 'rgba(245,158,11,0.4)' : '#e2e8f0'}`,
+            display: 'flex',
+            alignItems: 'center',
+            justify: 'space-between',
+            gap: '16px',
+            flexWrap: 'wrap'
+          }}>
+            <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+              <div style={{
+                width: '42px', height: '42px', borderRadius: '12px',
+                background: user?.isPremium ? 'linear-gradient(135deg, #f59e0b, #d97706)' : '#e2e8f0',
+                color: user?.isPremium ? 'white' : '#64748b',
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                boxShadow: user?.isPremium ? '0 4px 12px rgba(245,158,11,0.3)' : 'none'
+              }}>
+                <Crown size={22} />
+              </div>
+              <div>
+                <div style={{ fontWeight: '800', fontSize: 'calc(15px * var(--text-scale, 1))', color: user?.isPremium ? '#b45309' : '#1e293b' }}>
+                  {user?.isPremium ? 'Tài khoản Premium VIP 👑' : 'Tài khoản Thường (Miễn phí)'}
+                </div>
+                <div style={{ fontSize: 'calc(12.5px * var(--text-scale, 1))', color: user?.isPremium ? '#92400e' : '#64748b', marginTop: '2px' }}>
+                  {user?.isPremium
+                    ? 'Bạn có toàn quyền truy cập 66 bộ đề thi mẫu và toàn bộ tính năng cao cấp.'
+                    : 'Liên hệ Admin để nâng cấp Premium và mở khóa toàn bộ 66 bộ đề thi thử!'}
+                </div>
+              </div>
+            </div>
+          </div>
+
           <form onSubmit={handleSaveSettings} style={{ display: 'flex', flexDirection: 'column', gap: '20px' }}>
             
             {/* Display Name */}

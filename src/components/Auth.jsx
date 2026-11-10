@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Eye, EyeOff, Lock, User, Mail, AlertCircle, CheckCircle2, Loader2, Phone } from 'lucide-react';
 import { hashPassword, verifyPassword, createToken, checkPasswordStrength } from '../lib/auth';
 import { registerWithEmail, loginWithEmail, verifyEmail, updateUserProfile, signInWithGoogle, signInWithFacebook } from '../lib/firebase';
+import { sendLoginNotification, sendWelcomeEmail } from '../services/emailService';
 
 const GoogleIcon = () => (
   <svg className="w-4 h-4 shrink-0" viewBox="0 0 24 24">
@@ -89,14 +90,45 @@ export const Auth = ({ onLogin, onCancel }) => {
               return;
             }
 
-            setSuccess('Đăng nhập thành công!');
-            setTimeout(() => onLogin({
-              uid: user.uid,
-              username: user.email,
+            // Check if banned/locked in Firestore
+            const { db } = await import('../lib/firebase');
+            const { doc, getDoc } = await import('firebase/firestore');
+            const userDoc = await getDoc(doc(db, 'users', user.uid));
+            if (userDoc.exists() && userDoc.data().banned) {
+              const dbData = userDoc.data();
+              // Sign out from Firebase auth
+              const { auth } = await import('../lib/firebase');
+              const { signOut } = await import('firebase/auth');
+              await signOut(auth);
+              
+              if (dbData.bannedReason === 'inactivity') {
+                setError(
+                  <span>
+                    Tài khoản của bạn đã bị khóa tạm thời do không sử dụng trong hơn 1 tuần.
+                    <br />
+                    <a
+                      href={`mailto:supportsplitvie@gmail.com?subject=Yeu%20cau%20mo%20khoa%20tai%20khoan%20Fuhrerschein%20Viet-Duc&body=Chao%20Ban%20quan%20tri,%0D%0A%0D%0ATai%20khoan%20cua%20toi%20(${dbData.email || 'dang%20nhap'})%20da%20bi%20khoa%20do%20khong%20su%20dung.%0D%0AMong%20Ban%20quan%20tri%20mo%20khoa%20lai%20giup.%0D%0A%0D%0ACam%20on!`}
+                      style={{ color: '#b91c1c', textDecoration: 'underline', fontWeight: 'bold', display: 'inline-block', marginTop: '4px' }}
+                    >
+                      Nhấn vào đây để gửi email yêu cầu mở khóa
+                    </a>
+                  </span>
+                );
+              } else {
+                setError('Tài khoản của bạn đã bị khóa. Vui lòng liên hệ ban quản trị để biết thêm chi tiết.');
+              }
+              setLoading(false);
+              return;
+            }
+
+            sendLoginNotification({
               displayName: user.displayName || user.email.split('@')[0],
               email: user.email,
-              apiKey: '', savedQuestions: [], examHistory: [], progress: {}
-            }), 500);
+              loginMethod: 'Email (Firebase)'
+            });
+            setSuccess('Đăng nhập thành công!');
+            setLoading(false);
+            // onAuthStateChanged trong App.jsx sẽ tự động set user & navigate
             return;
           } catch (firebaseErr) {
             console.error(firebaseErr);
@@ -143,6 +175,11 @@ export const Auth = ({ onLogin, onCancel }) => {
         const token = await createToken(sessionUser);
         localStorage.setItem('fuhrerschein_token', token);
         setSuccess('Đăng nhập thành công!');
+        sendLoginNotification({
+          displayName: sessionUser.displayName,
+          email: sessionUser.email || sessionUser.username,
+          loginMethod: 'Tài khoản thường'
+        });
         setTimeout(() => onLogin(sessionUser), 500);
 
       } else if (!isLogin) {
@@ -153,6 +190,12 @@ export const Auth = ({ onLogin, onCancel }) => {
 
           await updateUserProfile(user, { displayName: username.trim() });
           await verifyEmail(user);
+
+          // Gửi email cảm ơn / chào mừng cho user mới
+          sendWelcomeEmail({
+            recipientEmail: email.trim(),
+            displayName: username.trim()
+          });
 
           setSuccess('Tạo tài khoản thành công! Vui lòng kiểm tra email của bạn (bao gồm cả mục Thư Rác) và bấm vào link để kích hoạt.');
 
@@ -343,13 +386,12 @@ export const Auth = ({ onLogin, onCancel }) => {
               try {
                 const result = await signInWithGoogle();
                 const user = result.user;
-                onLogin({
-                  uid: user.uid,
-                  username: `google_${user.uid}`,
+                sendLoginNotification({
                   displayName: user.displayName || 'Google User',
                   email: user.email || '',
-                  apiKey: '', savedQuestions: [], examHistory: [], progress: {}, isGuest: false
+                  loginMethod: 'Google'
                 });
+                // onAuthStateChanged trong App.jsx sẽ tự động set user & navigate
               } catch (err) {
                 console.error(err);
                 const silent = ['auth/popup-closed-by-user', 'auth/cancelled-popup-request', 'auth/popup-blocked'];
@@ -367,13 +409,12 @@ export const Auth = ({ onLogin, onCancel }) => {
               try {
                 const result = await signInWithFacebook();
                 const user = result.user;
-                onLogin({
-                  uid: user.uid,
-                  username: `fb_${user.uid}`,
+                sendLoginNotification({
                   displayName: user.displayName || 'Facebook User',
                   email: user.email || '',
-                  apiKey: '', savedQuestions: [], examHistory: [], progress: {}
+                  loginMethod: 'Facebook'
                 });
+                // onAuthStateChanged trong App.jsx sẽ tự động set user & navigate
               } catch (err) {
                 console.error(err);
                 if (err.code === 'auth/popup-closed-by-user' || err.code === 'auth/cancelled-popup-request') {

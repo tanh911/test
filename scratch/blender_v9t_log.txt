@@ -1,0 +1,975 @@
+C:\Users\Tuan Anh\.gemini\antigravity\scratch\viet-de-fuhrerschein\scratch\build_map_blender.py:317: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m.use_nodes = True
+C:\Users\Tuan Anh\.gemini\antigravity\scratch\viet-de-fuhrerschein\scratch\build_map_blender.py:333: DeprecationWarning: 'Material.use_nodes' is expected to be removed in Blender 6.0
+  m.use_nodes = True
+graph roads: 16
+all meshes committed
+INFO Draco mesh compression is available, use library at D:\Program Files\5.0\scripts\addons_core\io_scene_gltf2\extern_draco.dll
+12:03:44 | INFO: Starting glTF 2.0 export
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt_-3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt_-2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt_1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt_2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt_3_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt_-3_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_-2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_-2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_0_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_-1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_-3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_-3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_0_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DuongAsphalt2_2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GiaoLo_-2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GiaoLo_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GiaoLo_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_-2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_-2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_0_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_-1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_-3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_-2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_0_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_3_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_-4_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_-3_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_-4_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_-3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_-4_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_VachTrang_3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_-2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_-2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_0_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_-1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_-3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_-3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_0_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_ViaHe_2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_-2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_-2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_0_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_-1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_-3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_-3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_0_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_Curb_2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_-2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_-2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_-1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_-4_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_-3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_0_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_-4_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_-3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_-2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_0_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CotDenDuong_3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_-2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_-2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_-1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_-4_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_-3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_0_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_-4_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_-3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_-2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_0_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_DenDuong_3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_-3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_-4_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_-2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_0_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_3_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_-2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_-3_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_GuardrailA2_-4_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoTrang_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoTrang_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoTrang_-3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoTrang_-2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoTrang_-1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoTrang_0_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoTrang_-4_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoTrang_-2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoTrang_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoTrang_0_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDen_-2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDen_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDen_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDen_-2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDen_-1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDen_1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDen_-3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDen_-3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDen_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDen_1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoBac_-2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoBac_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoBac_1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoBac_-1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoBac_-3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoBac_-2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoBac_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDo_-2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDo_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDo_-3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDo_-3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDo_-2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDo_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoDo_0_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoXanh_-2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoXanh_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoXanh_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoXanh_0_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoXanh_-3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoXanh_-1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoXanh_-4_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoXanh_-2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeDoXanh_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_-2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_0_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_0_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_-2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_-1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_-3_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_-4_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_-3_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_-2_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_-1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_0_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_XeLop_1_-1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CayBill_0_0
+12:03:44 | WARNING: More than one shader node tex image used for a texture. The resulting glTF sampler will behave like the first shader node tex image.
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CayBill_-1_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CayBill_0_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CayBill_-1_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CayBill_-2_0
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Extracting primitive: V2_CayBill_-2_1
+12:03:44 | INFO: Primitives created: 1
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt_-3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt_-2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt_1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt_2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt_3_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt_-3_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_-2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_-2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_0_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_-1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_-3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_-3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_0_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DuongAsphalt2_2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GiaoLo_-2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GiaoLo_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GiaoLo_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_-2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_-2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_0_0.
+Blender 5.0.1 (hash a3db93c5b259 built 2025-12-16 01:32:30)
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 215, compression ratio: 1.30
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 221, compression ratio: 1.27
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 221, compression ratio: 1.27
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 420, encoded size: 252, compression ratio: 1.67
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 32 vertices, 48 indices, raw size: 1120, encoded size: 400, compression ratio: 2.80
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 140, encoded size: 190, compression ratio: 0.74
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 420, encoded size: 247, compression ratio: 1.70
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 20 vertices, 30 indices, raw size: 700, encoded size: 327, compression ratio: 2.14
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 560, encoded size: 285, compression ratio: 1.96
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 207, compression ratio: 1.35
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 140, encoded size: 181, compression ratio: 0.77
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 212, compression ratio: 1.32
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 224, compression ratio: 1.25
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 140, encoded size: 177, compression ratio: 0.79
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 560, encoded size: 281, compression ratio: 1.99
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 228, compression ratio: 1.23
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 140, encoded size: 184, compression ratio: 0.76
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 140, encoded size: 184, compression ratio: 0.76
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 140, encoded size: 184, compression ratio: 0.76
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 140, encoded size: 184, compression ratio: 0.76
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 140, encoded size: 184, compression ratio: 0.76
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 140, encoded size: 184, compression ratio: 0.76
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 15 vertices, 42 indices, raw size: 444, encoded size: 200, compression ratio: 2.22
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 9 vertices, 21 indices, raw size: 258, encoded size: 165, compression ratio: 1.56
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 24 vertices, 63 indices, raw size: 702, encoded size: 226, compression ratio: 3.11
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 488 vertices, 732 indices, raw size: 13176, encoded size: 1213, compression ratio: 10.86
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 252 vertices, 378 indices, raw size: 6804, encoded size: 559, compression ratio: 12.17
+DracoEncoder | Preserve tria12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_0_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_-1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_-3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_-2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_0_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_3_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_-4_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_-3_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_-4_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_-3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_-4_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_VachTrang_3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_-2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_-2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_0_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_-1_1.
+ngle order: no
+DracoEncoder | Encoded 648 vertices, 972 indices, raw size: 17496, encoded size: 1434, compression ratio: 12.20
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 456 vertices, 684 indices, raw size: 12312, encoded size: 1246, compression ratio: 9.88
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 188 vertices, 282 indices, raw size: 5076, encoded size: 663, compression ratio: 7.66
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 320 vertices, 480 indices, raw size: 8640, encoded size: 851, compression ratio: 10.15
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 584 vertices, 876 indices, raw size: 15768, encoded size: 1452, compression ratio: 10.86
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 356 vertices, 534 indices, raw size: 9612, encoded size: 829, compression ratio: 11.59
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 340 vertices, 510 indices, raw size: 9180, encoded size: 794, compression ratio: 11.56
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 348 vertices, 522 indices, raw size: 9396, encoded size: 868, compression ratio: 10.82
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 216 vertices, 324 indices, raw size: 5832, encoded size: 689, compression ratio: 8.46
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 512 vertices, 768 indices, raw size: 13824, encoded size: 1378, compression ratio: 10.03
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 116 vertices, 174 indices, raw size: 3132, encoded size: 455, compression ratio: 6.88
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 88 vertices, 132 indices, raw size: 2376, encoded size: 427, compression ratio: 5.56
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 72 vertices, 108 indices, raw size: 1944, encoded size: 373, compression ratio: 5.21
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 248 vertices, 372 indices, raw size: 6696, encoded size: 804, compression ratio: 8.33
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 36 vertices, 54 indices, raw size: 972, encoded size: 252, compression ratio: 3.86
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 120 vertices, 180 indices, raw size: 3240, encoded size: 447, compression ratio: 7.25
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 124 vertices, 186 indices, raw size: 3348, encoded size: 464, compression ratio: 7.22
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 24 vertices, 36 indices, raw size: 648, encoded size: 213, compression ratio: 3.04
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 112 vertices, 168 indices, raw size: 3024, encoded size: 295, compression ratio: 10.25
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 183, compression ratio: 2.36
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 124 vertices, 186 indices, raw size: 3348, encoded size: 464, compression ratio: 7.22
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 183, compression ratio: 2.36
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 560, encoded size: 261, compression ratio: 2.15
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 204, compression ratio: 1.37
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 420, encoded size: 253, compression ratio: 1.66
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 420, encoded size: 240, compression ratio: 1.75
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 420, encoded size: 254, compression ratio: 1.65
+DracoEncoder | Preserve triangle o12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_-3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_-3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_0_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_ViaHe_2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_-2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_-2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_0_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_-1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_-3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_-3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_0_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_Curb_2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_-2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_-2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_-1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_-4_1.
+rder: no
+DracoEncoder | Encoded 36 vertices, 54 indices, raw size: 1260, encoded size: 434, compression ratio: 2.90
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 560, encoded size: 299, compression ratio: 1.87
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 217, compression ratio: 1.29
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 217, compression ratio: 1.29
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 217, compression ratio: 1.29
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 217, compression ratio: 1.29
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 217, compression ratio: 1.29
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 217, compression ratio: 1.29
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 174, compression ratio: 2.48
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 216, encoded size: 124, compression ratio: 1.74
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 324, encoded size: 157, compression ratio: 2.06
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 324, encoded size: 157, compression ratio: 2.06
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 324, encoded size: 171, compression ratio: 1.89
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 36 vertices, 54 indices, raw size: 972, encoded size: 278, compression ratio: 3.50
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 196, compression ratio: 2.20
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 216, encoded size: 147, compression ratio: 1.47
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 216, encoded size: 147, compression ratio: 1.47
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 216, encoded size: 147, compression ratio: 1.47
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 216, encoded size: 147, compression ratio: 1.47
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 216, encoded size: 147, compression ratio: 1.47
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 216, encoded size: 147, compression ratio: 1.47
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 224 vertices, 336 indices, raw size: 6048, encoded size: 709, compression ratio: 8.53
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 224 vertices, 336 indices, raw size: 6048, encoded size: 719, compression ratio: 8.41
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 280 vertices, 420 indices, raw size: 7560, encoded size: 796, compression ratio: 9.50
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 196 vertices, 294 indices, raw size: 5292, encoded size: 673, compression ratio: 7.86
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 112 vertices, 168 indices, raw size: 3024, encoded size: 456, compression ratio: 6.63
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 140 vertices, 210 indices, raw size: 3780, encoded size: 536, compression ratio: 7.05
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 28 vertices, 42 indices, raw size: 12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_-3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_0_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_-4_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_-3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_-2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_0_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CotDenDuong_3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_-2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_-2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_-1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_-4_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_-3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_0_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_-4_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_-3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_-2_-1.
+756, encoded size: 242, compression ratio: 3.12
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 112 vertices, 168 indices, raw size: 3024, encoded size: 465, compression ratio: 6.50
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 112 vertices, 168 indices, raw size: 3024, encoded size: 465, compression ratio: 6.50
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 112 vertices, 168 indices, raw size: 3024, encoded size: 465, compression ratio: 6.50
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 112 vertices, 168 indices, raw size: 3024, encoded size: 465, compression ratio: 6.50
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 28 vertices, 42 indices, raw size: 756, encoded size: 242, compression ratio: 3.12
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 28 vertices, 42 indices, raw size: 756, encoded size: 242, compression ratio: 3.12
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 112 vertices, 168 indices, raw size: 3024, encoded size: 465, compression ratio: 6.50
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 140 vertices, 210 indices, raw size: 3780, encoded size: 529, compression ratio: 7.15
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 112 vertices, 168 indices, raw size: 3024, encoded size: 465, compression ratio: 6.50
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 112 vertices, 168 indices, raw size: 3024, encoded size: 465, compression ratio: 6.50
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 112 vertices, 168 indices, raw size: 3024, encoded size: 465, compression ratio: 6.50
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 112 vertices, 168 indices, raw size: 3024, encoded size: 465, compression ratio: 6.50
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 28 vertices, 42 indices, raw size: 756, encoded size: 242, compression ratio: 3.12
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 32 vertices, 48 indices, raw size: 864, encoded size: 227, compression ratio: 3.81
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 32 vertices, 48 indices, raw size: 864, encoded size: 227, compression ratio: 3.81
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 253, compression ratio: 4.27
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 28 vertices, 42 indices, raw size: 756, encoded size: 216, compression ratio: 3.50
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 168, compression ratio: 2.57
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 20 vertices, 30 indices, raw size: 540, encoded size: 182, compression ratio: 2.97
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 108, encoded size: 123, compression ratio: 0.88
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 178, compression ratio: 2.43
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 178, compression ratio: 2.43
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 178, compression ratio: 2.43
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 178, compression ratio: 2.43
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 108, encoded size: 123, compression ratio: 0.88
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 108, encoded size: 123, compression ratio: 0.88
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 178, compression ratio: 2.43
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_0_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_DenDuong_3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_-3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_-4_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_-2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_0_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_3_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_-2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_-3_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_GuardrailA2_-4_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoTrang_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoTrang_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoTrang_-3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoTrang_-2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoTrang_-1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoTrang_0_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoTrang_-4_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoTrang_-2_-1.
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 20 vertices, 30 indices, raw size: 540, encoded size: 188, compression ratio: 2.87
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 178, compression ratio: 2.43
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 178, compression ratio: 2.43
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 178, compression ratio: 2.43
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 178, compression ratio: 2.43
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 108, encoded size: 123, compression ratio: 0.88
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 324, encoded size: 169, compression ratio: 1.92
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 216, encoded size: 145, compression ratio: 1.49
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 324, encoded size: 167, compression ratio: 1.94
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 181, compression ratio: 2.39
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 216, encoded size: 147, compression ratio: 1.47
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 108, encoded size: 132, compression ratio: 0.82
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 24 vertices, 36 indices, raw size: 648, encoded size: 216, compression ratio: 3.00
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 32 vertices, 48 indices, raw size: 864, encoded size: 262, compression ratio: 3.30
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 16 vertices, 24 indices, raw size: 432, encoded size: 188, compression ratio: 2.30
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 324, encoded size: 172, compression ratio: 1.88
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 324, encoded size: 164, compression ratio: 1.98
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 12 vertices, 18 indices, raw size: 324, encoded size: 161, compression ratio: 2.01
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 20 vertices, 30 indices, raw size: 540, encoded size: 210, compression ratio: 2.57
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 4 vertices, 6 indices, raw size: 108, encoded size: 128, compression ratio: 0.84
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 361, compression ratio: 5.98
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 295, compression ratio: 3.66
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 400, compression ratio: 5.40
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 437, compression ratio: 4.94
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 ve12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoTrang_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoTrang_0_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDen_-2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDen_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDen_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDen_-2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDen_-1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDen_1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDen_-3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDen_-3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDen_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDen_1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoBac_-2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoBac_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoBac_1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoBac_-1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoBac_-3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoBac_-2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoBac_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDo_-2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDo_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDo_-3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDo_-3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDo_-2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDo_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoDo_0_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoXanh_-2_0.
+rtices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 398, compression ratio: 5.43
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 392, compression ratio: 5.51
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 389, compression ratio: 5.55
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 389, compression ratio: 5.55
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 295, compression ratio: 3.66
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 120 vertices, 180 indices, raw size: 3240, encoded size: 569, compression ratio: 5.69
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 438, compression ratio: 4.93
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 444, compression ratio: 4.86
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 458, compression ratio: 4.72
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 295, compression ratio: 3.66
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 120 vertices, 180 indices, raw size: 3240, encoded size: 583, compression ratio: 5.56
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 286, compression ratio: 7.55
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 386, compression ratio: 5.60
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2112:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoXanh_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoXanh_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoXanh_0_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoXanh_-3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoXanh_-1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoXanh_-4_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoXanh_-2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeDoXanh_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_-2_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_0_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_-2_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_-1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_-3_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_-4_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_-3_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_-2_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_-1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_0_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_XeLop_1_-1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CayBill_0_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CayBill_-1_0.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CayBill_0_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CayBill_-1_1.
+12:03:44 | INFO: Draco encoder: Encoding mesh V2_CayBill_-2_0.
+60, encoded size: 301, compression ratio: 7.18
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 382, compression ratio: 5.65
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 404, compression ratio: 5.35
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 120 vertices, 180 indices, raw size: 3240, encoded size: 528, compression ratio: 6.14
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 316, compression ratio: 3.42
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 160 vertices, 240 indices, raw size: 4320, encoded size: 514, compression ratio: 8.40
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 280 vertices, 420 indices, raw size: 7560, encoded size: 782, compression ratio: 9.67
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 200 vertices, 300 indices, raw size: 5400, encoded size: 626, compression ratio: 8.63
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 160 vertices, 240 indices, raw size: 4320, encoded size: 602, compression ratio: 7.18
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 320 vertices, 480 indices, raw size: 8640, encoded size: 936, compression ratio: 9.23
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 240 vertices, 360 indices, raw size: 6480, encoded size: 825, compression ratio: 7.85
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 120 vertices, 180 indices, raw size: 3240, encoded size: 568, compression ratio: 5.70
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 200 vertices, 300 indices, raw size: 5400, encoded size: 762, compression ratio: 7.09
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 80 vertices, 120 indices, raw size: 2160, encoded size: 447, compression ratio: 4.83
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 200 vertices, 300 indices, raw size: 5400, encoded size: 776, compression ratio: 6.96
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 160 vertices, 240 indices, raw size: 4320, encoded size: 638, compression ratio: 6.77
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 240 vertices, 360 indices, raw size: 6480, encoded size: 806, compression ratio: 8.04
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 160 vertices, 240 indices, raw size: 4320, encoded size: 636, compression ratio: 6.79
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1080, encoded size: 310, compression ratio: 3.48
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 24 vertices, 36 indices, raw size: 840, encoded size: 289, compression ratio: 2.91
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 40 vertices, 60 indices, raw size: 1400, encoded size: 355, compression ratio: 3.94
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 202, compression ratio: 1.39
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 104 vertices, 156 indices, raw size: 3640, encoded size: 620, compression ratio: 5.87
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 32 vertices, 48 indices, raw size: 1120, encoded size: 12:03:44 | INFO: Draco encoder: Encoding mesh V2_CayBill_-2_1.
+12:03:44 | INFO: Finished glTF 2.0 export in 0.22783327102661133 s
+
+EXPORTED: public/maps/training_circuit.glb 0.48313140869140625 MB
+316, compression ratio: 3.54
+DracoEncoder | Preserve triangle order: no
+DracoEncoder | Encoded 8 vertices, 12 indices, raw size: 280, encoded size: 203, compression ratio: 1.38
+
+Blender quit

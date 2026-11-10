@@ -21,6 +21,10 @@ export const db = getFirestore(app);
 // Các Provider đăng nhập
 export const googleProvider = new GoogleAuthProvider();
 export const facebookProvider = new FacebookAuthProvider();
+facebookProvider.addScope('public_profile');
+facebookProvider.setCustomParameters({
+  'display': 'popup'
+});
 
 // Hàm tiện ích đăng nhập
 export const signInWithGoogle = () => signInWithPopup(auth, googleProvider);
