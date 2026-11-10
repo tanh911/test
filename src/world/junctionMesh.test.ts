@@ -189,3 +189,41 @@ describe('Unified Junction Architecture (buildJunctionMesh) - Kiểm Thử Hình
     expect(maxAreaDiff).toBeLessThan(0.05);
   });
 });
+
+// ── Winding regression: mọi quad junction phải cross < 0 trong mặt (x,z) —
+// cùng chiều với ribbon; cross > 0 bị backface-cull từ trên cao (nhựa "biến mất",
+// lộ nền đá phía dưới) — bug thật đã bị chụp màn hình trên bigMap + muenchen.
+import { generateBigMap } from '../data/maps/bigMap';
+
+function quadCross(q: { a: number[]; b: number[]; c: number[]; d: number[] }): number {
+  return (q.b[0] - q.a[0]) * (q.c[2] - q.a[2]) - (q.b[2] - q.a[2]) * (q.c[0] - q.a[0]);
+}
+
+describe('junction winding (cross < 0 khớp ribbon — chống backface-cull)', () => {
+  it('mọi asphalt/sidewalk quad của mọi giao lộ có cross < 0', () => {
+    const maps: Array<[string, GameMap]> = [
+      ['muenchen', muenchenJson as unknown as GameMap],
+      ['bigMap', generateBigMap() as unknown as GameMap]
+    ];
+    for (const [name, map] of maps) {
+      const seen = new Set<string>();
+      let checked = 0;
+      let bad = 0;
+      for (const ix of map.intersections) {
+        if (seen.has(ix.nodeId)) continue;
+        seen.add(ix.nodeId);
+        const n = nodeById(map, ix.nodeId);
+        if (!n) continue;
+        const roads = roadsAtNode(map, ix.nodeId);
+        if (roads.length < 2) continue;
+        const junc = buildJunctionMesh(n.x, n.z, roads);
+        for (const q of [...junc.asphaltQuads, ...junc.sidewalkQuads]) {
+          checked++;
+          if (quadCross(q) > 0) bad++;
+        }
+      }
+      expect(checked).toBeGreaterThan(100);
+      expect(bad).toBe(0);
+    }
+  });
+});

@@ -304,36 +304,60 @@ export function buildJunctionMesh(
   const vec2s = perimeter.map(([x, z]) => new THREE.Vector2(x, z));
   const tris = THREE.ShapeUtils.triangulateShape(vec2s, []);
 
+  // WINDING: ribbon chuẩn hóa cross < 0 trong mặt (x,z) (nhìn từ +Y xuống thấy mặt trên).
+  // Earcut trả tam giác cross > 0 → bị backface-cull từ trên cao (nhựa junction "biến mất",
+  // lộ nền đá phía dưới). Chuẩn hóa mọi tam giác về cross < 0.
   for (const [i0, i1, i2] of tris) {
     const p0 = perimeter[i0];
     const p1 = perimeter[i1];
     const p2 = perimeter[i2];
-    asphaltQuads.push({
-      a: [p0[0], P_Y, p0[1]],
-      b: [p1[0], P_Y, p1[1]],
-      c: [p2[0], P_Y, p2[1]],
-      d: [p2[0], P_Y, p2[1]]
-    });
+    const cross = (p1[0] - p0[0]) * (p2[1] - p0[1]) - (p1[1] - p0[1]) * (p2[0] - p0[0]);
+    if (cross > 0) {
+      // đảo: tam giác (p0, p2, p1)
+      asphaltQuads.push({
+        a: [p0[0], P_Y, p0[1]],
+        b: [p2[0], P_Y, p2[1]],
+        c: [p1[0], P_Y, p1[1]],
+        d: [p1[0], P_Y, p1[1]]
+      });
+    } else {
+      asphaltQuads.push({
+        a: [p0[0], P_Y, p0[1]],
+        b: [p1[0], P_Y, p1[1]],
+        c: [p2[0], P_Y, p2[1]],
+        d: [p2[0], P_Y, p2[1]]
+      });
+    }
   }
 
   // Dựng vỉa hè và bó vỉa từ các curbEdges
   for (const edge of curbEdges) {
     const { p1, p2, out1, out2 } = edge;
 
-    // Mặt trên phẳng của vỉa hè
-    sidewalkQuads.push({
-      a: [p1[0], SIDEWALK_H, p1[1]],
-      b: [p2[0], SIDEWALK_H, p2[1]],
-      c: [out2[0], SIDEWALK_H, out2[1]],
-      d: [out1[0], SIDEWALK_H, out1[1]]
-    });
+    // Mặt trên phẳng của vỉa hè (chuẩn hóa cross < 0)
+    const swCross = (p2[0] - p1[0]) * (out2[1] - p1[1]) - (p2[1] - p1[1]) * (out2[0] - p1[0]);
+    if (swCross > 0) {
+      sidewalkQuads.push({
+        a: [p1[0], SIDEWALK_H, p1[1]],
+        b: [out1[0], SIDEWALK_H, out1[1]],
+        c: [out2[0], SIDEWALK_H, out2[1]],
+        d: [p2[0], SIDEWALK_H, p2[1]]
+      });
+    } else {
+      sidewalkQuads.push({
+        a: [p1[0], SIDEWALK_H, p1[1]],
+        b: [p2[0], SIDEWALK_H, p2[1]],
+        c: [out2[0], SIDEWALK_H, out2[1]],
+        d: [out1[0], SIDEWALK_H, out1[1]]
+      });
+    }
 
-    // Mặt curb đứng
+    // Mặt curb đứng — normal quay về PHẦ ĐƯỜNG (ngược hướng outward) để nhìn từ xe thấy mặt curb
     curbQuads.push({
-      a: [p1[0], 0, p1[1]],
-      b: [p1[0], SIDEWALK_H, p1[1]],
-      c: [p2[0], SIDEWALK_H, p2[1]],
-      d: [p2[0], 0, p2[1]]
+      a: [p2[0], 0, p2[1]],
+      b: [p2[0], SIDEWALK_H, p2[1]],
+      c: [p1[0], SIDEWALK_H, p1[1]],
+      d: [p1[0], 0, p1[1]]
     });
   }
 
