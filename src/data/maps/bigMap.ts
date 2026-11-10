@@ -1,11 +1,20 @@
-// 🗺️ bigMap.ts — generator map lưới 2km×2km (Protocol Prompt 6 / G5)
+// 🗺️ bigMap.ts — generator map lưới (Protocol Prompt 6 / G5)
 // Đường grid mỗi 100m, giao lộ luân phiên luật, nhà + props trải đều.
-// CHỈ dùng cho dev verify chunk streaming (?big=1) — production dùng map.json thật.
-import type { GameMap, MapRoad, MapSign } from './mapLoader';
+// CHỈ dùng cho dev verify chunk streaming (?big=1 / ?map=stadt) — production dùng map.json thật.
+import type { GameMap, MapRoad, MapSign, MapIntersection } from '../../world/mapLoader';
+import { roadLength, nodeById } from '../../world/mapLoader';
 
 const SPACING = 100;
-const GRID = 21; // 21×21 node = 2000m
+const GRID = 21; // 21×21 node = 2000m (big map)
 const HALF = (GRID - 1) / 2 * SPACING;
+
+// ── Stadt map: lớn hơn (3km×3km), có vòng xuyến trung tâm + zona Tempo-30 ──
+const STADT_GRID = 31; // 31×31 node = 3000m
+const STADT_HALF = (STADT_GRID - 1) / 2 * SPACING;
+const STADT_CENTER = (STADT_GRID - 1) / 2; // index node trung tâm = 15
+// Zona Tempo-30: góc dưới-trái của Stadt (i,j ∈ [0,6])
+const TEMPO30_LIMIT = 6;
+// Vòng xuyến: node trung tâm (STADT_CENTER, STADT_CENTER)
 
 function mulberry(seed: number): () => number {
   let a = seed >>> 0;
@@ -128,7 +137,7 @@ export function generateBigMap(): GameMap {
       buildings.push({
         roadId: rd.id,
         side,
-        s: 8,
+        s: 16,
         length: 50,
         floors: 2 + Math.floor(rand() * 4),
         style,
@@ -155,5 +164,209 @@ export function generateBigMap(): GameMap {
     buildings,
     props,
     spawns: { player: { roadId: 'v_10_9', s: 80, lane: 0 } }
+  };
+}
+
+/** Map Stadt: lưới 3km×3km, vòng xuyến trung tâm (Kreisverkehr), zona Tempo-30 góc dưới-trái. */
+export function generateStadtMap(): GameMap {
+  const rand = mulberry(20241109);
+  const GRID = STADT_GRID;
+  const HALF = STADT_HALF;
+  const CENTER = STADT_CENTER;
+  const nodeId = (i: number, j: number) => `s${i}_${j}`;
+
+  const isRoundaboutNode = (i: number, j: number) => i === CENTER && j === CENTER;
+  const isTempo30Zone = (i: number, j: number) => i >= 0 && i <= TEMPO30_LIMIT && j >= 0 && j <= TEMPO30_LIMIT;
+
+  const nodes: GameMap['nodes'] = [];
+  for (let i = 0; i < GRID; i++) {
+    for (let j = 0; j < GRID; j++) {
+      const isEdge = i === 0 || j === 0 || i === GRID - 1 || j === GRID - 1;
+      const isCross = i > 0 && i < GRID - 1 && j > 0 && j < GRID - 1;
+      nodes.push({
+        id: nodeId(i, j),
+        x: i * SPACING - HALF,
+        z: j * SPACING - HALF,
+        type: isCross || (isEdge && (i % 2 === 0 || j % 2 === 0)) ? 'intersection' : 'end'
+      });
+    }
+  }
+
+  const roads: MapRoad[] = [];
+  const signs: MapSign[] = [];
+  const buildings: GameMap['buildings'] = [];
+  const props: GameMap['props'] = [];
+  const intersections: MapIntersection[] = [];
+  const styles: Array<'altbau' | 'backstein' | 'neubau'> = ['altbau', 'backstein', 'neubau'];
+  const propTypes: GameMap['props'][number]['type'][] = [
+    'street_lamp', 'tree', 'bollard', 'trash_bin', 'bench', 'litfasssaeule'
+  ];
+
+  // ── Đường ngang + dọc giữa các node ──
+  // Trong zona Tempo-30: speedLimit 30, laneWidth 2.5; ngoài ra: 50, laneWidth 3.0
+  for (let j = 0; j < GRID; j++) {
+    for (let i = 0; i < GRID - 1; i++) {
+      const cross = (i + j) % 2 === 0;
+      if (!cross && i % 3 !== 0) continue;
+      const in30 = isTempo30Zone(i, j) || isTempo30Zone(i + 1, j);
+      roads.push({
+        id: `h_${i}_${j}`,
+        from: nodeId(i, j),
+        to: nodeId(i + 1, j),
+        points: [[i * SPACING - HALF, j * SPACING - HALF], [(i + 1) * SPACING - HALF, j * SPACING - HALF]],
+        lanesForward: 1,
+        lanesBackward: 1,
+        laneWidth: in30 ? 2.5 : 3.0,
+        sidewalk: { left: true, right: true },
+        bikeLane: { left: false, right: false },
+        parking: { left: i % 2 === 0 ? 'parallel' : 'none', right: i % 3 === 0 ? 'parallel' : 'none' },
+        speedLimit: in30 ? 30 : 50,
+        priority: 'equal',
+        surface: in30 ? 'asphalt_worn' : 'asphalt'
+      });
+    }
+  }
+  for (let i = 0; i < GRID; i++) {
+    for (let j = 0; j < GRID - 1; j++) {
+      const cross = (i + j) % 2 === 0;
+      if (!cross && j % 3 !== 0) continue;
+      const in30 = isTempo30Zone(i, j) || isTempo30Zone(i, j + 1);
+      roads.push({
+        id: `v_${i}_${j}`,
+        from: nodeId(i, j),
+        to: nodeId(i, j + 1),
+        points: [[i * SPACING - HALF, j * SPACING - HALF], [i * SPACING - HALF, (j + 1) * SPACING - HALF]],
+        lanesForward: 1,
+        lanesBackward: 1,
+        laneWidth: in30 ? 2.5 : 3.0,
+        sidewalk: { left: true, right: true },
+        bikeLane: { left: false, right: false },
+        parking: { left: 'none', right: j % 2 === 0 ? 'parallel' : 'none' },
+        speedLimit: in30 ? 30 : 50,
+        priority: 'equal',
+        surface: in30 ? 'asphalt_worn' : 'asphalt'
+      });
+    }
+  }
+
+  // ── Giao lộ ──
+  let liCount = 0;
+  for (const n of nodes) {
+    const inner = n.x > -HALF && n.x < HALF && n.z > -HALF && n.z < HALF;
+    if (!inner) continue;
+    liCount++;
+    const roundabout = isRoundaboutNode(Math.round((n.x + HALF) / SPACING), Math.round((n.z + HALF) / SPACING));
+    let rule: MapIntersection['rule'];
+    let trafficLight: MapIntersection['trafficLight'] | null;
+    if (roundabout) {
+      rule = 'roundabout';
+      trafficLight = null;
+    } else if (liCount % 5 === 0) {
+      rule = 'traffic_light';
+      trafficLight = { cycle: 'standard', greenSeconds: 15, yellowSeconds: 3, redSeconds: 14 };
+    } else if (liCount % 3 === 0) {
+      rule = 'right_before_left';
+      trafficLight = null;
+    } else {
+      rule = 'priority_road';
+      trafficLight = null;
+    }
+    const in30 = isTempo30Zone(
+      Math.round((n.x + HALF) / SPACING),
+      Math.round((n.z + HALF) / SPACING)
+    );
+    // crosswalks tại giao lộ trongzona Tempo-30: tất cả road chạm node này
+    const cwRoads = in30 ? roads.filter((rd) => rd.from === n.id || rd.to === n.id).map((rd) => rd.id) : [];
+    intersections.push({
+      nodeId: n.id,
+      rule,
+      trafficLight,
+      crosswalks: cwRoads
+    });
+  }
+
+  // ── Biển báo StVO ──
+  // '215' Kreisverkehr trước mỗi approach dẫn vào vòng xuyến (4 hướng ở node trung tâm)
+  const rbNode = nodeId(CENTER, CENTER);
+  for (const rd of roads) {
+    if (rd.from === rbNode || rd.to === rbNode) {
+      const len = roadLength(rd);
+      // đặt biển cách node 8m, ở đầu kia node trung tâm
+      const s = rd.from === rbNode ? len - 8 : 8;
+      signs.push({ type: '215', roadId: rd.id, s, side: 'right', value: undefined });
+    }
+  }
+
+  // '274' value 30 ở đầu vàozona 30 (trên road crossing ranh giới zona)
+  // '274.1' Zona dọc dọc road trongzona 30
+  let sign30Placed = new Set<string>();
+  for (const rd of roads) {
+    const nFrom = nodeById({ nodes } as unknown as GameMap, rd.from);
+    const nTo = nodeById({ nodes } as unknown as GameMap, rd.to);
+    if (!nFrom || !nTo) continue;
+    const iFrom = Math.round((nFrom.x + HALF) / SPACING);
+    const jFrom = Math.round((nFrom.z + HALF) / SPACING);
+    const iTo = Math.round((nTo.x + HALF) / SPACING);
+    const jTo = Math.round((nTo.z + HALF) / SPACING);
+    const fromIn30 = isTempo30Zone(iFrom, jFrom);
+    const toIn30 = isTempo30Zone(iTo, jTo);
+
+    // Road dẫn vàozona 30 (một đầu trong, đầu ngoài) → '274' value 30 ở đầu ngoài
+    if (fromIn30 !== toIn30) {
+      const s = fromIn30 ? roadLength(rd) - 8 : 8;
+      const roadId = rd.id;
+      if (!sign30Placed.has(roadId)) {
+        signs.push({ type: '274', roadId, s, side: 'right', value: 30 });
+        sign30Placed.add(roadId);
+      }
+    }
+    // Cả hai đầu trongzona 30 → '274.1' Zona giữa road
+    if (fromIn30 && toIn30) {
+      signs.push({ type: '274.1', roadId: rd.id, s: roadLength(rd) / 2, side: 'right', value: undefined });
+    }
+  }
+
+  // Nhà + props dọc road (mỗi road 1 nhà + 1 prop xen kẽ)
+  let bi = 0;
+  for (const rd of roads) {
+    const side = bi % 2 === 0 ? 'left' : 'right';
+    const style = styles[Math.floor(rand() * styles.length)];
+    const dx = rd.points[1][0] - rd.points[0][0];
+    const dz = rd.points[1][1] - rd.points[0][1];
+    const len = Math.hypot(dx, dz);
+    if (len > 60) {
+      buildings.push({
+        roadId: rd.id,
+        side,
+        s: 16,
+        length: 50,
+        floors: 2 + Math.floor(rand() * 4),
+        style,
+        seed: 100 + bi
+      });
+    }
+    if (bi % 2 === 0) {
+      props.push({
+        type: propTypes[Math.floor(rand() * propTypes.length)],
+        roadId: rd.id,
+        s: 30,
+        side: side === 'left' ? 'right' : 'left'
+      });
+    }
+    bi++;
+  }
+
+  // Spawn player ở road chính gần trung tâm (hướng về vòng xuyến)
+  const spawnRoad = roads.find(r => r.id === `h_${CENTER - 1}_${CENTER}`) || roads[0];
+
+  return {
+    version: 1,
+    nodes,
+    roads,
+    intersections,
+    signs,
+    buildings,
+    props,
+    spawns: { player: { roadId: spawnRoad.id, s: SPACING * 2, lane: 0 } }
   };
 }

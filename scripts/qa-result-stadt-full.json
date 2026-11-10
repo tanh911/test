@@ -1,0 +1,415 @@
+{
+  "checks": {
+    "mapStructure": {
+      "nodes": 961,
+      "roads": 1240,
+      "intersections": 841,
+      "rules": {
+        "priority_road": 448,
+        "right_before_left": 224,
+        "traffic_light": 168,
+        "roundabout": 1
+      },
+      "signs": [
+        {
+          "type": "215",
+          "roadId": "h_15_15",
+          "side": "right"
+        },
+        {
+          "type": "215",
+          "roadId": "v_15_15",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_0_0",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_2_0",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_3_0",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_4_0",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "h_6_0",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_0_1",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_1_1",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_3_1",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_5_1",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "h_6_1",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_0_2",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_2_2",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_3_2",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_4_2",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "h_6_2",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_0_3",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_1_3",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_3_3",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_5_3",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "h_6_3",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_0_4",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_2_4",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_3_4",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_4_4",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "h_6_4",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_0_5",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_1_5",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_3_5",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_5_5",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "h_6_5",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_0_6",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_2_6",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_3_6",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "h_4_6",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "h_6_6",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_0_0",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_0_2",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_0_3",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_0_4",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "v_0_6",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_1_0",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_1_1",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_1_3",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_1_5",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "v_1_6",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_2_0",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_2_2",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_2_3",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_2_4",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "v_2_6",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_3_0",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_3_1",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_3_3",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_3_5",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "v_3_6",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_4_0",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_4_2",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_4_3",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_4_4",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "v_4_6",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_5_0",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_5_1",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_5_3",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_5_5",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "v_5_6",
+          "value": 30,
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_6_0",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_6_2",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_6_3",
+          "side": "right"
+        },
+        {
+          "type": "274.1",
+          "roadId": "v_6_4",
+          "side": "right"
+        },
+        {
+          "type": "274",
+          "roadId": "v_6_6",
+          "value": 30,
+          "side": "right"
+        }
+      ],
+      "signTypes": {
+        "215": 2,
+        "274": 14,
+        "274.1": 56
+      },
+      "speedCounts": {
+        "30": 70,
+        "50": 1170
+      },
+      "spawn": {
+        "roadId": "h_0_0",
+        "s": 200,
+        "lane": 0
+      },
+      "mapStateNpcCount": 0,
+      "mapStateLightCount": 168
+    },
+    "island": {
+      "junctionQuads": 0,
+      "roadQuads": 46
+    },
+    "trafficLightsRendered": 17,
+    "pedsRendered": 32,
+    "noConsoleError": true
+  },
+  "consoleErrors": []
+}

@@ -4,10 +4,10 @@
 // fake AO bằng vertex color tối ở chân tường. KHÔNG texture, KHÔNG PBR.
 // Ngân sách: ≤600 tris/module. Material 'building' dùng DoubleSide + vertexColors.
 import type { GameMap, MapBuilding, MapRoad } from './mapLoader';
-import { roadById, roadFullWidth } from './mapLoader';
+import { roadById, roadFullWidth, roadPointAt, roadLength } from './mapLoader';
 import { palette } from '../art/palette';
 import type { Quad } from './roadMesh';
-import { pointWithNormalAtS, polylineLength } from './roadMesh';
+
 
 type RGB = [number, number, number];
 
@@ -34,11 +34,11 @@ const WINDOW = hexRGB(palette.window);
 const ROOF = hexRGB(palette.roofTile);
 const ROOF_GREY = hexRGB('#6b6b66');
 
-const BUILDING_DEPTH = 12; // chiều sâu nhà (m)
-const FLOOR_H = 3.2;       // cao 1 tầng (m)
+const BUILDING_DEPTH = 9;  // chiều sâu nhà (m) - giảm nhẹ để tránh các nhà ở ngã rẽ cắt sâu vào nhau
+const FLOOR_H = 2.75;      // cao 1 tầng (m) - tỉ lệ Altstadt München chuẩn xác với lòng đường
 const WIN_W = 1.1;
-const WIN_H = 1.5;
-const WIN_BOTTOM = 1.0;    // đáy cửa sổ so với sàn tầng
+const WIN_H = 1.35;
+const WIN_BOTTOM = 0.85;   // đáy cửa sổ so với sàn tầng
 const AO_DARK = 0.82;      // hệ số AO chân tường
 
 function rng(seed: number): () => number {
@@ -61,8 +61,8 @@ export function buildingQuads(map: GameMap, b: MapBuilding): ColoredQuad[] {
   if (!road) return [];
   const side = b.side === 'right' ? 1 : -1;
   const half = roadFullWidth(road) / 2;
-  const frontOff = half + 2.5; // mặt tiền sát mép vỉa hè ngoài
-  const len = polylineLength(road.points);
+  const frontOff = half + 2.0; // sát mép vỉa hè, tạo tỷ lệ phố cổ Altstadt chuẩn xác
+  const len = roadLength(road);
   const s0 = Math.max(0, b.s);
   const s1 = Math.min(len, b.s + b.length);
   if (s1 - s0 < 6) return [];
@@ -71,7 +71,9 @@ export function buildingQuads(map: GameMap, b: MapBuilding): ColoredQuad[] {
   const variants = FACADE_VARIANTS[b.style] || FACADE_VARIANTS.altbau;
   const wall = hexRGB(variants[Math.floor(rand() * variants.length)]);
   const floors = Math.max(2, Math.min(6, b.floors));
-  const height = floors * FLOOR_H + 0.6;
+  // Jitter nhẹ cao độ mái theo seed để triệt tiêu Z-fighting khi các khối nhà liền kề cắt nhau
+  const heightJitter = (((b.seed * 9301 + 49297) % 233280) / 233280 - 0.5) * 0.5;
+  const height = floors * FLOOR_H + 0.6 + heightJitter;
   const isBrick = b.style === 'backstein';
   const baseWall = isBrick ? hexRGB(wallRGBHex(b)) : wall;
   const roofC = b.style === 'neubau' ? ROOF_GREY : ROOF;
@@ -80,7 +82,7 @@ export function buildingQuads(map: GameMap, b: MapBuilding): ColoredQuad[] {
 
   // điểm (s, y, off) — off dương = phía side của road
   const P = (s: number, y: number, off: number): [number, number, number] => {
-    const p = pointWithNormalAtS(road.points, s);
+    const p = roadPointAt(road, s);
     return [p.x + p.nx * side * off, y, p.z + p.nz * side * off];
   };
 
@@ -138,6 +140,7 @@ export function buildingQuads(map: GameMap, b: MapBuilding): ColoredQuad[] {
   out.push(sideWall(s0, frontOff, backOff, 0, height, baseWall, -1));
   out.push(sideWall(s1, frontOff, backOff, 0, height, baseWall, 1));
   out.push(facade(s0, s1, 0, height, backOff, baseWall, true, side));
+
 
   // ── Mái ──
   if (isBrick) {

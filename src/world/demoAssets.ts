@@ -37,11 +37,10 @@ export async function loadDemoAssets(scene: THREE.Scene, map: GameMap): Promise<
     '/simv2/car_npc_kombi_grey.glb',
     '/simv2/car_npc_suv_blue.glb',
     '/simv2/car_npc_transporter_white.glb',
-    '/simv2/tram.glb',
     ...Array.from({ length: 8 }, (_, i) => `/simv2/ped_${i + 1}.glb`)
   ];
   const loaded = await Promise.all(urls.map(u => loadGLB(loader, u).catch(() => null)));
-  const [player, sedan, kombi, suv, transporter, tram, ...peds] = loaded;
+  const [player, sedan, kombi, suv, transporter, ...peds] = loaded;
 
   const place = (obj: THREE.Group | null, x: number, z: number, rotY = 0, scale = 1) => {
     if (!obj) return;
@@ -49,7 +48,7 @@ export async function loadDemoAssets(scene: THREE.Scene, map: GameMap): Promise<
     obj.rotation.y = rotY;
     obj.scale.setScalar(scale);
     obj.traverse(o => {
-      if (o.isMesh) {
+      if ((o as THREE.Mesh).isMesh) {
         o.castShadow = true;
         o.receiveShadow = true;
       }
@@ -62,24 +61,17 @@ export async function loadDemoAssets(scene: THREE.Scene, map: GameMap): Promise<
   const p = carTransform(0, 60, r4heading, 1.5);
   place(player, p.pos[0], p.pos[2], p.rotY);
 
-  // sedan đỏ: r1 (đông), s=30 → (30,0), flow (1,0) h=π/2 → làn phải = phía nam z+1.5
-  const s = carTransform(30, 0, Math.PI / 2, 1.5);
+  // TẤT CẢ demo xe đờ ở LÀN ĐỖ song song (G1-fix: không chiếm làn chạy)
+  // r1 parking.right = parallel → làn đỗ phía nam z≈2.05, hướng đông
+  const s = carTransform(30, 2.05, Math.PI / 2, 0);
   place(sedan, s.pos[0], s.pos[2], s.rotY);
-
-  // kombi: r3 (tây) → (−50,0), flow đông h=π/2, làn phải z+1.5
-  const k = carTransform(-50, 0, Math.PI / 2, 1.5);
+  const k = carTransform(40, 2.05, Math.PI / 2, 0);
   place(kombi, k.pos[0], k.pos[2], k.rotY);
-
-  // suv đỗ r1 phía nam: x=20, z=2.05, hướng đông
   const su2 = carTransform(20, 2.05, Math.PI / 2, 0);
   place(suv, su2.pos[0], su2.pos[2], su2.rotY);
-
-  // transporter: r2 hướng nam (flow (0,1), h=0) tại (0,−25), làn phải = tây x−1.5
-  const t = carTransform(0, -25, 0, 1.5);
+  // r2 parking.right = parallel → làn đỗ phía đông x≈2.05, hướng bắc
+  const t = carTransform(2.05, -30, Math.PI, 0);
   place(transporter, t.pos[0], t.pos[2], t.rotY);
-
-  // tram: r3 giữa (−45, 0), dọc đường đông-tây, đầu về tây
-  place(tram, -45, 0, Math.PI / 2);
 
   // người đi bộ trên vỉa hè
   if (peds[0]) place(peds[0], -4.2, -15, Math.PI / 2);   // vỉa hè tây r2, nhìn đông

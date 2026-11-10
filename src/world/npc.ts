@@ -4,9 +4,9 @@
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { GameMap, MapRoad } from './mapLoader';
-import { pointAtS, roadById } from './mapLoader';
+import { pointAtS, roadById, roadLength } from './mapLoader';
 import { spawnFromMap } from './vehicle';
-import { roadsAtNode, polylineLength } from './roadMesh';
+import { roadsAtNode } from './roadMesh';
 import type { TrafficLightController, LightPhase } from './trafficLights';
 
 export interface NpcCar {
@@ -18,6 +18,11 @@ export interface NpcCar {
   group: THREE.Group;
   collisionAt: number;    // thời điểm va chạm gần nhất (để rate-limit)
   waiting: boolean;
+  signal: 'left' | 'right' | null;  // xi-nhan đang bật (null = tắt)
+  signalT: number;                  // thời gian nhấp nháy đã trôi qua
+  signalHold: number;               // giữ đèn thêm sau khi đáy vào road mới (s)
+  nextChoice?: { road: MapRoad; dir: 1 | -1 } | null; // rẽ latch 1 lần/segment (undefined = chưa latch)
+  signalLamps: THREE.Mesh[];        // 4 đèn quad, userData._blinkerSide = trái/phải
 }
 
 const NPC_SPEED_LIMIT = 11;     // ~40 km/h nội thành
@@ -27,6 +32,35 @@ const BRAKE = 8.0;
 const STOP_GAP = 6;             // khoảng cách dừng sau xe trước
 const LOOK_AHEAD = 18;          // phạm vi nhìn xe trước
 const APPROACH_DIST = 25;       // bắt đầu giảm tốc đến junction
+const SIGNAL_DIST = 35;         // bật xi-nhan trước junction (m) — trước cả vùng giảm tốc
+const TURN_THRESHOLD = 0.35;    // chênh heading > ~20° = rẽ, ngược lại đi thẳng
+const BLINK_PERIOD = 0.55;      // chu kỳ nhấp nháy xi-nhan (s)
+const BLINK_HOLD = 1.2;         // giữ đèn thêm sau khi đáy vào road mới (s)
+
+// 🎇 xi-nhan NPC: 4 đèn quad (trước/sau × trái/phải) gắn vào bbox GLB — dùng chung geo/material
+const blinkerGeo = new THREE.BoxGeometry(0.03, 0.09, 0.18);
+const blinkerMat = new THREE.MeshBasicMaterial({ color: 0xffa733 });
+
+function attachBlinkers(group: THREE.Group): THREE.Mesh[] {
+  // box.type xe khác nhau (sedan/kombi/suv/transporter) → đo bbox để đèn ôm sát thân
+  const box = new THREE.Box3().setFromObject(group);
+  const size = box.getSize(new THREE.Vector3());
+  const hw = size.x / 2;
+  const hl = size.z / 2;
+  const lamps: THREE.Mesh[] = [];
+  for (const side of ['left', 'right'] as const) {
+    const x = (side === 'left' ? -1 : 1) * (hw + 0.03); // local −X = trái flow, +X = phải flow
+    for (const zi of [-1, 1]) {
+      const m = new THREE.Mesh(blinkerGeo, blinkerMat);
+      m.position.set(x, size.y * 0.62, zi * (hl - 0.02)); // mặt trước GLB = −Z
+      m.userData._blinkerSide = side;
+      m.visible = false; // tắt mặc định → 0 draw call khi không rẽ
+      group.add(m);
+      lamps.push(m);
+    }
+  }
+  return lamps;
+}
 
 export interface NpcUpdateInput {
   player: { x: number; z: number } | null;
@@ -64,9 +98,10 @@ export class NPCController {
       try {
         const gltf = await loader.loadAsync(u);
         gltf.scene.traverse(o => {
-          if (o.isMesh) {
-            o.castShadow = true;
-            const mats = Array.isArray(o.material) ? o.material : [o.material];
+          if ((o as THREE.Mesh).isMesh) {
+            const mesh = o as THREE.Mesh;
+            mesh.castShadow = true;
+            const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
             for (const m of mats) m.side = THREE.FrontSide;
           }
         });
@@ -79,15 +114,17 @@ export class NPCController {
 
     // spawn rải rác trên các road có đủ chiều dài — TRÁNH vùng spawn player (25 m)
     const playerSpawn = spawnFromMap(this.map);
-    const roads = this.map.roads.filter(r => polylineLength(r.points) > 30);
+    const roads = this.map.roads.filter(r => roadLength(r) > 30);
     let placed = 0;
     let attempts = 0;
     while (placed < count && attempts < count * 10 && roads.length) {
       attempts++;
       const road = roads[Math.floor(Math.random() * roads.length)];
-      const len = polylineLength(road.points);
+      const len = roadLength(road);
       const s = 10 + Math.random() * Math.max(1, len - 20);
-      const dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+      let dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
+      if (road.lanesBackward === 0) dir = 1;
+      else if (road.lanesForward === 0) dir = -1;
       const pt = pointAtS(road, s);
       if (Math.hypot(pt.x - playerSpawn.x, pt.z - playerSpawn.z) < 25) continue;
       const npc = this.makeNpc(road, s, dir, placed);
@@ -102,6 +139,7 @@ export class NPCController {
     const group = tpl.clone(true);
     group.name = `npc_${idx}`;
     this.group.add(group);
+    const lamps = attachBlinkers(group);
     return {
       roadId: road.id,
       s,
@@ -110,7 +148,12 @@ export class NPCController {
       targetSpeed: NPC_SPEED_LIMIT * (0.75 + Math.random() * 0.25),
       group,
       collisionAt: -10,
-      waiting: false
+      waiting: false,
+      signal: null,
+      signalT: 0,
+      signalHold: 0,
+      nextChoice: undefined,
+      signalLamps: lamps
     };
   }
 
@@ -118,7 +161,7 @@ export class NPCController {
     let l = this.roadLen.get(roadId);
     if (l === undefined) {
       const r = roadById(this.map, roadId);
-      l = r ? polylineLength(r.points) : 0;
+      l = r ? roadLength(r) : 0;
       this.roadLen.set(roadId, l);
     }
     return l;
@@ -140,13 +183,64 @@ export class NPCController {
     return dir > 0 ? road.to : road.from;
   }
 
-  /** Chọn road kế tại node (ưu tiên rẽ, không U-turn trừ khi cụt) */
-  private pickNextRoad(road: MapRoad, node: string): { road: MapRoad; dir: 1 | -1 } | null {
-    const candidates = roadsAtNode(this.map, node).filter(r => r.road.id !== road.id);
-    if (!candidates.length) return null; // cụt → U-turn
+  /** Chọn road kế tại node (ưu tiên rẽ, không U-turn trừ khi cụt).
+   *  Với vòng xuyến (Kreisverkehr): bắt buộc rẽ phải (không cắt vòng, không rẽ trái).
+   *  npcDir: hướng NPC đang đi trên road hiện tại (+1: from→to, −1: to→from). */
+  private pickNextRoad(road: MapRoad, node: string, npcDir: 1 | -1): { road: MapRoad; dir: 1 | -1 } | null {
+    const candidates = roadsAtNode(this.map, node).filter(r => {
+      if (r.road.id === road.id) return false;
+      const candDir: 1 | -1 = r.road.from === node ? 1 : -1;
+      return candDir === 1 ? r.road.lanesForward > 0 : r.road.lanesBackward > 0;
+    });
+    if (!candidates.length) return null; // cụt hoặc không có đường đi hợp lệ → U-turn
+
+    const ix = this.map.intersections.find((i) => i.nodeId === node);
+    const isRoundabout = ix?.rule === 'roundabout';
+
+    if (isRoundabout) {
+      // Hướng ra khỏi node trên road hiện tại (để xác định "phải" đối chiếu)
+      const curExitH = npcDir > 0
+        ? this.exitHeading(road, 1)   // ra khỏi road.to, flow from→to
+        : this.exitHeading(road, -1); // ra khỏi road.from, flow to→from
+      let best: { road: MapRoad; dir: 1 | -1 } | null = null;
+      let bestScore = Infinity;
+      for (const cand of candidates) {
+        const candDir: 1 | -1 = cand.road.from === node ? 1 : -1;
+        const nextH = this.enterHeading(cand.road, candDir);
+        let d = nextH - curExitH;
+        while (d > Math.PI) d -= Math.PI * 2;
+        while (d < -Math.PI) d += Math.PI * 2;
+        // rẽ phải = d < 0 (âm). Chọn right-most (d âm nhất, gần −π/2)
+        const score = d;
+        if (score < bestScore) { bestScore = score; best = { road: cand.road, dir: candDir }; }
+      }
+      return best ?? ({ road: candidates[0].road, dir: candidates[0].road.from === node ? 1 : -1 });
+    }
+
     const pick = candidates[Math.floor(Math.random() * candidates.length)];
     const dir: 1 | -1 = pick.road.from === node ? 1 : -1;
     return { road: pick.road, dir };
+  }
+
+  /** Heading flow của NPC tại điểm RA KHỎI road (chạm node phía trước) */
+  private exitHeading(road: MapRoad, dir: 1 | -1): number {
+    const pt = pointAtS(road, roadLength(road)); // roadPointAt tự clamp s
+    return dir > 0 ? pt.heading : pt.heading + Math.PI;
+  }
+
+  /** Heading flow của NPC ngay khi VÀO road mới (đầu from nếu dir>0, đầu to nếu dir<0) */
+  private enterHeading(next: MapRoad, dir: 1 | -1): number {
+    const pt = pointAtS(next, dir > 0 ? 0 : roadLength(next));
+    return dir > 0 ? pt.heading : pt.heading + Math.PI;
+  }
+
+  /** Chênh heading chuẩn hóa [−π, π]: h tăng = RẼ TRÁI (quy ước vehicle.ts); < ngưỡng = đi thẳng */
+  private classifyTurn(curH: number, nextH: number): 'left' | 'right' | null {
+    let d = nextH - curH;
+    while (d > Math.PI) d -= Math.PI * 2;
+    while (d < -Math.PI) d += Math.PI * 2;
+    if (Math.abs(d) < TURN_THRESHOLD) return null;
+    return d > 0 ? 'left' : 'right';
   }
 
   update(dt: number, input: NpcUpdateInput): void {
@@ -161,7 +255,8 @@ export class NPCController {
       if (!road) continue;
       const len = this.len(npc.roadId);
       const half = (road.lanesForward + road.lanesBackward) * road.laneWidth / 2;
-      const laneOff = 0.5 * road.laneWidth;
+      const isSingleLaneOneway = road.lanesBackward === 0 && road.lanesForward === 1;
+      const laneOff = isSingleLaneOneway ? 0 : 0.5 * road.laneWidth;
 
       // ── 1. tốc độ mục tiêu ──
       let target = npc.targetSpeed;
@@ -223,6 +318,27 @@ export class NPCController {
         target = Math.min(target, TURN_SPEED);
       }
 
+      // ── 1b. đèn xi-nhan: latch quyết định 1 lần/segment + phân loại trái/phải/thẳng ──
+      if (npc.signalHold > 0) {
+        npc.signalHold -= dt; // đang giữ lần rẽ vừa qua → giữ nguyên signal
+      } else if (distJunction < SIGNAL_DIST) {
+        if (npc.nextChoice === undefined) {
+          npc.nextChoice = this.pickNextRoad(road, nodeAheadId, npc.dir);
+          if (!npc.nextChoice) {
+            npc.signal = 'left'; // cụt → U-turn, tín hiệu trái
+          } else {
+            const curH = this.exitHeading(road, npc.dir);
+            const nextH = this.enterHeading(npc.nextChoice.road, npc.nextChoice.dir);
+            npc.signal = this.classifyTurn(curH, nextH); // null = đi thẳng
+          }
+          npc.signalT = 0;
+        }
+        // đã latch trước đó trong cùng segment → giữ nguyên (không đổi quyết định giữa đường)
+      } else {
+        npc.signal = null; // ngoài vùng + hết hold → tắt đèn
+      }
+      if (npc.signal) npc.signalT += dt;
+
       // ── 2. tích phân tốc độ ──
       if (npc.speed < target) npc.speed = Math.min(target, npc.speed + ACCEL * dt);
       else npc.speed = Math.max(target, npc.speed - BRAKE * dt);
@@ -230,22 +346,32 @@ export class NPCController {
       // ── 3. di chuyển + chuyển road ──
       npc.s += npc.dir * npc.speed * dt;
       if (npc.s > len || npc.s < 0) {
-        const next = this.pickNextRoad(road, nodeAheadId);
+        // tái dùng quyết định đã latch để đèn khớp với đường NPC thực sự đi vào
+        const next = npc.nextChoice !== undefined ? npc.nextChoice : this.pickNextRoad(road, nodeAheadId, npc.dir);
         if (next) {
           npc.roadId = next.road.id;
           npc.dir = next.dir;
           // vào road mới từ đầu node
           npc.s = npc.dir > 0 ? 2 : this.len(npc.roadId) - 2;
+          npc.signalHold = BLINK_HOLD;
         } else {
           npc.dir = (npc.dir * -1) as 1 | -1;
           npc.s = Math.max(0.5, Math.min(len - 0.5, npc.s));
+          npc.signalHold = BLINK_HOLD;
         }
+        npc.signalT = 0;
+        npc.nextChoice = undefined; // latch lại cho segment mới
       }
 
       // ── 4. pose ──
       const p = this.pose(road, npc.s, npc.dir, laneOff);
       npc.group.position.set(p.x, 0, p.z);
       npc.group.rotation.y = p.ry;
+      // ── 5. xi-nhan nhấp nháy (chỉ rẽ mới có draw call) ──
+      const blinkOn = npc.signal !== null && (npc.signalT % BLINK_PERIOD) < BLINK_PERIOD / 2;
+      for (const lamp of npc.signalLamps) {
+        lamp.visible = blinkOn && (lamp.userData._blinkerSide as string) === npc.signal;
+      }
       // cull xa
       const camDist = input.player ? Math.hypot(p.x - input.player.x, p.z - input.player.z) : 1e9;
       npc.group.visible = camDist < 350;

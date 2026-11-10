@@ -30,6 +30,12 @@ export interface RuleState {
   gear: 'P' | 'R' | 'N' | 'D'; // số sân hiện tại
   violationsBySeverity: { major: Violation[]; minor: Violation[] }; // báo cáo chi tiết Fahrprüfung
   elapsedTime: number; // thời gian thi (giây)
+  steerAngle?: number;
+  rpm?: number;
+  speedLimit?: number;
+  camMode?: 'cabin' | 'outside' | 'mirror' | 'shoulder';
+  throttle?: number;
+  brake?: number;
 }
 
 // 🗺️ MiniMap (Prompt 10): top-down quanh player, đọc mỗi frame riêng
@@ -155,11 +161,13 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   renderer.shadowMap.type = THREE.PCFShadowMap;
   container.appendChild(renderer.domElement);
 
-  // ── Ánh sáng — Protocol mục 5 ──
-  const hemi = new THREE.HemisphereLight(0xbfd6ef, 0x59503a, 0.85);
+  // ── Ánh sáng Bavarian Altstadt — Cân bằng ambient tự nhiên, chống mặt tường đen xịt ──
+  const hemi = new THREE.HemisphereLight(0xdcebfa, 0x7a7364, 1.15);
   scene.add(hemi);
-  const sun = new THREE.DirectionalLight(0xfff4e0, 2.4);
-  sun.position.set(120, 160, 60);
+  const ambient = new THREE.AmbientLight(0xfff5ea, 0.42);
+  scene.add(ambient);
+  const sun = new THREE.DirectionalLight(0xfff2dc, 1.9);
+  sun.position.set(140, 200, 90);
   sun.castShadow = true;
   sun.shadow.mapSize.set(2048, 2048);
   sun.shadow.camera.left = -120;
@@ -202,7 +210,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   let fpsFrames = 0;
   let fpsLast = performance.now();
   // Camera mode: 'cabin' (mặc định), 'outside' (third-person), 'mirror', 'shoulder'
-  let camMode = 'cabin';
+  let camMode: 'cabin' | 'outside' | 'mirror' | 'shoulder' = 'cabin';
   let shoulderHold = 0; // thời gian giữ phím C (giây)
   let keyMPrev = false;
   let keyVPrev = false;
@@ -214,6 +222,12 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   let ruleEngine: RuleEngine | null = null;
   const npcCollisions: string[] = [];
   const staticRects = buildingRects(map);
+  let headYaw = 0;
+  let headPitch = 0;
+  let isMouseLooking = false;
+  let lastMouseX = 0;
+  let lastMouseY = 0;
+
   if (driveMode) {
     camera.rotation.order = 'YXZ';
     const driveKey = (e: KeyboardEvent, down: boolean) => {
@@ -222,6 +236,29 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     };
     window.addEventListener('keydown', e => driveKey(e, true));
     window.addEventListener('keyup', e => driveKey(e, false));
+
+    const onMouseDown = (e: MouseEvent) => {
+      isMouseLooking = true;
+      lastMouseX = e.clientX;
+      lastMouseY = e.clientY;
+    };
+    const onMouseMove = (e: MouseEvent) => {
+      if (isMouseLooking && camMode === 'cabin') {
+        const dx = e.clientX - lastMouseX;
+        const dy = e.clientY - lastMouseY;
+        headYaw -= dx * 0.005;
+        headPitch -= dy * 0.005;
+        headYaw = Math.max(-1.45, Math.min(1.45, headYaw));
+        headPitch = Math.max(-0.4, Math.min(0.4, headPitch));
+        lastMouseX = e.clientX;
+        lastMouseY = e.clientY;
+      }
+    };
+    const onMouseUp = () => { isMouseLooking = false; };
+    container.addEventListener('mousedown', onMouseDown);
+    window.addEventListener('mousemove', onMouseMove);
+    window.addEventListener('mouseup', onMouseUp);
+
     createVehicle(scene, map).then(v => { vehicle = v; });
     ruleEngine = new RuleEngine(map, world.controllers);
     // NPC traffic (nạp GLB nền, không chặn render)
@@ -238,15 +275,17 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         for (const r of staticRects) {
           if (vehicle.state.x > r.minX - 0.9 && vehicle.state.x < r.maxX + 0.9 &&
               vehicle.state.z > r.minZ - 0.9 && vehicle.state.z < r.maxZ + 0.9) {
+            const near = ruleEngine?.nearestRoad({ x: vehicle.state.x, z: vehicle.state.z, heading: vehicle.state.heading, speed: vehicle.state.speed });
+            const half = near ? (near.road.lanesForward + near.road.lanesBackward) * near.road.laneWidth / 2 : 3;
+            if (near && near.dist < half + 1.2) {
+              continue;
+            }
             vehicle.state.speed = 0;
             vehicle.syncPose();
             if (npcCollisions[npcCollisions.length - 1] !== 'building') npcCollisions.push('building');
             break;
           }
         }
-        const sp = vehicle.seatPose();
-        camera.position.set(sp.x, sp.y, sp.z);
-        camera.rotation.set(-0.03, sp.yaw, 0);
         // NPC + rule engine
         npcs?.update(dt, { player: { x: vehicle.state.x, z: vehicle.state.z }, controllers: world.controllers, collisions: npcCollisions });
         // ── số sân: 1=P, 2=R, 3=N, 4=D ──
@@ -270,7 +309,8 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           steer: keys.has('KeyD') ? 1 : keys.has('KeyA') ? -1 : 0,
           gear,
           signalLeft: keys.has('KeyQ'),
-          signalRight: keys.has('KeyE')
+          signalRight: keys.has('KeyE'),
+          boost: keys.has('ShiftLeft') || keys.has('ShiftRight')
         });
         // ── Camera mode: M = gương, C giữ = qua vai, V = camera ngoài ──
         if (keys.has('KeyM') && !keyMPrev) {
@@ -327,9 +367,32 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           camera.lookAt(vehicle.state.x + Math.sin(h) * 8, 1.5, vehicle.state.z + Math.cos(h) * 8);
         } else {
           // Cabin (mặc định)
+          // Liếc nhìn trái / phải bằng phím mũi tên hoặc Z/X (quan sát ngã tư StVO Blickführung)
+          let glanceYaw = 0;
+          if (keys.has('ArrowLeft') || keys.has('KeyZ')) glanceYaw = 1.15; // ~66° trái
+          else if (keys.has('ArrowRight') || keys.has('KeyX')) glanceYaw = -1.15; // ~66° phải
+
+          if (glanceYaw !== 0) {
+            headYaw += (glanceYaw - headYaw) * Math.min(1, 10 * dt);
+          } else if (!isMouseLooking) {
+            // Tự động về vị trí nhìn thẳng mượt mà
+            headYaw += (0 - headYaw) * Math.min(1, 6 * dt);
+            headPitch += (0 - headPitch) * Math.min(1, 6 * dt);
+          }
+
+          // Động học rung lắc cabin theo tốc độ, gia tốc và góc đánh lái
+          const steerAngle = vehicle.steerAngle || 0;
+          const speedNorm = Math.min(1, Math.abs(vehicle.state.speed) / 18);
+          const roll = -steerAngle * speedNorm * 0.06;
+          const pitchSquat = keys.has('KeyS') ? -0.025 : (keys.has('KeyW') ? 0.015 : 0);
+
+          // Dynamic FOV theo tốc độ: cảm giác tốc độ sống động
+          camera.fov = 66 + Math.min(10, (Math.abs(vehicle.state.speed) / 25) * 8);
+          camera.updateProjectionMatrix();
+
           const sp = vehicle.seatPose();
           camera.position.set(sp.x, sp.y, sp.z);
-          camera.rotation.set(-0.03, sp.yaw, 0);
+          camera.rotation.set(-0.03 + headPitch + pitchSquat, sp.yaw + headYaw, roll);
         }
       } else {
         // chờ GLB load — camera tạm tại spawn
@@ -419,15 +482,31 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     }),
     getRuleState: (): RuleState | null => {
       if (!ruleEngine || !vehicle) return null;
+      const speedKmh = Math.max(0, Math.round(vehicle.state.speed * 3.6));
+      let rpm = 800; // vòng tua idle
+      if (vehicle.state.gear === 'P' || vehicle.state.gear === 'N') {
+        rpm = keys.has('KeyW') ? 4200 : 800;
+      } else if (vehicle.state.gear === 'R') {
+        rpm = 800 + Math.min(3200, Math.round(Math.abs(speedKmh) * 140));
+      } else {
+        const gearSpeed = speedKmh < 24 ? speedKmh : speedKmh < 45 ? speedKmh - 20 : speedKmh < 68 ? speedKmh - 40 : speedKmh - 62;
+        rpm = Math.min(6200, Math.max(900, 900 + Math.round(gearSpeed * 85)));
+      }
       return {
         violations: ruleEngine.violations.slice(-5),
         bestanden: ruleEngine.bestanden,
         summary: ruleEngine.summary,
-        speedKmh: Math.max(0, Math.round(vehicle.state.speed * 3.6)),
+        speedKmh,
         signal: vehicle.signal,
         gear: vehicle.state.gear,
         violationsBySeverity: ruleEngine.violationsBySeverity,
-        elapsedTime: ruleEngine.elapsed
+        elapsedTime: ruleEngine.elapsed,
+        steerAngle: vehicle.steerAngle,
+        rpm,
+        speedLimit: ruleEngine.currentSpeedLimit ?? 50,
+        camMode,
+        throttle: vehicle.throttle,
+        brake: vehicle.brake
       };
     },
     // 🗺️ mini-map: gom snapshot mỗi frame từ RAF riêng của MiniMap — không dùng chung RAF render

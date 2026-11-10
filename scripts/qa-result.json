@@ -1,0 +1,419 @@
+{
+  "scenarios": {
+    "blinkerLatchAndHold": [
+      {
+        "step": "latch yêu cầu: signal = left",
+        "signal": "left",
+        "x": -67.1,
+        "z": 1.5,
+        "heading": 1.62,
+        "speedKmh": 13,
+        "violations": []
+      },
+      {
+        "step": "hold +0.4s: phải vẫn left",
+        "signal": "left",
+        "x": -65.3,
+        "z": 1.3,
+        "heading": 1.667,
+        "speedKmh": 15,
+        "violations": []
+      },
+      {
+        "step": "hold +0.9s: phải vẫn left",
+        "signal": "left",
+        "x": -61.7,
+        "z": 1,
+        "heading": 1.667,
+        "speedKmh": 19,
+        "violations": []
+      },
+      {
+        "step": "hold +1.5s: biên 1.6s",
+        "signal": null,
+        "x": -58.2,
+        "z": 0.6,
+        "heading": 1.667,
+        "speedKmh": 20,
+        "violations": []
+      },
+      {
+        "step": "+2.0s: phải tắt (null)",
+        "signal": null,
+        "x": -55.6,
+        "z": 0.4,
+        "heading": 1.667,
+        "speedKmh": 21,
+        "violations": [
+          "collision"
+        ]
+      }
+    ],
+    "fps": 24,
+    "nosignal": {
+      "samples": [
+        {
+          "step": "lần 0 thẳng bước 0",
+          "x": -70,
+          "z": 1.5,
+          "kmh": 0,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 8",
+          "x": -69.9,
+          "z": 1.5,
+          "kmh": 3,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 16",
+          "x": -69.6,
+          "z": 1.5,
+          "kmh": 6,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 24",
+          "x": -69.1,
+          "z": 1.5,
+          "kmh": 8,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 32",
+          "x": -68.5,
+          "z": 1.5,
+          "kmh": 10,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 40",
+          "x": -67.8,
+          "z": 1.5,
+          "kmh": 12,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 48",
+          "x": -66.9,
+          "z": 1.5,
+          "kmh": 13,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 56",
+          "x": -66,
+          "z": 1.5,
+          "kmh": 15,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 64",
+          "x": -65,
+          "z": 1.5,
+          "kmh": 16,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 72",
+          "x": -63.9,
+          "z": 1.5,
+          "kmh": 17,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 80",
+          "x": -62.7,
+          "z": 1.5,
+          "kmh": 18,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 88",
+          "x": -61.5,
+          "z": 1.5,
+          "kmh": 19,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 96",
+          "x": -60.2,
+          "z": 1.5,
+          "kmh": 19,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 104",
+          "x": -58.9,
+          "z": 1.5,
+          "kmh": 20,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 112",
+          "x": -57.6,
+          "z": 1.5,
+          "kmh": 21,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 120",
+          "x": -56.2,
+          "z": 1.5,
+          "kmh": 21,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 128",
+          "x": -54.7,
+          "z": 1.5,
+          "kmh": 22,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 136",
+          "x": -53.3,
+          "z": 1.5,
+          "kmh": 22,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 144",
+          "x": -51.8,
+          "z": 1.5,
+          "kmh": 22,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 152",
+          "x": -50.3,
+          "z": 1.5,
+          "kmh": 23,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 160",
+          "x": -48.8,
+          "z": 1.5,
+          "kmh": 23,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 168",
+          "x": -47.2,
+          "z": 1.5,
+          "kmh": 23,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 176",
+          "x": -45.7,
+          "z": 1.5,
+          "kmh": 23,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 184",
+          "x": -44.1,
+          "z": 1.5,
+          "kmh": 24,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 192",
+          "x": -42.5,
+          "z": 1.5,
+          "kmh": 24,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 200",
+          "x": -40.9,
+          "z": 1.5,
+          "kmh": 24,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 208",
+          "x": -39.3,
+          "z": 1.5,
+          "kmh": 24,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 216",
+          "x": -37.7,
+          "z": 1.5,
+          "kmh": 24,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 224",
+          "x": -36.1,
+          "z": 1.5,
+          "kmh": 24,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 232",
+          "x": -34.5,
+          "z": 1.5,
+          "kmh": 24,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 240",
+          "x": -32.8,
+          "z": 1.5,
+          "kmh": 25,
+          "violations": []
+        },
+        {
+          "step": "lần 0 thẳng bước 248",
+          "x": -31.2,
+          "z": 1.5,
+          "kmh": 25,
+          "violations": []
+        },
+        {
+          "step": "lần 0 tới điểm bắt đầu rẽ x≈-30",
+          "x": -29.94771734541269,
+          "z": 1.5,
+          "kmh": 25,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 0",
+          "x": -29.3,
+          "z": 1.5,
+          "kmh": 25,
+          "signal": null,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 6",
+          "x": -28.1,
+          "z": 1.4,
+          "kmh": 25,
+          "signal": null,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 12",
+          "x": -26.9,
+          "z": 1.3,
+          "kmh": 25,
+          "signal": null,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 18",
+          "x": -25.6,
+          "z": 1.2,
+          "kmh": 25,
+          "signal": null,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 24",
+          "x": -24.4,
+          "z": 1,
+          "kmh": 25,
+          "signal": null,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 30",
+          "x": -23.2,
+          "z": 0.8,
+          "kmh": 25,
+          "signal": null,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 36",
+          "x": -22,
+          "z": 0.5,
+          "kmh": 25,
+          "signal": null,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 42",
+          "x": -20.8,
+          "z": 0.1,
+          "kmh": 25,
+          "signal": null,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 48",
+          "x": -19.6,
+          "z": -0.2,
+          "kmh": 25,
+          "signal": null,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 54",
+          "x": -18.4,
+          "z": -0.7,
+          "kmh": 25,
+          "signal": null,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 60",
+          "x": -17.3,
+          "z": -1.2,
+          "kmh": 25,
+          "signal": null,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 66",
+          "x": -16.1,
+          "z": -1.7,
+          "kmh": 25,
+          "signal": null,
+          "violations": []
+        },
+        {
+          "step": "lần 0 rẽ bước 67 → nosignal ✓",
+          "x": -15.9,
+          "z": -1.8,
+          "kmh": 25,
+          "signal": null,
+          "violations": [
+            "nosignal"
+          ]
+        },
+        {
+          "step": "nosignal đã ghi nhận ✓",
+          "signal": null,
+          "x": -15.9,
+          "z": -1.8,
+          "heading": 2.024,
+          "speedKmh": 25,
+          "violations": [
+            "nosignal"
+          ]
+        }
+      ],
+      "fired": true
+    },
+    "bigMap": {
+      "canvases": 2,
+      "stats": {
+        "drawCalls": 128,
+        "triangles": 53206,
+        "cellsLoaded": 28,
+        "cellsTotal": 452,
+        "quads": 199708
+      },
+      "mapStatePlayers": true
+    }
+  },
+  "consoleErrors": []
+}

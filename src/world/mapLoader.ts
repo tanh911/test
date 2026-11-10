@@ -1,5 +1,8 @@
 // 🗺️ Map loader — Protocol mục 3: map.json là NGUỒN DỮ LIỆU DUY NHẤT.
 // Mọi generator (world/*) và rule engine đọc từ schema này. KHÔNG đổi schema nếu không báo trước.
+// Gồm cả curve cache: mỗi road nội suy Catmull-Rom ĐÚNG 1 LẦN (getPointAt đều theo chiều
+// dài cung) — roadMesh/markings/sidewalk/buildings/vehicle/NPC dùng chung điểm + chiều dài.
+import * as THREE from 'three';
 
 export interface MapNode {
   id: string;
@@ -126,24 +129,70 @@ export function roadFullWidth(road: MapRoad): number {
   return (road.lanesForward + road.lanesBackward) * road.laneWidth;
 }
 
-/** Điểm trên tim đường tại khoảng cách s (mét) tính từ node `from` — nội suy theo points */
-export function pointAtS(road: MapRoad, s: number): { x: number; z: number; heading: number } {
-  const pts = road.points;
-  let remaining = Math.max(0, s);
-  for (let i = 0; i < pts.length - 1; i++) {
-    const [x0, z0] = pts[i];
-    const [x1, z1] = pts[i + 1];
-    const segLen = Math.hypot(x1 - x0, z1 - z0);
-    if (remaining <= segLen || i === pts.length - 2) {
-      const t = segLen > 0 ? Math.min(1, remaining / segLen) : 0;
-      return {
-        x: x0 + (x1 - x0) * t,
-        z: z0 + (z1 - z0) * t,
-        heading: Math.atan2(x1 - x0, z1 - z0)
-      };
-    }
-    remaining -= segLen;
+// ── Curve cache dùng chung (mục G1-1) ──────────────────────────────
+export interface CurvePoint { x: number; z: number; nx: number; nz: number; }
+export interface RoadCurve { pts: CurvePoint[]; length: number; step: number; }
+
+const curveCache = new WeakMap<MapRoad, RoadCurve>();
+
+/** Nội suy Catmull-Rom mỗi `step` m — getPointAt/getTangentAt (đều theo chiều dài cung).
+ *  Gọi nhiều lần trả cùng instance → mọi module dùng chung điểm + chiều dài. */
+export function roadCurve(road: MapRoad, step = 2): RoadCurve {
+  const hit = curveCache.get(road);
+  if (hit) return hit;
+  const v3 = road.points.map(([x, z]) => new THREE.Vector3(x, 0, z));
+  // centripetal: tránh overshoot/loop (hairpin 180°) khi khoảng cách điểm gốc chênh lệch lớn
+  const curve = new THREE.CatmullRomCurve3(v3, false, 'centripetal');
+  const length = curve.getLength();
+  const n = Math.max(2, Math.ceil(length / step));
+  const pts: CurvePoint[] = [];
+  for (let i = 0; i <= n; i++) {
+    const u = i / n;
+    const p = curve.getPointAt(u);
+    const t = curve.getTangentAt(u);
+    pts.push({ x: p.x, z: p.z, nx: -t.z, nz: t.x });
   }
-  const [x, z] = pts[pts.length - 1];
-  return { x, z, heading: 0 };
+  const c: RoadCurve = { pts, length, step };
+  curveCache.set(road, c);
+  return c;
+}
+
+/** Chiều dài đường theo curve (không phải polyline gốc) */
+export function roadLength(road: MapRoad): number {
+  return roadCurve(road).length;
+}
+
+export interface RoadPoint {
+  x: number; z: number;
+  heading: number;       // atan2(tx, tz) — hướng flow từ from→to
+  nx: number; nz: number; // pháp tuyến đơn vị (= PHẢI flow)
+  tx: number; tz: number; // tangent đơn vị
+}
+
+/** Điểm trên tim đường tại s (mét, theo cung) — nội suy tuyến tính giữa 2 sample */
+export function roadPointAt(road: MapRoad, s: number): RoadPoint {
+  const c = roadCurve(road);
+  const clamped = Math.max(0, Math.min(c.length, s));
+  const f = (c.pts.length - 1) * (c.length > 0 ? clamped / c.length : 0);
+  const i = Math.min(c.pts.length - 2, Math.floor(f));
+  const t = Math.max(0, Math.min(1, f - i));
+  const a = c.pts[i];
+  const b = c.pts[i + 1];
+  const x = a.x + (b.x - a.x) * t;
+  const z = a.z + (b.z - a.z) * t;
+  let nx = a.nx + (b.nx - a.nx) * t;
+  let nz = a.nz + (b.nz - a.nz) * t;
+  const nl = Math.hypot(nx, nz) || 1;
+  nx /= nl;
+  nz /= nl;
+  const tx = b.x - a.x;
+  const tz = b.z - a.z;
+  const tl = Math.hypot(tx, tz) || 1;
+  return { x, z, nx, nz, tx: tx / tl, tz: tz / tl, heading: Math.atan2(tx / tl, tz / tl) };
+}
+
+/** Điểm trên tim đường tại khoảng cách s (mét) tính từ node `from` — wrapper mỏng */
+export function pointAtS(road: MapRoad, s: number): { x: number; z: number; heading: number } {
+  const p = roadPointAt(road, s);
+  return { x: p.x, z: p.z, heading: p.heading };
 }

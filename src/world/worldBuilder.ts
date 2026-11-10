@@ -4,7 +4,7 @@ import type { GameMap, MapIntersection } from './mapLoader';
 import { loadGameMap, nodeById } from './mapLoader';
 import { palette } from '../art/palette';
 import { ChunkBuilder } from './chunkBuilder';
-import { roadRibbonQuads, junctionPatchQuads, junctionBackgroundQuads, roadsAtNode, roadHalfWidth, junctionHalfExtent, roadSkipZones, roundaboutIslandQuads } from './roadMesh';
+import { roadRibbonQuads, junctionPatchQuads, buildJunctionMesh, roadsAtNode, roadHalfWidth, junctionHalfExtent, roadSkipZones, roundaboutIslandQuads } from './roadMesh';
 import { roadMarkingQuads } from './roadMarkings';
 import { sidewalkBoxes, sidewalkCornerPads } from './sidewalk';
 import { placeSigns } from './trafficSigns';
@@ -49,20 +49,22 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldHandle {
     pushQuads(cb, roadRibbonQuads(road, skip), 'road');
   }
 
-  // ── 2. Junction patches (asphalt_worn tại node intersection) ──
+  // ── 2. Đa giác nút giao thống nhất (Unified Junction Polygon + Sidewalk) ──
   for (const ix of map.intersections) {
     const node = nodeById(map, ix.nodeId);
     if (!node) continue;
     const roads = roadsAtNode(map, ix.nodeId);
-    pushQuads(cb, junctionPatchQuads(node.x, node.z, roads).quads, 'road_worn');
+    const junc = buildJunctionMesh(node.x, node.z, roads);
+    // Mặt đường ngã tư liền khối, đồng chất liệu 'road'
+    pushQuads(cb, junc.asphaltQuads, 'road');
+    // Vỉa hè và bó vỉa bo theo mép ngã tư
+    pushQuads(cb, junc.sidewalkQuads, 'sidewalk');
+    pushQuads(cb, junc.curbQuads, 'sidewalk');
 
     // ── 2.5 Đảo giao thông (island) tại nút vòng xuyến ──
     if (ix.rule === 'roundabout') {
       pushQuads(cb, roundaboutIslandQuads(node.x, node.z, map, ix.nodeId), 'road_worn');
     }
-
-    // Nen duong day duoi nut intersection (che khe con sot)
-    pushQuads(cb, junctionBackgroundQuads(node.x, node.z, roads), 'road_worn');
   }
 
   // ── 3. Vạch kẻ ──

@@ -1,0 +1,45 @@
+{
+  "scenarios": {
+    "stadtBoot": {
+      "signal": null,
+      "speedKmh": 0,
+      "bestanden": true,
+      "violations": [],
+      "draws": null,
+      "quads": 438639,
+      "cellsLoaded": 16,
+      "cellsTotal": 980,
+      "mapStatePlayer": true,
+      "mapStateNpcCount": 8,
+      "mapStateLightCount": 168,
+      "peds": 24,
+      "lights": 5,
+      "hasRoundabout": true
+    },
+    "stadtFly": {
+      "signal": null,
+      "speedKmh": null,
+      "bestanden": null,
+      "violations": [],
+      "draws": null,
+      "quads": 438639,
+      "cellsLoaded": 26,
+      "cellsTotal": 980,
+      "mapStatePlayer": false,
+      "mapStateNpcCount": 0,
+      "mapStateLightCount": 168
+    },
+    "bigMapRegression": {
+      "canvases": 2,
+      "stats": {
+        "drawCalls": 132,
+        "triangles": 53430,
+        "cellsLoaded": 28,
+        "cellsTotal": 452,
+        "quads": 199708
+      },
+      "mapStatePlayers": true
+    }
+  },
+  "consoleErrors": []
+}

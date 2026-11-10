@@ -67,6 +67,7 @@ export class RuleEngine {
   private rowChecked = new Set<string>();
   /** đã kiểm tra roundabout tại junction này chưa */
   private rbtChecked = new Set<string>();
+  currentSpeedLimit = 50;
   static instanceCounter = 0;
   // ── phát hiện 'nosignal': tích lũy Δheading giữa các frame ──
   private prevHeading: number | null = null;
@@ -111,7 +112,7 @@ export class RuleEngine {
   }
 
   /** Road gần điểm p nhất (kèm s chiếu + khoảng cách từ tâm đường) */
-  private nearestRoad(p: PlayerState): { road: MapRoad; s: number; dist: number } | null {
+  nearestRoad(p: PlayerState): { road: MapRoad; s: number; dist: number } | null {
     let best: { road: MapRoad; s: number; dist: number } | null = null;
     for (const road of this.map.roads) {
       const s = pointAtSRough(road, p);
@@ -211,6 +212,7 @@ export class RuleEngine {
     const kmh = p.speed * 3.6;
     // limit của road gần nhất
     const near = this.nearestRoad(p);
+    if (near) { this.currentSpeedLimit = near.road.speedLimit; }
     if (near && kmh > near.road.speedLimit + TOLERANCE_KMH && kmh > 10) {
       this.add('speed', 'minor', `Vượt tốc độ ${Math.round(kmh)} km/h (limit ${near.road.speedLimit})`, p);
     }

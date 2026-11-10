@@ -1,0 +1,52 @@
+{
+  "scenarios": {
+    "stadt": {
+      "signal": null,
+      "speedKmh": 0,
+      "bestanden": true,
+      "violations": [],
+      "draws": null,
+      "quads": 440707,
+      "cellsLoaded": 16,
+      "cellsTotal": 980,
+      "mapStatePlayer": true,
+      "mapStateNpcCount": 8,
+      "mapStateLightCount": 168,
+      "roundabouts": 1,
+      "crosswalks": 96,
+      "signs": {
+        "215": 2,
+        "274": 14,
+        "274.1": 56
+      }
+    },
+    "muenchen": {
+      "signal": null,
+      "speedKmh": 0,
+      "bestanden": true,
+      "violations": [],
+      "draws": null,
+      "quads": 243851,
+      "cellsLoaded": 27,
+      "cellsTotal": 201,
+      "mapStatePlayer": true,
+      "mapStateNpcCount": 0,
+      "mapStateLightCount": 0,
+      "roundabouts": 0,
+      "crosswalks": 0,
+      "signs": {}
+    },
+    "bigMapRegression": {
+      "canvases": 2,
+      "stats": {
+        "drawCalls": 128,
+        "triangles": 53254,
+        "cellsLoaded": 28,
+        "cellsTotal": 452,
+        "quads": 200614
+      },
+      "mapStatePlayers": true
+    }
+  },
+  "consoleErrors": []
+}

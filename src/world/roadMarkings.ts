@@ -34,23 +34,83 @@ function inZones(s: number, zones: Array<[number, number]>): boolean {
   return zones.some(([a, b]) => s >= a && s <= b);
 }
 
-/** Vạch đứt giữa: đoạn 3 m cách 6 m — né skip zones + đứng trước vạch dừng (G1-4) */
-function centerDashes(road: MapRoad, skip: Array<[number, number]>, stopZones: Array<[number, number]>): Quad[] {
+function distSeg(px: number, pz: number, a: [number, number], b: [number, number]): number {
+  const vx = b[0] - a[0], vz = b[1] - a[1];
+  const vv = vx * vx + vz * vz;
+  const t = vv < 1e-12 ? 0 : Math.max(0, Math.min(1, ((px - a[0]) * vx + (pz - a[1]) * vz) / vv));
+  return Math.hypot(px - (a[0] + t * vx), pz - (a[1] + t * vz));
+}
+
+function distToRoad(px: number, pz: number, road: MapRoad): number {
+  let minD = Infinity;
+  for (let i = 0; i < road.points.length - 1; i++) {
+    const d = distSeg(px, pz, road.points[i], road.points[i + 1]);
+    if (d < minD) minD = d;
+  }
+  return minD;
+}
+
+export interface AcuteSibling {
+  other: MapRoad;
+  facingSide: -1 | 1;
+}
+
+export function findAcuteSiblings(road: MapRoad, map: GameMap): AcuteSibling[] {
+  const siblings: AcuteSibling[] = [];
+  for (const other of map.roads) {
+    if (other.id === road.id) continue;
+    for (const end1 of ['from', 'to'] as const) {
+      for (const end2 of ['from', 'to'] as const) {
+        if (road[end1] === other[end2]) {
+          const p1A = end1 === 'from' ? road.points[0] : road.points[road.points.length - 1];
+          const p1B = end1 === 'from' ? road.points[1] : road.points[road.points.length - 2];
+          const p2A = end2 === 'from' ? other.points[0] : other.points[other.points.length - 1];
+          const p2B = end2 === 'from' ? other.points[1] : other.points[other.points.length - 2];
+          const d1x = p1B[0] - p1A[0], d1z = p1B[1] - p1A[1];
+          const d2x = p2B[0] - p2A[0], d2z = p2B[1] - p2A[1];
+          const l1 = Math.hypot(d1x, d1z) || 1, l2 = Math.hypot(d2x, d2z) || 1;
+          const dot = (d1x * d2x + d1z * d2z) / (l1 * l2);
+          if (dot > 0.5) { // góc < ~60°
+            const cross = (d2x * (-d1z) + d2z * d1x) / (l1 * l2);
+            const facingSide: -1 | 1 = end1 === 'from' ? (cross > 0 ? 1 : -1) : (cross > 0 ? -1 : 1);
+            siblings.push({ other, facingSide });
+          }
+        }
+      }
+    }
+  }
+  return siblings;
+}
+
+/** Vạch đứt giữa: đoạn 3 m cách 6 m — né skip zones + đứng trước vạch dừng + cull khi lấn vào lòng đường liền kề */
+function centerDashes(road: MapRoad, skip: Array<[number, number]>, stopZones: Array<[number, number]>, siblings: AcuteSibling[] = []): Quad[] {
   const out: Quad[] = [];
   const len = roadLength(road);
   const all = [...skip, ...stopZones];
   let s = 2;
   while (s + DASH_ON < len) {
     if (!inZones(s, all) && !inZones(s + DASH_ON, all)) {
-      out.push(spanQuad(road, s, s + DASH_ON, 0, MARK_W / 2));
+      const midS = s + DASH_ON / 2;
+      const pMid = roadPointAt(road, midS);
+      let culled = false;
+      for (const sib of siblings) {
+        const oHalf = (sib.other.lanesForward + sib.other.lanesBackward) * sib.other.laneWidth / 2;
+        if (distToRoad(pMid.x, pMid.z, sib.other) < oHalf + 0.1) {
+          culled = true;
+          break;
+        }
+      }
+      if (!culled) {
+        out.push(spanQuad(road, s, s + DASH_ON, 0, MARK_W / 2));
+      }
     }
     s += DASH_ON + DASH_OFF;
   }
   return out;
 }
 
-/** Vạch mép liền (Z. 295) 2 bên — offset ±(half−0.2), cắt tại vùng junction */
-function edgeLines(road: MapRoad, half: number, skip: Array<[number, number]>): Quad[] {
+/** Vạch mép liền (Z. 295) 2 bên — offset ±(half−0.2), cắt tại vùng junction và chống xoắn chữ X tại chỗ chụm làn */
+function edgeLines(road: MapRoad, half: number, skip: Array<[number, number]>, siblings: AcuteSibling[] = []): Quad[] {
   const out: Quad[] = [];
   const len = roadLength(road);
   const step = 2;
@@ -66,7 +126,27 @@ function edgeLines(road: MapRoad, half: number, skip: Array<[number, number]>): 
   for (const side of [-1, 1] as const) {
     for (const [a, b] of segs) {
       for (let s = a; s < b; s += step) {
-        out.push(spanQuad(road, s, Math.min(s + step, b), side * off, MARK_W / 2));
+        const sNext = Math.min(s + step, b);
+        const midS = (s + sNext) / 2;
+        const pMid = roadPointAt(road, midS);
+        const midX = pMid.x + pMid.nx * side * off;
+        const midZ = pMid.z + pMid.nz * side * off;
+
+        // Chống chữ X: nếu điểm vạch mép lọt vào lòng đường đối diện của nhánh nhọn kẹp sát → cull
+        let culled = false;
+        for (const sib of siblings) {
+          if (sib.facingSide === side) {
+            const oHalf = (sib.other.lanesForward + sib.other.lanesBackward) * sib.other.laneWidth / 2;
+            const d = distToRoad(midX, midZ, sib.other);
+            if (d < oHalf + 0.2) {
+              culled = true;
+              break;
+            }
+          }
+        }
+        if (!culled) {
+          out.push(spanQuad(road, s, sNext, side * off, MARK_W / 2));
+        }
       }
     }
   }
@@ -218,9 +298,11 @@ export function roadMarkingQuads(map: GameMap, road: MapRoad, skip: Array<[numbe
     const kind: Approach['kind'] | null =
       ix.trafficLight ? 'light' : ix.rule === 'stop' ? 'stop' : ix.rule === 'yield' ? 'yield' : ix.rule === 'roundabout' ? 'yield' : ix.rule === 'right_before_left' ? 'right_before_left' : null;
     if (kind && longEnough) {
-      // CHỈ vẽ vạch dừng/răng cưa cho hướng approach ĐẦU TO (side +1) — tránh vạch
-      // trùng lặp chồng lấn ở giữa ngã giao khi nhiều road gặp nhau.
-      if (road.to === ix.nodeId) approaches.push({ stopS: len - half - STOP_LINE_DIST, side: 1, kind });
+      if (road.to === ix.nodeId) {
+        approaches.push({ stopS: len - half - STOP_LINE_DIST, side: 1, kind });
+      } else if (road.from === ix.nodeId && road.lanesBackward > 0) {
+        approaches.push({ stopS: half + STOP_LINE_DIST, side: -1, kind });
+      }
     }
     if (ix.crosswalks.includes(road.id) && longEnough) {
       // CHỈ vẽ zebra cho hướng ĐẦU TO — tránh zebra trùng lặp.
@@ -231,10 +313,11 @@ export function roadMarkingQuads(map: GameMap, road: MapRoad, skip: Array<[numbe
   // vùng né vạch đứt: quanh mỗi vạch dừng (dừng đứt TRƯỚC Haltlinie)
   const stopZones: Array<[number, number]> = approaches.map(a => [a.stopS - 1.2, a.stopS + 1.2] as [number, number]);
 
-  quads.push(...edgeLines(road, half, skip));
+  const siblings = findAcuteSiblings(road, map);
+  quads.push(...edgeLines(road, half, skip, siblings));
   // vạch giữa đứt CHỈ khi đường 2 chiều (lanesBackward > 0)
   if (road.lanesBackward > 0) {
-    quads.push(...centerDashes(road, skip, stopZones));
+    quads.push(...centerDashes(road, skip, stopZones, siblings));
   }
   for (const a of approaches) {
     if (a.kind === 'yield' || a.kind === 'right_before_left') quads.push(...sharkTeeth(road, half, a.stopS, a.side));

@@ -1,0 +1,37 @@
+{
+  "scenario": {
+    "muenchenReal": {
+      "nodes": 4527,
+      "roads": 1884,
+      "intersections": 2225,
+      "roundabouts": 0,
+      "trafficLights": 0,
+      "crosswalks": 0,
+      "signs": 0,
+      "signTypes": {},
+      "speedCounts": {
+        "5": 9,
+        "10": 1,
+        "30": 194,
+        "50": 1680
+      },
+      "spawn": {
+        "roadId": "r0",
+        "s": 10,
+        "lane": 0
+      },
+      "signal": null,
+      "speedKmh": 0,
+      "bestanden": true,
+      "violations": [],
+      "draws": null,
+      "quads": 243135,
+      "cellsLoaded": 27,
+      "cellsTotal": 201,
+      "mapStatePlayer": true,
+      "mapStateNpcCount": 0,
+      "mapStateLightCount": 0
+    }
+  },
+  "consoleErrors": []
+}

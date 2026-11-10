@@ -1,0 +1,108 @@
+{
+  "checks": [
+    {
+      "step": "boot München OSM",
+      "info": {
+        "nodes": 4527,
+        "roads": 1884,
+        "intersections": 2225,
+        "stats": {
+          "drawCalls": 14,
+          "triangles": 1202,
+          "cellsLoaded": 23,
+          "cellsTotal": 201,
+          "quads": 243851
+        }
+      }
+    },
+    {
+      "step": "trung tâm bản đồ",
+      "x": 0,
+      "z": 0,
+      "stats": {
+        "drawCalls": 18,
+        "triangles": 1426,
+        "cellsLoaded": 26,
+        "cellsTotal": 201,
+        "quads": 243851
+      }
+    },
+    {
+      "step": "góc đông-nam",
+      "x": 200,
+      "z": 200,
+      "stats": {
+        "drawCalls": 18,
+        "triangles": 1426,
+        "cellsLoaded": 26,
+        "cellsTotal": 201,
+        "quads": 243851
+      }
+    },
+    {
+      "step": "góc tây-bắc",
+      "x": -200,
+      "z": -200,
+      "stats": {
+        "drawCalls": 18,
+        "triangles": 1426,
+        "cellsLoaded": 24,
+        "cellsTotal": 201,
+        "quads": 243851
+      }
+    },
+    {
+      "step": "phía đông",
+      "x": 400,
+      "z": 0,
+      "stats": {
+        "drawCalls": 14,
+        "triangles": 1202,
+        "cellsLoaded": 28,
+        "cellsTotal": 201,
+        "quads": 243851
+      }
+    },
+    {
+      "step": "phía nam",
+      "x": 0,
+      "z": 400,
+      "stats": {
+        "drawCalls": 18,
+        "triangles": 1426,
+        "cellsLoaded": 26,
+        "cellsTotal": 201,
+        "quads": 243851
+      }
+    },
+    {
+      "step": "phía tây",
+      "x": -400,
+      "z": 0,
+      "stats": {
+        "drawCalls": 14,
+        "triangles": 1202,
+        "cellsLoaded": 22,
+        "cellsTotal": 201,
+        "quads": 243851
+      }
+    },
+    {
+      "step": "phía bắc",
+      "x": 0,
+      "z": -400,
+      "stats": {
+        "drawCalls": 18,
+        "triangles": 1426,
+        "cellsLoaded": 25,
+        "cellsTotal": 201,
+        "quads": 243851
+      }
+    },
+    {
+      "step": "check console errors",
+      "consoleErrors": 0
+    }
+  ],
+  "consoleErrors": []
+}
