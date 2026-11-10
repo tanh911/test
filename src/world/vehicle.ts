@@ -269,10 +269,11 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
     },
 
     seatPose() {
-      // ghế lái LHD: glTF local (−0.38 = trái, mắt ~1.18, z +0.25 = vị trí ghế sau cabin)
-      // dash glTF z ≈ −0.73..−0.97 nằm TRƯỚC mắt, đỉnh y 0.97 < mắt → không che windshield
+      // ghế lái LHD. GLB gốc tại mặt đất + node translation y +0.56:
+      //   trim (cowl bảng đồng hồ) đỉnh y 1.16, dash đỉnh y 0.97, kính chắn gió đỉnh 1.46.
+      // Mắt phải nằm TRÊN trim (≥1.35) — ngồi ở 1.15 ngang hàng cowl → cowl che ~40% màn hình.
       const lx = -0.32;
-      const ly = 1.15;
+      const ly = 1.40;
       const lz = -0.05;
       // xoay local → world: yaw = heading + π (xe mặt −Z)
       const s = Math.sin(state.heading + Math.PI);

@@ -148,7 +148,8 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   const scene = new THREE.Scene();
   scene.background = new THREE.Color(palette.skyHorizon);
 
-  const camera = new THREE.PerspectiveCamera(60, container.clientWidth / Math.max(1, container.clientHeight), 0.3, 1500);
+  // far 4000 > bán kính skybox 3000 — không còn cắt mặt cầu trời (vòm nhọn ở fly view)
+  const camera = new THREE.PerspectiveCamera(60, container.clientWidth / Math.max(1, container.clientHeight), 0.3, 4000);
   if (!driveMode) {
     camera.position.set(40, 45, 130);
     bindFlyControls(container, camera);
@@ -183,7 +184,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   // ── Terrain + sky + fog ──
   createTerrain(scene);
   createSkybox(scene);
-  applyFog(scene);
+  const fog = applyFog(scene); // fog động: near/far cập nhật theo độ cao camera mỗi frame
 
   // 🌍 World data (Prompt 2-4) + chunk streaming (Prompt 6)
   const world = buildWorld(scene, map);
@@ -404,7 +405,21 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
       fly._flyUpdate?.(dt);
     }
     world.update(dt);
+    // ── Fog + streaming scale theo độ cao camera ──
+    // Mặc định (mặt đất ~1.2 m): 250/1400 như cũ. Bay lên cao thì lùi fog ra xa và
+    // nạp cell rộng hơn, nhờ đó fly/aerial view thấy được cả thành phố.
+    const camY = Math.max(0, camera.position.y);
+    const lift = Math.max(0, camY - 10);
+    fog.near = 250 + lift * 0.6;
+    fog.far = 1400 + lift * 2.2;
+    chunkMgr.setLoadRadius(Math.min(300 + camY * 1.5, 1000));
     chunkStats = chunkMgr.update(camera.position.x, camera.position.z);
+    // ── Shadow camera bám theo xe/camera: hết bóng biến mất ngoài 120 m từ gốc toạ độ ──
+    const shadowFocusX = driveMode && vehicle ? vehicle.state.x : camera.position.x;
+    const shadowFocusZ = driveMode && vehicle ? vehicle.state.z : camera.position.z;
+    sun.position.set(shadowFocusX + 140, 200, shadowFocusZ + 90);
+    sun.target.position.set(shadowFocusX, 0, shadowFocusZ);
+    sun.target.updateMatrixWorld();
     renderer.render(scene, camera);
     // FPS trung bình trượt 1 giây
     fpsFrames++;

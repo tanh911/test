@@ -133,12 +133,13 @@ function makePropGeometry(type: MapProp['type']): THREE.BufferGeometry {
       break;
     }
     case 'parked_car_static': {
-      // xe box đơn giản (Prompt 5 thay bằng GLB) — dài 4.2, rộng 1.7, cao 1.45
-      const body = new THREE.BoxGeometry(1.7, 0.55, 4.2);
-      body.translate(0, 0.55, 0);
+      // xe box đơn giản (Prompt 5 thay bằng GLB) — dài 4.2, rộng 1.7, cao ~1.25
+      // đáy chạm mặt đường (body y 0.05..0.65) — hết nổi lơ lửng 27 cm như bản cũ
+      const body = new THREE.BoxGeometry(1.7, 0.6, 4.2);
+      body.translate(0, 0.35, 0);
       parts.push(colored(body, CAR_COLORS[0])); // tint per-instance bằng instanceColor
-      const cabin = new THREE.BoxGeometry(1.55, 0.5, 2.2);
-      cabin.translate(0, 1.05, -0.1);
+      const cabin = new THREE.BoxGeometry(1.55, 0.55, 2.2);
+      cabin.translate(0, 0.975, -0.1);
       parts.push(colored(cabin, hexRGB(palette.window)));
       break;
     }
@@ -171,6 +172,14 @@ export function placeProps(scene: THREE.Scene, map: GameMap): PropsResult {
   for (const prop of map.props as MapProp[]) {
     const road = roadById(map, prop.roadId);
     if (!road) continue;
+    // Xe đỗ tĩnh: chỉ đặt khi OSM cho phép đỗ ở bên đó VÀ đường đủ rộng để còn
+    // làn chạy ≥ 3 m — không còn khối đen đứng chặn làn xe trên đường hẹp.
+    if (prop.type === 'parked_car_static') {
+      const parkSide = prop.side === 'right' ? road.parking?.right : road.parking?.left;
+      const halfForPark = roadFullWidth(road) / 2;
+      if (!parkSide || parkSide === 'none') continue;
+      if (halfForPark - 1.7 < 3.0) continue; // phần còn lại cho làn chạy < 3 m → bỏ
+    }
     const pt = pointAtS(road, prop.s);
     const side = prop.side === 'right' ? 1 : -1;
     const off = propOffset(prop.type, road);

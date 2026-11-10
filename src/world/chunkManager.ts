@@ -33,6 +33,13 @@ export class ChunkManager {
     scene.add(this.group);
   }
 
+  /** Mở rộng bán kính nạp theo độ cao camera — nhìn từ trên cao phải thấy cả quận,
+   *  không thể chỉ nạp đĩa 300 m quanh chân máy quay (hysteresis giữ nguyên +120 m). */
+  setLoadRadius(loadRadius: number): void {
+    this.opts.loadRadius = loadRadius;
+    this.opts.unloadRadius = loadRadius + 120;
+  }
+
   /** Gọi mỗi frame với vị trí camera — nạp/hủy cell */
   update(camX: number, camZ: number): ChunkStats {
     const { loadRadius, unloadRadius } = this.opts;
