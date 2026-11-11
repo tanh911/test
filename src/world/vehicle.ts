@@ -87,8 +87,12 @@ export interface VehicleHandle {
   update: (dt: number, input: VehicleInput) => void;
   /** áp lại pose từ state (sau va chạm đẩy vị trí) */
   syncPose: () => void;
-  /** pose ghế lái cho camera cabin (local −0.38 = LHD) */
+  /** pose ghế lái cho camera cabin */
   seatPose: () => { x: number; y: number; z: number; yaw: number };
+  /** đổi số P R N D */
+  setGear: (g: 'P' | 'R' | 'N' | 'D') => void;
+  /** cập nhật hiển thị chi tiết theo camera mode (ẩn gương ngoài khi ở cabin) */
+  setCameraMode: (mode: 'cabin' | 'outside' | 'mirror' | 'shoulder') => void;
   dispose: () => void;
   /** Gán hàm xử lý sự kiện xe (signal_left/right/off) */
   onEvent?: (fn: VehicleEventHandler) => void;
@@ -180,30 +184,75 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
       }
       steerAngle = Math.max(-MAX_STEER, Math.min(MAX_STEER, steerAngle));
 
-      // ── dọc: ga / phanh / lùi ──
+      // ── dọc: ga / phanh / lùi chuẩn xe số tự động (P, R, N, D) ──
       state.t += dt;
       lastThrottle = input.throttle;
       lastBrake = input.brake;
-      let throttle = input.throttle;
 
-      // ── chuyển số sân ──
       if (input.gear) {
         state.gear = input.gear;
-        if (state.gear === 'D' && state.speed < 0) state.speed = 0;
-        if (state.gear === 'R' && state.speed > 0.1) throttle = 0;
       }
-      if (state.gear === 'P' || state.gear === 'N') throttle = 0;
-      if (state.gear === 'D' && state.speed < -0.1) throttle = 0;
-      if (state.gear === 'R' && state.speed > 0.1) throttle = 0;
 
+      let a = 0;
       const currentAccel = input.boost ? ACCEL * 1.5 : ACCEL;
-      let a = throttle * currentAccel - DRAG * state.speed;
-      if (input.brake > 0) {
-        if (state.speed > 0.1) a -= input.brake * BRAKE;
-        else if (throttle === 0) a = -2.8; // lùi khi đứng
+
+      if (state.gear === 'P') {
+        // Số P: Khóa bánh, phanh đỗ, xe đứng yên hoàn toàn
+        state.speed = 0;
+        a = 0;
+      } else if (state.gear === 'N') {
+        // Số N: Mo, không có lực kéo động cơ, trôi tự do và phanh
+        if (input.brake > 0) {
+          a = -Math.sign(state.speed) * input.brake * BRAKE;
+        } else {
+          a = -DRAG * state.speed * 1.2;
+        }
+        state.speed += a * dt;
+        if (input.brake > 0 && Math.abs(state.speed) < 0.1) state.speed = 0;
+      } else if (state.gear === 'D') {
+        // Số D: Lái tiến
+        // W = Ga tiến (tốc độ > 0)
+        // S = Phanh dừng xe (tốc độ về 0 và đứng yên, KHÔNG BAO GIỜ LÙI KHI Ở SỐ D)
+        if (state.speed < 0) state.speed = 0;
+
+        if (input.brake > 0) {
+          if (state.speed > 0.05) {
+            a = -input.brake * BRAKE;
+          } else {
+            state.speed = 0;
+            a = 0;
+          }
+        } else if (input.throttle > 0) {
+          a = input.throttle * currentAccel - DRAG * state.speed;
+        } else {
+          a = -DRAG * state.speed * 1.5;
+        }
+
+        state.speed = Math.max(0, Math.min(MAX_SPEED_FWD, state.speed + a * dt));
+        if (input.throttle === 0 && state.speed < 0.08) state.speed = 0;
+      } else if (state.gear === 'R') {
+        // Số R: Lùi xe (bấm phím 2 hoặc chọn R để lùi)
+        // W = Đạp ga lùi (tốc độ âm: từ 0 tới MAX_SPEED_REV)
+        // S = Đạp phanh lùi (hãm tốc độ lùi về 0)
+        if (state.speed > 0) state.speed = 0;
+
+        if (input.brake > 0) {
+          if (state.speed < -0.05) {
+            a = input.brake * BRAKE; // gia tốc dương để hãm lùi về 0
+          } else {
+            state.speed = 0;
+            a = 0;
+          }
+        } else if (input.throttle > 0) {
+          const revAccel = ACCEL * 0.75;
+          a = -input.throttle * revAccel - DRAG * state.speed;
+        } else {
+          a = -DRAG * state.speed * 1.5;
+        }
+
+        state.speed = Math.max(MAX_SPEED_REV, Math.min(0, state.speed + a * dt));
+        if (input.throttle === 0 && Math.abs(state.speed) < 0.08) state.speed = 0;
       }
-      state.speed = Math.max(MAX_SPEED_REV, Math.min(MAX_SPEED_FWD, state.speed + a * dt));
-      if (throttle === 0 && input.brake === 0 && Math.abs(state.speed) < 0.05) state.speed = 0;
 
       // ── bicycle model ──
       if (Math.abs(state.speed) > 0.01) {
@@ -268,20 +317,28 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
       applyPose();
     },
 
-    seatPose() {
-      // ghế lái LHD. GLB gốc tại mặt đất + node translation y +0.56:
-      //   trim (cowl bảng đồng hồ) đỉnh y 1.16, dash đỉnh y 0.97, kính chắn gió đỉnh 1.46.
-      // Mắt phải nằm TRÊN trim (≥1.35) — ngồi ở 1.15 ngang hàng cowl → cowl che ~40% màn hình.
+        seatPose() {
+      // ghế lái LHD: glTF local (−0.32 = trái, mắt 1.18, z −0.10)
       const lx = -0.32;
-      const ly = 1.40;
-      const lz = -0.05;
-      // xoay local → world: yaw = heading + π (xe mặt −Z)
+      const ly = 1.18;
+      const lz = -0.10;
       const s = Math.sin(state.heading + Math.PI);
       const c = Math.cos(state.heading + Math.PI);
-      // three.js: world = R_y(θ)·local → x' = lx·cosθ + lz·sinθ; z' = −lx·sinθ + lz·cosθ
       const wx = state.x + lx * c + lz * s;
       const wz = state.z + -lx * s + lz * c;
       return { x: wx, y: ly, z: wz, yaw: state.heading + Math.PI };
+    },
+
+    setGear(g: 'P' | 'R' | 'N' | 'D') {
+      state.gear = g;
+    },
+
+    setCameraMode(mode: 'cabin' | 'outside' | 'mirror' | 'shoulder') {
+      // Ẩn khối gương ngoài thô (body_4) khi ở trong cabin để không che góc kính lái
+      const mirror = group.getObjectByName('body_4');
+      if (mirror) {
+        mirror.visible = mode !== 'cabin';
+      }
     },
 
     dispose() {

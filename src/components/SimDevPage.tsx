@@ -93,7 +93,7 @@ export const SimDevPage = () => {
         <b style={{ color: '#7dd3fc' }}>SIM v2 · {muenchenMap ? 'MÜNCHEN ALTSTADT (OSM thật)' : stadtMap ? 'STADT 3km × 3km (Kreisverkehr + Tempo-30)' : driveMode ? 'LÁI XE (W/A/S/D)' : bigMap ? 'BIG MAP 2km × 2km (G5)' : 'Prompt 1 — khung dự án'}</b><br />
         Nodes: {nodes} · Roads: {roads}<br />
         {driveMode
-          ? <>W/S = Ga/Phanh · A/D = Lái · Shift = Boost · Q/E = Xi-nhan<br />Kéo chuột / ← → = Liếc nhìn · V = Đổi cam · M = Gương · C = Qua vai</>
+          ? <>W = Ga (tiến/lùi theo số) · S = Phanh · 1/2/3/4 = Số P/R/N/D · A/D = Lái · Shift = Boost · Q/E = Xi-nhan<br />Kéo chuột / ← → = Liếc nhìn · V = Đổi cam · M = Gương · C = Qua vai</>
           : <>Kéo chuột = quay · WASD = di chuyển · Q/E = xuống/lên · Shift = nhanh</>}<br />
         {debugVisible && stats && (
           <span style={{ color: '#4ade80' }}>
@@ -179,14 +179,25 @@ export const SimDevPage = () => {
             {/* Cụm công-tơ-mét & Vòng tua RPM */}
             <div style={{ textAlign: 'center', minWidth: 90 }}>
               {/* Thanh chọn số P R N D */}
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 4 }}>
-                {['P', 'R', 'N', 'D'].map((g) => (
-                  <span key={g} style={{
-                    fontSize: 12, fontWeight: 800, padding: '1px 5px', borderRadius: 4,
-                    background: rule?.gear === g ? '#38bdf8' : 'rgba(255,255,255,0.06)',
-                    color: rule?.gear === g ? '#0f172a' : '#64748b',
-                    boxShadow: rule?.gear === g ? '0 0 8px #38bdf8' : 'none'
-                  }}>{g}</span>
+              <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 4, pointerEvents: 'auto' }}>
+                {(['P', 'R', 'N', 'D'] as const).map((g) => (
+                  <button
+                    key={g}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      sceneHandle?.setGear?.(g);
+                    }}
+                    style={{
+                      fontSize: 12, fontWeight: 800, padding: '2px 7px', borderRadius: 4,
+                      background: rule?.gear === g ? '#38bdf8' : 'rgba(255,255,255,0.08)',
+                      color: rule?.gear === g ? '#0f172a' : '#94a3b8',
+                      boxShadow: rule?.gear === g ? '0 0 10px #38bdf8' : 'none',
+                      border: 'none', cursor: 'pointer', transition: 'all 0.15s ease'
+                    }}
+                    title={`Phím số ${g === 'P' ? '1' : g === 'R' ? '2' : g === 'N' ? '3' : '4'}`}
+                  >
+                    {g}
+                  </button>
                 ))}
               </div>
 

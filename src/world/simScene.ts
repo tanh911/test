@@ -64,6 +64,8 @@ export interface SimSceneHandle {
   vehicle: VehicleHandle | null;
   getStats: () => SimStats;
   getRuleState: () => RuleState | null;
+  /** đổi số P R N D */
+  setGear?: (g: 'P' | 'R' | 'N' | 'D') => void;
   /** dữ liệu mini-map (player-centered top-down) — đọc mỗi frame từ RAF của MiniMap */
   getMapState: () => MapState;
   dispose: () => void;
@@ -260,7 +262,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
 
-    createVehicle(scene, map).then(v => { vehicle = v; });
+    createVehicle(scene, map).then(v => { vehicle = v; v.setCameraMode(camMode); });
     ruleEngine = new RuleEngine(map, world.controllers);
     // NPC traffic (nạp GLB nền, không chặn render)
     npcs = new NPCController(map, scene);
@@ -289,12 +291,12 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         }
         // NPC + rule engine
         npcs?.update(dt, { player: { x: vehicle.state.x, z: vehicle.state.z }, controllers: world.controllers, collisions: npcCollisions });
-        // ── số sân: 1=P, 2=R, 3=N, 4=D ──
+        // ── số: 1=P, 2=R, 3=N, 4=D (hỗ trợ cả Digit và Numpad) ──
         let gear: 'P' | 'R' | 'N' | 'D' | undefined;
-        if (keys.has('Digit1')) gear = 'P';
-        else if (keys.has('Digit2')) gear = 'R';
-        else if (keys.has('Digit3')) gear = 'N';
-        else if (keys.has('Digit4')) gear = 'D';
+        if (keys.has('Digit1') || keys.has('Numpad1')) gear = 'P';
+        else if (keys.has('Digit2') || keys.has('Numpad2')) gear = 'R';
+        else if (keys.has('Digit3') || keys.has('Numpad3')) gear = 'N';
+        else if (keys.has('Digit4') || keys.has('Numpad4')) gear = 'D';
         ruleEngine?.update(dt, {
           x: vehicle.state.x,
           z: vehicle.state.z,
@@ -316,12 +318,14 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         // ── Camera mode: M = gương, C giữ = qua vai, V = camera ngoài ──
         if (keys.has('KeyM') && !keyMPrev) {
           camMode = camMode === 'cabin' ? 'mirror' : 'cabin';
+          vehicle?.setCameraMode(camMode);
           keyMPrev = true;
         } else if (!keys.has('KeyM')) {
           keyMPrev = false;
         }
         if (keys.has('KeyV') && !keyVPrev) {
           camMode = camMode === 'outside' ? 'cabin' : 'outside';
+          vehicle?.setCameraMode(camMode);
           keyVPrev = true;
         } else if (!keys.has('KeyV')) {
           keyVPrev = false;
@@ -495,6 +499,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
       quads: world.stats.quads,
       fps
     }),
+    setGear: (g: 'P' | 'R' | 'N' | 'D') => {
+      vehicle?.setGear(g);
+    },
     getRuleState: (): RuleState | null => {
       if (!ruleEngine || !vehicle) return null;
       const speedKmh = Math.max(0, Math.round(vehicle.state.speed * 3.6));
