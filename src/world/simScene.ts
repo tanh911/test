@@ -439,58 +439,76 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
 
     if (driveMode && vehicle && camMode === 'cabin') {
       const h = vehicle.state.heading;
-      const panX = headYaw * 320;
-      const panY = headPitch * 220;
+      const cRect = renderer.domElement.getBoundingClientRect();
 
       renderer.setScissorTest(true);
       vehicle.group.visible = false; // Tạm ẩn xe để vỏ xe không che góc nhìn gương
 
       // 1. Gương chiếu hậu trung tâm (Center Rearview Mirror)
-      const rX = Math.round((screenW / 2 - 120 + panX * 0.35) * pr);
-      const rY = Math.round((screenH - 74 + panY) * pr);
-      const rW = Math.round(240 * pr), rH = Math.round(50 * pr);
-      if (rX + rW > 0 && rX < screenW * pr && rY + rH > 0 && rY < screenH * pr) {
-        rearCam.position.set(vehicle.state.x, 1.25, vehicle.state.z);
-        rearCam.lookAt(vehicle.state.x + Math.sin(h) * 50, 1.20, vehicle.state.z + Math.cos(h) * 50);
-        renderer.setScissor(rX, rY, rW, rH);
-        renderer.setViewport(rX, rY, rW, rH);
-        renderer.render(scene, rearCam);
+      const centerEl = document.getElementById('sim-mirror-center');
+      if (centerEl) {
+        const m = centerEl.getBoundingClientRect();
+        const rX = Math.round((m.left - cRect.left) * pr);
+        const rY = Math.round((cRect.bottom - m.bottom) * pr);
+        const rW = Math.round(m.width * pr);
+        const rH = Math.round(m.height * pr);
+        if (rW > 0 && rH > 0 && rX + rW > 0 && rX < screenW * pr && rY + rH > 0 && rY < screenH * pr) {
+          rearCam.aspect = m.width / m.height;
+          rearCam.updateProjectionMatrix();
+          rearCam.position.set(vehicle.state.x, 1.25, vehicle.state.z);
+          rearCam.lookAt(
+            vehicle.state.x - Math.sin(h) * 50,
+            1.20,
+            vehicle.state.z - Math.cos(h) * 50
+          );
+          renderer.setScissor(rX, rY, rW, rH);
+          renderer.setViewport(rX, rY, rW, rH);
+          renderer.render(scene, rearCam);
+        }
       }
 
-      // 2. Gương chiếu hậu trái (Left Wing Mirror)
-      const lX = Math.round((24 + panX) * pr);
-      const lY = Math.round((screenH * 0.40 + panY) * pr);
-      const lW = Math.round(150 * pr), lH = Math.round(95 * pr);
-      if (lX + lW > 0 && lX < screenW * pr && lY + lH > 0 && lY < screenH * pr) {
-        const lx = -1.1, lz = -0.4;
-        const s = Math.sin(h + Math.PI), c = Math.cos(h + Math.PI);
-        leftMirrorCam.position.set(
-          vehicle.state.x + lx * c + lz * s,
-          1.15,
-          vehicle.state.z - lx * s + lz * c
-        );
-        leftMirrorCam.lookAt(vehicle.state.x + Math.sin(h - 0.22) * 50, 1.10, vehicle.state.z + Math.cos(h - 0.22) * 50);
-        renderer.setScissor(lX, lY, lW, lH);
-        renderer.setViewport(lX, lY, lW, lH);
-        renderer.render(scene, leftMirrorCam);
+      // 2. Gương chiếu hậu ngoài bên trái (Left Wing Mirror)
+      const leftEl = document.getElementById('sim-mirror-left');
+      if (leftEl) {
+        const m = leftEl.getBoundingClientRect();
+        const lX = Math.round((m.left - cRect.left) * pr);
+        const lY = Math.round((cRect.bottom - m.bottom) * pr);
+        const lW = Math.round(m.width * pr);
+        const lH = Math.round(m.height * pr);
+        if (lW > 0 && lH > 0 && lX + lW > 0 && lX < screenW * pr && lY + lH > 0 && lY < screenH * pr) {
+          leftMirrorCam.aspect = m.width / m.height;
+          leftMirrorCam.updateProjectionMatrix();
+          const camX = vehicle.state.x - Math.cos(h) * 1.05 - Math.sin(h) * 0.15;
+          const camZ = vehicle.state.z + Math.sin(h) * 1.05 - Math.cos(h) * 0.15;
+          leftMirrorCam.position.set(camX, 1.08, camZ);
+          const ang = h - Math.PI + 0.14;
+          leftMirrorCam.lookAt(camX + Math.sin(ang) * 50, 1.05, camZ + Math.cos(ang) * 50);
+          renderer.setScissor(lX, lY, lW, lH);
+          renderer.setViewport(lX, lY, lW, lH);
+          renderer.render(scene, leftMirrorCam);
+        }
       }
 
-      // 3. Gương chiếu hậu phải (Right Wing Mirror)
-      const rxX = Math.round((screenW - 174 + panX) * pr);
-      const rxY = Math.round((screenH * 0.40 + panY) * pr);
-      const rxW = Math.round(150 * pr), rxH = Math.round(95 * pr);
-      if (rxX + rxW > 0 && rxX < screenW * pr && rxY + rxH > 0 && rxY < screenH * pr) {
-        const rx = 1.1, rz = -0.4;
-        const s = Math.sin(h + Math.PI), c = Math.cos(h + Math.PI);
-        rightMirrorCam.position.set(
-          vehicle.state.x + rx * c + rz * s,
-          1.15,
-          vehicle.state.z - rx * s + rz * c
-        );
-        rightMirrorCam.lookAt(vehicle.state.x + Math.sin(h + 0.22) * 50, 1.10, vehicle.state.z + Math.cos(h + 0.22) * 50);
-        renderer.setScissor(rxX, rxY, rxW, rxH);
-        renderer.setViewport(rxX, rxY, rxW, rxH);
-        renderer.render(scene, rightMirrorCam);
+      // 3. Gương chiếu hậu ngoài bên phải (Right Wing Mirror)
+      const rightEl = document.getElementById('sim-mirror-right');
+      if (rightEl) {
+        const m = rightEl.getBoundingClientRect();
+        const rxX = Math.round((m.left - cRect.left) * pr);
+        const rxY = Math.round((cRect.bottom - m.bottom) * pr);
+        const rxW = Math.round(m.width * pr);
+        const rxH = Math.round(m.height * pr);
+        if (rxW > 0 && rxH > 0 && rxX + rxW > 0 && rxX < screenW * pr && rxY + rxH > 0 && rxY < screenH * pr) {
+          rightMirrorCam.aspect = m.width / m.height;
+          rightMirrorCam.updateProjectionMatrix();
+          const camX = vehicle.state.x + Math.cos(h) * 1.05 - Math.sin(h) * 0.15;
+          const camZ = vehicle.state.z - Math.sin(h) * 1.05 - Math.cos(h) * 0.15;
+          rightMirrorCam.position.set(camX, 1.08, camZ);
+          const ang = h - Math.PI - 0.14;
+          rightMirrorCam.lookAt(camX + Math.sin(ang) * 50, 1.05, camZ + Math.cos(ang) * 50);
+          renderer.setScissor(rxX, rxY, rxW, rxH);
+          renderer.setViewport(rxX, rxY, rxW, rxH);
+          renderer.render(scene, rightMirrorCam);
+        }
       }
 
       vehicle.group.visible = true; // Hiện lại xe cho main view

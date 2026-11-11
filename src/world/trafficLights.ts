@@ -88,6 +88,24 @@ export function createTrafficLightMesh(): THREE.Group {
   return group;
 }
 
+function pointInAnyRoad(x: number, z: number, map: GameMap, margin = 0.4): boolean {
+  for (const r of map.roads) {
+    const half = (r.lanesForward + r.lanesBackward) * r.laneWidth / 2;
+    const pts = r.points;
+    for (let i = 1; i < pts.length; i++) {
+      const ax = pts[i - 1][0], az = pts[i - 1][1];
+      const bx = pts[i][0], bz = pts[i][1];
+      const dx = bx - ax, dz = bz - az;
+      const l2 = dx * dx + dz * dz;
+      if (l2 === 0) continue;
+      const t = Math.max(0, Math.min(1, ((x - ax) * dx + (z - az) * dz) / l2));
+      const px = ax + t * dx, pz = az + t * dz;
+      if (Math.hypot(x - px, z - pz) < half + margin) return true;
+    }
+  }
+  return false;
+}
+
 // ── Đặt đèn tự động từ intersections[] có trafficLight ──
 // Mỗi approach (luồng xe ĐẾN node) = 1 đèn đứng bên PHẢI luồng, mặt quay về xe đang tới.
 // Trả lightsByCell: đèn gắn theo chunk cell → chunkManager nạp/hủy theo camera (G5).
@@ -136,8 +154,22 @@ export function placeTrafficLights(scene: THREE.Scene, map: GameMap): {
         const rnz = ap.fx;
         const tl = createTrafficLightMesh();
         // góc gần bên phải: lùi 1 reach dọc flow (đúng cạnh vạch dừng) + lệch phải ngoài mép đường
-        const lx = node.x - ap.fx * reach + rnx * (half + 2.2);
-        const lz = node.z - ap.fz * reach + rnz * (half + 2.2);
+        let lx = node.x - ap.fx * reach + rnx * (half + 2.2);
+        let lz = node.z - ap.fz * reach + rnz * (half + 2.2);
+        if (pointInAnyRoad(lx, lz, map)) {
+          let placed = false;
+          for (const extraReach of [2, 4, 6]) {
+            const testX = node.x - ap.fx * (reach + extraReach) + rnx * (half + 1.2);
+            const testZ = node.z - ap.fz * (reach + extraReach) + rnz * (half + 1.2);
+            if (!pointInAnyRoad(testX, testZ, map)) {
+              lx = testX;
+              lz = testZ;
+              placed = true;
+              break;
+            }
+          }
+          if (!placed) continue;
+        }
         tl.position.set(lx, 0, lz);
         // Mặt đèn hướng NGƯỢC flow (nhìn thấy từ xe đang tới)
         tl.rotation.y = Math.atan2(-ap.fx, -ap.fz);

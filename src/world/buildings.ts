@@ -345,8 +345,9 @@ function buildRoadSegs(map: GameMap): RoadSegs[] {
 /** Khoảng cách từ điểm tới SWATH chữ nhật của 1 road (segment quét rộng half) —
  *  chuẩn point-to-OBB: điểm bên cạnh end-cap KHÔNG bị tính là trong asphalt. */
 function rectDistToRoadSegs(x: number, z: number, segs: RoadSegs): number {
-  // bbox precheck (nới 1 m) — đa số road ở xa thì bỏ qua ngay
-  if (x < segs.minX - 1 || x > segs.maxX + 1 || z < segs.minZ - 1 || z > segs.maxZ + 1) return Infinity;
+  // bbox precheck (nới rộng theo nửa bề rộng mặt đường + margin an toàn)
+  const m = segs.half + CORNER_CLEAR + 4;
+  if (x < segs.minX - m || x > segs.maxX + m || z < segs.minZ - m || z > segs.maxZ + m) return Infinity;
   let best = Infinity;
   for (let i = 0; i < segs.ax.length; i++) {
     const ax = segs.ax[i], az = segs.az[i];
@@ -568,6 +569,23 @@ export function allBuildingQuads(map: GameMap): ColoredQuad[] {
   }
   const plan = planCityBlockFill(map);
   for (const row of plan.rows) {
+    const strips = buildingStrips(map, row);
+    if (!strips) continue;
+    let clash = false;
+    for (const [a, b2, c, d] of strips) {
+      const pts: Array<[number, number]> = [[a, b2], [c, d], [a, d], [c, b2]];
+      for (const [x, z] of pts) {
+        for (const seg of roadSegs) {
+          if (rectDistToRoadSegs(x, z, seg) < CORNER_CLEAR) {
+            clash = true;
+            break;
+          }
+        }
+        if (clash) break;
+      }
+      if (clash) break;
+    }
+    if (clash) continue;
     out.push(...buildingQuads(map, row));
   }
   return out;

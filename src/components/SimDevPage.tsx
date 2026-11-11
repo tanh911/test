@@ -88,17 +88,18 @@ export const SimDevPage = () => {
         position: 'absolute', top: 12, left: 12,
         background: 'rgba(7,11,20,0.85)', color: '#f1f5f9',
         border: '1px solid rgba(148,163,184,0.3)', borderRadius: 10,
-        padding: '10px 14px', fontSize: 13, fontFamily: 'monospace',
+        padding: '8px 12px', fontSize: 11, fontFamily: 'monospace',
+        maxWidth: 350,
         pointerEvents: 'none'
       }}>
-        <b style={{ color: '#7dd3fc' }}>SIM v2 · {muenchenMap ? 'MÜNCHEN ALTSTADT (OSM thật)' : stadtMap ? 'STADT 3km × 3km (Kreisverkehr + Tempo-30)' : driveMode ? 'LÁI XE (W/A/S/D)' : bigMap ? 'BIG MAP 2km × 2km (G5)' : 'Prompt 1 — khung dự án'}</b><br />
+        <b style={{ color: '#7dd3fc' }}>SIM v2 · {muenchenMap ? 'MÜNCHEN ALTSTADT' : stadtMap ? 'STADT 3km × 3km' : driveMode ? 'LÁI XE (W/A/S/D)' : bigMap ? 'BIG MAP' : 'PROMPT 1'}</b><br />
         Nodes: {nodes} · Roads: {roads}<br />
         {driveMode
-          ? <>W = Ga (tiến/lùi theo số) · S = Phanh · 1/2/3/4 = Số P/R/N/D · A/D = Lái · Shift = Boost · Q/E = Xi-nhan<br />Kéo chuột / ← → = Liếc nhìn · V = Đổi cam · M = Gương · C = Qua vai</>
-          : <>Kéo chuột = quay · WASD = di chuyển · Q/E = xuống/lên · Shift = nhanh</>}<br />
+          ? <>W/S = Ga/Phanh · 1/2/3/4 = P/R/N/D · A/D = Lái<br />Shift = Boost · Q/E = Xi-nhan · Chuột = Liếc</>
+          : <>Kéo chuột = quay · WASD = di chuyển · Q/E = xuống/lên</>}<br />
         {debugVisible && stats && (
           <span style={{ color: '#4ade80' }}>
-            Draws: {stats.drawCalls} · Tris: {stats.triangles} · Cells: {stats.cellsLoaded}/{stats.cellsTotal} · Quads: {stats.quads}
+            Draws: {stats.drawCalls} · Tris: {stats.triangles} · Cells: {stats.cellsLoaded}/{stats.cellsTotal}
           </span>
         )}
       </div>
