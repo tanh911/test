@@ -397,7 +397,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
 
           const sp = vehicle.seatPose();
           camera.position.set(sp.x, sp.y, sp.z);
-          camera.rotation.set(-0.03 + headPitch + pitchSquat, sp.yaw + headYaw, roll);
+          camera.rotation.set(-0.005 + headPitch + pitchSquat, sp.yaw + headYaw, roll);
         }
       } else {
         // chờ GLB load — camera tạm tại spawn

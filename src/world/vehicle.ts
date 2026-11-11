@@ -127,7 +127,15 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
       m.castShadow = true;
       m.receiveShadow = true;
       const mats = Array.isArray(m.material) ? m.material : [m.material];
-      for (const mat of mats) mat.side = THREE.FrontSide;
+      for (const mat of mats) {
+        mat.side = THREE.FrontSide;
+        if (mat.name === 'paint_player') {
+          const mstd = mat as THREE.MeshStandardMaterial;
+          mstd.color.set('#253041'); // Xám kim loại sang trọng (Metallic Graphite)
+          mstd.roughness = 0.26;
+          mstd.metalness = 0.70;
+        }
+      }
     }
   });
   group.name = 'vehicle_player';
@@ -317,11 +325,11 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
       applyPose();
     },
 
-        seatPose() {
-      // ghế lái LHD: glTF local (−0.32 = trái, mắt 1.18, z −0.10)
+    seatPose() {
+      // ghế lái LHD: glTF local (−0.32 = trái, mắt 1.20, z −0.12)
       const lx = -0.32;
-      const ly = 1.18;
-      const lz = -0.10;
+      const ly = 1.20;
+      const lz = -0.12;
       const s = Math.sin(state.heading + Math.PI);
       const c = Math.cos(state.heading + Math.PI);
       const wx = state.x + lx * c + lz * s;
@@ -334,11 +342,13 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
     },
 
     setCameraMode(mode: 'cabin' | 'outside' | 'mirror' | 'shoulder') {
-      // Ẩn khối gương ngoài thô (body_4) khi ở trong cabin để không che góc kính lái
+      const isCabin = mode === 'cabin';
       const mirror = group.getObjectByName('body_4');
-      if (mirror) {
-        mirror.visible = mode !== 'cabin';
-      }
+      if (mirror) mirror.visible = !isCabin;
+      const dash = group.getObjectByName('body_7');
+      if (dash) dash.visible = !isCabin;
+      const seat = group.getObjectByName('body_8');
+      if (seat) seat.visible = !isCabin;
     },
 
     dispose() {

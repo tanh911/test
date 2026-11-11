@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from 'react';
 import { createSimScene, type SimSceneHandle, type SimStats, type RuleState } from '../world/simScene';
 import { loadDemoAssets } from '../world/demoAssets';
 import { MiniMap } from './MiniMap';
+import { ModernCockpit } from './sim/ModernCockpit';
 import { generateBigMap, generateStadtMap } from '../data/maps/bigMap';
 import muenchenCleanMap from '../data/maps/muenchen-altstadt-clean.json';
 import testCrossingMap from '../data/maps/test_crossing.json';
@@ -107,128 +108,80 @@ export const SimDevPage = () => {
           {/* keyframes nhấp nháy xi-nhan (sync BLINK_PERIOD 0.55s với vehicle.ts) */}
           <style>{`@keyframes blinkSignal { 50% { opacity: 0.12; } }`}</style>
 
-          {/* Mini-map: góc dưới-trái (Prompt 10) */}
+          {/* 🚗 MODERN COCKPIT OVERLAY (Buồng lái xe thể thao + Khung kính lái + Vô-lăng) */}
+          {(!rule?.camMode || rule.camMode === 'cabin') && (
+            <ModernCockpit
+              speedKmh={rule?.speedKmh ?? 0}
+              rpm={rule?.rpm ?? 850}
+              gear={rule?.gear ?? 'D'}
+              speedLimit={rule?.speedLimit ?? 50}
+              signal={rule?.signal}
+              steerAngle={rule?.steerAngle ?? 0}
+              camMode={rule?.camMode ?? 'cabin'}
+              onSelectGear={(g) => sceneHandle?.setGear?.(g)}
+              onToggleCam={() => {
+                window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyV' }));
+              }}
+              onToggleMirror={() => {
+                window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyM' }));
+              }}
+            />
+          )}
+
+          {/* Mini-map: góc dưới-trái */}
           {sceneHandle && (
-            <div style={{ position: 'absolute', bottom: 24, left: 24 }}>
+            <div style={{ position: 'absolute', bottom: 24, left: 24, zIndex: 35 }}>
               <MiniMap handle={sceneHandle} />
             </div>
           )}
 
-          {/* Gương chiếu hậu kỹ thuật số Cockpit (Digital Rearview Mirror) */}
-          <div style={{
-            position: 'absolute', top: 12, left: '50%', transform: 'translateX(-50%)',
-            background: 'linear-gradient(180deg, rgba(15,23,42,0.95) 0%, rgba(15,23,42,0.8) 100%)',
-            border: '2px solid rgba(148,163,184,0.4)', borderRadius: 10,
-            padding: '6px 20px', display: 'flex', alignItems: 'center', gap: 16,
-            boxShadow: '0 8px 24px rgba(0,0,0,0.6)', backdropFilter: 'blur(8px)',
-            pointerEvents: 'none', zIndex: 20
-          }}>
-            <div style={{ fontSize: 10, color: '#94a3b8', letterSpacing: 1.5, fontWeight: 700 }}>REARVIEW [M]</div>
+          {/* HUD phụ khi ở camera ngoài (outside/shoulder) */}
+          {rule?.camMode && rule.camMode !== 'cabin' && (
             <div style={{
-              width: 130, height: 26, background: '#020617', borderRadius: 4,
-              border: '1px solid rgba(56,189,248,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center',
-              position: 'relative', overflow: 'hidden'
+              position: 'absolute', bottom: 24, right: 24,
+              background: 'linear-gradient(180deg, rgba(15,23,42,0.92) 0%, rgba(2,6,23,0.96) 100%)',
+              color: '#f1f5f9',
+              border: '1px solid rgba(148,163,184,0.35)', borderRadius: 16,
+              padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 18,
+              boxShadow: '0 12px 32px rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)',
+              pointerEvents: 'none', zIndex: 35
             }}>
-              <div style={{ position: 'absolute', left: '50%', top: 0, bottom: 0, width: 1, background: 'rgba(56,189,248,0.3)' }} />
-              <div style={{ position: 'absolute', left: 25, right: 25, bottom: 4, height: 1, background: 'rgba(239,68,68,0.5)' }} />
-              <div style={{ position: 'absolute', left: 40, right: 40, bottom: 10, height: 1, background: 'rgba(234,179,8,0.5)' }} />
-              <div style={{ position: 'absolute', left: 52, right: 52, bottom: 16, height: 1, background: 'rgba(74,222,128,0.5)' }} />
-              <span style={{ fontSize: 10, color: '#38bdf8', fontWeight: 600, zIndex: 2 }}>
-                {rule?.camMode === 'mirror' ? 'ACTIVE MIRROR' : 'WIDE REAR'}
-              </span>
-            </div>
-            <div style={{
-              fontSize: 10, padding: '2px 8px', borderRadius: 4, fontWeight: 700,
-              background: rule?.camMode === 'cabin' ? '#0369a1' : '#334155',
-              color: '#f8fafc'
-            }}>
-              {rule?.camMode ? rule.camMode.toUpperCase() : 'CABIN'}
-            </div>
-          </div>
-
-          {/* Bảng đồng hồ trung tâm Cockpit Sport Dashboard */}
-          <div style={{
-            position: 'absolute', bottom: 24, right: 24,
-            background: 'linear-gradient(180deg, rgba(15,23,42,0.92) 0%, rgba(2,6,23,0.96) 100%)',
-            color: '#f1f5f9',
-            border: '1px solid rgba(148,163,184,0.35)', borderRadius: 16,
-            padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 18,
-            boxShadow: '0 12px 32px rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)',
-            pointerEvents: 'none'
-          }}>
-            {/* Biển báo tốc độ StVO Đức */}
-            <div style={{
-              width: 44, height: 44, borderRadius: '50%', background: '#f8fafc',
-              border: `4px solid ${rule && (rule.speedKmh ?? 0) > (rule.speedLimit ?? 50) + 3 ? '#ef4444' : '#dc2626'}`,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              boxShadow: rule && (rule.speedKmh ?? 0) > (rule.speedLimit ?? 50) + 3 ? '0 0 14px #ef4444' : '0 2px 6px rgba(0,0,0,0.4)'
-            }}>
-              <span style={{ color: '#0f172a', fontWeight: 900, fontSize: 17, lineHeight: 1 }}>
-                {rule?.speedLimit ?? 50}
-              </span>
-            </div>
-
-            {/* Xi-nhan trái */}
-            <span style={{
-              fontSize: 26, color: '#fbbf24', lineHeight: 1,
-              opacity: rule?.signal === 'left' ? 1 : 0.12,
-              animation: rule?.signal === 'left' ? 'blinkSignal 0.55s steps(1) infinite' : undefined,
-              textShadow: rule?.signal === 'left' ? '0 0 12px #fbbf24' : undefined
-            }}>◀</span>
-
-            {/* Cụm công-tơ-mét & Vòng tua RPM */}
-            <div style={{ textAlign: 'center', minWidth: 90 }}>
-              {/* Thanh chọn số P R N D */}
-              <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 4, pointerEvents: 'auto' }}>
-                {(['P', 'R', 'N', 'D'] as const).map((g) => (
-                  <button
-                    key={g}
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      sceneHandle?.setGear?.(g);
-                    }}
-                    style={{
-                      fontSize: 12, fontWeight: 800, padding: '2px 7px', borderRadius: 4,
-                      background: rule?.gear === g ? '#38bdf8' : 'rgba(255,255,255,0.08)',
-                      color: rule?.gear === g ? '#0f172a' : '#94a3b8',
-                      boxShadow: rule?.gear === g ? '0 0 10px #38bdf8' : 'none',
-                      border: 'none', cursor: 'pointer', transition: 'all 0.15s ease'
-                    }}
-                    title={`Phím số ${g === 'P' ? '1' : g === 'R' ? '2' : g === 'N' ? '3' : '4'}`}
-                  >
-                    {g}
-                  </button>
-                ))}
+              <div style={{
+                width: 44, height: 44, borderRadius: '50%', background: '#f8fafc',
+                border: `4px solid ${rule && (rule.speedKmh ?? 0) > (rule.speedLimit ?? 50) + 3 ? '#ef4444' : '#dc2626'}`,
+                display: 'flex', alignItems: 'center', justifyContent: 'center'
+              }}>
+                <span style={{ color: '#0f172a', fontWeight: 900, fontSize: 17 }}>
+                  {rule?.speedLimit ?? 50}
+                </span>
               </div>
-
-              {/* Tốc độ số */}
-              <div style={{ fontSize: 38, fontWeight: 900, lineHeight: 1, letterSpacing: -1, color: '#ffffff' }}>
-                {rule?.speedKmh ?? 0}
-              </div>
-              <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600, marginTop: 1 }}>km/h</div>
-
-              {/* Thanh Tachometer RPM Bar */}
-              <div style={{ width: '100%', height: 5, background: '#1e293b', borderRadius: 3, marginTop: 6, overflow: 'hidden' }}>
-                <div style={{
-                  width: `${Math.min(100, ((rule?.rpm ?? 800) / 6000) * 100)}%`,
-                  height: '100%',
-                  background: (rule?.rpm ?? 800) > 5200 ? 'linear-gradient(90deg, #eab308, #ef4444)' : 'linear-gradient(90deg, #38bdf8, #22c55e)',
-                  transition: 'width 0.1s ease'
-                }} />
-              </div>
-              <div style={{ fontSize: 9, color: '#64748b', marginTop: 2, fontFamily: 'monospace' }}>
-                {rule?.rpm ?? 800} RPM
+              <div style={{ textAlign: 'center', minWidth: 90 }}>
+                <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 4, pointerEvents: 'auto' }}>
+                  {(['P', 'R', 'N', 'D'] as const).map((g) => (
+                    <button
+                      key={g}
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        sceneHandle?.setGear?.(g);
+                      }}
+                      style={{
+                        fontSize: 12, fontWeight: 800, padding: '2px 7px', borderRadius: 4,
+                        background: rule?.gear === g ? '#38bdf8' : 'rgba(255,255,255,0.08)',
+                        color: rule?.gear === g ? '#0f172a' : '#94a3b8',
+                        border: 'none', cursor: 'pointer'
+                      }}
+                    >
+                      {g}
+                    </button>
+                  ))}
+                </div>
+                <div style={{ fontSize: 38, fontWeight: 900, lineHeight: 1, color: '#ffffff' }}>
+                  {rule?.speedKmh ?? 0}
+                </div>
+                <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>km/h</div>
               </div>
             </div>
-
-            {/* Xi-nhan phải */}
-            <span style={{
-              fontSize: 26, color: '#fbbf24', lineHeight: 1,
-              opacity: rule?.signal === 'right' ? 1 : 0.12,
-              animation: rule?.signal === 'right' ? 'blinkSignal 0.55s steps(1) infinite' : undefined,
-              textShadow: rule?.signal === 'right' ? '0 0 12px #fbbf24' : undefined
-            }}>▶</span>
-          </div>
+          )}
           {/* Kết quả thi */}
           <div style={{
             position: 'absolute', top: 12, right: 12,
