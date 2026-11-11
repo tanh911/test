@@ -36,6 +36,8 @@ export interface RuleState {
   camMode?: 'cabin' | 'outside' | 'mirror' | 'shoulder';
   throttle?: number;
   brake?: number;
+  headYaw?: number;
+  headPitch?: number;
 }
 
 // 🗺️ MiniMap (Prompt 10): top-down quanh player, đọc mỗi frame riêng
@@ -227,6 +229,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   const staticRects = buildingRects(map);
   let headYaw = 0;
   let headPitch = 0;
+  const rearCam = new THREE.PerspectiveCamera(50, 240 / 50, 0.5, 300);
+  const leftMirrorCam = new THREE.PerspectiveCamera(55, 150 / 95, 0.3, 200);
+  const rightMirrorCam = new THREE.PerspectiveCamera(55, 150 / 95, 0.3, 200);
   let isMouseLooking = false;
   let lastMouseX = 0;
   let lastMouseY = 0;
@@ -424,7 +429,73 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     sun.position.set(shadowFocusX + 140, 200, shadowFocusZ + 90);
     sun.target.position.set(shadowFocusX, 0, shadowFocusZ);
     sun.target.updateMatrixWorld();
+    const pr = renderer.getPixelRatio();
+    const screenW = renderer.domElement.clientWidth;
+    const screenH = renderer.domElement.clientHeight;
+
+    renderer.setScissorTest(false);
+    renderer.setViewport(0, 0, screenW * pr, screenH * pr);
     renderer.render(scene, camera);
+
+    if (driveMode && vehicle && camMode === 'cabin') {
+      const h = vehicle.state.heading;
+      const panX = headYaw * 320;
+      const panY = headPitch * 220;
+
+      renderer.setScissorTest(true);
+      vehicle.group.visible = false; // Tạm ẩn xe để vỏ xe không che góc nhìn gương
+
+      // 1. Gương chiếu hậu trung tâm (Center Rearview Mirror)
+      const rX = Math.round((screenW / 2 - 120 + panX * 0.35) * pr);
+      const rY = Math.round((screenH - 74 + panY) * pr);
+      const rW = Math.round(240 * pr), rH = Math.round(50 * pr);
+      if (rX + rW > 0 && rX < screenW * pr && rY + rH > 0 && rY < screenH * pr) {
+        rearCam.position.set(vehicle.state.x, 1.25, vehicle.state.z);
+        rearCam.lookAt(vehicle.state.x + Math.sin(h) * 50, 1.20, vehicle.state.z + Math.cos(h) * 50);
+        renderer.setScissor(rX, rY, rW, rH);
+        renderer.setViewport(rX, rY, rW, rH);
+        renderer.render(scene, rearCam);
+      }
+
+      // 2. Gương chiếu hậu trái (Left Wing Mirror)
+      const lX = Math.round((24 + panX) * pr);
+      const lY = Math.round((screenH * 0.40 + panY) * pr);
+      const lW = Math.round(150 * pr), lH = Math.round(95 * pr);
+      if (lX + lW > 0 && lX < screenW * pr && lY + lH > 0 && lY < screenH * pr) {
+        const lx = -1.1, lz = -0.4;
+        const s = Math.sin(h + Math.PI), c = Math.cos(h + Math.PI);
+        leftMirrorCam.position.set(
+          vehicle.state.x + lx * c + lz * s,
+          1.15,
+          vehicle.state.z - lx * s + lz * c
+        );
+        leftMirrorCam.lookAt(vehicle.state.x + Math.sin(h - 0.22) * 50, 1.10, vehicle.state.z + Math.cos(h - 0.22) * 50);
+        renderer.setScissor(lX, lY, lW, lH);
+        renderer.setViewport(lX, lY, lW, lH);
+        renderer.render(scene, leftMirrorCam);
+      }
+
+      // 3. Gương chiếu hậu phải (Right Wing Mirror)
+      const rxX = Math.round((screenW - 174 + panX) * pr);
+      const rxY = Math.round((screenH * 0.40 + panY) * pr);
+      const rxW = Math.round(150 * pr), rxH = Math.round(95 * pr);
+      if (rxX + rxW > 0 && rxX < screenW * pr && rxY + rxH > 0 && rxY < screenH * pr) {
+        const rx = 1.1, rz = -0.4;
+        const s = Math.sin(h + Math.PI), c = Math.cos(h + Math.PI);
+        rightMirrorCam.position.set(
+          vehicle.state.x + rx * c + rz * s,
+          1.15,
+          vehicle.state.z - rx * s + rz * c
+        );
+        rightMirrorCam.lookAt(vehicle.state.x + Math.sin(h + 0.22) * 50, 1.10, vehicle.state.z + Math.cos(h + 0.22) * 50);
+        renderer.setScissor(rxX, rxY, rxW, rxH);
+        renderer.setViewport(rxX, rxY, rxW, rxH);
+        renderer.render(scene, rightMirrorCam);
+      }
+
+      vehicle.group.visible = true; // Hiện lại xe cho main view
+      renderer.setScissorTest(false);
+    }
     // FPS trung bình trượt 1 giây
     fpsFrames++;
     const nowFps = performance.now();
@@ -528,7 +599,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         speedLimit: ruleEngine.currentSpeedLimit ?? 50,
         camMode,
         throttle: vehicle.throttle,
-        brake: vehicle.brake
+        brake: vehicle.brake,
+        headYaw,
+        headPitch
       };
     },
     // 🗺️ mini-map: gom snapshot mỗi frame từ RAF riêng của MiniMap — không dùng chung RAF render

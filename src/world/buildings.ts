@@ -545,7 +545,25 @@ export function planCityBlockFill(map: GameMap): BlockFillPlan {
 /** Tất cả buildings trong map → ColoredQuad cho ChunkBuilder (gồm gap-fill + hàng courtyard) */
 export function allBuildingQuads(map: GameMap): ColoredQuad[] {
   const out: ColoredQuad[] = [];
+  const roadSegs = buildRoadSegs(map);
   for (const b of map.buildings as MapBuilding[]) {
+    const strips = buildingStrips(map, { ...b, depthOff: 0 });
+    if (!strips) continue;
+    let clash = false;
+    for (const [a, b2, c, d] of strips) {
+      const pts: Array<[number, number]> = [[a, b2], [c, d], [a, d], [c, b2]];
+      for (const [x, z] of pts) {
+        for (const seg of roadSegs) {
+          if (rectDistToRoadSegs(x, z, seg) < CORNER_CLEAR) {
+            clash = true;
+            break;
+          }
+        }
+        if (clash) break;
+      }
+      if (clash) break;
+    }
+    if (clash) continue;
     out.push(...buildingQuads(map, b));
   }
   const plan = planCityBlockFill(map);

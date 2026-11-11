@@ -118,6 +118,8 @@ export const SimDevPage = () => {
               signal={rule?.signal}
               steerAngle={rule?.steerAngle ?? 0}
               camMode={rule?.camMode ?? 'cabin'}
+              headYaw={rule?.headYaw ?? 0}
+              headPitch={rule?.headPitch ?? 0}
               onSelectGear={(g) => sceneHandle?.setGear?.(g)}
               onToggleCam={() => {
                 window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyV' }));

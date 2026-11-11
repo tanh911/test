@@ -13384,15 +13384,6 @@
     },
     {
       "roadId": "r4",
-      "side": "left",
-      "s": 8,
-      "length": 16.6,
-      "floors": 3,
-      "style": "backstein",
-      "seed": 5013
-    },
-    {
-      "roadId": "r4",
       "side": "right",
       "s": 8,
       "length": 16.6,
@@ -13511,15 +13502,6 @@
     {
       "roadId": "r6",
       "side": "right",
-      "s": 8,
-      "length": 21,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5027
-    },
-    {
-      "roadId": "r6",
-      "side": "right",
       "s": 30.2,
       "length": 22,
       "floors": 3,
@@ -13579,15 +13561,6 @@
       "floors": 3,
       "style": "neubau",
       "seed": 5034
-    },
-    {
-      "roadId": "r7",
-      "side": "left",
-      "s": 65.4,
-      "length": 29,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5035
     },
     {
       "roadId": "r7",
@@ -13696,15 +13669,6 @@
       "floors": 4,
       "style": "altbau",
       "seed": 5047
-    },
-    {
-      "roadId": "r9",
-      "side": "right",
-      "s": 8,
-      "length": 23.8,
-      "floors": 5,
-      "style": "backstein",
-      "seed": 5048
     },
     {
       "roadId": "r10",
@@ -13924,15 +13888,6 @@
     },
     {
       "roadId": "r15",
-      "side": "left",
-      "s": 61.4,
-      "length": 14.8,
-      "floors": 3,
-      "style": "backstein",
-      "seed": 5073
-    },
-    {
-      "roadId": "r15",
       "side": "right",
       "s": 8,
       "length": 20,
@@ -14137,15 +14092,6 @@
       "floors": 5,
       "style": "altbau",
       "seed": 5096
-    },
-    {
-      "roadId": "r20",
-      "side": "left",
-      "s": 8,
-      "length": 22.9,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5097
     },
     {
       "roadId": "r20",
@@ -14546,15 +14492,6 @@
     {
       "roadId": "r29",
       "side": "left",
-      "s": 8,
-      "length": 24,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5142
-    },
-    {
-      "roadId": "r29",
-      "side": "left",
       "s": 33.2,
       "length": 25,
       "floors": 4,
@@ -14632,15 +14569,6 @@
       "floors": 3,
       "style": "altbau",
       "seed": 5151
-    },
-    {
-      "roadId": "r32",
-      "side": "left",
-      "s": 8,
-      "length": 18,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5152
     },
     {
       "roadId": "r32",
@@ -14843,15 +14771,6 @@
     {
       "roadId": "r35",
       "side": "left",
-      "s": 8,
-      "length": 25,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5175
-    },
-    {
-      "roadId": "r35",
-      "side": "left",
       "s": 34.2,
       "length": 25.6,
       "floors": 4,
@@ -14902,51 +14821,6 @@
       "floors": 3,
       "style": "altbau",
       "seed": 5181
-    },
-    {
-      "roadId": "r36",
-      "side": "right",
-      "s": 8,
-      "length": 32,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5182
-    },
-    {
-      "roadId": "r36",
-      "side": "right",
-      "s": 41.2,
-      "length": 33,
-      "floors": 5,
-      "style": "backstein",
-      "seed": 5183
-    },
-    {
-      "roadId": "r36",
-      "side": "right",
-      "s": 75.4,
-      "length": 18,
-      "floors": 3,
-      "style": "neubau",
-      "seed": 5184
-    },
-    {
-      "roadId": "r37",
-      "side": "right",
-      "s": 8,
-      "length": 19,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5185
-    },
-    {
-      "roadId": "r37",
-      "side": "right",
-      "s": 28.2,
-      "length": 20,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5186
     },
     {
       "roadId": "r38",
@@ -15019,15 +14893,6 @@
       "floors": 4,
       "style": "neubau",
       "seed": 5194
-    },
-    {
-      "roadId": "r38",
-      "side": "right",
-      "s": 92.6,
-      "length": 29,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5195
     },
     {
       "roadId": "r39",
@@ -15127,15 +14992,6 @@
       "floors": 4,
       "style": "altbau",
       "seed": 5206
-    },
-    {
-      "roadId": "r40",
-      "side": "left",
-      "s": 8,
-      "length": 25,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5207
     },
     {
       "roadId": "r40",
@@ -15363,15 +15219,6 @@
       "seed": 5232
     },
     {
-      "roadId": "r42",
-      "side": "right",
-      "s": 61.4,
-      "length": 16.2,
-      "floors": 4,
-      "style": "backstein",
-      "seed": 5233
-    },
-    {
       "roadId": "r43",
       "side": "left",
       "s": 8,
@@ -15424,15 +15271,6 @@
       "floors": 4,
       "style": "neubau",
       "seed": 5239
-    },
-    {
-      "roadId": "r43",
-      "side": "right",
-      "s": 8,
-      "length": 26,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5240
     },
     {
       "roadId": "r43",
@@ -15608,15 +15446,6 @@
     {
       "roadId": "r47",
       "side": "right",
-      "s": 8,
-      "length": 30,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5260
-    },
-    {
-      "roadId": "r47",
-      "side": "right",
       "s": 39.2,
       "length": 31,
       "floors": 5,
@@ -15777,24 +15606,6 @@
       "seed": 5278
     },
     {
-      "roadId": "r52",
-      "side": "right",
-      "s": 8,
-      "length": 33,
-      "floors": 5,
-      "style": "neubau",
-      "seed": 5279
-    },
-    {
-      "roadId": "r52",
-      "side": "right",
-      "s": 42.2,
-      "length": 18,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5280
-    },
-    {
       "roadId": "r53",
       "side": "left",
       "s": 8,
@@ -15930,15 +15741,6 @@
       "seed": 5295
     },
     {
-      "roadId": "r56",
-      "side": "right",
-      "s": 8,
-      "length": 13,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5296
-    },
-    {
       "roadId": "r57",
       "side": "left",
       "s": 8,
@@ -15964,15 +15766,6 @@
       "floors": 4,
       "style": "neubau",
       "seed": 5299
-    },
-    {
-      "roadId": "r57",
-      "side": "right",
-      "s": 30.2,
-      "length": 17,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5300
     },
     {
       "roadId": "r58",
@@ -16030,15 +15823,6 @@
     },
     {
       "roadId": "r61",
-      "side": "left",
-      "s": 8,
-      "length": 29,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5307
-    },
-    {
-      "roadId": "r61",
       "side": "right",
       "s": 8,
       "length": 30,
@@ -16090,15 +15874,6 @@
       "floors": 3,
       "style": "backstein",
       "seed": 5313
-    },
-    {
-      "roadId": "r63",
-      "side": "left",
-      "s": 8,
-      "length": 20,
-      "floors": 4,
-      "style": "neubau",
-      "seed": 5314
     },
     {
       "roadId": "r63",
@@ -16283,15 +16058,6 @@
     {
       "roadId": "r67",
       "side": "left",
-      "s": 8,
-      "length": 25,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5335
-    },
-    {
-      "roadId": "r67",
-      "side": "left",
       "s": 34.2,
       "length": 26,
       "floors": 5,
@@ -16364,15 +16130,6 @@
     {
       "roadId": "r69",
       "side": "right",
-      "s": 8,
-      "length": 18,
-      "floors": 4,
-      "style": "neubau",
-      "seed": 5344
-    },
-    {
-      "roadId": "r69",
-      "side": "right",
       "s": 27.2,
       "length": 19,
       "floors": 5,
@@ -16432,15 +16189,6 @@
       "floors": 5,
       "style": "altbau",
       "seed": 5351
-    },
-    {
-      "roadId": "r72",
-      "side": "right",
-      "s": 83.6,
-      "length": 24.6,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5352
     },
     {
       "roadId": "r73",
@@ -16652,15 +16400,6 @@
     {
       "roadId": "r80",
       "side": "right",
-      "s": 8,
-      "length": 18,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5376
-    },
-    {
-      "roadId": "r80",
-      "side": "right",
       "s": 27.2,
       "length": 19,
       "floors": 4,
@@ -16765,33 +16504,6 @@
       "floors": 3,
       "style": "backstein",
       "seed": 5388
-    },
-    {
-      "roadId": "r83",
-      "side": "right",
-      "s": 8,
-      "length": 26.6,
-      "floors": 4,
-      "style": "neubau",
-      "seed": 5389
-    },
-    {
-      "roadId": "r84",
-      "side": "right",
-      "s": 8,
-      "length": 16.2,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5390
-    },
-    {
-      "roadId": "r85",
-      "side": "left",
-      "s": 8,
-      "length": 33,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5391
     },
     {
       "roadId": "r86",
@@ -16902,24 +16614,6 @@
       "seed": 5403
     },
     {
-      "roadId": "r86",
-      "side": "right",
-      "s": 122.8,
-      "length": 30,
-      "floors": 4,
-      "style": "neubau",
-      "seed": 5404
-    },
-    {
-      "roadId": "r86",
-      "side": "right",
-      "s": 154,
-      "length": 30.7,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5405
-    },
-    {
       "roadId": "r87",
       "side": "left",
       "s": 8,
@@ -16974,60 +16668,6 @@
       "seed": 5411
     },
     {
-      "roadId": "r87",
-      "side": "right",
-      "s": 8,
-      "length": 22,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5412
-    },
-    {
-      "roadId": "r87",
-      "side": "right",
-      "s": 31.2,
-      "length": 23,
-      "floors": 4,
-      "style": "backstein",
-      "seed": 5413
-    },
-    {
-      "roadId": "r87",
-      "side": "right",
-      "s": 55.4,
-      "length": 24,
-      "floors": 5,
-      "style": "neubau",
-      "seed": 5414
-    },
-    {
-      "roadId": "r87",
-      "side": "right",
-      "s": 80.6,
-      "length": 25,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5415
-    },
-    {
-      "roadId": "r87",
-      "side": "right",
-      "s": 106.8,
-      "length": 26,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5416
-    },
-    {
-      "roadId": "r87",
-      "side": "right",
-      "s": 134,
-      "length": 27,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5417
-    },
-    {
       "roadId": "r88",
       "side": "left",
       "s": 8,
@@ -17035,15 +16675,6 @@
       "floors": 3,
       "style": "backstein",
       "seed": 5418
-    },
-    {
-      "roadId": "r88",
-      "side": "right",
-      "s": 8,
-      "length": 22.1,
-      "floors": 4,
-      "style": "neubau",
-      "seed": 5419
     },
     {
       "roadId": "r89",
@@ -17210,15 +16841,6 @@
     {
       "roadId": "r96",
       "side": "left",
-      "s": 8,
-      "length": 32,
-      "floors": 5,
-      "style": "backstein",
-      "seed": 5438
-    },
-    {
-      "roadId": "r96",
-      "side": "left",
       "s": 41.2,
       "length": 33,
       "floors": 3,
@@ -17278,15 +16900,6 @@
       "floors": 3,
       "style": "altbau",
       "seed": 5445
-    },
-    {
-      "roadId": "r97",
-      "side": "right",
-      "s": 55.4,
-      "length": 24,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5446
     },
     {
       "roadId": "r98",
@@ -17487,33 +17100,6 @@
       "seed": 5468
     },
     {
-      "roadId": "r104",
-      "side": "right",
-      "s": 8,
-      "length": 31,
-      "floors": 3,
-      "style": "neubau",
-      "seed": 5469
-    },
-    {
-      "roadId": "r104",
-      "side": "right",
-      "s": 40.2,
-      "length": 32,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5470
-    },
-    {
-      "roadId": "r104",
-      "side": "right",
-      "s": 73.4,
-      "length": 33,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5471
-    },
-    {
       "roadId": "r105",
       "side": "left",
       "s": 8,
@@ -17557,42 +17143,6 @@
       "floors": 4,
       "style": "altbau",
       "seed": 5476
-    },
-    {
-      "roadId": "r105",
-      "side": "right",
-      "s": 8,
-      "length": 23,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5477
-    },
-    {
-      "roadId": "r105",
-      "side": "right",
-      "s": 32.2,
-      "length": 24,
-      "floors": 3,
-      "style": "backstein",
-      "seed": 5478
-    },
-    {
-      "roadId": "r105",
-      "side": "right",
-      "s": 57.4,
-      "length": 25,
-      "floors": 4,
-      "style": "neubau",
-      "seed": 5479
-    },
-    {
-      "roadId": "r105",
-      "side": "right",
-      "s": 83.6,
-      "length": 26,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5480
     },
     {
       "roadId": "r106",
@@ -17676,15 +17226,6 @@
       "seed": 5489
     },
     {
-      "roadId": "r108",
-      "side": "right",
-      "s": 28.2,
-      "length": 17.6,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5490
-    },
-    {
       "roadId": "r109",
       "side": "left",
       "s": 8,
@@ -17701,15 +17242,6 @@
       "floors": 5,
       "style": "altbau",
       "seed": 5492
-    },
-    {
-      "roadId": "r113",
-      "side": "right",
-      "s": 8,
-      "length": 23,
-      "floors": 3,
-      "style": "backstein",
-      "seed": 5493
     },
     {
       "roadId": "r114",
@@ -17854,15 +17386,6 @@
       "floors": 4,
       "style": "neubau",
       "seed": 5509
-    },
-    {
-      "roadId": "r116",
-      "side": "right",
-      "s": 8,
-      "length": 24,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5510
     },
     {
       "roadId": "r117",
@@ -18343,15 +17866,6 @@
     },
     {
       "roadId": "r127",
-      "side": "left",
-      "s": 67.4,
-      "length": 17.2,
-      "floors": 5,
-      "style": "neubau",
-      "seed": 5564
-    },
-    {
-      "roadId": "r127",
       "side": "right",
       "s": 8,
       "length": 31,
@@ -18367,33 +17881,6 @@
       "floors": 4,
       "style": "altbau",
       "seed": 5566
-    },
-    {
-      "roadId": "r131",
-      "side": "left",
-      "s": 8,
-      "length": 21.1,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5567
-    },
-    {
-      "roadId": "r131",
-      "side": "right",
-      "s": 8,
-      "length": 18,
-      "floors": 3,
-      "style": "backstein",
-      "seed": 5568
-    },
-    {
-      "roadId": "r133",
-      "side": "left",
-      "s": 8,
-      "length": 19,
-      "floors": 4,
-      "style": "neubau",
-      "seed": 5569
     },
     {
       "roadId": "r134",
@@ -18450,24 +17937,6 @@
       "seed": 5575
     },
     {
-      "roadId": "r136",
-      "side": "right",
-      "s": 8,
-      "length": 26,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5576
-    },
-    {
-      "roadId": "r136",
-      "side": "right",
-      "s": 35.2,
-      "length": 14.8,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5577
-    },
-    {
       "roadId": "r137",
       "side": "left",
       "s": 8,
@@ -18493,15 +17962,6 @@
       "floors": 3,
       "style": "altbau",
       "seed": 5580
-    },
-    {
-      "roadId": "r137",
-      "side": "right",
-      "s": 8,
-      "length": 31,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5581
     },
     {
       "roadId": "r137",
@@ -18641,24 +18101,6 @@
     {
       "roadId": "r141",
       "side": "right",
-      "s": 8,
-      "length": 31,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5597
-    },
-    {
-      "roadId": "r141",
-      "side": "right",
-      "s": 40.2,
-      "length": 32,
-      "floors": 3,
-      "style": "backstein",
-      "seed": 5598
-    },
-    {
-      "roadId": "r141",
-      "side": "right",
       "s": 73.4,
       "length": 24.9,
       "floors": 4,
@@ -18738,15 +18180,6 @@
       "seed": 5607
     },
     {
-      "roadId": "r143",
-      "side": "right",
-      "s": 83.6,
-      "length": 16,
-      "floors": 4,
-      "style": "backstein",
-      "seed": 5608
-    },
-    {
       "roadId": "r144",
       "side": "left",
       "s": 8,
@@ -18772,15 +18205,6 @@
       "floors": 4,
       "style": "altbau",
       "seed": 5611
-    },
-    {
-      "roadId": "r144",
-      "side": "right",
-      "s": 8,
-      "length": 30,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5612
     },
     {
       "roadId": "r144",
@@ -18882,15 +18306,6 @@
       "seed": 5623
     },
     {
-      "roadId": "r146",
-      "side": "right",
-      "s": 8,
-      "length": 25.8,
-      "floors": 5,
-      "style": "neubau",
-      "seed": 5624
-    },
-    {
       "roadId": "r148",
       "side": "left",
       "s": 8,
@@ -18990,24 +18405,6 @@
       "seed": 5635
     },
     {
-      "roadId": "r150",
-      "side": "left",
-      "s": 8,
-      "length": 22,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5636
-    },
-    {
-      "roadId": "r150",
-      "side": "right",
-      "s": 8,
-      "length": 23,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5637
-    },
-    {
       "roadId": "r152",
       "side": "left",
       "s": 8,
@@ -19044,42 +18441,6 @@
       "seed": 5641
     },
     {
-      "roadId": "r152",
-      "side": "right",
-      "s": 8,
-      "length": 28,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5642
-    },
-    {
-      "roadId": "r152",
-      "side": "right",
-      "s": 37.2,
-      "length": 29,
-      "floors": 3,
-      "style": "backstein",
-      "seed": 5643
-    },
-    {
-      "roadId": "r152",
-      "side": "right",
-      "s": 67.4,
-      "length": 30,
-      "floors": 4,
-      "style": "neubau",
-      "seed": 5644
-    },
-    {
-      "roadId": "r153",
-      "side": "left",
-      "s": 8,
-      "length": 31,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5645
-    },
-    {
       "roadId": "r153",
       "side": "left",
       "s": 40.2,
@@ -19096,15 +18457,6 @@
       "floors": 4,
       "style": "altbau",
       "seed": 5647
-    },
-    {
-      "roadId": "r153",
-      "side": "right",
-      "s": 8,
-      "length": 18,
-      "floors": 5,
-      "style": "backstein",
-      "seed": 5648
     },
     {
       "roadId": "r153",
@@ -19186,15 +18538,6 @@
       "floors": 5,
       "style": "altbau",
       "seed": 5657
-    },
-    {
-      "roadId": "r158",
-      "side": "left",
-      "s": 8,
-      "length": 26.3,
-      "floors": 3,
-      "style": "backstein",
-      "seed": 5658
     },
     {
       "roadId": "r158",
@@ -19342,33 +18685,6 @@
     },
     {
       "roadId": "r165",
-      "side": "left",
-      "s": 8,
-      "length": 29,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5675
-    },
-    {
-      "roadId": "r165",
-      "side": "left",
-      "s": 38.2,
-      "length": 30,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5676
-    },
-    {
-      "roadId": "r165",
-      "side": "left",
-      "s": 69.4,
-      "length": 31,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5677
-    },
-    {
-      "roadId": "r165",
       "side": "right",
       "s": 8,
       "length": 32,
@@ -19438,24 +18754,6 @@
       "floors": 3,
       "style": "altbau",
       "seed": 5685
-    },
-    {
-      "roadId": "r168",
-      "side": "right",
-      "s": 8,
-      "length": 24,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5686
-    },
-    {
-      "roadId": "r168",
-      "side": "right",
-      "s": 33.2,
-      "length": 16.3,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5687
     },
     {
       "roadId": "r169",
@@ -19631,15 +18929,6 @@
     {
       "roadId": "r180",
       "side": "right",
-      "s": 8,
-      "length": 29,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5707
-    },
-    {
-      "roadId": "r180",
-      "side": "right",
       "s": 38.2,
       "length": 28,
       "floors": 5,
@@ -19672,15 +18961,6 @@
       "floors": 5,
       "style": "altbau",
       "seed": 5711
-    },
-    {
-      "roadId": "r181",
-      "side": "right",
-      "s": 8,
-      "length": 18,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5712
     },
     {
       "roadId": "r181",
@@ -19728,24 +19008,6 @@
       "seed": 5717
     },
     {
-      "roadId": "r182",
-      "side": "right",
-      "s": 8,
-      "length": 24,
-      "floors": 3,
-      "style": "backstein",
-      "seed": 5718
-    },
-    {
-      "roadId": "r182",
-      "side": "right",
-      "s": 33.2,
-      "length": 22.4,
-      "floors": 4,
-      "style": "neubau",
-      "seed": 5719
-    },
-    {
       "roadId": "r184",
       "side": "left",
       "s": 8,
@@ -19780,24 +19042,6 @@
       "floors": 5,
       "style": "backstein",
       "seed": 5723
-    },
-    {
-      "roadId": "r186",
-      "side": "right",
-      "s": 8,
-      "length": 26.9,
-      "floors": 3,
-      "style": "neubau",
-      "seed": 5724
-    },
-    {
-      "roadId": "r187",
-      "side": "right",
-      "s": 8,
-      "length": 31,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5725
     },
     {
       "roadId": "r189",
@@ -19969,42 +19213,6 @@
       "floors": 5,
       "style": "neubau",
       "seed": 5744
-    },
-    {
-      "roadId": "r196",
-      "side": "right",
-      "s": 8,
-      "length": 19,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5745
-    },
-    {
-      "roadId": "r196",
-      "side": "right",
-      "s": 28.2,
-      "length": 20,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5746
-    },
-    {
-      "roadId": "r196",
-      "side": "right",
-      "s": 49.4,
-      "length": 12.4,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5747
-    },
-    {
-      "roadId": "r197",
-      "side": "left",
-      "s": 8,
-      "length": 17.7,
-      "floors": 3,
-      "style": "backstein",
-      "seed": 5748
     },
     {
       "roadId": "r197",
@@ -20196,15 +19404,6 @@
       "seed": 5769
     },
     {
-      "roadId": "r205",
-      "side": "right",
-      "s": 8,
-      "length": 12.5,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5770
-    },
-    {
       "roadId": "r207",
       "side": "left",
       "s": 8,
@@ -20239,15 +19438,6 @@
       "floors": 5,
       "style": "neubau",
       "seed": 5774
-    },
-    {
-      "roadId": "r211",
-      "side": "right",
-      "s": 8,
-      "length": 12,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5775
     },
     {
       "roadId": "r212",
@@ -20565,15 +19755,6 @@
       "seed": 5810
     },
     {
-      "roadId": "r228",
-      "side": "right",
-      "s": 8,
-      "length": 21,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5811
-    },
-    {
       "roadId": "r229",
       "side": "left",
       "s": 8,
@@ -20599,15 +19780,6 @@
       "floors": 3,
       "style": "neubau",
       "seed": 5814
-    },
-    {
-      "roadId": "r231",
-      "side": "right",
-      "s": 8,
-      "length": 20,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5815
     },
     {
       "roadId": "r232",
@@ -20770,24 +19942,6 @@
       "floors": 4,
       "style": "backstein",
       "seed": 5833
-    },
-    {
-      "roadId": "r237",
-      "side": "left",
-      "s": 139,
-      "length": 28,
-      "floors": 5,
-      "style": "neubau",
-      "seed": 5834
-    },
-    {
-      "roadId": "r237",
-      "side": "left",
-      "s": 168.2,
-      "length": 27.6,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 5835
     },
     {
       "roadId": "r237",
@@ -21816,24 +20970,6 @@
       "seed": 5949
     },
     {
-      "roadId": "r249",
-      "side": "left",
-      "s": 8,
-      "length": 26.7,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 5950
-    },
-    {
-      "roadId": "r251",
-      "side": "left",
-      "s": 8,
-      "length": 20.4,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5951
-    },
-    {
       "roadId": "r251",
       "side": "right",
       "s": 8,
@@ -21841,15 +20977,6 @@
       "floors": 3,
       "style": "altbau",
       "seed": 5952
-    },
-    {
-      "roadId": "r252",
-      "side": "right",
-      "s": 8,
-      "length": 19,
-      "floors": 4,
-      "style": "backstein",
-      "seed": 5953
     },
     {
       "roadId": "r253",
@@ -21958,15 +21085,6 @@
       "floors": 4,
       "style": "altbau",
       "seed": 5965
-    },
-    {
-      "roadId": "r254",
-      "side": "left",
-      "s": 159,
-      "length": 28.4,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 5966
     },
     {
       "roadId": "r254",
@@ -22249,15 +21367,6 @@
     },
     {
       "roadId": "r257",
-      "side": "left",
-      "s": 40.2,
-      "length": 15.2,
-      "floors": 4,
-      "style": "backstein",
-      "seed": 5998
-    },
-    {
-      "roadId": "r257",
       "side": "right",
       "s": 8,
       "length": 33,
@@ -22300,15 +21409,6 @@
       "floors": 3,
       "style": "backstein",
       "seed": 6003
-    },
-    {
-      "roadId": "r258",
-      "side": "right",
-      "s": 8,
-      "length": 22,
-      "floors": 4,
-      "style": "neubau",
-      "seed": 6004
     },
     {
       "roadId": "r258",
@@ -22446,60 +21546,6 @@
       "seed": 6019
     },
     {
-      "roadId": "r260",
-      "side": "right",
-      "s": 8,
-      "length": 22,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 6020
-    },
-    {
-      "roadId": "r260",
-      "side": "right",
-      "s": 31.2,
-      "length": 23,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 6021
-    },
-    {
-      "roadId": "r260",
-      "side": "right",
-      "s": 55.4,
-      "length": 24,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 6022
-    },
-    {
-      "roadId": "r260",
-      "side": "right",
-      "s": 80.6,
-      "length": 25,
-      "floors": 5,
-      "style": "backstein",
-      "seed": 6023
-    },
-    {
-      "roadId": "r260",
-      "side": "right",
-      "s": 106.8,
-      "length": 12.7,
-      "floors": 3,
-      "style": "neubau",
-      "seed": 6024
-    },
-    {
-      "roadId": "r261",
-      "side": "left",
-      "s": 8,
-      "length": 27,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 6025
-    },
-    {
       "roadId": "r261",
       "side": "left",
       "s": 36.2,
@@ -22590,24 +21636,6 @@
       "seed": 6035
     },
     {
-      "roadId": "r262",
-      "side": "right",
-      "s": 8,
-      "length": 22,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 6036
-    },
-    {
-      "roadId": "r262",
-      "side": "right",
-      "s": 31.2,
-      "length": 14.8,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 6037
-    },
-    {
       "roadId": "r263",
       "side": "left",
       "s": 8,
@@ -22615,15 +21643,6 @@
       "floors": 5,
       "style": "backstein",
       "seed": 6038
-    },
-    {
-      "roadId": "r263",
-      "side": "right",
-      "s": 8,
-      "length": 23.6,
-      "floors": 3,
-      "style": "neubau",
-      "seed": 6039
     },
     {
       "roadId": "r264",
@@ -23150,15 +22169,6 @@
     {
       "roadId": "r270",
       "side": "left",
-      "s": 8,
-      "length": 20,
-      "floors": 5,
-      "style": "backstein",
-      "seed": 6098
-    },
-    {
-      "roadId": "r270",
-      "side": "left",
       "s": 29.2,
       "length": 21,
       "floors": 3,
@@ -23193,42 +22203,6 @@
       "seed": 6102
     },
     {
-      "roadId": "r270",
-      "side": "right",
-      "s": 8,
-      "length": 25,
-      "floors": 4,
-      "style": "backstein",
-      "seed": 6103
-    },
-    {
-      "roadId": "r270",
-      "side": "right",
-      "s": 34.2,
-      "length": 26,
-      "floors": 5,
-      "style": "neubau",
-      "seed": 6104
-    },
-    {
-      "roadId": "r270",
-      "side": "right",
-      "s": 61.4,
-      "length": 27,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 6105
-    },
-    {
-      "roadId": "r270",
-      "side": "right",
-      "s": 89.6,
-      "length": 28,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 6106
-    },
-    {
       "roadId": "r271",
       "side": "left",
       "s": 8,
@@ -23254,15 +22228,6 @@
       "floors": 4,
       "style": "neubau",
       "seed": 6109
-    },
-    {
-      "roadId": "r271",
-      "side": "right",
-      "s": 40.2,
-      "length": 24.7,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 6110
     },
     {
       "roadId": "r273",
@@ -23310,15 +22275,6 @@
       "seed": 6115
     },
     {
-      "roadId": "r273",
-      "side": "left",
-      "s": 125,
-      "length": 22,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 6116
-    },
-    {
       "roadId": "r274",
       "side": "left",
       "s": 8,
@@ -23355,33 +22311,6 @@
       "seed": 6120
     },
     {
-      "roadId": "r274",
-      "side": "right",
-      "s": 8,
-      "length": 27,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 6121
-    },
-    {
-      "roadId": "r274",
-      "side": "right",
-      "s": 36.2,
-      "length": 28,
-      "floors": 5,
-      "style": "altbau",
-      "seed": 6122
-    },
-    {
-      "roadId": "r274",
-      "side": "right",
-      "s": 65.4,
-      "length": 29,
-      "floors": 3,
-      "style": "backstein",
-      "seed": 6123
-    },
-    {
       "roadId": "r275",
       "side": "left",
       "s": 8,
@@ -23398,24 +22327,6 @@
       "floors": 5,
       "style": "altbau",
       "seed": 6125
-    },
-    {
-      "roadId": "r276",
-      "side": "right",
-      "s": 8,
-      "length": 32,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 6126
-    },
-    {
-      "roadId": "r276",
-      "side": "right",
-      "s": 41.2,
-      "length": 31.6,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 6127
     },
     {
       "roadId": "r277",
@@ -23454,42 +22365,6 @@
       "seed": 6131
     },
     {
-      "roadId": "r278",
-      "side": "left",
-      "s": 8,
-      "length": 22,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 6132
-    },
-    {
-      "roadId": "r279",
-      "side": "right",
-      "s": 8,
-      "length": 23,
-      "floors": 4,
-      "style": "backstein",
-      "seed": 6133
-    },
-    {
-      "roadId": "r279",
-      "side": "right",
-      "s": 32.2,
-      "length": 24,
-      "floors": 5,
-      "style": "neubau",
-      "seed": 6134
-    },
-    {
-      "roadId": "r279",
-      "side": "right",
-      "s": 57.4,
-      "length": 14.1,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 6135
-    },
-    {
       "roadId": "r280",
       "side": "left",
       "s": 8,
@@ -23508,24 +22383,6 @@
       "seed": 6137
     },
     {
-      "roadId": "r280",
-      "side": "right",
-      "s": 8,
-      "length": 28,
-      "floors": 3,
-      "style": "backstein",
-      "seed": 6138
-    },
-    {
-      "roadId": "r280",
-      "side": "right",
-      "s": 37.2,
-      "length": 29,
-      "floors": 4,
-      "style": "neubau",
-      "seed": 6139
-    },
-    {
       "roadId": "r281",
       "side": "left",
       "s": 8,
@@ -23542,15 +22399,6 @@
       "floors": 3,
       "style": "altbau",
       "seed": 6141
-    },
-    {
-      "roadId": "r281",
-      "side": "left",
-      "s": 71.4,
-      "length": 16.1,
-      "floors": 4,
-      "style": "altbau",
-      "seed": 6142
     },
     {
       "roadId": "r281",
@@ -23857,15 +22705,6 @@
       "floors": 5,
       "style": "altbau",
       "seed": 6176
-    },
-    {
-      "roadId": "r285",
-      "side": "right",
-      "s": 8,
-      "length": 19,
-      "floors": 3,
-      "style": "altbau",
-      "seed": 6177
     },
     {
       "roadId": "r285",
