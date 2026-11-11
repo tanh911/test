@@ -15,10 +15,10 @@ export interface ModernCockpitProps {
 
 /**
  * 🚗 MODERN COCKPIT OVERLAY (Fahrschule & Sport Virtual Cockpit)
- * Buồng lái thể thao hiện đại, chuẩn tỉ lệ ghế lái xe Đức:
+ * Căn chuẩn trục nhìn ghế lái (Driver Eye Horizon ~44%):
  * - Khung kính chắn gió & Cột chữ A (A-Pillars) bọc da sang trọng
  * - Gương chiếu hậu trung tâm (Digital Rearview Mirror)
- * - Táp-lô vòm cong thể thao (Leather Stitching, Ambient Cyan Strip, Air Vents)
+ * - Táp-lô vòm cong thể thao cân đối tầm nhìn (Leather Stitching, Ambient Cyan Strip, Air Vents)
  * - Cụm đồng hồ Virtual Cockpit độ nét cao:
  *   + Đồng hồ vòng tua RPM Analog (0 - 8000 RPM, Redline đỏ 6500)
  *   + Đồng hồ tốc độ Analog (0 - 260 km/h, vạch đỏ StVO 30 / 50 / 100)
@@ -84,7 +84,6 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
         preserveAspectRatio="none"
       >
         <defs>
-          {/* Gradient Cột chữ A bên trái */}
           <linearGradient id="leftPillarGrad" x1="0%" y1="0%" x2="100%" y2="0%">
             <stop offset="0%" stopColor="#0b0d11" />
             <stop offset="65%" stopColor="#181c23" />
@@ -92,7 +91,6 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
             <stop offset="100%" stopColor="#0f1217" />
           </linearGradient>
 
-          {/* Gradient Cột chữ A bên phải */}
           <linearGradient id="rightPillarGrad" x1="100%" y1="0%" x2="0%" y2="0%">
             <stop offset="0%" stopColor="#0b0d11" />
             <stop offset="65%" stopColor="#181c23" />
@@ -100,14 +98,12 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
             <stop offset="100%" stopColor="#0f1217" />
           </linearGradient>
 
-          {/* Gradient viền mép trần xe */}
           <linearGradient id="roofGrad" x1="0%" y1="0%" x2="0%" y2="100%">
             <stop offset="0%" stopColor="#090a0d" />
             <stop offset="70%" stopColor="#15181f" />
             <stop offset="100%" stopColor="rgba(21, 24, 31, 0)" />
           </linearGradient>
 
-          {/* Bóng đổ kính lái */}
           <filter id="pillarShadow" x="-20%" y="-20%" width="140%" height="140%">
             <feDropShadow dx="8" dy="4" stdDeviation="10" floodColor="#000000" floodOpacity="0.85" />
           </filter>
@@ -139,7 +135,7 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
         style={{
           position: 'absolute',
           top: 14,
-          left: '50%',
+          left: '51%',
           transform: 'translateX(-50%)',
           display: 'flex',
           flexDirection: 'column',
@@ -240,9 +236,9 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
 
             <linearGradient id="ambientCyan" x1="0%" y1="0%" x2="100%" y2="0%">
               <stop offset="0%" stopColor="transparent" />
-              <stop offset="12%" stopColor="#0284c7" />
-              <stop offset="40%" stopColor="#38bdf8" />
-              <stop offset="70%" stopColor="#0284c7" />
+              <stop offset="15%" stopColor="#0284c7" />
+              <stop offset="44%" stopColor="#38bdf8" />
+              <stop offset="72%" stopColor="#0284c7" />
               <stop offset="100%" stopColor="transparent" />
             </linearGradient>
 
@@ -251,15 +247,15 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
             </filter>
           </defs>
 
-          {/* Khối táp-lô: Đường cong vòm che cụm đồng hồ chuẩn dáng xe Đức */}
+          {/* Vòm táp-lô căn chuẩn tầm nhìn lái xe: Đỉnh vòm quanh X = 845 (44% màn hình) */}
           <path
             d="
               M 0,400 
-              L 0,130 
-              C 120,125 240,100 370,68 
-              C 480,42 700,36 880,64 
-              C 1020,86 1160,118 1420,135 
-              C 1650,148 1800,156 1920,160 
+              L 0,140 
+              C 140,135 280,110 420,72 
+              C 560,40 1120,40 1260,76 
+              C 1400,108 1550,132 1720,148 
+              C 1820,156 1880,162 1920,165 
               L 1920,400 
               Z
             "
@@ -270,11 +266,11 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
           {/* Dải LED Ambient Cyan */}
           <path
             d="
-              M 0,130 
-              C 120,125 240,100 370,68 
-              C 480,42 700,36 880,64 
-              C 1020,86 1160,118 1420,135 
-              C 1650,148 1800,156 1920,160
+              M 0,140 
+              C 140,135 280,110 420,72 
+              C 560,40 1120,40 1260,76 
+              C 1400,108 1550,132 1720,148 
+              C 1820,156 1880,162 1920,165
             "
             stroke="url(#ambientCyan)"
             strokeWidth="3.5"
@@ -282,14 +278,14 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
             opacity="0.9"
           />
 
-          {/* Chỉ thêu kép da táp-lô */}
+          {/* Chỉ thêu da kép sang trọng */}
           <path
             d="
-              M 0,138 
-              C 120,133 240,108 370,76 
-              C 480,50 700,44 880,72 
-              C 1020,94 1160,126 1420,143 
-              C 1650,156 1800,164 1920,168
+              M 0,148 
+              C 140,143 280,118 420,80 
+              C 560,48 1120,48 1260,84 
+              C 1400,116 1550,140 1720,156 
+              C 1820,164 1880,170 1920,173
             "
             stroke="rgba(255,255,255,0.2)"
             strokeDasharray="5,4"
@@ -298,7 +294,7 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
           />
 
           {/* Cửa gió điều hòa bên trái */}
-          <g transform="translate(180, 150)">
+          <g transform="translate(130, 160)">
             <rect x="0" y="0" width="70" height="38" rx="6" fill="#0d0f13" stroke="#2e3542" strokeWidth="2" />
             <line x1="8" y1="10" x2="62" y2="10" stroke="#475569" strokeWidth="2.5" />
             <line x1="8" y1="19" x2="62" y2="19" stroke="#475569" strokeWidth="2.5" />
@@ -306,8 +302,8 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
             <circle cx="35" cy="19" r="4" fill="#94a3b8" />
           </g>
 
-          {/* Cửa gió điều hòa bên phải */}
-          <g transform="translate(1120, 160)">
+          {/* Cửa gió điều hòa bên phải (cụm phụ) */}
+          <g transform="translate(1420, 165)">
             <rect x="0" y="0" width="90" height="38" rx="6" fill="#0d0f13" stroke="#2e3542" strokeWidth="2" />
             <line x1="10" y1="10" x2="80" y2="10" stroke="#475569" strokeWidth="2.5" />
             <line x1="10" y1="19" x2="80" y2="19" stroke="#475569" strokeWidth="2.5" />
@@ -320,7 +316,7 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
         <div
           style={{
             position: 'absolute',
-            left: '34%',
+            left: '44%',
             bottom: '26%',
             transform: 'translateX(-50%)',
             width: 610,
@@ -352,7 +348,6 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
                 opacity="0.9"
               />
 
-              {/* Vạch chia 0 đến 8 */}
               {[0, 1, 2, 3, 4, 5, 6, 7, 8].map((tick) => {
                 const angle = -135 + (tick / 8) * 270;
                 const rad = (angle * Math.PI) / 180;
@@ -461,7 +456,6 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
 
             {/* Giữa: Biển báo StVO + Tốc độ số lớn */}
             <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', gap: 14 }}>
-              {/* Biển báo StVO Đức (Zeichen 274) */}
               <div
                 style={{
                   width: 46,
@@ -482,7 +476,6 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
                 </span>
               </div>
 
-              {/* Tốc độ số Digital */}
               <div style={{ textAlign: 'center' }}>
                 <div
                   style={{
@@ -549,7 +542,6 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
               <circle cx="80" cy="80" r="74" fill="#0c0e14" stroke="#1f2533" strokeWidth="3" />
               <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
 
-              {/* Vạch chia tốc độ 0 - 260 km/h */}
               {[0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240, 260].map((v) => {
                 const angle = -135 + (v / 260) * 270;
                 const rad = (angle * Math.PI) / 180;
@@ -605,7 +597,7 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
         <div
           style={{
             position: 'absolute',
-            left: '34%',
+            left: '44%',
             bottom: '-62%',
             transform: `translateX(-50%) rotate(${steerDeg}deg)`,
             transformOrigin: '240px 240px',
@@ -635,7 +627,7 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
               </filter>
             </defs>
 
-            {/* Vành ngoài vô-lăng (Thick Sports Rim) */}
+            {/* Vành ngoài vô-lăng */}
             <circle
               cx="240"
               cy="240"
@@ -646,7 +638,7 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
               filter="url(#wheelShadow)"
             />
 
-            {/* Viền kim loại mờ bên trong vành */}
+            {/* Viền kim loại mờ */}
             <circle
               cx="240"
               cy="240"
@@ -656,7 +648,7 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
               strokeWidth="2"
             />
 
-            {/* Gờ tì ngón tay cái thể thao (Thumb grips tại hướng 10h và 2h) */}
+            {/* Gờ tì ngón tay cái thể thao */}
             <path
               d="M 60,165 C 50,195 50,210 65,230"
               stroke="#13161c"
@@ -699,7 +691,7 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
             />
             <rect x="233" y="340" width="14" height="65" rx="7" fill="#0e1117" />
 
-            {/* Trung tâm túi khí (Airbag Hub & Horn Pad) */}
+            {/* Trung tâm túi khí */}
             <circle
               cx="240"
               cy="255"
@@ -717,7 +709,7 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
               strokeWidth="1.5"
             />
 
-            {/* Logo trung tâm Fahrschule / Sport Emblem */}
+            {/* Logo trung tâm Fahrschule */}
             <circle cx="240" cy="255" r="28" fill="#0b0e14" stroke="#94a3b8" strokeWidth="2.5" />
             <circle cx="240" cy="255" r="24" fill="none" stroke="#38bdf8" strokeWidth="1" />
             <text
