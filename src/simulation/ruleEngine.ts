@@ -72,6 +72,11 @@ export class RuleEngine {
   // ── phát hiện 'nosignal': tích lũy Δheading giữa các frame ──
   private prevHeading: number | null = null;
   private turnAccum = 0; // góc đổi hướng chưa có xi-nhan (rad, dương = trái)
+  // ── Chống đếm lặp lỗi tốc độ theo từng đợt (Episode-based Speeding Tracker) ──
+  private activeSpeedViolation: Violation | null = null;
+  private activeSpeedPeakKmh = 0;
+  private activeSpeedLimit = 0;
+  private belowLimitDuration = 0;
   private map: GameMap;
   private controllers: TrafficLightController[];
 
@@ -86,7 +91,12 @@ export class RuleEngine {
   get bestanden(): boolean {
     const major = this.violations.filter(v => v.severity === 'major').length;
     const minor = this.violations.length - major;
-    return major === 0 && minor < 10;
+    const speedCount = this.violations.filter(v => v.type === 'speed').length;
+    // Chuẩn thi thực hành Đức (Fahrprüfung):
+    // - Bất kỳ lỗi nặng (major > 0) → trượt ngay
+    // - Lặp lại lỗi vượt tốc độ từ 2 đợt riêng biệt trở lên → trượt
+    // - Tổng lỗi nhẹ từ 3 lỗi trở lên → trượt
+    return major === 0 && minor < 3 && speedCount < 2;
   }
 
   get summary(): string {
@@ -208,13 +218,61 @@ export class RuleEngine {
   update(dt: number, p: PlayerState, collisions: string[]): void {
     this.elapsedTime += dt;
 
-    // ── tốc độ ──
+    // ── tốc độ: chống đếm lặp trong cùng 1 đợt vượt tốc & phân loại lỗi nặng/nhẹ chuẩn Đức ──
     const kmh = p.speed * 3.6;
-    // limit của road gần nhất
     const near = this.nearestRoad(p);
     if (near) { this.currentSpeedLimit = near.road.speedLimit; }
-    if (near && kmh > near.road.speedLimit + TOLERANCE_KMH && kmh > 10) {
-      this.add('speed', 'minor', `Vượt tốc độ ${Math.round(kmh)} km/h (limit ${near.road.speedLimit})`, p);
+    if (near) {
+      const limit = near.road.speedLimit;
+      const over = kmh - limit;
+      if (over > TOLERANCE_KMH && kmh > 10) {
+        this.belowLimitDuration = 0;
+        const roundedKmh = Math.round(kmh);
+        // Vượt >= 15 km/h (hoặc >= 12 km/h trong khu Tempo 30, vd >= 42 km/h ở khu 30) là lỗi NẶNG (Schwerer Fehler)
+        const isMajorSpeed = over >= 15 || (limit <= 30 && over >= 12);
+        const sev: Severity = isMajorSpeed ? 'major' : 'minor';
+        const msg = isMajorSpeed
+          ? `Vượt tốc độ nghiêm trọng ${roundedKmh} km/h (limit ${limit})`
+          : `Vượt tốc độ ${roundedKmh} km/h (limit ${limit})`;
+
+        if (!this.activeSpeedViolation || this.activeSpeedLimit !== limit) {
+          // Bắt đầu đợt vượt tốc mới (hoặc sang vùng giới hạn tốc độ mới)
+          if (this.elapsedTime - this.lastAt.speed >= RATE_LIMIT.speed) {
+            this.lastAt.speed = this.elapsedTime;
+            const v: Violation = {
+              type: 'speed',
+              severity: sev,
+              message: msg,
+              x: p.x,
+              z: p.z,
+              t: this.elapsedTime
+            };
+            this.violations.push(v);
+            this.activeSpeedViolation = v;
+            this.activeSpeedPeakKmh = roundedKmh;
+            this.activeSpeedLimit = limit;
+          }
+        } else {
+          // Đang trong cùng 1 đợt vượt tốc → CẬP NHẬT đỉnh tốc độ & nâng mức lỗi nếu vượt ngưỡng nặng (KHÔNG cộng dồn lặp lỗi!)
+          if (roundedKmh > this.activeSpeedPeakKmh) {
+            this.activeSpeedPeakKmh = roundedKmh;
+            this.activeSpeedViolation.message = msg;
+            this.activeSpeedViolation.x = p.x;
+            this.activeSpeedViolation.z = p.z;
+          }
+          if (sev === 'major' && this.activeSpeedViolation.severity !== 'major') {
+            this.activeSpeedViolation.severity = 'major';
+            this.activeSpeedViolation.message = msg;
+          }
+        }
+      } else if (kmh <= limit + 1.0) {
+        // Khi xe đã giảm tốc về dưới giới hạn liên tục >= 5 giây thì mới khép lại đợt vượt tốc cũ
+        this.belowLimitDuration += dt;
+        if (this.belowLimitDuration >= 5.0) {
+          this.activeSpeedViolation = null;
+          this.activeSpeedPeakKmh = 0;
+        }
+      }
     }
 
     // ── rời mặt đường ──

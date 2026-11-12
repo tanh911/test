@@ -58,10 +58,14 @@ export const SimDevPage = () => {
   const [pos, setPos] = useState<PosDebug | null>(null);
   const [sceneHandle, setSceneHandle] = useState<SimSceneHandle | null>(null);
 
-  const formatViolationMsg = (type: string, rawMsg: string, l: 'vi' | 'de'): string => {
+  const formatViolationMsg = (type: string, rawMsg: string, l: 'vi' | 'de', severity?: 'minor' | 'major'): string => {
     const mSpeed = rawMsg.match(/(\d+)\s*km\/h.*?(?:limit|giới hạn)\s*(\d+)/i);
     if (l === 'de') {
-      if (type === 'speed' && mSpeed) return `Tempo überschritten: ${mSpeed[1]} km/h (Limit ${mSpeed[2]} km/h)`;
+      if (type === 'speed' && mSpeed) {
+        return severity === 'major'
+          ? `Erheblich zu schnell: ${mSpeed[1]} km/h (Limit ${mSpeed[2]} km/h)`
+          : `Tempo überschritten: ${mSpeed[1]} km/h (Limit ${mSpeed[2]} km/h)`;
+      }
       if (type === 'redlight') return 'Rote Ampel überfahren';
       if (type === 'stop') return 'Stoppschild (Z.206) nicht angehalten';
       if (type === 'nosignal') return 'Blinken beim Abbiegen vergessen';
@@ -71,7 +75,11 @@ export const SimDevPage = () => {
       if (type === 'collision') return 'Kollision mit Hindernis oder Fahrzeug';
       return rawMsg;
     } else {
-      if (type === 'speed' && mSpeed) return `Vượt tốc độ: ${mSpeed[1]} km/h (tối đa ${mSpeed[2]} km/h)`;
+      if (type === 'speed' && mSpeed) {
+        return severity === 'major'
+          ? `Vượt tốc độ nghiêm trọng: ${mSpeed[1]} km/h (tối đa ${mSpeed[2]} km/h)`
+          : `Vượt tốc độ: ${mSpeed[1]} km/h (tối đa ${mSpeed[2]} km/h)`;
+      }
       if (type === 'redlight') return 'Vượt đèn đỏ tại giao lộ';
       if (type === 'stop') return 'Không dừng hẳn tại biển STOP';
       if (type === 'nosignal') return 'Quên bật xi-nhan khi chuyển hướng';
@@ -302,7 +310,7 @@ export const SimDevPage = () => {
                     <b style={{ color: '#f87171' }}>{lang === 'de' ? 'Schwere Fehler:' : 'Lỗi nghiêm trọng:'}</b>
                     {rule.violationsBySeverity.major.slice().reverse().map((v, i) => (
                       <div key={i} style={{ color: '#f87171', marginLeft: 10 }}>
-                        ⛔ {formatViolationMsg(v.type, v.message, lang)}
+                        ⛔ {formatViolationMsg(v.type, v.message, lang, v.severity)}
                       </div>
                     ))}
                   </div>
@@ -312,7 +320,7 @@ export const SimDevPage = () => {
                     <b style={{ color: '#fbbf24' }}>{lang === 'de' ? 'Leichte Fehler:' : 'Lỗi nhẹ:'}</b>
                     {rule.violationsBySeverity.minor.slice().reverse().map((v, i) => (
                       <div key={i} style={{ color: '#fbbf24', marginLeft: 10 }}>
-                        ⚠ {formatViolationMsg(v.type, v.message, lang)}
+                        ⚠ {formatViolationMsg(v.type, v.message, lang, v.severity)}
                       </div>
                     ))}
                   </div>

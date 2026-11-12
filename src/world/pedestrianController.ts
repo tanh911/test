@@ -6,10 +6,11 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { GameMap, MapRoad } from './mapLoader';
 import { roadById, pointAtS, roadLength } from './mapLoader';
 import { roadsAtNode } from './roadMesh';
+import { spawnFromMap } from './vehicle';
 
-const PED_SPEED = 1.2; // m/s, đi bộ bình thường
-const SIDEWALK_OFF = 0.9; // lệch ngoài mép đường (m)
-const DESPAWN_DIST = 400; // cull xa camera
+const PED_SPEED = 1.25; // m/s, đi bộ bình thường
+const SIDEWALK_OFF = 1.65; // lệch ngoài mép đường (m) — giữa vỉa hè ngoài
+const DESPAWN_DIST = 600; // cull xa camera
 
 interface Ped {
   roadId: string;
@@ -17,8 +18,9 @@ interface Ped {
   dir: 1 | -1;      // +1: from→to, −1: to→from
   side: 1 | -1;     // +1: phải flow, −1: trái flow (về phía vỉa hè)
   group: THREE.Group;
-  waiting: boolean; // đang đợi qua zebra
-  waitTimer: number; // bộ đếm ngược đợi zebra (s)
+  waiting: boolean; // đang đợi/đi qua zebra
+  waitTimer: number; // bộ đếm ngược tại zebra (s)
+  crossing?: boolean; // đang băng qua vạch kẻ đường
   nextChoice?: { road: MapRoad; dir: 1 | -1 } | null;
 }
 
@@ -49,7 +51,17 @@ export class PedestrianController {
               for (const mat of mats) mat.side = THREE.FrontSide;
             }
           });
-          this.templates.push(t);
+          // Chuẩn hoá chiều cao người đi bộ ~ 1.70m và đặt chân chạm mặt đất (y = 0)
+          const box = new THREE.Box3().setFromObject(t);
+          const sz = box.getSize(new THREE.Vector3());
+          if (sz.y > 0.1) {
+            const sc = 1.70 / sz.y;
+            t.scale.setScalar(sc);
+            t.position.y = -box.min.y * sc;
+          }
+          const wrap = new THREE.Group();
+          wrap.add(t);
+          this.templates.push(wrap);
         }
       }
       if (this.templates.length) {
@@ -75,19 +87,48 @@ export class PedestrianController {
     return l;
   }
 
+  private pickSideForRoad(road: MapRoad): 1 | -1 {
+    // Đường 1 chiều (đặc biệt là 2 làn tách đôi): vỉa hè ngoài luôn nằm bên phải chiều đi (+1)
+    if (road.lanesBackward === 0) return 1;
+    if (road.sidewalk.right && !road.sidewalk.left) return 1;
+    if (road.sidewalk.left && !road.sidewalk.right) return -1;
+    return Math.random() < 0.5 ? 1 : -1;
+  }
+
   private spawnPeds(): void {
-    const roads = this.map.roads.filter(r => roadLength(r) > 30 && (r.sidewalk.left || r.sidewalk.right));
+    const playerSpawn = spawnFromMap(this.map);
+    const roads = this.map.roads.filter(r => roadLength(r) > 24 && (r.sidewalk.left || r.sidewalk.right));
+    const nearbyRoads = roads.filter(r => {
+      const mid = pointAtS(r, roadLength(r) * 0.5);
+      return Math.hypot(mid.x - playerSpawn.x, mid.z - playerSpawn.z) < 160;
+    });
     let placed = 0;
-    const maxPeds = 48; // dày đủ để người chơi gặp người đi bộ thường xuyên
+    const maxPeds = 56;
     while (placed < maxPeds && roads.length) {
-      const road = roads[Math.floor(Math.random() * roads.length)];
+      const pool = (placed < 16 && nearbyRoads.length > 0) ? nearbyRoads : roads;
+      const road = pool[Math.floor(Math.random() * pool.length)];
       const len = this.len(road.id);
       const s = 5 + Math.random() * Math.max(1, len - 10);
       const dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
-      const side: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
-      this.peds.push(this.makePed(road, s, dir, side, placed));
+      const side: 1 | -1 = this.pickSideForRoad(road);
+      const ped = this.makePed(road, s, dir, side, placed);
+      const p0 = this.pose(road, s, dir, side);
+      ped.group.position.set(p0.x, 0.10, p0.z);
+      ped.group.rotation.y = p0.ry;
+      this.peds.push(ped);
       placed++;
     }
+  }
+
+  /** Kiểm tra có người đi bộ đang ở khu vực vạch qua đường gần xe người chơi không */
+  isPedNearCrosswalk(px: number, pz: number, radius = 7.0): boolean {
+    if (!this.ready) return false;
+    for (const ped of this.peds) {
+      if (!ped.waiting) continue;
+      const d = Math.hypot(ped.group.position.x - px, ped.group.position.z - pz);
+      if (d < radius) return true;
+    }
+    return false;
   }
 
   private makePed(road: MapRoad, s: number, dir: 1 | -1, side: 1 | -1, idx: number): Ped {
@@ -112,21 +153,33 @@ export class PedestrianController {
     return { road: pick.road, dir };
   }
 
-  /** Pose ped trên vỉa hè: offset = side * (half + SIDEWALK_OFF) so với tim đường */
+  /** Pose ped trên vỉa hè: side tính theo hướng gốc của road (+1 = vỉa hè phải, −1 = vỉa hè trái) */
   private pose(road: MapRoad, s: number, dir: 1 | -1, side: 1 | -1): { x: number; z: number; ry: number } {
     const pt = pointAtS(road, s);
     const h = dir > 0 ? pt.heading : pt.heading + Math.PI;
-    const fx = Math.sin(h);
-    const fz = Math.cos(h);
-    // phải flow = (−fz, fx); trái flow = (fz, −fx)
-    const rx = side > 0 ? -fz : fz;
-    const rz = side > 0 ? fx : -fz;
+    const roadFx = Math.sin(pt.heading);
+    const roadFz = Math.cos(pt.heading);
+    const rx = side > 0 ? -roadFz : roadFz;
+    const rz = side > 0 ? roadFx : -roadFx;
     const half = (road.lanesForward + road.lanesBackward) * road.laneWidth / 2;
     return {
       x: pt.x + rx * (half + SIDEWALK_OFF),
       z: pt.z + rz * (half + SIDEWALK_OFF),
       ry: h + Math.PI // GLB ped mặt −Z → rotation.y = h + π
     };
+  }
+
+  private advanceToNextRoad(ped: Ped, road: MapRoad, nodeAheadId: string, len: number): void {
+    const next = this.pickNextRoad(road, nodeAheadId);
+    if (next) {
+      ped.roadId = next.road.id;
+      ped.dir = next.dir;
+      ped.s = ped.dir > 0 ? 7 : Math.max(2, this.len(ped.roadId) - 7);
+      ped.side = this.pickSideForRoad(next.road);
+    } else {
+      ped.dir = (ped.dir * -1) as 1 | -1;
+      ped.s = ped.dir > 0 ? 7 : Math.max(2, len - 7);
+    }
   }
 
   update(dt: number): void {
@@ -136,8 +189,9 @@ export class PedestrianController {
       const road = roadById(this.map, ped.roadId);
       if (!road) continue;
       const len = this.len(ped.roadId);
+      const nodeAheadId = this.nodeAhead(road, ped.dir);
 
-      // Di dộng dọc vỉa hè (trừ khi đang đợi qua zebra)
+      // Di động dọc vỉa hè (trừ khi đang đợi qua zebra)
       if (!ped.waiting) {
         ped.s += ped.dir * PED_SPEED * dt;
       } else {
@@ -145,48 +199,39 @@ export class PedestrianController {
         if (ped.waitTimer <= 0) {
           ped.waiting = false;
           ped.waitTimer = 0;
+          this.advanceToNextRoad(ped, road, nodeAheadId, len);
         }
       }
 
-      // Đã đến node phía trước?
-      const nodeAheadId = this.nodeAhead(road, ped.dir);
-      const distToNode = ped.dir > 0 ? len - ped.s : ped.s;
-      const nearJunction = distToNode < 6;
+      const curRoad = roadById(this.map, ped.roadId);
+      if (!curRoad) continue;
+      const curLen = this.len(ped.roadId);
+      const curNodeAhead = this.nodeAhead(curRoad, ped.dir);
+      const distToNode = ped.dir > 0 ? curLen - ped.s : ped.s;
+      const nearJunction = distToNode < 5;
 
       if (nearJunction && !ped.waiting) {
-        // Có zebra (crosswalk) tại node này trên road hiện tại?
-        const ix = this.map.intersections.find(j => j.nodeId === nodeAheadId);
-        const hasZebra = ix ? ix.crosswalks.includes(road.id) : false;
+        const ix = this.map.intersections.find(j => j.nodeId === curNodeAhead);
+        const hasZebra = ix ? ix.crosswalks.includes(curRoad.id) : false;
         if (hasZebra) {
           ped.waiting = true;
-          ped.waitTimer = 1.5; // chờ 1.5s tại zebra trước khi qua
+          ped.waitTimer = 1.5;
         } else {
-          // Chuyển sang road khác
-          const next = this.pickNextRoad(road, nodeAheadId);
-          if (next) {
-            ped.roadId = next.road.id;
-            ped.dir = next.dir;
-            ped.s = ped.dir > 0 ? 2 : this.len(ped.roadId) - 2;
-            // đổi sang vỉa hè ngẫu nhiên bên road mới
-            ped.side = Math.random() < 0.5 ? 1 : -1;
-          } else {
-            // Cụt → quay lui
-            ped.dir = (ped.dir * -1) as 1 | -1;
-            ped.s = Math.max(1, Math.min(len - 1, ped.s));
-          }
+          this.advanceToNextRoad(ped, curRoad, curNodeAhead, curLen);
         }
       }
 
-      // Ngoài road (qua node) → clamp
-      if (ped.s > len) ped.s = len;
+      const finalRoad = roadById(this.map, ped.roadId);
+      if (!finalRoad) continue;
+      const finalLen = this.len(ped.roadId);
+      if (ped.s > finalLen) ped.s = finalLen;
       if (ped.s < 0) ped.s = 0;
 
       // Pose
-      const p = this.pose(road, ped.s, ped.dir, ped.side);
-      ped.group.position.set(p.x, 0, p.z);
+      const p = this.pose(finalRoad, ped.s, ped.dir, ped.side);
+      ped.group.position.set(p.x, 0.10, p.z);
       ped.group.rotation.y = p.ry;
 
-      // Cull xa camera (dùng camera position gần nhất nếu có — đơn giản: cull theo khoảng cách từ gốc)
       const dist = Math.hypot(p.x, p.z);
       ped.group.visible = dist < DESPAWN_DIST;
     }

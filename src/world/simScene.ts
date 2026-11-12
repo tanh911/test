@@ -7,6 +7,7 @@ import { buildWorld } from './worldBuilder';
 import { ChunkManager } from './chunkManager';
 import { createVehicle, spawnFromMap, type VehicleHandle } from './vehicle';
 import { NPCController } from './npc';
+import { PedestrianController } from './pedestrianController';
 import { buildingRects } from './collisions';
 import { RuleEngine, type Violation } from '../simulation/ruleEngine';
 import { nodeById } from './mapLoader';
@@ -271,14 +272,15 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   // 🚙 Drive mode: WASD lái xe (dùng chung `keys` module), camera ghế lái
   let vehicle: VehicleHandle | null = null;
   let npcs: NPCController | null = null;
+  let peds: PedestrianController | null = null;
   let ruleEngine: RuleEngine | null = null;
   const npcCollisions: string[] = [];
   const staticRects = buildingRects(map);
   let headYaw = 0;
   let headPitch = 0;
-  const rearCam = new THREE.PerspectiveCamera(50, 240 / 50, 0.5, 300);
-  const leftMirrorCam = new THREE.PerspectiveCamera(55, 150 / 95, 0.3, 200);
-  const rightMirrorCam = new THREE.PerspectiveCamera(55, 150 / 95, 0.3, 200);
+  const rearCam = new THREE.PerspectiveCamera(42, 310 / 74, 0.5, 320);
+  const leftMirrorCam = new THREE.PerspectiveCamera(44, 188 / 108, 0.3, 250);
+  const rightMirrorCam = new THREE.PerspectiveCamera(44, 182 / 104, 0.3, 250);
   let isMouseLooking = false;
   let lastMouseX = 0;
   let lastMouseY = 0;
@@ -316,9 +318,11 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
 
     createVehicle(scene, map).then(v => { vehicle = v; v.setCameraMode(camMode); });
     ruleEngine = new RuleEngine(map, world.controllers);
-    // NPC traffic (nạp GLB nền, không chặn render)
+    // NPC traffic + người đi bộ (nạp GLB nền, không chặn render)
     npcs = new NPCController(map, scene);
-    npcs.init(world.controllers, 8);
+    npcs.init(world.controllers, 36);
+    peds = new PedestrianController(scene, map);
+    peds.init();
   }
 
   const tick = (now: number) => {
@@ -344,8 +348,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
             break;
           }
         }
-        // NPC + rule engine
+        // NPC + người đi bộ + rule engine
         npcs?.update(dt, { player: { x: vehicle.state.x, z: vehicle.state.z }, controllers: world.controllers, collisions: npcCollisions });
+        peds?.update(dt);
         // ── số: 1=P, 2=R, 3=N, 4=D (hỗ trợ cả Digit và Numpad) ──
         let gear: 'P' | 'R' | 'N' | 'D' | undefined;
         if (keys.has('Digit1') || keys.has('Numpad1')) gear = 'P';
@@ -359,7 +364,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           speed: vehicle.state.speed,
           signal: vehicle.signal, // phục vụ vi phạm 'nosignal' (quên xi-nhan khi rẽ)
           stopped: Math.abs(vehicle.state.speed) < 0.15, // xe đã dừng hẳn (dùng cho stop sign)
-          inCrosswalk: false // sẽ cập nhật khi phát hiện player trong vùng zebra
+          inCrosswalk: peds ? peds.isPedNearCrosswalk(vehicle.state.x, vehicle.state.z) : false
         }, npcCollisions);
         vehicle?.update(dt, {
           throttle: keys.has('KeyW') ? 1 : 0,
@@ -505,11 +510,11 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         if (rW > 0 && rH > 0 && rX + rW > 0 && rX < screenW * pr && rY + rH > 0 && rY < screenH * pr) {
           rearCam.aspect = m.width / m.height;
           rearCam.updateProjectionMatrix();
-          rearCam.position.set(vehicle.state.x, 1.25, vehicle.state.z);
+          rearCam.position.set(vehicle.state.x, 1.32, vehicle.state.z);
           rearCam.lookAt(
-            vehicle.state.x - Math.sin(h) * 50,
-            1.20,
-            vehicle.state.z - Math.cos(h) * 50
+            vehicle.state.x - Math.sin(h) * 45,
+            0.92,
+            vehicle.state.z - Math.cos(h) * 45
           );
           renderer.setScissor(rX, rY, rW, rH);
           renderer.setViewport(rX, rY, rW, rH);
@@ -530,9 +535,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           leftMirrorCam.updateProjectionMatrix();
           const camX = vehicle.state.x - Math.cos(h) * 1.05 - Math.sin(h) * 0.15;
           const camZ = vehicle.state.z + Math.sin(h) * 1.05 - Math.cos(h) * 0.15;
-          leftMirrorCam.position.set(camX, 1.08, camZ);
-          const ang = h - Math.PI + 0.14;
-          leftMirrorCam.lookAt(camX + Math.sin(ang) * 50, 1.05, camZ + Math.cos(ang) * 50);
+          leftMirrorCam.position.set(camX, 1.15, camZ);
+          const ang = h - Math.PI + 0.11;
+          leftMirrorCam.lookAt(camX + Math.sin(ang) * 45, 0.85, camZ + Math.cos(ang) * 45);
           renderer.setScissor(lX, lY, lW, lH);
           renderer.setViewport(lX, lY, lW, lH);
           renderer.render(scene, leftMirrorCam);
@@ -552,9 +557,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           rightMirrorCam.updateProjectionMatrix();
           const camX = vehicle.state.x + Math.cos(h) * 1.05 - Math.sin(h) * 0.15;
           const camZ = vehicle.state.z - Math.sin(h) * 1.05 - Math.cos(h) * 0.15;
-          rightMirrorCam.position.set(camX, 1.08, camZ);
-          const ang = h - Math.PI - 0.14;
-          rightMirrorCam.lookAt(camX + Math.sin(ang) * 50, 1.05, camZ + Math.cos(ang) * 50);
+          rightMirrorCam.position.set(camX, 1.15, camZ);
+          const ang = h - Math.PI - 0.11;
+          rightMirrorCam.lookAt(camX + Math.sin(ang) * 45, 0.85, camZ + Math.cos(ang) * 45);
           renderer.setScissor(rxX, rxY, rxW, rxH);
           renderer.setViewport(rxX, rxY, rxW, rxH);
           renderer.render(scene, rightMirrorCam);

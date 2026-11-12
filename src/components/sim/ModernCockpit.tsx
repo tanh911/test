@@ -45,9 +45,9 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
     return Math.max(-85, Math.min(85, rawDeg * 2.4));
   }, [steerAngle]);
 
-  // Góc kim tốc độ (-125° tới +125°, thang đo 0..240 km/h)
+  // Góc kim tốc độ (-125° tới +125°, thang đo đô thị 0..120 km/h giúp vùng 0-60 km/h rộng và cực dễ đọc)
   const speedNeedleDeg = useMemo(() => {
-    const frac = Math.max(0, Math.min(1, speedKmh / 240));
+    const frac = Math.max(0, Math.min(1, speedKmh / 120));
     return -125 + frac * 250;
   }, [speedKmh]);
 
@@ -136,7 +136,7 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
       <div
         style={{
           position: 'absolute',
-          top: 14,
+          top: 18,
           left: '50%',
           transform: 'translateX(-50%)',
           display: 'flex',
@@ -149,45 +149,35 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
         {/* Cụm ngàm nhôm treo gương vào kính lái */}
         <div
           style={{
-            width: 16,
-            height: 10,
-            background: 'linear-gradient(180deg, #101318 0%, #1e2430 100%)',
-            borderRadius: '2px 2px 0 0',
-            border: '1px solid #334155'
+            width: 22,
+            height: 12,
+            background: 'linear-gradient(180deg, #101318 0%, #262e3d 100%)',
+            borderRadius: '3px 3px 0 0',
+            border: '1px solid #475569'
           }}
         />
 
-        {/* Khung gương tràn viền cao cấp */}
+        {/* Khung gương tràn viền cao cấp — kích thước lớn (310x74), sáng rõ không phủ mờ */}
         <div
           id="sim-mirror-center"
           style={{
             position: 'relative',
-            width: 250,
-            height: 56,
-            borderRadius: '8px 8px 18px 18px',
-            border: '2px solid #334155',
-            boxShadow: '0 10px 28px rgba(0,0,0,0.9), inset 0 1px 2px rgba(255,255,255,0.3)',
+            width: 310,
+            height: 74,
+            borderRadius: '10px 10px 20px 20px',
+            border: '3px solid #283244',
+            boxShadow: '0 10px 28px rgba(0,0,0,0.85), inset 0 1px 2px rgba(255,255,255,0.35)',
             background: 'transparent',
             overflow: 'hidden'
           }}
         >
-          {/* Lớp phủ quang học chống chói dịu mắt */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(180deg, rgba(56,189,248,0.04) 0%, rgba(2,6,23,0.1) 100%)',
-              pointerEvents: 'none'
-            }}
-          />
           {/* Vát viền kính sang trọng */}
           <div
             style={{
               position: 'absolute',
               inset: 0,
-              borderRadius: '6px 6px 16px 16px',
-              border: '1px solid rgba(255,255,255,0.16)',
-              boxShadow: 'inset 0 0 6px rgba(0,0,0,0.5)',
+              borderRadius: '7px 7px 17px 17px',
+              border: '1px solid rgba(255,255,255,0.22)',
               pointerEvents: 'none'
             }}
           />
@@ -202,7 +192,7 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
               height: 5,
               borderRadius: '50%',
               background: '#38bdf8',
-              opacity: 0.7,
+              opacity: 0.75,
               boxShadow: '0 0 4px #38bdf8',
               pointerEvents: 'none'
             }}
@@ -214,15 +204,15 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
       <div
         style={{
           position: 'absolute',
-          left: 42,
+          left: 40,
           bottom: '38.5%',
-          width: 152,
-          height: 88,
-          borderRadius: '12px',
+          width: 188,
+          height: 108,
+          borderRadius: '14px',
           background: 'transparent',
           border: '7px solid #161b24',
-          outline: '1.5px solid #334155',
-          boxShadow: '0 12px 32px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.2)',
+          outline: '1.5px solid #3b4963',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.22)',
           pointerEvents: 'none',
           zIndex: 32
         }}
@@ -233,30 +223,20 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
             position: 'relative',
             width: '100%',
             height: '100%',
-            borderRadius: '5px',
-            boxShadow: 'inset 0 0 6px rgba(0,0,0,0.75)',
+            borderRadius: '7px',
             background: 'transparent',
             overflow: 'hidden'
           }}
         >
-          {/* Lớp phủ quang học xanh mát */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(135deg, rgba(56,189,248,0.05) 0%, rgba(2,6,23,0.1) 100%)',
-              pointerEvents: 'none'
-            }}
-          />
           {/* Vạch chia góc lồi chống điểm mù StVO (Aspherical Divider) */}
           <div
             style={{
               position: 'absolute',
-              left: 28,
+              left: 34,
               top: 0,
               bottom: 0,
               width: 1,
-              borderRight: '1px dashed rgba(255,255,255,0.4)',
+              borderRight: '1px dashed rgba(255,255,255,0.45)',
               pointerEvents: 'none'
             }}
           />
@@ -267,15 +247,15 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
       <div
         style={{
           position: 'absolute',
-          right: 42,
+          right: 40,
           bottom: '38.5%',
-          width: 146,
-          height: 84,
-          borderRadius: '12px',
+          width: 182,
+          height: 104,
+          borderRadius: '14px',
           background: 'transparent',
           border: '7px solid #161b24',
-          outline: '1.5px solid #334155',
-          boxShadow: '0 12px 32px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.2)',
+          outline: '1.5px solid #3b4963',
+          boxShadow: '0 12px 32px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.22)',
           pointerEvents: 'none',
           zIndex: 32
         }}
@@ -286,30 +266,20 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
             position: 'relative',
             width: '100%',
             height: '100%',
-            borderRadius: '5px',
-            boxShadow: 'inset 0 0 6px rgba(0,0,0,0.75)',
+            borderRadius: '7px',
             background: 'transparent',
             overflow: 'hidden'
           }}
         >
-          {/* Lớp phủ quang học xanh mát */}
-          <div
-            style={{
-              position: 'absolute',
-              inset: 0,
-              background: 'linear-gradient(225deg, rgba(56,189,248,0.05) 0%, rgba(2,6,23,0.1) 100%)',
-              pointerEvents: 'none'
-            }}
-          />
           {/* Vạch chia góc lồi chống điểm mù StVO (Aspherical Divider) */}
           <div
             style={{
               position: 'absolute',
-              right: 28,
+              right: 34,
               top: 0,
               bottom: 0,
               width: 1,
-              borderLeft: '1px dashed rgba(255,255,255,0.4)',
+              borderLeft: '1px dashed rgba(255,255,255,0.45)',
               pointerEvents: 'none'
             }}
           />
@@ -492,10 +462,10 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
           style={{
             position: 'absolute',
             left: '44%',
-            bottom: '34%',
+            bottom: '45%',
             transform: 'translateX(-50%)',
-            width: 620,
-            height: 186,
+            width: 604,
+            height: 170,
             background: 'linear-gradient(180deg, #0e1117 0%, #050608 100%)',
             border: '2px solid #232936',
             borderRadius: 22,
@@ -503,7 +473,7 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
             display: 'flex',
             alignItems: 'center',
             justifyContent: 'space-between',
-            padding: '8px 18px',
+            padding: '7px 16px',
             pointerEvents: 'auto',
             zIndex: 12
           }}
@@ -746,38 +716,22 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
             </div>
           </div>
 
-          {/* Công-tơ-mét Tốc độ Analog */}
-          <div style={{ width: 168, height: 168, position: 'relative' }}>
+          {/* Công-tơ-mét Tốc độ Analog (Thang đô thị 0..120 km/h — vùng 0-60 rộng gấp đôi, cực dễ đọc) */}
+          <div style={{ width: 162, height: 162, position: 'relative' }}>
             <svg viewBox="0 0 160 160" style={{ width: '100%', height: '100%' }}>
               <circle cx="80" cy="80" r="74" fill="#0c0e14" stroke="#1f2533" strokeWidth="3" />
               <circle cx="80" cy="80" r="70" fill="none" stroke="rgba(255,255,255,0.06)" strokeWidth="1" />
 
-              {/* Vạch đỏ StVO 30 & 50 km/h */}
-              {[30, 50].map((limitVal) => {
-                const degFromTop = -125 + (limitVal / 240) * 250;
+              {[0, 10, 20, 30, 40, 50, 60, 70, 80, 90, 100, 110, 120].map((v) => {
+                const degFromTop = -125 + (v / 120) * 250;
                 const rad = ((degFromTop - 90) * Math.PI) / 180;
-                return (
-                  <line
-                    key={`stvo-${limitVal}`}
-                    x1={80 + Math.cos(rad) * 67}
-                    y1={80 + Math.sin(rad) * 67}
-                    x2={80 + Math.cos(rad) * 53}
-                    y2={80 + Math.sin(rad) * 53}
-                    stroke="#ef4444"
-                    strokeWidth="3"
-                  />
-                );
-              })}
-
-              {[0, 20, 40, 60, 80, 100, 120, 140, 160, 180, 200, 220, 240].map((v) => {
-                const degFromTop = -125 + (v / 240) * 250;
-                const rad = ((degFromTop - 90) * Math.PI) / 180;
+                const isStVO = v === 30 || v === 50;
                 const x1 = 80 + Math.cos(rad) * 66;
                 const y1 = 80 + Math.sin(rad) * 66;
-                const x2 = 80 + Math.cos(rad) * 56;
-                const y2 = 80 + Math.sin(rad) * 56;
-                const tx = 80 + Math.cos(rad) * 43.5;
-                const ty = 80 + Math.sin(rad) * 43.5;
+                const x2 = 80 + Math.cos(rad) * (isStVO ? 52 : 55);
+                const y2 = 80 + Math.sin(rad) * (isStVO ? 52 : 55);
+                const tx = 80 + Math.cos(rad) * 43;
+                const ty = 80 + Math.sin(rad) * 43;
 
                 return (
                   <g key={v}>
@@ -786,15 +740,15 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
                       y1={y1}
                       x2={x2}
                       y2={y2}
-                      stroke="#f1f5f9"
-                      strokeWidth={v % 40 === 0 ? '2.2' : '1.5'}
+                      stroke={isStVO ? '#ef4444' : '#f1f5f9'}
+                      strokeWidth={isStVO ? '3.2' : v % 20 === 0 ? '2.2' : '1.5'}
                     />
                     <text
                       x={tx}
-                      y={ty + 3}
-                      fill="#e2e8f0"
-                      fontSize={v >= 100 ? '8.2' : '9'}
-                      fontWeight="800"
+                      y={ty + 3.2}
+                      fill={isStVO ? '#fca5a5' : '#e2e8f0'}
+                      fontSize={v >= 100 ? '8.5' : '9.5'}
+                      fontWeight={isStVO ? '900' : '800'}
                       textAnchor="middle"
                       fontFamily="Inter, system-ui, sans-serif"
                     >
@@ -818,15 +772,16 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
         </div>
 
         {/* ── 7. VÔ-LĂNG THỂ THAO 3 CHẤU (ANIMATED SPORTS STEERING WHEEL) ──
-            Hạ thấp hợp lý dưới bệ đồng hồ để KHÔNG che bất kỳ con số, chữ RPM/km/h hay dãy số P R N D nào. */}
+            Đặt ngay dưới bệ đồng hồ: thấy rõ vành da, 2 chấu điều khiển và logo trung tâm FS,
+            xoay mượt theo góc lái A/D mà KHÔNG che bất kỳ con số hay nút P R N D nào. */}
         <div
           style={{
             position: 'absolute',
             left: '44%',
-            bottom: '-96%',
-            transform: 'translateX(-50%) perspective(1050px) rotateX(22deg)',
-            width: 400,
-            height: 400,
+            bottom: '-72%',
+            transform: 'translateX(-50%) perspective(950px) rotateX(18deg)',
+            width: 390,
+            height: 390,
             pointerEvents: 'none',
             zIndex: 15
           }}
@@ -838,51 +793,52 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
               transform: `rotate(${steerDeg}deg)`,
               transformOrigin: '50% 50%',
               transition: 'transform 0.04s linear',
-              filter: 'drop-shadow(0 16px 26px rgba(0,0,0,0.88))'
+              filter: 'drop-shadow(0 14px 24px rgba(0,0,0,0.9))'
             }}
           >
           <svg viewBox="0 0 480 480" style={{ width: '100%', height: '100%' }}>
             <defs>
-              <radialGradient id="wheelRimGrad" cx="50%" cy="42%" r="52%">
-                <stop offset="76%" stopColor="#343b47" />
-                <stop offset="88%" stopColor="#181c22" />
-                <stop offset="100%" stopColor="#0a0c10" />
+              <radialGradient id="wheelRimGrad" cx="50%" cy="45%" r="45%">
+                <stop offset="72%" stopColor="#384152" />
+                <stop offset="86%" stopColor="#1c212b" />
+                <stop offset="100%" stopColor="#0b0e14" />
               </radialGradient>
 
               <linearGradient id="spokeChrome" x1="0%" y1="0%" x2="100%" y2="100%">
-                <stop offset="0%" stopColor="#64748b" />
-                <stop offset="50%" stopColor="#94a3b8" />
-                <stop offset="100%" stopColor="#334155" />
+                <stop offset="0%" stopColor="#94a3b8" />
+                <stop offset="50%" stopColor="#cbd5e1" />
+                <stop offset="100%" stopColor="#475569" />
               </linearGradient>
 
               <filter id="wheelShadow" x="-20%" y="-20%" width="140%" height="140%">
-                <feDropShadow dx="0" dy="8" stdDeviation="16" floodColor="#000000" floodOpacity="0.9" />
+                <feDropShadow dx="0" dy="8" stdDeviation="14" floodColor="#000000" floodOpacity="0.9" />
               </filter>
             </defs>
 
+            {/* Vành vô-lăng bán kính r=162 xoay quanh tâm (240,240): đỉnh vành ở y=78 nằm gọn dưới dãy P R N D */}
             <circle
               cx="240"
               cy="240"
-              r="215"
+              r="162"
               fill="none"
               stroke="url(#wheelRimGrad)"
-              strokeWidth="42"
+              strokeWidth="34"
               filter="url(#wheelShadow)"
             />
 
-            {/* Highlight da bọc viền trên — bắt sáng cửa sổ trước */}
+            {/* Vạch đỏ căn tâm đỉnh vô-lăng (12 o'clock sport stripe) */}
             <path
-              d="M 117,64 A 215 215 0 0 1 363,64"
-              stroke="rgba(255,255,255,0.14)"
-              strokeWidth="11"
-              fill="none"
-              strokeLinecap="round"
+              d="M 233,78 L 247,78"
+              stroke="#ef4444"
+              strokeWidth="34"
+              strokeLinecap="butt"
             />
-            {/* Bóng đổ phần viền dưới khuất */}
+
+            {/* Highlight da bọc viền trên */}
             <path
-              d="M 122,418 A 215 215 0 0 0 358,418"
-              stroke="rgba(0,0,0,0.55)"
-              strokeWidth="24"
+              d="M 135,116 A 162 162 0 0 1 345,116"
+              stroke="rgba(255,255,255,0.22)"
+              strokeWidth="8"
               fill="none"
               strokeLinecap="round"
             />
@@ -890,75 +846,63 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
             <circle
               cx="240"
               cy="240"
-              r="192"
+              r="144"
               fill="none"
-              stroke="rgba(255,255,255,0.08)"
-              strokeWidth="2"
+              stroke="rgba(56,189,248,0.22)"
+              strokeWidth="1.8"
             />
 
+            {/* Chấu ngang trái + cụm phím điều khiển */}
             <path
-              d="M 60,165 C 50,195 50,210 65,230"
-              stroke="#13161c"
-              strokeWidth="46"
-              strokeLinecap="round"
-              fill="none"
-            />
-            <path
-              d="M 420,165 C 430,195 430,210 415,230"
-              stroke="#13161c"
-              strokeWidth="46"
-              strokeLinecap="round"
-              fill="none"
-            />
-
-            <path
-              d="M 65,225 L 180,225 C 195,225 200,235 200,245 L 200,265 C 200,275 190,280 175,280 L 75,275 Z"
-              fill="#181c23"
+              d="M 92,186 L 186,196 C 198,198 204,204 204,212 L 204,228 C 204,236 196,240 182,238 L 96,224 Z"
+              fill="#1c222d"
               stroke="url(#spokeChrome)"
-              strokeWidth="2.5"
+              strokeWidth="2.8"
             />
-            <rect x="100" y="240" width="22" height="18" rx="4" fill="#0d0f13" stroke="#475569" strokeWidth="1" />
-            <rect x="130" y="240" width="22" height="18" rx="4" fill="#0d0f13" stroke="#475569" strokeWidth="1" />
+            <rect x="122" y="200" width="20" height="14" rx="3.5" fill="#0d0f13" stroke="#64748b" strokeWidth="1.2" />
+            <rect x="148" y="203" width="20" height="14" rx="3.5" fill="#0d0f13" stroke="#64748b" strokeWidth="1.2" />
 
+            {/* Chấu ngang phải + cụm phím điều khiển */}
             <path
-              d="M 415,225 L 300,225 C 285,225 280,235 280,245 L 280,265 C 280,275 290,280 305,280 L 405,275 Z"
-              fill="#181c23"
+              d="M 388,186 L 294,196 C 282,198 276,204 276,212 L 276,228 C 276,236 284,240 298,238 L 384,224 Z"
+              fill="#1c222d"
               stroke="url(#spokeChrome)"
-              strokeWidth="2.5"
+              strokeWidth="2.8"
             />
-            <rect x="328" y="240" width="22" height="18" rx="4" fill="#0d0f13" stroke="#475569" strokeWidth="1" />
-            <rect x="358" y="240" width="22" height="18" rx="4" fill="#0d0f13" stroke="#475569" strokeWidth="1" />
+            <rect x="312" y="203" width="20" height="14" rx="3.5" fill="#0d0f13" stroke="#64748b" strokeWidth="1.2" />
+            <rect x="338" y="200" width="20" height="14" rx="3.5" fill="#0d0f13" stroke="#64748b" strokeWidth="1.2" />
 
+            {/* Chấu dọc dưới */}
             <path
-              d="M 215,310 L 210,430 C 210,440 220,445 240,445 C 260,445 270,440 270,430 L 265,310 Z"
+              d="M 218,255 L 214,395 C 214,402 224,406 240,406 C 256,406 266,402 266,395 L 262,255 Z"
               fill="url(#spokeChrome)"
             />
-            <rect x="233" y="340" width="14" height="65" rx="7" fill="#0e1117" />
 
+            {/* Bầu túi khí trung tâm & Logo FS */}
             <circle
               cx="240"
-              cy="255"
-              r="76"
-              fill="#13161c"
-              stroke="#2e3748"
-              strokeWidth="3.5"
+              cy="222"
+              r="54"
+              fill="#141820"
+              stroke="#334155"
+              strokeWidth="3.2"
             />
             <circle
               cx="240"
-              cy="255"
-              r="70"
+              cy="222"
+              r="47"
               fill="none"
-              stroke="rgba(255,255,255,0.08)"
+              stroke="rgba(255,255,255,0.12)"
               strokeWidth="1.5"
             />
 
-            <circle cx="240" cy="255" r="28" fill="#0b0e14" stroke="#94a3b8" strokeWidth="2.5" />
-            <circle cx="240" cy="255" r="24" fill="none" stroke="#38bdf8" strokeWidth="1" />
+            <circle cx="240" cy="218" r="21" fill="#0b0e14" stroke="#94a3b8" strokeWidth="2.2" />
+            <circle cx="240" cy="218" r="17" fill="none" stroke="#38bdf8" strokeWidth="1.2" />
             <text
               x="240"
-              y="260"
+              y="223"
               fill="#f8fafc"
-              fontSize="14"
+              fontSize="12"
               fontWeight="900"
               textAnchor="middle"
               fontFamily="sans-serif"

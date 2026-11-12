@@ -315,8 +315,8 @@ export function roadMarkingQuads(map: GameMap, road: MapRoad, skip: Array<[numbe
 
   const siblings = findAcuteSiblings(road, map);
   quads.push(...edgeLines(road, half, skip, siblings));
-  // vạch giữa đứt CHỈ khi đường 2 chiều (lanesBackward > 0)
-  if (road.lanesBackward > 0) {
+  // vạch phân làn đứt nét cho đường 2 chiều HOẶC đường 1 chiều từ 2 làn trở lên
+  if (road.lanesBackward > 0 || road.lanesForward >= 2) {
     quads.push(...centerDashes(road, skip, stopZones, siblings));
   }
   for (const a of approaches) {

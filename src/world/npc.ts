@@ -120,22 +120,37 @@ export class NPCController {
     }
     if (!this.templates.length) return;
 
-    // spawn rải rác trên các road có đủ chiều dài — TRÁNH vùng spawn player (25 m)
+    // Ưu tiên spawn 10 xe NPC quanh khu vực xuất phát của người chơi (20m..160m) để các ngã tư đèn đỏ có lưu thông thực tế ngay lập tức
     const playerSpawn = spawnFromMap(this.map);
-    const roads = this.map.roads.filter(r => roadLength(r) > 30);
+    const roads = this.map.roads.filter(r => roadLength(r) > 24);
+    const nearbyRoads = roads.filter(r => {
+      const mid = pointAtS(r, roadLength(r) * 0.5);
+      const d = Math.hypot(mid.x - playerSpawn.x, mid.z - playerSpawn.z);
+      return d > 15 && d < 165;
+    });
+
     let placed = 0;
     let attempts = 0;
-    while (placed < count && attempts < count * 10 && roads.length) {
+    const priorityTarget = Math.min(10, Math.floor(count * 0.45));
+    while (placed < count && attempts < count * 14 && roads.length) {
       attempts++;
-      const road = roads[Math.floor(Math.random() * roads.length)];
+      const pool = (placed < priorityTarget && nearbyRoads.length > 0) ? nearbyRoads : roads;
+      const road = pool[Math.floor(Math.random() * pool.length)];
       const len = roadLength(road);
-      const s = 10 + Math.random() * Math.max(1, len - 20);
+      const s = 8 + Math.random() * Math.max(1, len - 16);
       let dir: 1 | -1 = Math.random() < 0.5 ? 1 : -1;
       if (road.lanesBackward === 0) dir = 1;
       else if (road.lanesForward === 0) dir = -1;
       const pt = pointAtS(road, s);
-      if (Math.hypot(pt.x - playerSpawn.x, pt.z - playerSpawn.z) < 25) continue;
+      if (Math.hypot(pt.x - playerSpawn.x, pt.z - playerSpawn.z) < 18) continue;
+      // Tránh đặt 2 xe chồng lên nhau
+      const tooClose = this.npcs.some(other => other.roadId === road.id && other.dir === dir && Math.abs(other.s - s) < 11);
+      if (tooClose) continue;
       const npc = this.makeNpc(road, s, dir, placed);
+      const laneOff = (dir > 0 ? road.lanesForward - 0.5 : road.lanesBackward - 0.5) * road.laneWidth;
+      const p0 = this.pose(road, s, dir, laneOff);
+      npc.group.position.set(p0.x, 0, p0.z);
+      npc.group.rotation.y = p0.ry;
       this.npcs.push(npc);
       placed++;
     }

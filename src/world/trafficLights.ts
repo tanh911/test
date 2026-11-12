@@ -72,10 +72,11 @@ export function createTrafficLightMesh(): THREE.Group {
   const darkMat = new THREE.MeshLambertMaterial({ color: 0x0f172a });
   const poleMat = new THREE.MeshLambertMaterial({ color: 0x334155 });
 
-  // Cột 3.5 m
-  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 3.5, 8), poleMat);
-  pole.position.y = 1.75;
+  // Cột thép đèn tín hiệu 3.75 m
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.07, 3.75, 10), poleMat);
+  pole.position.y = 1.875;
   group.add(pole);
+  group.userData._pole = pole;
 
   // Hộp đèn (3 đèn dọc) trên đỉnh cột
   const boxGeo = new THREE.BoxGeometry(0.28, 0.85, 0.22);
@@ -132,73 +133,106 @@ function pointInAnyRoad(x: number, z: number, map: GameMap, margin = 0.4): boole
   return false;
 }
 
-// ── Mô hình đèn thật (CC0 — Stadt Rostock /3DModels): Ampel_Standard_Mast.glb ──
+// ── Mô hình hộp đèn tín hiệu thật (CC0 — Stadt Rostock /3DModels): Ampel_Standard_Mast.glb ──
 const ampelLoader = new GLTFLoader();
 let ampelProto: Promise<THREE.Group | null> | null = null;
 function loadAmpelModel(): Promise<THREE.Group | null> {
   if (!ampelProto) {
     ampelProto = ampelLoader.loadAsync('/simv2/ampel/Ampel_Standard_Mast.glb').then(g => {
       const grp = g.scene;
-      // ── Dò MẶT đèn: các mesh material ampel_* (đèn) lệch về phía nào so với tâm
-      // model → xoay để mặt đèn (đèn chính hướng xe) hướng +Z. ──
       grp.updateMatrixWorld(true);
-      const lampAcc = new THREE.Vector3();
-      let lampCount = 0;
+
+      // Trong Ampel_Standard_Mast.glb gốc:
+      // - Ngàm gắn cột (Masthalterung) nằm tại x ≈ 0
+      // - Thân hộp đèn (Cube) ở x ≈ +0.14, mặt kính đèn (ampel_rot/gelb/gruen) ở x ≈ +0.28
+      // - Vành che nắng (Sonnenblende) vươn về +X (x ≈ +0.44)
+      // Do vành che nắng nhô xa hơn mặt đèn nên tâm bounding box chung lệch về trước mặt đèn,
+      // khiến phép dò lc.x - wc.x trước đây bị âm và xoay ngược hộp đèn 180°!
+      // Giải pháp chuẩn: bake matrixWorld vào geometry rồi xoay -90° quanh trục Y để mặt đèn hướng thẳng về +Z.
+      const meshes: THREE.Mesh[] = [];
       grp.traverse(o => {
         const mesh = o as THREE.Mesh;
-        if (!mesh.isMesh) return;
-        const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-        if (!mats.some(m => (m.name || '').startsWith('ampel_'))) return;
-        mesh.geometry.computeBoundingBox();
-        const bc = mesh.geometry.boundingBox!.getCenter(new THREE.Vector3()).applyMatrix4(mesh.matrixWorld);
-        lampAcc.add(bc);
-        lampCount++;
+        if (mesh.isMesh) meshes.push(mesh);
       });
-      if (lampCount > 0) {
-        const whole = new THREE.Box3().setFromObject(grp);
-        const wc = whole.getCenter(new THREE.Vector3());
-        const lc = lampAcc.multiplyScalar(1 / lampCount);
-        const ox = lc.x - wc.x, oz = lc.z - wc.z;
-        if (Math.abs(ox) > Math.abs(oz)) grp.rotation.y = ox > 0 ? -Math.PI / 2 : Math.PI / 2;
-        else if (oz < 0) grp.rotation.y = Math.PI;
+
+      for (const mesh of meshes) {
+        mesh.geometry = mesh.geometry.clone();
+        mesh.geometry.applyMatrix4(mesh.matrixWorld);
+        mesh.geometry.rotateY(-Math.PI / 2);
       }
+
+      grp.traverse(o => {
+        o.position.set(0, 0, 0);
+        o.rotation.set(0, 0, 0);
+        o.scale.set(1, 1, 1);
+      });
       grp.updateMatrixWorld(true);
-      // LUÔN chuẩn hoá tổng cao 4.3 m (model gốc có thể ở unit khác — bug đèn khổng lồ)
+
+      // Chuẩn hóa chiều cao hộp đèn chính = 0.96 m (kích thước thật của Signalgeber Đức, gắn trên cột thép 3.75 m)
       const box = new THREE.Box3().setFromObject(grp);
       const size = box.getSize(new THREE.Vector3());
-      if (isFinite(size.y) && size.y > 0.01) grp.scale.setScalar(4.3 / size.y);
-      box.setFromObject(grp);
-      const c = box.getCenter(new THREE.Vector3());
-      grp.position.x -= c.x;
-      grp.position.z -= c.z;
-      grp.position.y -= box.min.y;
+      const center = box.getCenter(new THREE.Vector3());
+      const scaleFactor = size.y > 0.01 ? 0.96 / size.y : 1;
+
+      for (const mesh of meshes) {
+        // Căn tâm X và Y về 0, giữ Z tính từ ngàm cột (box.min.z) để hộp đèn gắn sát phía trước cột thép
+        mesh.geometry.translate(-center.x, -center.y, -box.min.z);
+        mesh.geometry.scale(scaleFactor, scaleFactor, scaleFactor);
+        mesh.geometry.computeBoundingBox();
+        mesh.geometry.computeBoundingSphere();
+      }
       return grp;
     }).catch(() => null);
   }
   return ampelProto;
 }
 
-/** Gắn mô hình GLB lên 1 đèn canvas: ẩn mesh canvas, thu materials ampel_rot/gelb/gruen */
+/** Gắn mô hình GLB hộp đèn chính (cao 3.25m) + hộp đèn phụ ngang tầm mắt tài xế (1.85m) lên cột thép */
 async function upgradeLightWithModel(group: THREE.Group): Promise<void> {
   const proto = await loadAmpelModel();
   if (!proto) return;
-  const clone = proto.clone(true);
-  // lấy materials đèn theo tên để applyLightVisuals điều khiển
-  const glbMats: { rot: THREE.MeshLambertMaterial[]; gelb: THREE.MeshLambertMaterial[]; gruen: THREE.MeshLambertMaterial[] } = { rot: [], gelb: [], gruen: [] };
-  clone.traverse(o => {
-    const mesh = o as THREE.Mesh;
-    if (!mesh.isMesh) return;
-    const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
-    for (const m of mats) {
-      const name = (m as THREE.MeshStandardMaterial).name;
-      if (name === 'ampel_rot') glbMats.rot.push(m as THREE.MeshLambertMaterial);
-      else if (name === 'ampel_gelb') glbMats.gelb.push(m as THREE.MeshLambertMaterial);
-      else if (name === 'ampel_gruen') glbMats.gruen.push(m as THREE.MeshLambertMaterial);
-    }
-  });
+
+  const pole = group.userData._pole as THREE.Mesh | undefined;
+  // Ẩn các hình hộp/tròn placeholder bằng canvas nhưng GIỮ LẠI cột thép trụ
+  for (const child of [...group.children]) {
+    if (child !== pole) child.visible = false;
+  }
+
+  const glbMats: { rot: THREE.MeshLambertMaterial[]; gelb: THREE.MeshLambertMaterial[]; gruen: THREE.MeshLambertMaterial[] } = {
+    rot: [],
+    gelb: [],
+    gruen: []
+  };
+
+  const attachSignalHead = (yPos: number, scale: number) => {
+    const head = proto.clone(true);
+    head.scale.setScalar(scale);
+    head.position.set(0, yPos, 0.045);
+    head.traverse(o => {
+      const mesh = o as THREE.Mesh;
+      if (!mesh.isMesh) return;
+      const cloneMat = (m: THREE.Material) => {
+        const cm = m.clone() as THREE.MeshLambertMaterial;
+        if (cm.name === 'ampel_rot') glbMats.rot.push(cm);
+        else if (cm.name === 'ampel_gelb') glbMats.gelb.push(cm);
+        else if (cm.name === 'ampel_gruen') glbMats.gruen.push(cm);
+        return cm;
+      };
+      if (Array.isArray(mesh.material)) {
+        mesh.material = mesh.material.map(cloneMat);
+      } else if (mesh.material) {
+        mesh.material = cloneMat(mesh.material);
+      }
+    });
+    group.add(head);
+  };
+
+  // Hộp đèn chính trên cao (3.22m) + hộp đèn phụ ngang tầm mắt (1.85m, chuẩn Đức Niedrigsignalgeber)
+  attachSignalHead(3.22, 1.0);
+  attachSignalHead(1.85, 0.65);
+
   group.userData._glbMats = glbMats;
-  for (const child of [...group.children]) child.visible = false; // ẩn canvas placeholder
-  group.add(clone);
+  applyLightVisuals([group]);
 }
 
 // ── Đặt đèn tự động từ intersections[] có trafficLight ──
@@ -308,8 +342,8 @@ export function placeTrafficLights(scene: THREE.Scene, map: GameMap): {
             lx = candX;
             lz = candZ;
             placed = true;
-            // flow thực tế tại vị trí đặt (xoay mặt đèn về xe đang tới)
-            tl.rotation.y = Math.atan2(-fx, -fz);
+            // Xoay mặt đèn hướng thẳng về làn xe đang tiến tới (hơi nghiêng 6° vào tâm làn để tài xế nhìn trực diện)
+            tl.rotation.y = Math.atan2(-fx, -fz) - 0.10;
           }
         }
         if (!placed) continue;
