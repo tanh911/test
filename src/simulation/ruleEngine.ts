@@ -285,7 +285,7 @@ export class RuleEngine {
           this.redArmed.delete(key);
           continue;
         }
-        const phase: LightPhase = ctrl.currentPhase;
+        const phase: LightPhase = ctrl.phaseForArm(road.id, nodeId === road.to ? 'to' : 'from');
         // cắt vạch khi đỏ: đang tiến về vạch khi đỏ (armed), vượt stopS, vẫn chạy
         if (phase === 'red' && distToStop < 0 && this.redArmed.has(key) && kmh > 5) {
           this.add('redlight', 'major', 'Chạy đèn đỏ', p);

@@ -3,8 +3,9 @@
 // Chỗ zebra: hạ mặt (ramp) dài 1.5 m xuống 0.03 m để qua đường cho người đi bộ.
 // Pad góc giao lộ: ô vuông SW×SW nối vỉa hè 2 nhánh quanh góc (cùng màu/y → không z-fight nhìn thấy).
 import type { GameMap, MapRoad } from './mapLoader';
+import { roadLength, roadPointAt } from './mapLoader';
 import type { Quad } from './roadMesh';
-import { polylineLength, pointWithNormalAtS, roadHalfWidth, roadSkipZones, roadsAtNode, junctionHalfExtent } from './roadMesh';
+import { roadHalfWidth, roadSkipZones, roadsAtNode, junctionHalfExtent } from './roadMesh';
 
 export interface SidewalkPiece {
   /** 4 đỉnh mặt trên (thứ tự: inner0 → outer0 → outer1 → inner1), y = height */
@@ -74,7 +75,9 @@ function findAcuteSiblings(road: MapRoad, map: GameMap): AcuteSibling[] {
 
 export function sidewalkBoxes(road: MapRoad, map: GameMap): SidewalkPiece[] {
   const half = roadHalfWidth(road);
-  const len = polylineLength(road.points);
+  // Dùng curve length (Catmull-Rom) — CÙNG lưới s với ribbon. polylineLength gốc
+  // lệch trên đường cong → mép trong vỉa hè không ôm khít mép ribbon (răng cưa).
+  const len = roadLength(road);
   const skip = roadSkipZones(road, map);
   const pieces: SidewalkPiece[] = [];
 
@@ -137,8 +140,11 @@ export function sidewalkBoxes(road: MapRoad, map: GameMap): SidewalkPiece[] {
       const isRamp = h0 === RAMP_H || h1 === RAMP_H;
       const hAvg = (h0 + h1) / 2;
 
-      const inner0 = pointWithNormalAtS(road.points, s);
-      const inner1 = pointWithNormalAtS(road.points, nextS);
+      // Điểm nội suy Curve (Catmull-Rom, đều theo cung) — trùng khít 100% với
+      // roadPointAt mà ribbon/markings dùng. pointWithNormalAtS (polyline gốc)
+      // làm vỉa hè hở khỏi mép đường tới 1.5 m trên road cong (răng cưa).
+      const inner0 = roadPointAt(road, s);
+      const inner1 = roadPointAt(road, nextS);
       const ix0 = inner0.x + inner0.nx * side * half;
       const iz0 = inner0.z + inner0.nz * side * half;
       const ix1 = inner1.x + inner1.nx * side * half;

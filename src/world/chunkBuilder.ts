@@ -4,7 +4,7 @@
 import * as THREE from 'three';
 import type { Quad } from './roadMesh';
 
-export type MaterialKey = 'road' | 'road_worn' | 'white' | 'sidewalk' | 'building';
+export type MaterialKey = 'road' | 'road_worn' | 'white' | 'sidewalk' | 'curb' | 'water' | 'bank' | 'building';
 
 const CHUNK_SIZE = 100;
 

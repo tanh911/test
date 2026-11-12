@@ -78,7 +78,7 @@ export class PedestrianController {
   private spawnPeds(): void {
     const roads = this.map.roads.filter(r => roadLength(r) > 30 && (r.sidewalk.left || r.sidewalk.right));
     let placed = 0;
-    const maxPeds = 12;
+    const maxPeds = 48; // dày đủ để người chơi gặp người đi bộ thường xuyên
     while (placed < maxPeds && roads.length) {
       const road = roads[Math.floor(Math.random() * roads.length)];
       const len = this.len(road.id);

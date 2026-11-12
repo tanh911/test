@@ -1504,7 +1504,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r2",
@@ -1545,7 +1546,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Friedrichstraße"
     },
     {
       "id": "r3",
@@ -1590,7 +1592,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Friedrichstraße"
     },
     {
       "id": "r4",
@@ -1623,7 +1626,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Luisenstraße"
     },
     {
       "id": "r5",
@@ -1656,7 +1660,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Geschwister-Scholl-Straße"
     },
     {
       "id": "r6",
@@ -1689,7 +1694,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Planckstraße"
     },
     {
       "id": "r7",
@@ -1730,7 +1736,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Georgenstraße"
     },
     {
       "id": "r8",
@@ -1767,7 +1774,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r9",
@@ -1800,7 +1809,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r10",
@@ -1833,7 +1843,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r11",
@@ -1866,7 +1877,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r12",
@@ -1915,7 +1927,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Hannah-Arendt-Straße"
     },
     {
       "id": "r13",
@@ -1948,7 +1961,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Hannah-Arendt-Straße"
     },
     {
       "id": "r14",
@@ -1985,7 +1999,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r15",
@@ -2030,7 +2045,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Universitätsstraße"
     },
     {
       "id": "r16",
@@ -2071,7 +2087,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r17",
@@ -2104,7 +2121,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r18",
@@ -2149,7 +2167,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r19",
@@ -2194,7 +2213,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r20",
@@ -2231,7 +2251,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r21",
@@ -2264,7 +2285,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r22",
@@ -2305,7 +2327,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Schiffbauerdamm"
     },
     {
       "id": "r23",
@@ -2358,7 +2381,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Wilhelmstraße"
     },
     {
       "id": "r24",
@@ -2395,7 +2419,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Wilhelmstraße"
     },
     {
       "id": "r25",
@@ -2440,7 +2465,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r26",
@@ -2473,7 +2499,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Schadowstraße"
     },
     {
       "id": "r27",
@@ -2514,7 +2541,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Schadowstraße"
     },
     {
       "id": "r28",
@@ -2547,7 +2575,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r29",
@@ -2580,7 +2609,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r30",
@@ -2613,7 +2643,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Wilhelmstraße"
     },
     {
       "id": "r31",
@@ -2646,7 +2677,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r32",
@@ -2679,7 +2711,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r33",
@@ -2716,7 +2749,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r34",
@@ -2761,7 +2795,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r35",
@@ -2794,7 +2829,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r36",
@@ -2831,7 +2867,9 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r37",
@@ -2872,7 +2910,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße"
     },
     {
       "id": "r38",
@@ -2909,7 +2948,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Friedrichstraße"
     },
     {
       "id": "r39",
@@ -2942,7 +2982,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Geschwister-Scholl-Straße",
+      "nameConfidence": "low"
     },
     {
       "id": "r40",
@@ -2979,7 +3021,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Geschwister-Scholl-Straße"
     },
     {
       "id": "r41",
@@ -3012,7 +3055,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Am Kupfergraben",
+      "nameConfidence": "low"
     },
     {
       "id": "r42",
@@ -3049,7 +3094,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden",
+      "nameConfidence": "low"
     },
     {
       "id": "r43",
@@ -3098,7 +3145,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r44",
@@ -3131,7 +3179,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r45",
@@ -3172,7 +3221,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r46",
@@ -3205,7 +3255,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r47",
@@ -3238,7 +3289,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r48",
@@ -3271,7 +3323,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r49",
@@ -3304,7 +3357,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r50",
@@ -3341,7 +3395,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r51",
@@ -3378,7 +3433,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r52",
@@ -3419,7 +3475,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Reichstagufer"
     },
     {
       "id": "r53",
@@ -3452,7 +3509,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Reichstagufer"
     },
     {
       "id": "r54",
@@ -3489,7 +3547,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Reichstagufer"
     },
     {
       "id": "r55",
@@ -3526,7 +3585,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Reichstagufer"
     },
     {
       "id": "r56",
@@ -3563,7 +3623,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r57",
@@ -3596,7 +3657,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r58",
@@ -3629,7 +3691,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Georgenstraße"
     },
     {
       "id": "r59",
@@ -3666,7 +3729,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Hegelplatz"
     },
     {
       "id": "r60",
@@ -3699,7 +3763,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Marienstraße"
     },
     {
       "id": "r61",
@@ -3732,7 +3797,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Luisenstraße"
     },
     {
       "id": "r62",
@@ -3769,7 +3835,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r63",
@@ -3810,7 +3877,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r64",
@@ -3851,7 +3919,8 @@
       },
       "speedLimit": 7,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r65",
@@ -3884,7 +3953,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Gertrud-Kolmar-Straße"
     },
     {
       "id": "r66",
@@ -3921,7 +3991,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r67",
@@ -3958,7 +4029,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße",
+      "nameConfidence": "low"
     },
     {
       "id": "r68",
@@ -3991,7 +4064,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r69",
@@ -4024,7 +4098,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße",
+      "nameConfidence": "low"
     },
     {
       "id": "r70",
@@ -4057,7 +4133,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße"
     },
     {
       "id": "r71",
@@ -4090,7 +4167,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Schadowstraße"
     },
     {
       "id": "r72",
@@ -4135,7 +4213,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r73",
@@ -4172,7 +4251,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r74",
@@ -4209,7 +4289,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r75",
@@ -4242,7 +4323,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Charlottenstraße"
     },
     {
       "id": "r76",
@@ -4275,7 +4357,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r77",
@@ -4312,7 +4395,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r78",
@@ -4345,7 +4429,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mittelstraße"
     },
     {
       "id": "r79",
@@ -4378,7 +4463,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mittelstraße"
     },
     {
       "id": "r80",
@@ -4435,7 +4521,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mittelstraße"
     },
     {
       "id": "r81",
@@ -4468,7 +4555,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mittelstraße"
     },
     {
       "id": "r82",
@@ -4505,7 +4593,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Georgenstraße"
     },
     {
       "id": "r83",
@@ -4542,7 +4631,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Am Kupfergraben"
     },
     {
       "id": "r84",
@@ -4579,7 +4669,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Am Kupfergraben"
     },
     {
       "id": "r85",
@@ -4620,7 +4711,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Am Kupfergraben"
     },
     {
       "id": "r86",
@@ -4673,7 +4765,9 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden",
+      "nameConfidence": "low"
     },
     {
       "id": "r87",
@@ -4714,7 +4808,9 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Jägerstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r88",
@@ -4751,7 +4847,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r89",
@@ -4784,7 +4881,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Reichstagufer"
     },
     {
       "id": "r90",
@@ -4817,7 +4915,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße"
     },
     {
       "id": "r91",
@@ -4850,7 +4949,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße"
     },
     {
       "id": "r92",
@@ -4883,7 +4983,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r93",
@@ -4916,7 +5017,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r94",
@@ -4949,7 +5051,9 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r95",
@@ -4982,7 +5086,9 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r96",
@@ -5015,7 +5121,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bertolt-Brecht-Platz"
     },
     {
       "id": "r97",
@@ -5056,7 +5163,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r98",
@@ -5089,7 +5197,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Marienstraße"
     },
     {
       "id": "r99",
@@ -5130,7 +5239,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Mauerstraße"
     },
     {
       "id": "r100",
@@ -5171,7 +5281,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mittelstraße"
     },
     {
       "id": "r101",
@@ -5204,7 +5315,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Wilhelmstraße"
     },
     {
       "id": "r102",
@@ -5245,7 +5357,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße"
     },
     {
       "id": "r103",
@@ -5278,7 +5391,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Wilhelmstraße"
     },
     {
       "id": "r104",
@@ -5323,7 +5437,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße"
     },
     {
       "id": "r105",
@@ -5360,7 +5475,9 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Jägerstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r106",
@@ -5397,7 +5514,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r107",
@@ -5430,7 +5548,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r108",
@@ -5471,7 +5590,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Gertrud-Kolmar-Straße"
     },
     {
       "id": "r109",
@@ -5504,7 +5624,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r110",
@@ -5537,7 +5658,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r111",
@@ -5570,7 +5692,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße"
     },
     {
       "id": "r112",
@@ -5603,7 +5726,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Luisenstraße"
     },
     {
       "id": "r113",
@@ -5640,7 +5764,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r114",
@@ -5677,7 +5802,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mauerstraße"
     },
     {
       "id": "r115",
@@ -5722,7 +5848,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Jägerstraße"
     },
     {
       "id": "r116",
@@ -5759,7 +5886,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r117",
@@ -5796,7 +5924,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Albrechtstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r118",
@@ -5829,7 +5959,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r119",
@@ -5862,7 +5993,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Schadowstraße"
     },
     {
       "id": "r120",
@@ -5899,7 +6031,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r121",
@@ -5944,7 +6077,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Charlottenstraße"
     },
     {
       "id": "r122",
@@ -6001,7 +6135,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r123",
@@ -6038,7 +6173,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r124",
@@ -6071,7 +6207,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mauerstraße"
     },
     {
       "id": "r125",
@@ -6108,7 +6245,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r126",
@@ -6149,7 +6287,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r127",
@@ -6186,7 +6326,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Charlottenstraße"
     },
     {
       "id": "r128",
@@ -6219,7 +6360,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r129",
@@ -6252,7 +6394,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mittelstraße"
     },
     {
       "id": "r130",
@@ -6285,7 +6428,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mittelstraße"
     },
     {
       "id": "r131",
@@ -6318,7 +6462,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r132",
@@ -6351,7 +6496,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r133",
@@ -6388,7 +6534,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r134",
@@ -6421,7 +6568,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Georgenstraße"
     },
     {
       "id": "r135",
@@ -6458,7 +6606,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Marienstraße"
     },
     {
       "id": "r136",
@@ -6491,7 +6640,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Luisenstraße"
     },
     {
       "id": "r137",
@@ -6532,7 +6682,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Luisenstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r138",
@@ -6565,7 +6717,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r139",
@@ -6598,7 +6751,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Wilhelmstraße"
     },
     {
       "id": "r140",
@@ -6639,7 +6793,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Wilhelmstraße"
     },
     {
       "id": "r141",
@@ -6696,7 +6851,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Luisenstraße"
     },
     {
       "id": "r142",
@@ -6737,7 +6893,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße"
     },
     {
       "id": "r143",
@@ -6778,7 +6935,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mauerstraße"
     },
     {
       "id": "r144",
@@ -6819,7 +6977,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße"
     },
     {
       "id": "r145",
@@ -6852,7 +7011,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Taubenstraße"
     },
     {
       "id": "r146",
@@ -6889,7 +7049,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße"
     },
     {
       "id": "r147",
@@ -6922,7 +7083,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße"
     },
     {
       "id": "r148",
@@ -6959,7 +7121,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r149",
@@ -7000,7 +7163,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Universitätsstraße"
     },
     {
       "id": "r150",
@@ -7037,7 +7201,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Gertrud-Kolmar-Straße"
     },
     {
       "id": "r151",
@@ -7070,7 +7235,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße"
     },
     {
       "id": "r152",
@@ -7107,7 +7273,9 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Am Kupfergraben",
+      "nameConfidence": "low"
     },
     {
       "id": "r153",
@@ -7144,7 +7312,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Planckstraße"
     },
     {
       "id": "r154",
@@ -7181,7 +7350,8 @@
       },
       "speedLimit": 5,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Behrenstraße"
     },
     {
       "id": "r155",
@@ -7214,7 +7384,8 @@
       },
       "speedLimit": 5,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Behrenstraße"
     },
     {
       "id": "r156",
@@ -7263,7 +7434,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Gertrud-Kolmar-Straße"
     },
     {
       "id": "r157",
@@ -7300,7 +7472,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r158",
@@ -7333,7 +7506,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Planckstraße"
     },
     {
       "id": "r159",
@@ -7366,7 +7540,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r160",
@@ -7399,7 +7574,8 @@
       },
       "speedLimit": 7,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r161",
@@ -7436,7 +7612,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Schiffbauerdamm"
     },
     {
       "id": "r162",
@@ -7469,7 +7646,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r163",
@@ -7506,7 +7684,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r164",
@@ -7547,7 +7726,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Reichstagufer"
     },
     {
       "id": "r165",
@@ -7580,7 +7760,9 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße",
+      "nameConfidence": "low"
     },
     {
       "id": "r166",
@@ -7617,7 +7799,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße"
     },
     {
       "id": "r167",
@@ -7650,7 +7833,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r168",
@@ -7687,7 +7871,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Marienstraße"
     },
     {
       "id": "r169",
@@ -7728,7 +7913,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Jägerstraße"
     },
     {
       "id": "r170",
@@ -7761,7 +7947,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Taubenstraße"
     },
     {
       "id": "r171",
@@ -7794,7 +7981,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r172",
@@ -7827,7 +8015,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r173",
@@ -7860,7 +8049,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Schadowstraße"
     },
     {
       "id": "r174",
@@ -7893,7 +8083,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Schadowstraße"
     },
     {
       "id": "r175",
@@ -7926,7 +8117,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Schadowstraße"
     },
     {
       "id": "r176",
@@ -7959,7 +8151,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r177",
@@ -7992,7 +8185,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Schadowstraße"
     },
     {
       "id": "r178",
@@ -8029,7 +8223,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r179",
@@ -8062,7 +8257,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r180",
@@ -8095,7 +8291,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Hannah-Arendt-Straße"
     },
     {
       "id": "r181",
@@ -8132,7 +8329,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Gertrud-Kolmar-Straße"
     },
     {
       "id": "r182",
@@ -8169,7 +8367,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r183",
@@ -8202,7 +8401,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Am Kupfergraben"
     },
     {
       "id": "r184",
@@ -8235,7 +8435,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Wilhelmstraße"
     },
     {
       "id": "r185",
@@ -8272,7 +8473,9 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r186",
@@ -8313,7 +8516,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r187",
@@ -8350,7 +8554,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r188",
@@ -8383,7 +8588,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Behrenstraße"
     },
     {
       "id": "r189",
@@ -8420,7 +8626,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße"
     },
     {
       "id": "r190",
@@ -8453,7 +8660,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße"
     },
     {
       "id": "r191",
@@ -8486,7 +8694,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Georgenstraße"
     },
     {
       "id": "r192",
@@ -8519,7 +8728,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Albrechtstraße"
     },
     {
       "id": "r193",
@@ -8552,7 +8762,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Albrechtstraße"
     },
     {
       "id": "r194",
@@ -8585,7 +8796,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Planckstraße"
     },
     {
       "id": "r195",
@@ -8622,7 +8834,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Friedrichstraße"
     },
     {
       "id": "r196",
@@ -8655,7 +8868,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße"
     },
     {
       "id": "r197",
@@ -8688,7 +8902,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Luisenstraße"
     },
     {
       "id": "r198",
@@ -8721,7 +8936,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Schiffbauerdamm"
     },
     {
       "id": "r199",
@@ -8754,7 +8970,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mittelstraße"
     },
     {
       "id": "r200",
@@ -8787,7 +9004,9 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r201",
@@ -8820,7 +9039,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r202",
@@ -8869,7 +9089,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Jägerstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r203",
@@ -8902,7 +9124,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mauerstraße"
     },
     {
       "id": "r204",
@@ -8939,7 +9162,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r205",
@@ -8976,7 +9200,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r206",
@@ -9009,7 +9234,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Marienstraße"
     },
     {
       "id": "r207",
@@ -9042,7 +9268,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Reichstagufer"
     },
     {
       "id": "r208",
@@ -9075,7 +9302,9 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden",
+      "nameConfidence": "low"
     },
     {
       "id": "r209",
@@ -9108,7 +9337,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r210",
@@ -9141,7 +9371,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Am Kupfergraben"
     },
     {
       "id": "r211",
@@ -9178,7 +9409,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Bertolt-Brecht-Platz"
     },
     {
       "id": "r212",
@@ -9211,7 +9443,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Bertolt-Brecht-Platz"
     },
     {
       "id": "r213",
@@ -9248,7 +9481,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Bertolt-Brecht-Platz"
     },
     {
       "id": "r214",
@@ -9281,7 +9515,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bertolt-Brecht-Platz"
     },
     {
       "id": "r215",
@@ -9314,7 +9549,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Hannah-Arendt-Straße"
     },
     {
       "id": "r216",
@@ -9347,7 +9583,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Am Kupfergraben"
     },
     {
       "id": "r217",
@@ -9380,7 +9617,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Geschwister-Scholl-Straße"
     },
     {
       "id": "r218",
@@ -9417,7 +9655,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "An der Kolonnade"
     },
     {
       "id": "r219",
@@ -9450,7 +9689,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Geschwister-Scholl-Straße"
     },
     {
       "id": "r220",
@@ -9483,7 +9723,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Georgenstraße"
     },
     {
       "id": "r221",
@@ -9516,7 +9757,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Marienstraße"
     },
     {
       "id": "r222",
@@ -9553,7 +9795,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mittelstraße"
     },
     {
       "id": "r223",
@@ -9586,7 +9829,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mittelstraße"
     },
     {
       "id": "r224",
@@ -9619,7 +9863,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Glinkastraße"
     },
     {
       "id": "r225",
@@ -9652,7 +9897,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Glinkastraße"
     },
     {
       "id": "r226",
@@ -9685,7 +9931,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Charlottenstraße"
     },
     {
       "id": "r227",
@@ -9718,7 +9965,8 @@
       },
       "speedLimit": 5,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Charlottenstraße"
     },
     {
       "id": "r228",
@@ -9751,7 +9999,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r229",
@@ -9788,7 +10037,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r230",
@@ -9821,7 +10071,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße"
     },
     {
       "id": "r231",
@@ -9858,7 +10109,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Taubenstraße"
     },
     {
       "id": "r232",
@@ -9891,7 +10143,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r233",
@@ -9924,7 +10177,9 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r234",
@@ -9957,7 +10212,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Bertolt-Brecht-Platz"
     },
     {
       "id": "r235",
@@ -9990,7 +10246,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Glinkastraße"
     },
     {
       "id": "r236",
@@ -10039,7 +10296,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Friedrichstraße"
     },
     {
       "id": "r237",
@@ -10076,7 +10334,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Anton-Wilhelm-Amo-Straße",
+      "nameConfidence": "low"
     },
     {
       "id": "r238",
@@ -10133,7 +10393,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Jägerstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r239",
@@ -10166,7 +10428,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Markgrafenstraße"
     },
     {
       "id": "r240",
@@ -10219,7 +10482,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Georgenstraße"
     },
     {
       "id": "r241",
@@ -10252,7 +10516,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r242",
@@ -10305,7 +10570,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r243",
@@ -10342,7 +10608,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r244",
@@ -10395,7 +10662,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r245",
@@ -10432,7 +10700,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Neustädtische Kirchstraße"
     },
     {
       "id": "r246",
@@ -10469,7 +10738,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Luisenstraße"
     },
     {
       "id": "r247",
@@ -10506,7 +10776,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße",
+      "nameConfidence": "low"
     },
     {
       "id": "r248",
@@ -10547,7 +10819,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "cobble"
+      "surface": "cobble",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r249",
@@ -10596,7 +10869,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Marienstraße"
     },
     {
       "id": "r250",
@@ -10629,7 +10903,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße"
     },
     {
       "id": "r251",
@@ -10662,7 +10937,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße"
     },
     {
       "id": "r252",
@@ -10699,7 +10975,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Wilhelmstraße"
     },
     {
       "id": "r253",
@@ -10744,7 +11021,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Schiffbauerdamm"
     },
     {
       "id": "r254",
@@ -10793,7 +11071,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Mittelstraße"
     },
     {
       "id": "r255",
@@ -10834,7 +11113,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Am Kupfergraben"
     },
     {
       "id": "r256",
@@ -10871,7 +11151,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Georgenstraße"
     },
     {
       "id": "r257",
@@ -10912,7 +11193,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Reichstagufer"
     },
     {
       "id": "r258",
@@ -10945,7 +11227,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r259",
@@ -10986,7 +11269,9 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r260",
@@ -11027,7 +11312,9 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Bauhofstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r261",
@@ -11064,7 +11351,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Wilhelmstraße"
     },
     {
       "id": "r262",
@@ -11105,7 +11393,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Hannah-Arendt-Straße"
     },
     {
       "id": "r263",
@@ -11138,7 +11427,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r264",
@@ -11179,7 +11469,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r265",
@@ -11224,7 +11515,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Glinkastraße"
     },
     {
       "id": "r266",
@@ -11257,7 +11549,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Taubenstraße"
     },
     {
       "id": "r267",
@@ -11302,7 +11595,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r268",
@@ -11339,7 +11633,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Französische Straße"
     },
     {
       "id": "r269",
@@ -11388,7 +11683,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden"
     },
     {
       "id": "r270",
@@ -11425,7 +11721,9 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Anton-Wilhelm-Amo-Straße",
+      "nameConfidence": "low"
     },
     {
       "id": "r271",
@@ -11466,7 +11764,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Taubenstraße"
     },
     {
       "id": "r272",
@@ -11499,7 +11798,9 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden",
+      "nameConfidence": "low"
     },
     {
       "id": "r273",
@@ -11548,7 +11849,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Marienstraße"
     },
     {
       "id": "r274",
@@ -11589,7 +11891,8 @@
       },
       "speedLimit": 30,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r275",
@@ -11622,7 +11925,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Adele-Schreiber-Krieger-Straße"
     },
     {
       "id": "r276",
@@ -11663,7 +11967,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Reichstagufer"
     },
     {
       "id": "r277",
@@ -11700,7 +12005,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Schiffbauerdamm"
     },
     {
       "id": "r278",
@@ -11741,7 +12047,8 @@
       },
       "speedLimit": 50,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Marienstraße"
     },
     {
       "id": "r279",
@@ -11782,7 +12089,8 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße"
     },
     {
       "id": "r280",
@@ -11819,7 +12127,9 @@
       },
       "speedLimit": 50,
       "priority": "main",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Unter den Linden",
+      "nameConfidence": "low"
     },
     {
       "id": "r281",
@@ -11852,7 +12162,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Friedrichstraße"
     },
     {
       "id": "r282",
@@ -11885,7 +12196,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Planckstraße"
     },
     {
       "id": "r283",
@@ -11986,7 +12298,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Charlottenstraße"
     },
     {
       "id": "r284",
@@ -12019,7 +12332,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "In den Ministergärten"
     },
     {
       "id": "r285",
@@ -12052,7 +12366,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Planckstraße"
     },
     {
       "id": "r286",
@@ -12105,7 +12420,8 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Charlottenstraße"
     },
     {
       "id": "r287",
@@ -12166,7 +12482,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Dorotheenstraße",
+      "nameConfidence": "low"
     },
     {
       "id": "r288",
@@ -12223,7 +12541,9 @@
       },
       "speedLimit": 30,
       "priority": "equal",
-      "surface": "asphalt"
+      "surface": "asphalt",
+      "name": "Jägerstraße",
+      "nameConfidence": "low"
     }
   ],
   "intersections": [
@@ -13263,7 +13583,875 @@
       "crosswalks": []
     }
   ],
-  "signs": [],
+  "signs": [
+    {
+      "type": "274",
+      "roadId": "r197",
+      "s": 26,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r246",
+      "s": 6.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "220",
+      "roadId": "r136",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r141",
+      "s": 6.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r206",
+      "s": 10.1,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "267",
+      "roadId": "r23",
+      "s": 177.8,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "220",
+      "roadId": "r24",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "220",
+      "roadId": "r66",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "267",
+      "roadId": "r244",
+      "s": 125.9,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r249",
+      "s": 12.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r273",
+      "s": 152.8,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "220",
+      "roadId": "r181",
+      "s": 7.7,
+      "side": "right"
+    },
+    {
+      "type": "267",
+      "roadId": "r136",
+      "s": 47.1,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "267",
+      "roadId": "r24",
+      "s": 137.8,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "267",
+      "roadId": "r33",
+      "s": 179.5,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "220",
+      "roadId": "r122",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "267",
+      "roadId": "r215",
+      "s": 20.5,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r262",
+      "s": 4.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "205",
+      "roadId": "r65",
+      "s": 6.2,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "306",
+      "roadId": "r218",
+      "s": 131.4,
+      "side": "right"
+    },
+    {
+      "type": "267",
+      "roadId": "r218",
+      "s": 129.2,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "267",
+      "roadId": "r25",
+      "s": 94.5,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "267",
+      "roadId": "r27",
+      "s": 66.9,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "220",
+      "roadId": "r244",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r22",
+      "s": 81.5,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "267",
+      "roadId": "r26",
+      "s": 79.3,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "220",
+      "roadId": "r27",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "220",
+      "roadId": "r77",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "267",
+      "roadId": "r122",
+      "s": 161.4,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "220",
+      "roadId": "r26",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "267",
+      "roadId": "r77",
+      "s": 11.7,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r142",
+      "s": 37.4,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r167",
+      "s": 6.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r97",
+      "s": 4.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r114",
+      "s": 4.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "220",
+      "roadId": "r114",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "267",
+      "roadId": "r124",
+      "s": 16.7,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "220",
+      "roadId": "r245",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "267",
+      "roadId": "r115",
+      "s": 141.4,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r116",
+      "s": 4.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "220",
+      "roadId": "r124",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "267",
+      "roadId": "r143",
+      "s": 100.7,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "205",
+      "roadId": "r161",
+      "s": 6.2,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "306",
+      "roadId": "r192",
+      "s": 90.1,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r192",
+      "s": 90.1,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "306",
+      "roadId": "r193",
+      "s": 7.7,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r193",
+      "s": 13.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "267",
+      "roadId": "r114",
+      "s": 85.4,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "220",
+      "roadId": "r265",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r211",
+      "s": 6.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "220",
+      "roadId": "r143",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r242",
+      "s": 125.7,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "267",
+      "roadId": "r245",
+      "s": 157.8,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r55",
+      "s": 34.7,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r89",
+      "s": 11.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r207",
+      "s": 28.8,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "220",
+      "roadId": "r115",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "267",
+      "roadId": "r265",
+      "s": 68.9,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "267",
+      "roadId": "r224",
+      "s": 18.3,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "220",
+      "roadId": "r225",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r53",
+      "s": 6.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "205",
+      "roadId": "r2",
+      "s": 6.2,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "306",
+      "roadId": "r134",
+      "s": 6.2,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r134",
+      "s": 6.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "306",
+      "roadId": "r191",
+      "s": 27.9,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r191",
+      "s": 27.9,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "220",
+      "roadId": "r38",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "306",
+      "roadId": "r134",
+      "s": 55.8,
+      "side": "right"
+    },
+    {
+      "type": "306",
+      "roadId": "r236",
+      "s": 94,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r153",
+      "s": 6.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r158",
+      "s": 6.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r285",
+      "s": 6.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "267",
+      "roadId": "r38",
+      "s": 124.4,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r227",
+      "s": 4.1,
+      "side": "left",
+      "value": 5,
+      "flip": true
+    },
+    {
+      "type": "220",
+      "roadId": "r282",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r283",
+      "s": 164.3,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r154",
+      "s": 9.4,
+      "side": "left",
+      "value": 5,
+      "flip": true
+    },
+    {
+      "type": "267",
+      "roadId": "r40",
+      "s": 83.2,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r148",
+      "s": 72.4,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "306",
+      "roadId": "r205",
+      "s": 23.9,
+      "side": "right"
+    },
+    {
+      "type": "306",
+      "roadId": "r256",
+      "s": 171.3,
+      "side": "right"
+    },
+    {
+      "type": "306",
+      "roadId": "r56",
+      "s": 24.4,
+      "side": "right"
+    },
+    {
+      "type": "205",
+      "roadId": "r57",
+      "s": 49,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r57",
+      "s": 49,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "205",
+      "roadId": "r58",
+      "s": 62.4,
+      "side": "right"
+    },
+    {
+      "type": "267",
+      "roadId": "r58",
+      "s": 60.2,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "306",
+      "roadId": "r186",
+      "s": 36.3,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r204",
+      "s": 4.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r205",
+      "s": 4.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r40",
+      "s": 6.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "220",
+      "roadId": "r40",
+      "s": 6.7,
+      "side": "right"
+    },
+    {
+      "type": "220",
+      "roadId": "r58",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r239",
+      "s": 36.7,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "205",
+      "roadId": "r59",
+      "s": 11.2,
+      "side": "right"
+    },
+    {
+      "type": "220",
+      "roadId": "r196",
+      "s": 6.2,
+      "side": "right"
+    },
+    {
+      "type": "306",
+      "roadId": "r204",
+      "s": 27.2,
+      "side": "right"
+    },
+    {
+      "type": "267",
+      "roadId": "r210",
+      "s": 40.8,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "306",
+      "roadId": "r274",
+      "s": 106.5,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r288",
+      "s": 369.7,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r64",
+      "s": 4.7,
+      "side": "right",
+      "value": 7
+    },
+    {
+      "type": "220",
+      "roadId": "r120",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r160",
+      "s": 4.7,
+      "side": "right",
+      "value": 7
+    },
+    {
+      "type": "274",
+      "roadId": "r51",
+      "s": 6.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r238",
+      "s": 4.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "267",
+      "roadId": "r120",
+      "s": 32.4,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "267",
+      "roadId": "r84",
+      "s": 23.3,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r255",
+      "s": 6.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r84",
+      "s": 4.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "220",
+      "roadId": "r84",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r274",
+      "s": 8.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r45",
+      "s": 4.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "306",
+      "roadId": "r132",
+      "s": 18.3,
+      "side": "right"
+    },
+    {
+      "type": "306",
+      "roadId": "r190",
+      "s": 18.1,
+      "side": "right"
+    },
+    {
+      "type": "306",
+      "roadId": "r133",
+      "s": 37.4,
+      "side": "right"
+    },
+    {
+      "type": "306",
+      "roadId": "r279",
+      "s": 72.9,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r70",
+      "s": 6.5,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "274",
+      "roadId": "r251",
+      "s": 6.2,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "267",
+      "roadId": "r231",
+      "s": 26.2,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "306",
+      "roadId": "r146",
+      "s": 35.7,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r250",
+      "s": 4.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "306",
+      "roadId": "r147",
+      "s": 8.2,
+      "side": "right"
+    },
+    {
+      "type": "306",
+      "roadId": "r165",
+      "s": 110.7,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r202",
+      "s": 4.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "220",
+      "roadId": "r202",
+      "s": 4.7,
+      "side": "right"
+    },
+    {
+      "type": "274",
+      "roadId": "r41",
+      "s": 219,
+      "side": "left",
+      "value": 30,
+      "flip": true
+    },
+    {
+      "type": "274",
+      "roadId": "r287",
+      "s": 4.7,
+      "side": "right",
+      "value": 30
+    },
+    {
+      "type": "205",
+      "roadId": "r272",
+      "s": 5.7,
+      "side": "left",
+      "flip": true
+    },
+    {
+      "type": "306",
+      "roadId": "r280",
+      "s": 68.9,
+      "side": "right"
+    }
+  ],
   "buildings": [
     {
       "roadId": "r1",
@@ -26333,5 +27521,205 @@
       "s": 135,
       "lane": 0
     }
-  }
+  },
+  "waters": [
+    {
+      "id": "spree",
+      "name": "Spree",
+      "width": 58,
+      "points": [
+        [
+          785.7,
+          392.5
+        ],
+        [
+          772.2,
+          412.1
+        ],
+        [
+          755.5,
+          437
+        ],
+        [
+          732.3,
+          460.5
+        ],
+        [
+          694.2,
+          487.2
+        ],
+        [
+          626.4,
+          514.6
+        ],
+        [
+          586.6,
+          529
+        ],
+        [
+          538.5,
+          547.4
+        ],
+        [
+          463.5,
+          575.1
+        ],
+        [
+          373.9,
+          588.8
+        ],
+        [
+          355.8,
+          590.3
+        ],
+        [
+          282.3,
+          598.9
+        ],
+        [
+          194.8,
+          609.7
+        ],
+        [
+          160.6,
+          606.7
+        ],
+        [
+          46.3,
+          593.5
+        ],
+        [
+          25.4,
+          590.5
+        ],
+        [
+          -32.1,
+          579
+        ],
+        [
+          -56.1,
+          568.3
+        ],
+        [
+          -126.2,
+          501.2
+        ],
+        [
+          -193.3,
+          439.6
+        ],
+        [
+          -229.3,
+          406.3
+        ],
+        [
+          -255.7,
+          381.6
+        ],
+        [
+          -293.5,
+          354
+        ],
+        [
+          -351.6,
+          322.9
+        ],
+        [
+          -445.9,
+          277
+        ],
+        [
+          -540.3,
+          246.5
+        ],
+        [
+          -578.3,
+          244.5
+        ],
+        [
+          -624.5,
+          242.2
+        ],
+        [
+          -651.6,
+          245.8
+        ],
+        [
+          -672.5,
+          248.6
+        ],
+        [
+          -693.4,
+          254.7
+        ],
+        [
+          -713.9,
+          262.5
+        ],
+        [
+          -737.8,
+          274.4
+        ],
+        [
+          -756.7,
+          285.1
+        ],
+        [
+          -775.5,
+          298.2
+        ],
+        [
+          -793.3,
+          312.6
+        ]
+      ]
+    },
+    {
+      "id": "spreekanal",
+      "name": "Spreekanal",
+      "width": 30,
+      "points": [
+        [
+          585.3,
+          261.2
+        ],
+        [
+          576.3,
+          275
+        ],
+        [
+          564.9,
+          287.7
+        ],
+        [
+          517.3,
+          325.3
+        ],
+        [
+          462.3,
+          389.3
+        ],
+        [
+          414.5,
+          444.1
+        ],
+        [
+          404.5,
+          456
+        ],
+        [
+          348.8,
+          519.9
+        ],
+        [
+          328.2,
+          544.1
+        ],
+        [
+          282.3,
+          598.9
+        ]
+      ]
+    }
+  ]
 }

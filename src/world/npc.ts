@@ -97,6 +97,14 @@ export class NPCController {
     for (const u of urls) {
       try {
         const gltf = await loader.loadAsync(u);
+        // ── Scale xe NPC vừa làn 3 m: sedan/kombi/suv ~1.8 m, transporter ~2.0 m ──
+        const pre = new THREE.Box3().setFromObject(gltf.scene);
+        const preSize = pre.getSize(new THREE.Vector3());
+        if (preSize.x > 0.5) {
+          const targetW = u.includes('transporter') ? 2.0 : 1.8;
+          const fit = targetW / preSize.x;
+          if (Math.abs(fit - 1) > 0.05) gltf.scene.scale.setScalar(fit);
+        }
         gltf.scene.traverse(o => {
           if ((o as THREE.Mesh).isMesh) {
             const mesh = o as THREE.Mesh;
@@ -266,7 +274,7 @@ export class NPCController {
       const nodeAheadId = this.nodeAhead(road, npc.dir);
       const ctrl = byNode.get(nodeAheadId);
       if (ctrl) {
-        const phase: LightPhase = ctrl.currentPhase;
+        const phase: LightPhase = ctrl.phaseForArm(road.id, npc.dir > 0 ? 'to' : 'from');
         const stopS = npc.dir > 0 ? len - half - 2 : half + 2;
         const distToStop = npc.dir > 0 ? stopS - npc.s : npc.s - stopS;
         if ((phase === 'red' || phase === 'red_yellow') && distToStop > -1 && distToStop < APPROACH_DIST) {

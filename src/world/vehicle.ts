@@ -140,6 +140,14 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
   });
   group.name = 'vehicle_player';
 
+  // Scale xe vừa làn 3 m: bề ngang chuẩn xe con Đức ~1.75 m (GLB gốc có thể to/nhỏ)
+  const preBox = new THREE.Box3().setFromObject(group);
+  const preSize = preBox.getSize(new THREE.Vector3());
+  if (preSize.x > 0.5) {
+    const fit = 1.75 / preSize.x;
+    if (Math.abs(fit - 1) > 0.05) group.scale.setScalar(fit);
+  }
+
   const spawn = spawnFromMap(map);
   const state: VehicleState = { x: spawn.x, z: spawn.z, heading: spawn.heading, speed: 0, gear: 'D', t: 0 };
   let steerAngle = 0; // dương = trái (A)

@@ -65,12 +65,16 @@ export function pointWithNormalAtS(
 /**
  * Dải mặt đường cho 1 road — CẮT ĐÚNG tại ranh giới skip zone (G1-2):
  * không bỏ cả quad; quad chạm ranh giới được nội suy điểm biên chính xác.
+ * opts.extraWidth: nới rộng 2 mép (vai đường lót dưới ribbon+vỉa hè — khe hở
+ * lộ asphalt worn thay vì cỏ). opts.y: cao độ (mặc định 0).
  */
 export function roadRibbonQuads(
   road: MapRoad,
-  skipZones: Array<[number, number]> = []
+  skipZones: Array<[number, number]> = [],
+  opts: { extraWidth?: number; y?: number } = {}
 ): Quad[] {
-  const half = roadHalfWidth(road);
+  const half = roadHalfWidth(road) + (opts.extraWidth ?? 0);
+  const y = opts.y ?? 0;
   const curve = roadCurve(road);
   const L = curve.length;
   const quads: Quad[] = [];
@@ -88,10 +92,10 @@ export function roadRibbonQuads(
   const step = curve.step;
   const emit = (pa: { x: number; z: number; nx: number; nz: number }, pb: { x: number; z: number; nx: number; nz: number }) => {
     quads.push({
-      a: [pa.x - pa.nx * half, 0, pa.z - pa.nz * half],
-      b: [pa.x + pa.nx * half, 0, pa.z + pa.nz * half],
-      c: [pb.x + pb.nx * half, 0, pb.z + pb.nz * half],
-      d: [pb.x - pb.nx * half, 0, pb.z - pb.nz * half]
+      a: [pa.x - pa.nx * half, y, pa.z - pa.nz * half],
+      b: [pa.x + pa.nx * half, y, pa.z + pa.nz * half],
+      c: [pb.x + pb.nx * half, y, pb.z + pb.nz * half],
+      d: [pb.x - pb.nx * half, y, pb.z - pb.nz * half]
     });
   };
 
@@ -131,6 +135,17 @@ export interface JunctionResult {
   sidewalkQuads: Quad[];
   curbQuads: Quad[];
   poly: Array<[number, number]>;
+}
+
+/** Điểm nằm trong đa giác (ray casting) — dùng lọc strip vỉa hè gập vào lòng đường */
+function pointInPolygon(x: number, z: number, poly: Array<[number, number]>): boolean {
+  let inside = false;
+  for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
+    const [xi, zi] = poly[i];
+    const [xj, zj] = poly[j];
+    if ((zi > z) !== (zj > z) && x < ((xj - xi) * (z - zi)) / (zj - zi) + xi) inside = !inside;
+  }
+  return inside;
 }
 
 /**
@@ -338,7 +353,76 @@ export function buildJunctionMesh(
 
   // Dựng vỉa hè và bó vỉa từ các curbEdges
   for (const edge of curbEdges) {
-    const { p1, p2, out1, out2 } = edge;
+    const { p1, p2, out1: outA, out2: outB } = edge;
+
+    // ── Chống "móng vuốt": strip góc bị GẬP vào trong lòng đường ──
+    // Khi miệng nhánh nằm TRONG polygon asphalt của nhánh khác (góc nhọn đặc biệt),
+    // điểm gốc p1/p2 của strip rơi vào trong nhựa → vỉa hè đè đường + bóng đen
+    // (bug chụp ảnh n146). Nudge 5 cm về phía out để điểm BIÊN chuẩn (p1/p2 nằm
+    // trên mép polygon của chính nó) không bị ray-casting đánh dấu oan.
+    const nudgedIn = (p: [number, number], o: [number, number]): [number, number] => {
+      const dx = o[0] - p[0], dz = o[1] - p[1];
+      const l = Math.hypot(dx, dz) || 1;
+      return [p[0] + (dx / l) * 0.05, p[1] + (dz / l) * 0.05];
+    };
+    const p1n = nudgedIn(p1, outA);
+    const p2n = nudgedIn(p2, outB);
+
+    // ── Chống "mũi tên khổng lồ" (bug chụp ảnh m32/Gertrud-Kolmar): cornerPt bị
+    // kẹp distToChord ≤ 6 m có thể văng QUA LÒNG đường nhánh kề → strip chéo ngang
+    // mặt đường trông như mũi tên to. Test: điểm của strip nằm TRONG corridor
+    // (dist tới tim < half − 0.25) của NHÁNH NÀO thì strip gãy → bỏ. Điểm MÉP
+    // chuẩn (A.L/R, cornerPt nằm đúng dist = half) không bị oan. ──
+    const stripCrossesAsphalt = (x: number, z: number): boolean => {
+      for (const arm of arms) {
+        const pts = arm.road.points;
+        let minD = Infinity;
+        for (let i = 1; i < pts.length; i++) {
+          const vx = pts[i][0] - pts[i - 1][0], vz = pts[i][1] - pts[i - 1][1];
+          const l2 = vx * vx + vz * vz || 1;
+          const t = Math.max(0, Math.min(1, ((x - pts[i - 1][0]) * vx + (z - pts[i - 1][1]) * vz) / l2));
+          minD = Math.min(minD, Math.hypot(x - (pts[i - 1][0] + t * vx), z - (pts[i - 1][1] + t * vz)));
+        }
+        if (minD < arm.half - 0.25) return true;
+      }
+      return false;
+    };
+    const stripBad = (x: number, z: number): boolean =>
+      pointInPolygon(x, z, perimeter) || stripCrossesAsphalt(x, z);
+
+    // ── CLAMP thay vì DROP (bug khuyết mép góc ngã tư 6 nhánh n155): điểm out
+    // bị văng vào lòng đường thì ĐẨY XA node theo tia hướng ngoài tới khi thoáng
+    // (góc chuyển thành miệng cu-ra rộng như ngã tư thật) — chỉ drop khi 8 lần
+    // đẩy vẫn không thoát. ──
+    const pushOutClear = (p: [number, number]): [number, number] | null => {
+      if (!stripBad(p[0], p[1])) return p;
+      for (let scale = 1.15; scale <= 3.0; scale += 0.2) {
+        const cand: [number, number] = [
+          nodeX + (p[0] - nodeX) * scale,
+          nodeZ + (p[1] - nodeZ) * scale
+        ];
+        if (!stripBad(cand[0], cand[1])) return cand;
+      }
+      return null;
+    };
+
+    const o1c = pushOutClear(outA);
+    const o2c = pushOutClear(outB);
+    if (!o1c || !o2c) continue;
+    const out1f = o1c;
+    const out2f = o2c;
+    const cxf = (p1[0] + p2[0] + out1f[0] + out2f[0]) / 4;
+    const czf = (p1[1] + p2[1] + out1f[1] + out2f[1]) / 4;
+    if (
+      stripBad(p1n[0], p1n[1]) ||
+      stripBad(p2n[0], p2n[1]) ||
+      stripBad(cxf, czf)
+    ) {
+      continue;
+    }
+    // dùng out đã clamp cho mọi quad phía dưới
+    const out1 = out1f;
+    const out2 = out2f;
 
     // Mặt trên phẳng của vỉa hè — tách 2 tam giác, MỖI tam giác chuẩn hóa cross < 0
     // (đảo cả quad trapezoid không đảm bảo dấu cross của tam giác đầu khi quad lõm)
@@ -571,6 +655,33 @@ export function roadSkipZones(road: MapRoad, map: GameMap): Array<[number, numbe
     if (extent > 0) {
       if (end === 'from') zones.push([0, extent]);
       else zones.push([len - extent, len]);
+    }
+  }
+  return zones;
+}
+
+/** Skip zones DÀNH RIÊNG CHO RIBBON: co mỗi đầu zone vào 3 m để ribbon CHỒNG LẤN
+ *  vào trong miệng patch junction. Patch (y=0.002) vẽ đè ribbon (y=0), cùng material
+ *  'road' nên phần chồng hoàn toàn vô hình — nhờ đó vá triệt để khe hình nêm giữa
+ *  biên cắt ribbon (vuông góc TIẾP TUYẾN cục bộ) và miệng patch (vuông góc DÂY CUNG
+ *  dir) trên road cong. Vòng xuyến giữ nguyên zone (không chồng vào làn ring). */
+export function ribbonSkipZones(road: MapRoad, map: GameMap): Array<[number, number]> {
+  const OVERLAP = 3;
+  const len = roadLength(road);
+  const zones: Array<[number, number]> = [];
+  for (const [a, b] of roadSkipZones(road, map)) {
+    const nodeId = a === 0 ? road.from : road.to;
+    const ix = map.intersections.find((i) => i.nodeId === nodeId);
+    if (ix?.rule === 'roundabout') {
+      zones.push([a, b]);
+      continue;
+    }
+    if (a === 0) {
+      const nb = b - OVERLAP;
+      if (nb > 0.5) zones.push([0, nb]);
+    } else {
+      const na = a + OVERLAP;
+      if (na < len - 0.5) zones.push([na, len]);
     }
   }
   return zones;

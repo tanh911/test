@@ -225,60 +225,58 @@ export interface RoadMarkingResult {
   quads: Quad[];
 }
 
-/** Vạch vòng lane ring quanh island tại nút Kreisverkehr (roundabout).
- *  Vạch đứt quanh quãng ở bán kính r = junctionHalfExtent + 1.5, đoạn 3m cách 1m. */
+/** Vạch vòng lane ring + viền đảo giữa tại nút Kreisverkehr (roundabout). */
 function roundaboutLaneRingQuads(
-  road: MapRoad,
+  _road: MapRoad,
   map: GameMap,
   nodeId: string,
-  half: number
+  _half: number
 ): Quad[] {
   const ix = map.intersections.find((i) => i.nodeId === nodeId);
   if (!ix || ix.rule !== 'roundabout') return [];
-  const r = junctionHalfExtent(map, nodeId) + 1.5;
-  const segs = 32;
-  const quads: Quad[] = [];
-  const MARKING_Y = 0.01;
-  const MARK_W = 0.12;
-  const DASH_ON = 3;
-  const DASH_OFF = 1;
+  const node = map.nodes.find((n) => n.id === nodeId);
+  if (!node) return [];
 
-  // Lấy heading tiếp tuyến tại điểm trên vòng (đi theo chiều kim đồng hồ đối với lưu thông Đức?
-  // Ở Đức vòng xuyến đi theo chiều kim đồng hồ, vehicles rẽ phải vào vòng)
-  // Vẽ vạch đứt quanh quãng, không cần heading chính xác — chỉ cần vị trí.
-  for (let k = 0; k < segs; k++) {
-    const a0 = (k / segs) * Math.PI * 2;
-    const a1 = ((k + 1) / segs) * Math.PI * 2;
-    const arcLen = r * (a1 - a0);
-    // chỉ vẽ dash nếu cung dài đủ
-    if (arcLen < DASH_ON) continue;
-    const nOn = Math.max(1, Math.floor(arcLen / (DASH_ON + DASH_OFF)));
-    const dashLen = arcLen / nOn;
-    const onLen = Math.min(DASH_ON, dashLen * 0.7);
-    const offLen = dashLen - onLen;
-    let curA = a0;
-    while (curA < a1 - 1e-6) {
-      const endA = Math.min(curA + onLen / r, a1);
-      const p0 = roadPointAt(road, 0); // dùng làm gốc, ta sẽ tính toán lại vị trí
-      // Vị trí trên vòng: node + r*(cos, sin)
-      // Lấy node toạ độ từ map
-      const node = map.nodes.find((n) => n.id === nodeId);
-      if (!node) break;
-      const x0 = node.x + r * Math.cos(curA);
-      const z0 = node.z + r * Math.sin(curA);
-      const x1 = node.x + r * Math.cos(endA);
-      const z1 = node.z + r * Math.sin(endA);
-      // pháp tuyến của vòng = hướng radiële (cos, sin), lệch bên phải của vạch
-      const nx = Math.cos(curA);
-      const nz = Math.sin(curA);
-      quads.push({
-        a: [x0 - nx * (MARK_W / 2), MARKING_Y, z0 - nz * (MARK_W / 2)],
-        b: [x0 + nx * (MARK_W / 2), MARKING_Y, z0 + nz * (MARK_W / 2)],
-        c: [x1 + nx * (MARK_W / 2), MARKING_Y, z1 + nz * (MARK_W / 2)],
-        d: [x1 - nx * (MARK_W / 2), MARKING_Y, z1 - nz * (MARK_W / 2)],
-      });
-      curA = endA + offLen / r;
-    }
+  const baseExtent = junctionHalfExtent(map, nodeId);
+  const rIsland = Math.max(2.6, baseExtent * 0.52);
+  const rOuter = baseExtent + 1.4;
+  const quads: Quad[] = [];
+  const RING_Y = 0.015;
+
+  // 1) Viền liền trắng rõ nét bao quanh đảo giữa (Kreisverkehrsinsel)
+  const islandSegs = 32;
+  const islandW = 0.2;
+  for (let k = 0; k < islandSegs; k++) {
+    const a0 = (k / islandSegs) * Math.PI * 2;
+    const a1 = ((k + 1) / islandSegs) * Math.PI * 2;
+    const nx0 = Math.cos(a0), nz0 = Math.sin(a0);
+    const nx1 = Math.cos(a1), nz1 = Math.sin(a1);
+    const x0 = node.x + rIsland * nx0, z0 = node.z + rIsland * nz0;
+    const x1 = node.x + rIsland * nx1, z1 = node.z + rIsland * nz1;
+    quads.push({
+      a: [x0 - nx0 * (islandW / 2), RING_Y, z0 - nz0 * (islandW / 2)],
+      b: [x0 + nx0 * (islandW / 2), RING_Y, z0 + nz0 * (islandW / 2)],
+      c: [x1 + nx1 * (islandW / 2), RING_Y, z1 + nz1 * (islandW / 2)],
+      d: [x1 - nx1 * (islandW / 2), RING_Y, z1 - nz1 * (islandW / 2)],
+    });
+  }
+
+  // 2) Vạch đứt dẫn hướng làn vòng xuyến (24 đoạn đứt rõ nét)
+  const dashCount = 24;
+  const dashW = 0.16;
+  for (let k = 0; k < dashCount; k++) {
+    const a0 = (k / dashCount) * Math.PI * 2;
+    const a1 = ((k + 0.62) / dashCount) * Math.PI * 2;
+    const nx0 = Math.cos(a0), nz0 = Math.sin(a0);
+    const nx1 = Math.cos(a1), nz1 = Math.sin(a1);
+    const x0 = node.x + rOuter * nx0, z0 = node.z + rOuter * nz0;
+    const x1 = node.x + rOuter * nx1, z1 = node.z + rOuter * nz1;
+    quads.push({
+      a: [x0 - nx0 * (dashW / 2), RING_Y, z0 - nz0 * (dashW / 2)],
+      b: [x0 + nx0 * (dashW / 2), RING_Y, z0 + nz0 * (dashW / 2)],
+      c: [x1 + nx1 * (dashW / 2), RING_Y, z1 + nz1 * (dashW / 2)],
+      d: [x1 - nx1 * (dashW / 2), RING_Y, z1 - nz1 * (dashW / 2)],
+    });
   }
   return quads;
 }
@@ -295,8 +293,10 @@ export function roadMarkingQuads(map: GameMap, road: MapRoad, skip: Array<[numbe
 
   for (const ix of map.intersections as MapIntersection[]) {
     if (road.from !== ix.nodeId && road.to !== ix.nodeId) continue;
-    const kind: Approach['kind'] | null =
+    let kind: Approach['kind'] | null =
       ix.trafficLight ? 'light' : ix.rule === 'stop' ? 'stop' : ix.rule === 'yield' ? 'yield' : ix.rule === 'roundabout' ? 'yield' : ix.rule === 'right_before_left' ? 'right_before_left' : null;
+    // priority_road: nhánh KHÔNG main → Vorfahrt gewähren (shark teeth, khớp Z.205)
+    if (!kind && ix.rule === 'priority_road' && road.priority !== 'main') kind = 'yield';
     if (kind && longEnough) {
       if (road.to === ix.nodeId) {
         approaches.push({ stopS: len - half - STOP_LINE_DIST, side: 1, kind });

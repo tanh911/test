@@ -72,28 +72,43 @@ class OccGrid {
 
 function hexRGB(hex: string): RGB {
   const n = parseInt(hex.slice(1), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+  // three r152+: vertex color là KHÔNG GIAN LINEAR — hex là sRGB. Không convert thì
+  // mọi màu bị wash out (0.91 linear encode lại thành ~0.96 sRGB → kem nhạt bệt).
+  const srgb = (c8: number) => {
+    const v = c8 / 255;
+    return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  return [srgb((n >> 16) & 255), srgb((n >> 8) & 255), srgb(n & 255)];
 }
 function darken(c: RGB, f: number): RGB {
   return [c[0] * f, c[1] * f, c[2] * f];
 }
+function lighten(c: RGB, f: number): RGB {
+  return [Math.min(1, c[0] * f), Math.min(1, c[1] * f), Math.min(1, c[2] * f)];
+}
 
-// Biến thể màu facade theo seed (mục 4.4: biến thể theo seed, không PBR)
+// Biến thể màu facade theo seed (mục 4.4: biến thể theo seed, không PBR) — mở rộng dải
+// sắc độ München: kem altbau, gạch backstein ấm, neubau xám ấm/lạnh xen kẽ.
 const FACADE_VARIANTS: Record<string, string[]> = {
-  altbau: ['#e8dfc8', '#e3d6b8', '#e8e2d4', '#d9cdb0'],
-  backstein: ['#b5654a', '#a35a42', '#c06e50'],
-  neubau: ['#b8b4aa', '#c9c4b8', '#cdc9bf']
+  altbau: ['#e8dfc8', '#e3d6b8', '#e8e2d4', '#d9cdb0', '#dcc9a8', '#e5d9c0'],
+  backstein: ['#b5654a', '#a35a42', '#c06e50', '#9c5138'],
+  neubau: ['#b8b4aa', '#c9c4b8', '#cdc9bf', '#a8a49c', '#c2beb2']
 };
-const WINDOW = hexRGB(palette.window);
 const ROOF = hexRGB(palette.roofTile);
 const ROOF_GREY = hexRGB('#6b6b66');
 
+// Kính cửa sổ phản chiếu trời: đỉnh sáng, đáy tối — quad gradient 2 màu vertex
+const GLASS_HIGH_TINTS = ['#a9cde3', '#9cc0d8', '#b5d1e2', '#a2b8c8'];
+const GLASS_LOW_TINTS = ['#31495c', '#2c4354', '#3a5266', '#263c4c'];
+const FRAME_CREAM = hexRGB('#e9e5da'); // khung cửa sổ altbau trắng kem
+const SILL_STONE = hexRGB('#d9d3c6');  // bậu cửa đá sáng
+
 const BUILDING_DEPTH = 9;  // chiều sâu nhà (m) - giảm nhẹ để tránh các nhà ở ngã rẽ cắt sâu vào nhau
 const FLOOR_H = 2.75;      // cao 1 tầng (m) - tỉ lệ Altstadt München chuẩn xác với lòng đường
-const WIN_W = 1.1;
-const WIN_H = 1.35;
+const WIN_W = 1.25;
+const WIN_H = 1.45;
 const WIN_BOTTOM = 0.85;   // đáy cửa sổ so với sàn tầng
-const AO_DARK = 0.82;      // hệ số AO chân tường
+const AO_DARK = 0.74;      // hệ số AO chân tường — đậm hơn để nhà "đứng" trên đất
 
 function rng(seed: number): () => number {
   let a = seed >>> 0;
@@ -174,23 +189,57 @@ export function buildingQuads(map: GameMap, b: FillBuilding): ColoredQuad[] {
   const backOff = frontOff + (b.depth ?? BUILDING_DEPTH);
   const midOff = frontOff + (b.depth ?? BUILDING_DEPTH) / 2;
 
-  // ── Mặt tiền + cửa sổ + (không brick) dải cửa hàng tầng trệt ──
+  // ── Mặt tiền + cửa sổ khung trắng + kính phản chiếu + bậu đá + dải tầng ──
   out.push(facade(s0, s1, 0, height, frontOff, baseWall));
+
+  // kính mỗi building chọn tint riêng theo seed — đỉnh sáng (trời), đáy tối (phố)
+  const glassHigh = hexRGB(GLASS_HIGH_TINTS[Math.floor(rand() * GLASS_HIGH_TINTS.length)]);
+  const glassLow = hexRGB(GLASS_LOW_TINTS[Math.floor(rand() * GLASS_LOW_TINTS.length)]);
+  const windowGlass = (sa: number, sb: number, y0: number, y1: number, off: number): ColoredQuad => {
+    const [q0, q1] = -side > 0 ? [sa, sb] : [sb, sa];
+    return {
+      quad: { a: P(q0, y0, off), b: P(q1, y0, off), c: P(q1, y1, off), d: P(q0, y1, off) },
+      colors: [glassLow, glassLow, glassHigh, glassHigh]
+    };
+  };
+
   const usable = s1 - s0;
   if (!plain) {
-    const cols = Math.max(1, Math.floor((usable - 1.6) / 2.2));
+    const cols = Math.max(1, Math.floor((usable - 1.2) / 2.05));
     const colStep = usable / cols;
-    for (let f = 0; f < floors; f++) {
+    // tầng trệt kính lớn kiểu cửa hàng (altbau/neubau) — tầng 1 trở lên mới có cửa sổ
+    const fStart = isBrick ? 0 : 1;
+    // dải phân tách tầng mảnh — tạo nhịp ngang facade
+    for (let f = fStart + 1; f < floors; f++) {
+      out.push(facade(s0 + 0.15, s1 - 0.15, f * FLOOR_H - 0.16, f * FLOOR_H - 0.02, frontOff - 0.015, darken(baseWall, 0.86), false));
+    }
+    for (let f = fStart; f < floors; f++) {
       const y0 = f * FLOOR_H + WIN_BOTTOM;
       const y1 = y0 + WIN_H;
       for (let c = 0; c < cols; c++) {
         const wx0 = s0 + c * colStep + (colStep - WIN_W) / 2;
         const wx1 = wx0 + WIN_W;
-        out.push(facade(wx0, wx1, y0, y1, frontOff - 0.02, WINDOW, false));
+        // 1. khung trắng kem nhô 1.2 cm quanh kính
+        out.push(facade(wx0 - 0.07, wx1 + 0.07, y0 - 0.07, y1 + 0.07, frontOff - 0.012, FRAME_CREAM, false));
+        // 2. kính trời gradient (nhô 2.5 cm)
+        out.push(windowGlass(wx0, wx1, y0, y1, frontOff - 0.025));
+        // 3. bậu cửa đá sáng nhô 3.5 cm — bắt nắng, làm kính "nằm trong" tường
+        out.push(facade(wx0 - 0.05, wx1 + 0.05, y0 - 0.05, y0 - 0.005, frontOff - 0.035, SILL_STONE, false));
       }
     }
     if (!isBrick) {
-      out.push(facade(s0 + 0.8, s1 - 0.8, 0, 2.4, frontOff - 0.02, darken(baseWall, 0.55), false));
+      // tầng trệt: dãy ô kính cửa hàng có TRỤ đá ở giữa — hết dải xanh liền khối
+      const shopStep = 2.6;
+      const shopCols = Math.max(1, Math.floor((usable - 1.4) / shopStep));
+      for (let c = 0; c < shopCols; c++) {
+        const gx0 = s0 + 0.6 + c * shopStep;
+        const gx1 = Math.min(s1 - 0.6, gx0 + shopStep - 0.8); // chừa 0.8 m trụ đá
+        if (gx1 - gx0 < 0.7) break;
+        out.push(facade(gx0, gx1, 0.45, 2.3, frontOff - 0.025, glassLow, false));
+      }
+      // bệ đá-plinth dưới cửa hàng + chỉ stucco sáng chạy ngang phía trên
+      out.push(facade(s0 + 0.4, s1 - 0.4, 0, 0.45, frontOff - 0.03, darken(baseWall, 0.72), false));
+      out.push(facade(s0 + 0.4, s1 - 0.4, 2.3, 2.58, frontOff - 0.035, lighten(baseWall, 1.08), false));
     }
   }
 
@@ -225,6 +274,34 @@ export function buildingQuads(map: GameMap, b: FillBuilding): ColoredQuad[] {
     out.push(facade(s0, s1, height, height + 0.6, backOff, par, false, side));
     out.push(sideWall(s0, frontOff, backOff, height, height + 0.6, par, -1, false));
     out.push(sideWall(s1, frontOff, backOff, height, height + 0.6, par, 1, false));
+
+    // ── Cornice altbau: chỉ đá sáng chạy ngang dưới lan can — điểm nhấn skyline ──
+    if (b.style === 'altbau' && !plain) {
+      const cor = lighten(baseWall, 1.1);
+      out.push(facade(s0, s1, height - 0.24, height + 0.02, frontOff - 0.05, cor, false));
+      out.push(facade(s0, s1, height - 0.24, height + 0.02, backOff + 0.05, cor, false, side));
+      out.push(sideWall(s0, frontOff - 0.05, backOff + 0.05, height - 0.24, height + 0.02, cor, -1, false));
+      out.push(sideWall(s1, frontOff - 0.05, backOff + 0.05, height - 0.24, height + 0.02, cor, 1, false));
+    }
+
+    // ── Ống khói gác mái — phố München thiếu ống khói là mất hồn ──
+    if (!plain) {
+      const chimneys = floors >= 4 ? 2 : 1;
+      const cCol = darken(baseWall, 0.62);
+      for (let ci = 0; ci < chimneys; ci++) {
+        const cw = 0.5 + rand() * 0.18;
+        const chH = 1.0 + rand() * 0.55;
+        const cs = s0 + usable * (ci === 0 ? 0.2 + rand() * 0.14 : 0.66 + rand() * 0.14);
+        const co = midOff + (rand() - 0.5) * 1.6;
+        const o0 = Math.max(frontOff + 0.5, co - cw / 2);
+        const o1 = Math.min(backOff - 0.5, o0 + cw);
+        out.push(sideWall(cs, o0, o1, height, height + chH, cCol, -1, false));
+        out.push(sideWall(cs, o0, o1, height, height + chH, cCol, 1, false));
+        out.push(facade(cs - cw / 2, cs + cw / 2, height, height + chH, o0, cCol, false));
+        out.push(facade(cs - cw / 2, cs + cw / 2, height, height + chH, o1, cCol, false, side));
+        out.push(roofFlat(cs - cw / 2, cs + cw / 2, height + chH, o0, o1, darken(cCol, 0.72)));
+      }
+    }
   }
 
   return out;
@@ -311,6 +388,28 @@ const GAP_EDGE_MARGIN = 6;   // không xây sát miệng ngã tư (đầu/cuối
 const GAP_SEG_RETREAT = 0.8; // lùi mỗi đầu segment — tránh chạm strip nhà liền kề (TOL 0.3 + dư)
 const STRIP_TOL = 0.3;       // 2 strip cách nhau < 0.3 m coi như chạm (cho phép liền kề sát)
 const CORNER_CLEAR = 0.5;    // góc building cách swath asphalt tối thiểu 0.5 m
+const MAX_FACADE_TURN = 0.52; // ~30° — nhà quét theo road cong hơn thế là tường quạt/mái gãy
+
+/** Nhà nằm trên đoạn road CONG QUÁ 30° thì bỏ: geometry quét theo curve làm tường
+ *  kính quạt tròn, mái đôi gãy đôi như giấy gập (bug chụp ảnh r286). Road cong nhẹ
+ *  (<30°) vẫn quét theo — trông tự nhiên như phố Đức thật. */
+function buildingTooCurved(map: GameMap, b: { roadId: string; s: number; length: number }): boolean {
+  const road = roadById(map, b.roadId);
+  if (!road) return false;
+  const s0 = Math.max(0, b.s);
+  const s1 = Math.min(roadLength(road), b.s + b.length);
+  if (s1 - s0 < 6) return false;
+  const h0 = roadPointAt(road, s0).heading;
+  let maxDelta = 0;
+  for (let s = s0; s <= s1 + 1e-6; s += 2) {
+    const ss = Math.min(s1, s);
+    const h = roadPointAt(road, ss).heading;
+    let d = Math.abs(h - h0);
+    if (d > Math.PI) d = Math.PI * 2 - d;
+    if (d > maxDelta) maxDelta = d;
+  }
+  return maxDelta > MAX_FACADE_TURN;
+}
 
 /** Segment đường precompute — bbox precheck trước khi quét point-to-OBB cho nhanh */
 interface RoadSegs {
@@ -367,6 +466,71 @@ function rectDistToRoadSegs(x: number, z: number, segs: RoadSegs): number {
 /** 2 strip AABB chạm nhau? (coi khoảng hở < STRIP_TOL là chạm) */
 function stripsTouch(a: [number, number, number, number], b: [number, number, number, number]): boolean {
   return a[0] < b[2] - STRIP_TOL && b[0] < a[2] - STRIP_TOL && a[1] < b[3] - STRIP_TOL && b[1] < a[3] - STRIP_TOL;
+}
+
+/** Segs mặt nước (Spree/Spreekanal) — dùng chung máy rectDistToRoadSegs (swatch = width/2) */
+function buildWaterSegs(map: GameMap): RoadSegs[] {
+  const out: RoadSegs[] = [];
+  for (const w of map.waters ?? []) {
+    const pts = w.points;
+    const segs: RoadSegs = {
+      half: w.width / 2,
+      minX: Infinity, minZ: Infinity, maxX: -Infinity, maxZ: -Infinity,
+      ax: [], az: [], dx: [], dz: [], l2: []
+    };
+    for (const [x, z] of pts) {
+      if (x < segs.minX) segs.minX = x; if (x > segs.maxX) segs.maxX = x;
+      if (z < segs.minZ) segs.minZ = z; if (z > segs.maxZ) segs.maxZ = z;
+    }
+    for (let i = 1; i < pts.length; i++) {
+      const ax = pts[i - 1][0], az = pts[i - 1][1];
+      const dx = pts[i][0] - ax, dz = pts[i][1] - az;
+      segs.ax.push(ax); segs.az.push(az); segs.dx.push(dx); segs.dz.push(dz);
+      segs.l2.push(dx * dx + dz * dz || 1);
+    }
+    if (segs.ax.length) out.push(segs);
+  }
+  return out;
+}
+
+/** Building có đâm vào LÒNG đường không? — sample DÀY dọc footprint (bước 1.5 m
+ *  theo s × 1.5 m theo chiều sâu): check 4 góc strip AABB không đủ vì nhà đứng
+ *  chéo qua road khác thì góc AABB có thể cách road > 0.5 m trong khi thân nhà
+ *  cắm thẳng vào lòng đường (bug chụp ảnh: mép ngã tư). waterSegs: nhà rơi vào
+ *  sông (nước cách mép nhà < 1 m) cũng loại. */
+function buildingClashesRoad(
+  map: GameMap,
+  b: { roadId: string; side: 'left' | 'right'; s: number; length: number; depthOff?: number; depth?: number },
+  roadSegs: RoadSegs[],
+  waterSegs: RoadSegs[] = []
+): boolean {
+  const road = roadById(map, b.roadId);
+  if (!road) return false;
+  const side = b.side === 'right' ? 1 : -1;
+  const half = roadFullWidth(road) / 2;
+  const frontOff = half + 2.0 + (b.depthOff ?? 0);
+  const backOff = frontOff + (b.depth ?? BUILDING_DEPTH);
+  const s0 = Math.max(0, b.s);
+  const s1 = Math.min(roadLength(road), b.s + b.length);
+  if (s1 - s0 < 1) return false;
+  for (let s = s0; ; s += 1.5) {
+    const ss = Math.min(s1, s);
+    const p = roadPointAt(road, ss);
+    for (let off = frontOff; ; off += 1.5) {
+      const o = Math.min(backOff, off);
+      const x = p.x + p.nx * side * o;
+      const z = p.z + p.nz * side * o;
+      for (const segs of roadSegs) {
+        if (rectDistToRoadSegs(x, z, segs) < CORNER_CLEAR) return true;
+      }
+      for (const segs of waterSegs) {
+        if (rectDistToRoadSegs(x, z, segs) < 1.0) return true;
+      }
+      if (o >= backOff) break;
+    }
+    if (ss >= s1) break;
+  }
+  return false;
 }
 
 /** Lập kế hoạch lấp phố — deterministic theo seed, export cho test đơn vị.
@@ -547,45 +711,18 @@ export function planCityBlockFill(map: GameMap): BlockFillPlan {
 export function allBuildingQuads(map: GameMap): ColoredQuad[] {
   const out: ColoredQuad[] = [];
   const roadSegs = buildRoadSegs(map);
+  const waterSegs = buildWaterSegs(map);
   for (const b of map.buildings as MapBuilding[]) {
-    const strips = buildingStrips(map, { ...b, depthOff: 0 });
-    if (!strips) continue;
-    let clash = false;
-    for (const [a, b2, c, d] of strips) {
-      const pts: Array<[number, number]> = [[a, b2], [c, d], [a, d], [c, b2]];
-      for (const [x, z] of pts) {
-        for (const seg of roadSegs) {
-          if (rectDistToRoadSegs(x, z, seg) < CORNER_CLEAR) {
-            clash = true;
-            break;
-          }
-        }
-        if (clash) break;
-      }
-      if (clash) break;
-    }
-    if (clash) continue;
+    // Sample dày footprint: nhà đâm vào lòng đường (nhất là mép ngã tư/road chéo) thì bỏ
+    if (buildingClashesRoad(map, b, roadSegs, waterSegs)) continue;
+    // Nhà trên road cong quá 30° bị xoắn tường/mái → bỏ
+    if (buildingTooCurved(map, b)) continue;
     out.push(...buildingQuads(map, b));
   }
   const plan = planCityBlockFill(map);
   for (const row of plan.rows) {
-    const strips = buildingStrips(map, row);
-    if (!strips) continue;
-    let clash = false;
-    for (const [a, b2, c, d] of strips) {
-      const pts: Array<[number, number]> = [[a, b2], [c, d], [a, d], [c, b2]];
-      for (const [x, z] of pts) {
-        for (const seg of roadSegs) {
-          if (rectDistToRoadSegs(x, z, seg) < CORNER_CLEAR) {
-            clash = true;
-            break;
-          }
-        }
-        if (clash) break;
-      }
-      if (clash) break;
-    }
-    if (clash) continue;
+    if (buildingClashesRoad(map, row, roadSegs, waterSegs)) continue;
+    if (buildingTooCurved(map, row)) continue;
     out.push(...buildingQuads(map, row));
   }
   return out;

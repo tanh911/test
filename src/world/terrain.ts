@@ -37,15 +37,24 @@ export function createTerrain(scene: THREE.Scene, size = 5000): THREE.Group {
   return group;
 }
 
-/** Trời gradient sky_top → sky_horizon */
+/** Trời gradient + vầng mặt trời + mây thủ tục (procedural clouds).
+ *  QUAN TRỌNG: fog của three.js trộn SAU chunk tonemapping/colorspace — màu fog
+ *  hiển thị = giá trị LINEAR thô của hex. ShaderMaterial tự viết không qua
+ *  tonemapping/colorspace chunk → output raw linear Y HỆT fog → chân trời khớp
+ *  tuyệt đối với vật thể hoà sương, không seam. Tuyệt đối KHÔNG thêm ACES/sRGB
+ *  vào shader này nếu không sẽ hở seam trời–đất. */
 export function createSkybox(scene: THREE.Scene): THREE.Mesh {
   const geo = new THREE.SphereGeometry(3000, 32, 16);
   const mat = new THREE.ShaderMaterial({
     side: THREE.BackSide,
     depthWrite: false,
+    fog: false,
     uniforms: {
       topColor: { value: new THREE.Color(palette.skyTop) },
-      horizonColor: { value: new THREE.Color(palette.skyHorizon) }
+      horizonColor: { value: new THREE.Color(palette.skyHorizon) },
+      sunDir: { value: new THREE.Vector3(140, 200, 90).normalize() },
+      sunColor: { value: new THREE.Color(0xfff0d0) },
+      uTime: { value: 0 }
     },
     vertexShader: `
       varying vec3 vWorldPos;
@@ -57,13 +66,60 @@ export function createSkybox(scene: THREE.Scene): THREE.Mesh {
     fragmentShader: `
       uniform vec3 topColor;
       uniform vec3 horizonColor;
+      uniform vec3 sunDir;
+      uniform vec3 sunColor;
+      uniform float exposure;
+      uniform float uTime;
       varying vec3 vWorldPos;
+
+      // ── Value noise 2 octave cho mây mềm ──
+      float hash12(vec2 p) { return fract(sin(dot(p, vec2(127.1, 311.7))) * 43758.5453); }
+      float vnoise(vec2 p) {
+        vec2 i = floor(p);
+        vec2 f = fract(p);
+        vec2 u = f * f * (3.0 - 2.0 * f);
+        return mix(
+          mix(hash12(i), hash12(i + vec2(1.0, 0.0)), u.x),
+          mix(hash12(i + vec2(0.0, 1.0)), hash12(i + vec2(1.0, 1.0)), u.x), u.y);
+      }
+      float fbm(vec2 p) {
+        return 0.55 * vnoise(p) + 0.30 * vnoise(p * 2.13 + 17.7) + 0.15 * vnoise(p * 4.41 + 43.1);
+      }
+
       void main() {
-        float h = normalize(vWorldPos).y;
+        vec3 dir = normalize(vWorldPos);
+        float h = dir.y;
         // Giữ NGUYÊN màu skyHorizon quanh chân trời (h <= 0.06) để khớp 100% với
-        // fog màu skyHorizon — không còn seam "rìa hành tinh"; trên đó gradient mượt lên skyTop.
+        // fog màu skyHorizon — trên đó gradient mượt lên skyTop.
         float t = smoothstep(0.06, 0.9, h);
-        gl_FragColor = vec4(mix(horizonColor, topColor, t), 1.0);
+        vec3 col = mix(horizonColor, topColor, t);
+
+        float ndl = max(dot(dir, sunDir), 0.0);
+        // Vầng hào quang quanh mặt trời (halo rộng + đĩa lõi)
+        col += sunColor * pow(ndl, 6.0) * 0.22;
+        col += sunColor * pow(ndl, 320.0) * 1.6;
+
+        // ── Mây: chiếu hướng nhìn lên mặt phẳng y=1 trôi chậm theo gió ──
+        if (h > 0.02) {
+          vec2 cuv = dir.xz / max(dir.y, 0.06) * 0.42;
+          float drift = uTime * 0.004;
+          float d1 = fbm(cuv * 0.55 + vec2(drift, drift * 0.4));
+          float d2 = fbm(cuv * 1.3 + vec2(-drift * 1.6, drift * 0.7) + 5.2);
+          float cover = smoothstep(0.48, 0.78, d1 * 0.72 + d2 * 0.28);
+          // fade mây tan dần gần chân trời + nhạt dần khi nhìn ngang
+          cover *= smoothstep(0.02, 0.22, h);
+          vec3 cloudLit = vec3(1.15, 1.14, 1.12);
+          vec3 cloudDark = vec3(0.82, 0.84, 0.90);
+          // đáy mây tối hơn (chiều dày) — sample d1 lệch hướng mặt trời làm bóng
+          float thick = smoothstep(0.5, 0.85, d1);
+          vec3 cloudCol = mix(cloudLit, cloudDark, thick * 0.55);
+          // viền mây hướng mặt trời ấm lên
+          cloudCol += sunColor * pow(ndl, 3.0) * 0.25 * (1.0 - thick);
+          col = mix(col, cloudCol, cover * 0.92);
+        }
+
+        // Output RAW linear — khớp fog (three trộn fog sau colorspace, giá trị thô)
+        gl_FragColor = vec4(col, 1.0);
       }
     `
   });

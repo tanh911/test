@@ -3,7 +3,7 @@ import * as THREE from 'three';
 import { buildJunctionMesh, roadHalfWidth, roadsAtNode } from './roadMesh';
 import type { GameMap, MapRoad } from './mapLoader';
 import { loadGameMap, nodeById } from './mapLoader';
-import muenchenJson from '../data/maps/muenchen-altstadt-clean.json';
+import berlinMitteJson from '../data/maps/berlin-mitte-clean.json';
 
 function makeMockRoad(id: string, from: string, to: string, lanesForward: number, lanesBackward: number, laneWidth: number, len = 50): MapRoad {
   return {
@@ -154,7 +154,7 @@ describe('Unified Junction Architecture (buildJunctionMesh) - Kiểm Thử Hình
   });
 
   it('5. Toàn bộ 127 ngã tư München Altstadt: 100% không tự cắt, 100% bảo toàn diện tích Shoelace = Mesh', () => {
-    const map: GameMap = loadGameMap(muenchenJson);
+    const map: GameMap = loadGameMap(berlinMitteJson);
     let testedCount = 0;
     let maxAreaDiff = 0;
 
@@ -202,7 +202,7 @@ function quadCross(q: { a: number[]; b: number[]; c: number[]; d: number[] }): n
 describe('junction winding (cross < 0 khớp ribbon — chống backface-cull)', () => {
   it('mọi asphalt/sidewalk quad của mọi giao lộ có cross < 0', () => {
     const maps: Array<[string, GameMap]> = [
-      ['muenchen', muenchenJson as unknown as GameMap],
+      ['muenchen', berlinMitteJson as unknown as GameMap],
       ['bigMap', generateBigMap() as unknown as GameMap]
     ];
     for (const [name, map] of maps) {

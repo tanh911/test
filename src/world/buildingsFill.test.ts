@@ -1,12 +1,12 @@
 // buildingsFill.test.ts — lấp phố: gap dọc đường + hàng courtyard
 // Quy tắc: không đè đường, không đè nhau (mức strip), deterministic.
 import { describe, expect, it } from 'vitest';
-import muenchenCleanMap from '../data/maps/muenchen-altstadt-clean.json';
+import berlinMitteMap from '../data/maps/berlin-mitte-clean.json';
 import type { GameMap, MapRoad } from './mapLoader';
 import { roadById, roadFullWidth, roadLength, roadPointAt } from './mapLoader';
 import { buildingQuads, buildingStrips, planCityBlockFill } from './buildings';
 
-const map = muenchenCleanMap as unknown as GameMap;
+const map = berlinMitteMap as unknown as GameMap;
 
 /** Khoảng cách từ điểm tới SWATH hình chữ nhật của road (segment quét rộng half) + bbox precheck */
 const roadBBoxes = map.roads.map((r) => {
@@ -42,7 +42,7 @@ function distToRoadSwath(x: number, z: number, road: MapRoad, roadIdx: number): 
 describe('planCityBlockFill — lấp gap dọc phố + hàng courtyard', () => {
   const plan = planCityBlockFill(map);
 
-  it('sinh đủ lượng nhà fill trên map München', () => {
+  it('sinh đủ lượng nhà fill trên map Berlin-Mitte', () => {
     expect(plan.stats.front).toBe(1224);
     expect(plan.stats.gapFilled).toBeGreaterThanOrEqual(20); // gap fillable (block hẹp phần lớn đã kín 2 phía)
     expect(plan.stats.rowsAdded).toBeGreaterThan(500);       // 678 hàng courtyard — nguồn khối lượng chính

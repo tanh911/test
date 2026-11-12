@@ -38,6 +38,8 @@ export interface RuleState {
   brake?: number;
   headYaw?: number;
   headPitch?: number;
+  /** tên phố hiện tại (road gần nhất) — hiển thị trên cụm đồng hồ */
+  streetName?: string;
 }
 
 // 🗺️ MiniMap (Prompt 10): top-down quanh player, đọc mỗi frame riêng
@@ -51,6 +53,22 @@ export interface MapState {
   player: { x: number; z: number; heading: number; signal: 'left' | 'right' | null } | null;
   npcs: Array<{ x: number; z: number; heading: number }>;
   lights: MapLightState[];
+}
+
+/** Vị trí debug report lỗi — hiện trên HUD trang sim-dev */
+export interface PosDebug {
+  x: number;
+  z: number;
+  /** ô chunk 100 m chứa vị trí (chunkKeyFor) */
+  cell: string;
+  /** node giao lộ gần nhất trong bán kính 80 m (nếu có) */
+  node?: string;
+  /** road gần nhất (quét segment, bất kể khoảng cách) */
+  road?: string;
+  /** tên phố thật của road gần nhất (OSM Berlin, gắn sẵn trong map JSON) */
+  roadName?: string;
+  /** hướng nhìn/lái (độ, 0 = bắc) */
+  headingDeg: number;
 }
 
 export interface SimSceneOptions {
@@ -70,12 +88,35 @@ export interface SimSceneHandle {
   setGear?: (g: 'P' | 'R' | 'N' | 'D') => void;
   /** dữ liệu mini-map (player-centered top-down) — đọc mỗi frame từ RAF của MiniMap */
   getMapState: () => MapState;
+  /** tọa độ debug để report lỗi: x/z (m), ô chunk 100 m, node giao lộ + road gần nhất */
+  getPosDebug: () => PosDebug;
   dispose: () => void;
   /** gọi mỗi frame từ host (React) — cập nhật camera bay/xe + render */
   update: (dt: number) => void;
 }
 
 const keys = new Set<string>();
+
+/** Road gần nhất với điểm (x,z) — quét segment polyline toàn map (poll 2 Hz, rẻ) */
+function nearestRoadAt(
+  map: { roads: Array<{ id: string; name?: string; points: [number, number][] }> },
+  x: number,
+  z: number
+): { road: { id: string; name?: string }; dist: number } | null {
+  let best: { road: { id: string; name?: string }; dist: number } | null = null;
+  for (const r of map.roads) {
+    const pts = r.points;
+    for (let i = 1; i < pts.length; i++) {
+      const ax = pts[i - 1][0], az = pts[i - 1][1];
+      const vx = pts[i][0] - ax, vz = pts[i][1] - az;
+      const l2 = vx * vx + vz * vz || 1;
+      const t = Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / l2));
+      const d = Math.hypot(x - (ax + t * vx), z - (az + t * vz));
+      if (!best || d < best.dist) best = { road: r, dist: d };
+    }
+  }
+  return best;
+}
 
 function bindFlyControls(dom: HTMLElement, camera: THREE.PerspectiveCamera): () => void {
   const onKeyDown = (e: KeyboardEvent) => keys.add(e.code);
@@ -111,7 +152,8 @@ function bindFlyControls(dom: HTMLElement, camera: THREE.PerspectiveCamera): () 
 
   // gắn hàm cập nhật camera mỗi frame qua userData
   flyCam.userData._flyUpdate = (dt: number) => {
-    const speed = keys.has('ShiftLeft') ? 60 : 18;
+    // tốc độ bay (m/s): thường 30, giữ Shift tăng lực 105 — quét map 1.4 km nhanh
+    const speed = keys.has('ShiftLeft') || keys.has('ShiftRight') ? 105 : 30;
     const dir = new THREE.Vector3();
     if (keys.has('KeyW')) dir.z -= 1;
     if (keys.has('KeyS')) dir.z += 1;
@@ -164,30 +206,35 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   renderer.setPixelRatio(Math.min(window.devicePixelRatio, 1.5));
   renderer.shadowMap.enabled = true;
   renderer.shadowMap.type = THREE.PCFShadowMap;
+  // ── Color grading điện ảnh: ACES Filmic + sRGB — hết hiện tượng "giấy bồi" phẳng trắng,
+  //    highlight trời/nhà có rolloff mềm, màu façade đậm nét như ảnh chụp thật ──
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.18;
   container.appendChild(renderer.domElement);
 
-  // ── Ánh sáng Bavarian Altstadt — Cân bằng ambient tự nhiên, chống mặt tường đen xịt ──
-  const hemi = new THREE.HemisphereLight(0xdcebfa, 0x7a7364, 1.15);
+  // ── Ánh sáng Bavarian Altstadt — nâng cường độ để bù tone mapping ACES (nén ~0.8 stop) ──
+  const hemi = new THREE.HemisphereLight(0xd8ecff, 0x8a8272, 1.7);
   scene.add(hemi);
-  const ambient = new THREE.AmbientLight(0xfff5ea, 0.42);
+  const ambient = new THREE.AmbientLight(0xfff3e0, 0.62);
   scene.add(ambient);
-  const sun = new THREE.DirectionalLight(0xfff2dc, 1.9);
+  const sun = new THREE.DirectionalLight(0xffedd0, 2.6);
   sun.position.set(140, 200, 90);
   sun.castShadow = true;
-  sun.shadow.mapSize.set(2048, 2048);
-  sun.shadow.camera.left = -120;
-  sun.shadow.camera.right = 120;
-  sun.shadow.camera.top = 120;
-  sun.shadow.camera.bottom = -120;
-  sun.shadow.camera.far = 500;
+  sun.shadow.mapSize.set(4096, 4096);
+  sun.shadow.camera.left = -140;
+  sun.shadow.camera.right = 140;
+  sun.shadow.camera.top = 140;
+  sun.shadow.camera.bottom = -140;
+  sun.shadow.camera.far = 600;
   sun.shadow.bias = -0.0004;      // chống shadow acne trên tường nhà
-  sun.shadow.normalBias = 0.03;   // đẩy shadow theo normal — hết sọc chéo
+  sun.shadow.normalBias = 0.04;   // đẩy shadow theo normal — hết sọc chéo
   scene.add(sun);
   scene.add(sun.target);
 
   // ── Terrain + sky + fog ──
   createTerrain(scene);
-  createSkybox(scene);
+  const skybox = createSkybox(scene);
   const fog = applyFog(scene); // fog động: near/far cập nhật theo độ cao camera mỗi frame
 
   // 🌍 World data (Prompt 2-4) + chunk streaming (Prompt 6)
@@ -277,6 +324,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   const tick = (now: number) => {
     const dt = Math.min(0.1, (now - last) / 1000);
     last = now;
+    // mây trôi chậm trên trời (uTime giây)
+    const skyMat = skybox.material as THREE.ShaderMaterial;
+    skyMat.uniforms.uTime.value = now / 1000;
     if (driveMode) {
       if (vehicle) {
         // va chạm công trình: dừng xe + ghi lỗi major (AABB nhà, radius 0.9)
@@ -415,12 +465,12 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     }
     world.update(dt);
     // ── Fog + streaming scale theo độ cao camera ──
-    // Mặc định (mặt đất ~1.2 m): 250/1400 như cũ. Bay lên cao thì lùi fog ra xa và
-    // nạp cell rộng hơn, nhờ đó fly/aerial view thấy được cả thành phố.
+    // Mặt đất: 250/1400. Bay lên thì lùi fog ra xa NHƯNG vẫn phải hết gọn TRƯỚC mép
+    // terrain (2500 m) — nếu fog còn "đang giữa chừng" ở mép đất thì gặp trời bị seam.
     const camY = Math.max(0, camera.position.y);
     const lift = Math.max(0, camY - 10);
-    fog.near = 250 + lift * 0.6;
-    fog.far = 1400 + lift * 2.2;
+    fog.near = 250 + lift * 0.5;
+    fog.far = Math.min(1400 + lift * 0.8, 1900);
     chunkMgr.setLoadRadius(Math.min(300 + camY * 1.5, 1000));
     chunkStats = chunkMgr.update(camera.position.x, camera.position.z);
     // ── Shadow camera bám theo xe/camera: hết bóng biến mất ngoài 120 m từ gốc toạ độ ──
@@ -619,7 +669,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         throttle: vehicle.throttle,
         brake: vehicle.brake,
         headYaw,
-        headPitch
+        headPitch,
+        // tên phố hiện tại cho cụm đồng hồ (road gần nhất)
+        streetName: nearestRoadAt(map, vehicle.state.x, vehicle.state.z)?.road.name
       };
     },
     // 🗺️ mini-map: gom snapshot mỗi frame từ RAF riêng của MiniMap — không dùng chung RAF render
@@ -640,6 +692,32 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
       }));
       const lights = lightNodes.map(l => ({ x: l.x, z: l.z, phase: l.phase() }));
       return { player, npcs: npcDots, lights };
+    },
+    // 📍 tọa độ debug report lỗi — drive: vị trí xe; fly: vị trí camera
+    getPosDebug: (): PosDebug => {
+      const p = driveMode && vehicle
+        ? { x: vehicle.state.x, z: vehicle.state.z, heading: vehicle.state.heading }
+        : { x: camera.position.x, z: camera.position.z, heading: (camera.rotation as THREE.Euler).y };
+      const cell = `${Math.floor(p.x / 100)},${Math.floor(p.z / 100)}`;
+      // node giao lộ gần nhất ≤ 80 m
+      let node: string | undefined;
+      let bestNode = 80;
+      for (const n of map.nodes) {
+        if (n.type !== 'intersection') continue;
+        const d = Math.hypot(n.x - p.x, n.z - p.z);
+        if (d < bestNode) {
+          bestNode = d;
+          node = n.id;
+        }
+      }
+      // road gần nhất — quét segment polyline (HUD poll 2 Hz nên chi phí không đáng kể)
+      const near = nearestRoadAt(map, p.x, p.z);
+      const road = near?.road.id;
+      const roadName = near?.road.name;
+      let headingDeg = (p.heading * 180) / Math.PI;
+      // chuẩn 0..360, quy về la bàn (0 = bắc = −Z)
+      headingDeg = ((-headingDeg % 360) + 360) % 360;
+      return { x: p.x, z: p.z, cell, node, road, roadName, headingDeg };
     },
     dispose: () => {
       cancelAnimationFrame(raf);

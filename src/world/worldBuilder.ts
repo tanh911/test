@@ -1,10 +1,10 @@
 // 🌍 world builder tổng hợp — Protocol Prompt 2-4: đường + giao lộ + vạch + vỉa hè + nhà + props
 import * as THREE from 'three';
 import type { GameMap, MapIntersection } from './mapLoader';
-import { loadGameMap, nodeById } from './mapLoader';
+import { loadGameMap, nodeById, roadLength } from './mapLoader';
 import { palette } from '../art/palette';
 import { ChunkBuilder } from './chunkBuilder';
-import { roadRibbonQuads, junctionPatchQuads, buildJunctionMesh, roadsAtNode, roadHalfWidth, junctionHalfExtent, roadSkipZones, roundaboutIslandQuads } from './roadMesh';
+import { roadRibbonQuads, junctionPatchQuads, buildJunctionMesh, roadsAtNode, roadHalfWidth, junctionHalfExtent, roadSkipZones, ribbonSkipZones, roundaboutIslandQuads, junctionBackgroundQuads } from './roadMesh';
 import { roadMarkingQuads } from './roadMarkings';
 import { sidewalkBoxes, sidewalkCornerPads } from './sidewalk';
 import { placeSigns } from './trafficSigns';
@@ -39,14 +39,65 @@ function pushQuads(cb: ChunkBuilder, quads: Quad[], material: Parameters<ChunkBu
   for (const q of quads) cb.addQuad(q, material);
 }
 
+/** Ribbon mặt nước mượt: nội suy Catmull-Rom 4 m/step, mỗi bước 1 quad vuông góc
+ *  tangent — cùng pattern winding với roadRibbonQuads (nhìn từ +Y thấy mặt trên). */
+function waterRibbonQuads(points: [number, number][], halfWidth: number, y: number): Quad[] {
+  if (points.length < 2) return [];
+  const curve = new THREE.CatmullRomCurve3(
+    points.map(([x, z]) => new THREE.Vector3(x, 0, z)),
+    false,
+    'centripetal'
+  );
+  const len = curve.getLength();
+  const n = Math.max(2, Math.ceil(len / 4));
+  const quads: Quad[] = [];
+  let prev: { x: number; z: number; nx: number; nz: number } | null = null;
+  for (let i = 0; i <= n; i++) {
+    const p = curve.getPointAt(i / n);
+    const t = curve.getTangentAt(i / n);
+    const cur = { x: p.x, z: p.z, nx: -t.z, nz: t.x };
+    if (prev) {
+      quads.push({
+        a: [prev.x - prev.nx * halfWidth, y, prev.z - prev.nz * halfWidth],
+        b: [prev.x + prev.nx * halfWidth, y, prev.z + prev.nz * halfWidth],
+        c: [cur.x + cur.nx * halfWidth, y, cur.z + cur.nz * halfWidth],
+        d: [cur.x - cur.nx * halfWidth, y, cur.z - cur.nz * halfWidth]
+      });
+    }
+    prev = cur;
+  }
+  return quads;
+}
+
 export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldHandle {
   const map: GameMap = loadGameMap(mapJson);
   const cb = new ChunkBuilder();
 
   // ── 1. Mặt đường ribbon từng road ──
+  // ribbonSkipZones: ribbon chồng 3 m vào miệng patch junction — vá khe nêm road cong
   for (const road of map.roads) {
-    const skip = roadSkipZones(road, map);
+    const skip = ribbonSkipZones(road, map);
     pushQuads(cb, roadRibbonQuads(road, skip), 'road');
+    // ── Vai đường lót dưới (shoulder): rộng hơn ribbon 2.6 m (chui dưới vỉa hè),
+    // y = -0.012 nằm dưới mọi lớp phủ — mọi khe cỏ giữa ribbon/vỉa hè/patch lộ ra
+    // asphalt worn thay vì cỏ. Skip zone NỚI thêm 1.5 m để không trồi qua patch. ──
+    const len = roadLength(road);
+    const shoulderSkip: Array<[number, number]> = [];
+    for (const [a, b] of roadSkipZones(road, map)) {
+      if (a === 0) shoulderSkip.push([0, Math.min(b + 1.5, len)]);
+      else shoulderSkip.push([Math.max(a - 1.5, 0), len]);
+    }
+    pushQuads(cb, roadRibbonQuads(road, shoulderSkip, { extraWidth: 2.6, y: -0.012 }), 'road_worn');
+  }
+
+  // ── 1.5 Mặt nước (Spree + Spreekanal) — vẽ TRÊN terrain (y=-0.035/-0.02) nhưng
+  //      DƯỚI road (y=0) → các bridge road (Friedrichstraßenbrücke, Marschallbrücke...)
+  //      tự nhiên trông như cầu bắc qua sông. Kè đá bao quanh mép (Kaimauer). ──
+  for (const water of map.waters ?? []) {
+    const bankQuads = waterRibbonQuads(water.points, water.width / 2 + 3.5, -0.035);
+    const waterQuads = waterRibbonQuads(water.points, water.width / 2, -0.02);
+    pushQuads(cb, bankQuads, 'bank');
+    pushQuads(cb, waterQuads, 'water');
   }
 
   // ── 2. Đa giác nút giao thống nhất (Unified Junction Polygon + Sidewalk) ──
@@ -54,12 +105,15 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldHandle {
     const node = nodeById(map, ix.nodeId);
     if (!node) continue;
     const roads = roadsAtNode(map, ix.nodeId);
+    // Nền lót asphalt worn (y=-0.005) dưới mọi nút giao — lưới an toàn che nốt
+    // mọi khe hairline giữa ribbon / patch / vỉa hè mà các lớp trên sót lại
+    pushQuads(cb, junctionBackgroundQuads(node.x, node.z, roads), 'road_worn');
     const junc = buildJunctionMesh(node.x, node.z, roads);
     // Mặt đường ngã tư liền khối, đồng chất liệu 'road'
     pushQuads(cb, junc.asphaltQuads, 'road');
-    // Vỉa hè và bó vỉa bo theo mép ngã tư
+    // Vỉa hè và bó vỉa bo theo mép ngã tư — curb dùng material riêng sáng hơn vỉa hè
     pushQuads(cb, junc.sidewalkQuads, 'sidewalk');
-    pushQuads(cb, junc.curbQuads, 'sidewalk');
+    pushQuads(cb, junc.curbQuads, 'curb');
 
     // ── 2.5 Đảo giao thông (island) tại nút vòng xuyến ──
     if (ix.rule === 'roundabout') {
@@ -93,7 +147,7 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldHandle {
       cb.addQuad({ a: t0, b: t1, c: t2, d: t3 }, 'sidewalk');
       if (piece.curb) {
         const [c0, c1, c2, c3] = piece.curb;
-        cb.addQuad({ a: c0, b: c1, c: c2, d: c3 }, 'sidewalk');
+        cb.addQuad({ a: c0, b: c1, c: c2, d: c3 }, 'curb');
       }
     }
   }
@@ -101,7 +155,7 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldHandle {
   // ── 4.5 Pad vỉa hè 4 góc giao lộ ──
   for (const pad of sidewalkCornerPads(map)) {
     cb.addQuad(pad.top, 'sidewalk');
-    for (const curb of pad.curbs) cb.addQuad(curb, 'sidewalk');
+    for (const curb of pad.curbs) cb.addQuad(curb, 'curb');
   }
 
   // ── 4.6 Nhà phố (vertex color facade + cửa sổ + AO) ──
@@ -120,6 +174,9 @@ export function buildWorld(scene: THREE.Scene, mapJson: unknown): WorldHandle {
       polygonOffsetUnits: -2
     }),
     sidewalk: new THREE.MeshLambertMaterial({ color: palette.sidewalk }),
+    curb: new THREE.MeshLambertMaterial({ color: palette.curb }),
+    bank: new THREE.MeshLambertMaterial({ color: palette.riverBank }),
+    water: new THREE.MeshLambertMaterial({ color: palette.water }),
     building: new THREE.MeshLambertMaterial({ vertexColors: true, side: THREE.DoubleSide })
   };
 

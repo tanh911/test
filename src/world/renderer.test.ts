@@ -4,12 +4,12 @@
 // 3. junctionPatchQuads (bao lồi) không throw trên map sạch
 import { describe, expect, it } from 'vitest';
 import type { GameMap, MapRoad } from './mapLoader';
-import muenchenCleanMap from '../data/maps/muenchen-altstadt-clean.json';
+import berlinMitteMap from '../data/maps/berlin-mitte-clean.json';
 import { roadMarkingQuads } from './roadMarkings';
 import { sidewalkBoxes } from './sidewalk';
 import { junctionPatchQuads, roadSkipZones, roadsAtNode } from './roadMesh';
 
-const map: GameMap = muenchenCleanMap as unknown as GameMap;
+const map: GameMap = berlinMitteMap as unknown as GameMap;
 
 function roadById(id: string): MapRoad {
   const r = map.roads.find((r) => r.id === id);

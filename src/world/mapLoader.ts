@@ -69,6 +69,9 @@ export interface MapSign {
   s: number; // mét dọc đường tính từ node `from`
   side: 'left' | 'right';
   value?: number; // giá trị biển (274: tốc độ)
+  /** true: mặt biển quay THEO chiều flow (mặc định quay ngược flow) — dùng cho
+   *  Z.267 cấm ngược chiều một chiều, chiếu về xe đi ngược luật */
+  flip?: boolean;
 }
 
 export interface MapBuilding {
@@ -94,6 +97,14 @@ export interface MapSpawn {
   lane: number;
 }
 
+/** Mặt nước (sông/kênh) — polyline tim dòng + bề rộng: Spree 58 m, Spreekanal 30 m */
+export interface MapWater {
+  id: string;
+  name: string;
+  width: number;
+  points: [number, number][];
+}
+
 export interface GameMap {
   version: number;
   nodes: MapNode[];
@@ -103,6 +114,8 @@ export interface GameMap {
   buildings: MapBuilding[];
   props: MapProp[];
   spawns: { player: MapSpawn };
+  /** mặt nước — Berlin-Mitte có sông Spree cắt ngang, bridge roads bắc qua */
+  waters?: MapWater[];
 }
 
 export function loadGameMap(json: unknown): GameMap {

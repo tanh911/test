@@ -1,6 +1,6 @@
 import fs from 'fs';
 
-const map = JSON.parse(fs.readFileSync('src/data/maps/muenchen-altstadt-clean.json', 'utf8'));
+const map = JSON.parse(fs.readFileSync('src/data/maps/berlin-mitte-clean.json', 'utf8'));
 
 function roadHalfWidth(road) {
   const full = (road.lanesForward + road.lanesBackward) * road.laneWidth;

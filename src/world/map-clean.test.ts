@@ -1,12 +1,12 @@
-// map-clean.test.ts — validate muenchen-altstadt-clean.json (schema v1)
+// map-clean.test.ts — validate berlin-mitte-clean.json (schema v1)
 // Quy tắc: không có giao cắt thiếu node, không có node intersection bậc < 3,
 // không có road ngắn hơn 4 m.
 import { describe, expect, it } from 'vitest';
-import muenchenCleanMap from '../data/maps/muenchen-altstadt-clean.json';
+import berlinMitteMap from '../data/maps/berlin-mitte-clean.json';
 import type { GameMap } from './mapLoader';
 import { collectBoundaryIssues, collectSeamIssues, collectSawtoothIssues } from './testJunctionBoundary';
 
-const map: GameMap = muenchenCleanMap as unknown as GameMap;
+const map: GameMap = berlinMitteMap as unknown as GameMap;
 
 const nodeIds = new Set(map.nodes.map((n) => n.id));
 const deg = new Map<string, number>();
@@ -23,7 +23,7 @@ function polylen(pts: [number, number][]): number {
   return L;
 }
 
-describe('muenchen-altstadt-clean.json validation', () => {
+describe('berlin-mitte-clean.json validation', () => {
   it('không có bad node refs', () => {
     const bad = map.roads.filter((r) => !nodeIds.has(r.from) || !nodeIds.has(r.to));
     expect(bad).toEqual([]);
@@ -98,7 +98,7 @@ describe('muenchen-altstadt-clean.json validation', () => {
 // ── G1-3 (map sạch): biên thật của patch giao lộ ──
 // Mọi điểm trên biên bao lồi patch ≤ 1 m từ miệng một nhánh HOẶC cạnh trong
 // pad vỉa hè; hai đầu miệng mỗi nhánh nằm trong patch (thay cận đỉnh 1.5·Kmax).
-describe('muenchen-clean × biên thật patch giao lộ (collectBoundaryIssues)', () => {
+describe('berlin-mitte × biên thật patch giao lộ (collectBoundaryIssues)', () => {
   it('biên patch phủ kín: mọi điểm biên sát miệng nhánh/cạnh pad, miệng nằm trong patch', () => {
     const { checkedNodes, issues } = collectBoundaryIssues(map);
     console.info(`[biên patch] node kiểm: ${checkedNodes}, vi phạm: ${issues.length}`);
@@ -117,7 +117,7 @@ describe('muenchen-clean × biên thật patch giao lộ (collectBoundaryIssues)
 // Lưới ±16 m quanh node bước 0,25 m: mọi điểm không nằm trong lớp phủ
 // (patch hull / ribbon / vỉa hè / pad / đảo vòng xuyến) mà cách mép > 0,05 m
 // và bị kẹp giữa ≥ 2 phủ đối diện → khe cỏ thật → vi phạm (mục tiêu: 0).
-describe('muenchen-clean × khe cỏ quanh node (collectSeamIssues)', () => {
+describe('berlin-mitte × khe cỏ quanh node (collectSeamIssues)', () => {
   it('lưới ±16 m bít mọi khe cỏ giữa các lớp phủ quanh node', () => {
     const { checkedNodes, issues } = collectSeamIssues(map);
     console.info(`[seam] node kiểm: ${checkedNodes}, vi phạm: ${issues.length}`);
@@ -135,7 +135,7 @@ describe('muenchen-clean × khe cỏ quanh node (collectSeamIssues)', () => {
 // Mép TRONG mọi piece vỉa hè phải sát mép ribbon cùng road (≤ 0,05 m) —
 // cùng lưới s của roadCurve nên bình thường gap ≈ 0; trên đường cong trước
 // khi sửa gap nhảy theo mẫu răng cưa.
-describe('muenchen-clean × răng cưa vỉa hè (collectSawtoothIssues)', () => {
+describe('berlin-mitte × răng cưa vỉa hè (collectSawtoothIssues)', () => {
   it('mép trong vỉa hè trùng khít mép ribbon trên mọi road', () => {
     const { checkedRoads, issues } = collectSawtoothIssues(map);
     console.info(`[răng cưa] road kiểm: ${checkedRoads}, vi phạm: ${issues.length}`);

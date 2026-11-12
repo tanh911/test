@@ -13,7 +13,12 @@ type RGB = [number, number, number];
 
 function hexRGB(hex: string): RGB {
   const n = parseInt(hex.slice(1), 16);
-  return [((n >> 16) & 255) / 255, ((n >> 8) & 255) / 255, (n & 255) / 255];
+  // vertex color là linear — hex là sRGB: không convert thì màu bị wash out
+  const srgb = (c8: number) => {
+    const v = c8 / 255;
+    return v <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4);
+  };
+  return [srgb((n >> 16) & 255), srgb((n >> 8) & 255), srgb(n & 255)];
 }
 
 // ── helper dựng geometry từ primitives, tô vertex color theo bộ phận ──
@@ -51,25 +56,30 @@ function makePropGeometry(type: MapProp['type']): THREE.BufferGeometry {
   const parts: THREE.BufferGeometry[] = [];
   switch (type) {
     case 'tree': {
-      parts.push(colored(new THREE.CylinderGeometry(0.12, 0.18, 2.2, 6), BARK));
-      parts[0].translate(0, 1.1, 0);
-      const crown1 = new THREE.IcosahedronGeometry(1.6, 0);
-      crown1.translate(0, 3.1, 0);
-      parts.push(colored(crown1, LEAF1));
-      const crown2 = new THREE.IcosahedronGeometry(1.1, 0);
-      crown2.translate(0.3, 4.0, 0.2);
-      parts.push(colored(crown2, LEAF2));
+      // thân cao thẳng + tán 3 lớp so le — silhouette cây phố München thật hơn tán 2 khối cũ
+      parts.push(colored(new THREE.CylinderGeometry(0.13, 0.2, 2.6, 6), BARK));
+      parts[0].translate(0, 1.3, 0);
+      const crownBase = new THREE.IcosahedronGeometry(1.7, 0);
+      crownBase.translate(-0.15, 3.3, -0.1);
+      parts.push(colored(crownBase, LEAF1));
+      const crownMid = new THREE.IcosahedronGeometry(1.35, 0);
+      crownMid.translate(0.55, 4.2, 0.3);
+      parts.push(colored(crownMid, LEAF2));
+      const crownTop = new THREE.IcosahedronGeometry(0.95, 0);
+      crownTop.translate(-0.35, 5.0, -0.25);
+      parts.push(colored(crownTop, LEAF2));
       break;
     }
     case 'street_lamp': {
       const pole = new THREE.CylinderGeometry(0.06, 0.09, 5.0, 6);
       pole.translate(0, 2.5, 0);
       parts.push(colored(pole, METAL_DARK));
-      const arm = new THREE.BoxGeometry(0.08, 0.08, 1.4);
-      arm.translate(0, 4.9, 0.6);
+      // càng ngắn + đầu đèn to → hết cảm giác "gậy chìa lơ lửng" nhìn từ trên cao
+      const arm = new THREE.BoxGeometry(0.09, 0.09, 1.0);
+      arm.translate(0, 4.9, 0.45);
       parts.push(colored(arm, METAL_DARK));
-      const head = new THREE.BoxGeometry(0.3, 0.12, 0.5);
-      head.translate(0, 4.85, 1.2);
+      const head = new THREE.BoxGeometry(0.38, 0.14, 0.6);
+      head.translate(0, 4.86, 0.95);
       parts.push(colored(head, hexRGB('#f2e6b8'))); // chạm đèn màu sáng
       break;
     }
@@ -133,18 +143,38 @@ function makePropGeometry(type: MapProp['type']): THREE.BufferGeometry {
       break;
     }
     case 'parked_car_static': {
-      // xe box đơn giản (Prompt 5 thay bằng GLB) — dài 4.2, rộng 1.7, cao ~1.25
-      // đáy chạm mặt đường (body y 0.05..0.65) — hết nổi lơ lửng 27 cm như bản cũ
-      const body = new THREE.BoxGeometry(1.7, 0.6, 4.2);
-      body.translate(0, 0.35, 0);
+      // xe đỗ: thân + cabin kính + 4 bánh — hết khối hộp "chở bia" lơ lửng
+      const body = new THREE.BoxGeometry(1.7, 0.55, 4.2);
+      body.translate(0, 0.48, 0);
       parts.push(colored(body, CAR_COLORS[0])); // tint per-instance bằng instanceColor
-      const cabin = new THREE.BoxGeometry(1.55, 0.55, 2.2);
-      cabin.translate(0, 0.975, -0.1);
+      const cabin = new THREE.BoxGeometry(1.55, 0.5, 2.1);
+      cabin.translate(0, 1.0, -0.15);
       parts.push(colored(cabin, hexRGB(palette.window)));
+      const wheelGeo = new THREE.CylinderGeometry(0.3, 0.3, 0.22, 10);
+      wheelGeo.rotateZ(Math.PI / 2);
+      for (const [wx, wz] of [[-0.85, 1.35], [0.85, 1.35], [-0.85, -1.35], [0.85, -1.35]]) {
+        const wheel = wheelGeo.clone();
+        wheel.translate(wx, 0.3, wz);
+        parts.push(colored(wheel, hexRGB('#22242a')));
+      }
       break;
     }
   }
   return mergeGeometries(parts, false) || new THREE.BufferGeometry();
+}
+
+/** Khoảng cách từ điểm tới polyline (segment-wise) — dùng lọc prop rơi xuống sông */
+function distToPolyline(x: number, z: number, pts: [number, number][]): number {
+  let best = Infinity;
+  for (let i = 1; i < pts.length; i++) {
+    const ax = pts[i - 1][0], az = pts[i - 1][1];
+    const vx = pts[i][0] - ax, vz = pts[i][1] - az;
+    const l2 = vx * vx + vz * vz || 1;
+    const t = Math.max(0, Math.min(1, ((x - ax) * vx + (z - az) * vz) / l2));
+    const d = Math.hypot(x - (ax + t * vx), z - (az + t * vz));
+    if (d < best) best = d;
+  }
+  return best;
 }
 
 /** Offset(prop) từ tim đường: đứng trên vỉa hè; parked_car nằm trong làn đỗ */
@@ -190,6 +220,12 @@ export function placeProps(scene: THREE.Scene, map: GameMap): PropsResult {
     const rz = fx;
     const x = pt.x + rx * side * off;
     const z = pt.z + rz * side * off;
+    // prop chìm trong sông (Spree/Spreekanal)? — bỏ, cây đèn không mọc dưới nước
+    let inWater = false;
+    for (const w of map.waters ?? []) {
+      if (distToPolyline(x, z, w.points) < w.width / 2 + 0.8) { inWater = true; break; }
+    }
+    if (inWater) continue;
     // hướng prop: mặt +Z local quay về road → yaw = atan2(rx·side, rz·side)... parked car dọc đường
     const yaw = prop.type === 'parked_car_static'
       ? Math.atan2(fx, fz)
@@ -211,7 +247,9 @@ export function placeProps(scene: THREE.Scene, map: GameMap): PropsResult {
     items.forEach((it, i) => {
       q.setFromAxisAngle(new THREE.Vector3(0, 1, 0), it.yaw);
       pos.set(it.x, 0, it.z);
-      m.compose(pos, q, scale);
+      // cây cao thấp xen kẽ tự nhiên theo seed
+      const ts = type === 'tree' ? 0.82 + ((it.seedIdx * 53) % 46) / 100 : 1;
+      m.compose(pos, q, scale.set(ts, ts, ts));
       inst.setMatrixAt(i, m);
       if (type === 'parked_car_static') {
         const c = CAR_COLORS[it.seedIdx % CAR_COLORS.length];
