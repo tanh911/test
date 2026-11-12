@@ -104,6 +104,21 @@ export class PedestrianController {
     });
     let placed = 0;
     const maxPeds = 56;
+
+    // Nếu bản đồ có trạm vạch Zebra (r_rvl_zebra), đặt sẵn 2 người đi bộ gần vạch qua đường để luyện phản xạ nhường người đi bộ!
+    const zebraRoad = this.map.roads.find(r => r.id === 'r_rvl_zebra');
+    if (zebraRoad) {
+      const zLen = this.len(zebraRoad.id);
+      for (const [sOff, sideVal] of [[zLen - 11, 1], [zLen - 15, -1]] as Array<[number, 1 | -1]>) {
+        const ped = this.makePed(zebraRoad, Math.max(5, sOff), 1, sideVal, placed);
+        const p0 = this.pose(zebraRoad, ped.s, 1, sideVal);
+        ped.group.position.set(p0.x, 0.10, p0.z);
+        ped.group.rotation.y = p0.ry;
+        this.peds.push(ped);
+        placed++;
+      }
+    }
+
     while (placed < maxPeds && roads.length) {
       const pool = (placed < 16 && nearbyRoads.length > 0) ? nearbyRoads : roads;
       const road = pool[Math.floor(Math.random() * pool.length)];
@@ -215,7 +230,7 @@ export class PedestrianController {
         const hasZebra = ix ? ix.crosswalks.includes(curRoad.id) : false;
         if (hasZebra) {
           ped.waiting = true;
-          ped.waitTimer = 1.5;
+          ped.waitTimer = 4.2; // Đi bộ băng ngang qua vạch Zebra trong 4.2s
         } else {
           this.advanceToNextRoad(ped, curRoad, curNodeAhead, curLen);
         }
@@ -227,10 +242,20 @@ export class PedestrianController {
       if (ped.s > finalLen) ped.s = finalLen;
       if (ped.s < 0) ped.s = 0;
 
-      // Pose
+      // Pose (nếu đang băng qua vạch Zebra thì nội suy ngang mặt đường từ vỉa hè bên này sang vỉa hè bên kia)
       const p = this.pose(finalRoad, ped.s, ped.dir, ped.side);
-      ped.group.position.set(p.x, 0.10, p.z);
-      ped.group.rotation.y = p.ry;
+      if (ped.waiting && ped.waitTimer > 0) {
+        const prog = 1 - ped.waitTimer / 4.2; // 0 -> 1
+        const pOpposite = this.pose(finalRoad, ped.s, ped.dir, (ped.side * -1) as 1 | -1);
+        const cx = p.x + (pOpposite.x - p.x) * prog;
+        const cz = p.z + (pOpposite.z - p.z) * prog;
+        const crossHeading = Math.atan2(pOpposite.x - p.x, pOpposite.z - p.z) + Math.PI;
+        ped.group.position.set(cx, 0.04, cz);
+        ped.group.rotation.y = crossHeading;
+      } else {
+        ped.group.position.set(p.x, 0.10, p.z);
+        ped.group.rotation.y = p.ry;
+      }
 
       const dist = Math.hypot(p.x, p.z);
       ped.group.visible = dist < DESPAWN_DIST;

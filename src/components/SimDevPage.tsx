@@ -4,13 +4,14 @@ import { loadDemoAssets } from '../world/demoAssets';
 import { MiniMap } from './MiniMap';
 import { ModernCockpit } from './sim/ModernCockpit';
 import { generateBigMap, generateStadtMap } from '../data/maps/bigMap';
+import { generateExamParcoursMap, EXAM_STATIONS } from '../data/maps/examParcours';
 import berlinMitteMap from '../data/maps/berlin-mitte-clean.json';
 import testCrossingMap from '../data/maps/test_crossing.json';
 
 // 🧪 Trang dev cho simulator v2 — route /sim-dev (không có trong nav production)
 // ?big=1 — map lưới 2km×2km để verify chunk streaming (G5)
 // ?map=stadt — map Stadt 3km×3km: vòng xuyến, zona Tempo-30, người đi bộ
-// ?map=berlin — map Berlin-Mitte OSM thật (alias cũ: ?map=muenchen)
+// ?map=berlin&drive=1 — Mặc định nạp Sa hình Phản xạ Tình huống 6 Trạm Berlin-Mitte (thêm &raw=1 nếu muốn xem OSM thô)
 export const SimDevPage = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const handleRef = useRef<SimSceneHandle | null>(null);
@@ -18,11 +19,14 @@ export const SimDevPage = () => {
   const bigMap = params?.get('big') === '1';
   const stadtMap = params?.get('map') === 'stadt';
   const berlinMap = params?.get('map') === 'berlin' || params?.get('map') === 'muenchen';
+  const rawOsm = params?.get('raw') === '1';
   const driveMode = params?.get('drive') === '1';
+  const isParcoursMode = driveMode && !rawOsm && !stadtMap && !bigMap;
 
   useEffect(() => {
     if (!containerRef.current || handleRef.current) return;
-    const mapJson = stadtMap ? generateStadtMap()
+    const mapJson = isParcoursMode ? generateExamParcoursMap()
+      : stadtMap ? generateStadtMap()
       : berlinMap ? berlinMitteMap
       : bigMap ? generateBigMap()
       : testCrossingMap;
@@ -51,7 +55,7 @@ export const SimDevPage = () => {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const [debugVisible, setDebugVisible] = useState(true);
+  const [debugVisible, setDebugVisible] = useState(false);
   const [lang, setLang] = useState<'vi' | 'de'>('vi');
   const [stats, setStats] = useState<SimStats | null>(null);
   const [rule, setRule] = useState<RuleState | null>(null);
@@ -67,7 +71,8 @@ export const SimDevPage = () => {
           : `Tempo überschritten: ${mSpeed[1]} km/h (Limit ${mSpeed[2]} km/h)`;
       }
       if (type === 'redlight') return 'Rote Ampel überfahren';
-      if (type === 'stop') return 'Stoppschild (Z.206) nicht angehalten';
+      if (type === 'stop' || type === 'stop_sign') return 'Stoppschild (Z.206) nicht angehalten';
+      if (type === 'right_of_way') return 'Rechts vor links missachtet (§8 StVO)';
       if (type === 'nosignal') return 'Blinken beim Abbiegen vergessen';
       if (type === 'offroad') return 'Fahrbahn verlassen / Gehweg befahren';
       if (type === 'pedestrian') return 'Fußgänger am Zebrastreifen nicht vorgelassen';
@@ -81,7 +86,8 @@ export const SimDevPage = () => {
           : `Vượt tốc độ: ${mSpeed[1]} km/h (tối đa ${mSpeed[2]} km/h)`;
       }
       if (type === 'redlight') return 'Vượt đèn đỏ tại giao lộ';
-      if (type === 'stop') return 'Không dừng hẳn tại biển STOP';
+      if (type === 'stop' || type === 'stop_sign') return 'Không dừng hẳn tại biển STOP';
+      if (type === 'right_of_way') return 'Không nhường xe bên phải (Rechts vor links)';
       if (type === 'nosignal') return 'Quên bật xi-nhan khi chuyển hướng';
       if (type === 'offroad') return 'Đi chệch lòng đường / leo vỉa hè';
       if (type === 'pedestrian') return 'Không nhường người đi bộ tại vạch kẻ đường';
@@ -142,11 +148,58 @@ export const SimDevPage = () => {
         boxShadow: '0 8px 24px rgba(0,0,0,0.65)',
         pointerEvents: 'auto'
       }}>
-        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 10, marginBottom: debugVisible ? 4 : 0 }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: debugVisible ? 4 : 0, flexWrap: 'wrap' }}>
           <b style={{ color: '#7dd3fc' }}>
-            SIM v2 · {berlinMap ? 'BERLIN MITTE' : stadtMap ? 'STADT 3km × 3km' : driveMode ? (lang === 'de' ? 'FAHRMODUS' : 'MÔ PHỎNG LÁI XE') : bigMap ? 'BIG MAP' : 'TEST MAP'}
+            {isParcoursMode
+              ? (lang === 'de' ? 'PRÜFUNGS-PARCOURS (6 STATIONEN)' : 'SA HÌNH PHẢN XẠ (6 TRẠM)')
+              : `SIM v2 · ${berlinMap ? 'BERLIN MITTE (OSM)' : stadtMap ? 'STADT 3km' : 'MAP'}`}
           </b>
-          <div style={{ display: 'flex', gap: 6 }}>
+          <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
+            {driveMode && (
+              <>
+                <button
+                  onClick={() => sceneHandle?.cycleCameraMode?.()}
+                  style={{
+                    background: 'rgba(16,185,129,0.2)', color: '#6ee7b7',
+                    border: '1px solid rgba(16,185,129,0.45)', borderRadius: 5,
+                    padding: '1px 7px', fontSize: 10, fontWeight: 800, cursor: 'pointer'
+                  }}
+                  title="Phím tắt V: Đổi góc nhìn (Buồng lái / Kính lái thoáng / Sau xe)"
+                >
+                  🎥 {rule?.camMode === 'hood'
+                    ? (lang === 'de' ? 'V: Motorhaube' : 'V: Kính lái')
+                    : rule?.camMode === 'outside'
+                      ? (lang === 'de' ? 'V: Außen' : 'V: Sau xe')
+                      : (lang === 'de' ? 'V: Cockpit' : 'V: Buồng lái')}
+                </button>
+                <button
+                  onClick={() => sceneHandle?.resetExam?.()}
+                  style={{
+                    background: 'rgba(245,158,11,0.18)', color: '#fcd34d',
+                    border: '1px solid rgba(245,158,11,0.45)', borderRadius: 5,
+                    padding: '1px 7px', fontSize: 10, fontWeight: 800, cursor: 'pointer'
+                  }}
+                  title="Khởi động lại lộ trình thi"
+                >
+                  🔄 {lang === 'de' ? 'Neustart' : 'Thi lại'}
+                </button>
+                <button
+                  onClick={() => {
+                    const url = new URL(window.location.href);
+                    if (rawOsm) url.searchParams.delete('raw');
+                    else url.searchParams.set('raw', '1');
+                    window.location.href = url.toString();
+                  }}
+                  style={{
+                    background: 'rgba(168,85,247,0.18)', color: '#d8b4fe',
+                    border: '1px solid rgba(168,85,247,0.45)', borderRadius: 5,
+                    padding: '1px 7px', fontSize: 10, fontWeight: 700, cursor: 'pointer'
+                  }}
+                >
+                  {rawOsm ? '🎯 Sa hình 6 Trạm' : '🏙️ Map lớn OSM'}
+                </button>
+              </>
+            )}
             <button
               onClick={() => setLang(l => (l === 'vi' ? 'de' : 'vi'))}
               style={{
@@ -167,7 +220,7 @@ export const SimDevPage = () => {
               }}
               title="Phím tắt F3"
             >
-              {debugVisible ? (lang === 'de' ? 'F3 Ausblenden' : 'F3 Thu gọn') : (lang === 'de' ? 'F3 Info' : 'F3 Chi tiết')}
+              {debugVisible ? (lang === 'de' ? 'F3 −' : 'F3 Thu gọn') : (lang === 'de' ? 'F3 +' : 'F3 Chi tiết')}
             </button>
           </div>
         </div>
@@ -204,81 +257,179 @@ export const SimDevPage = () => {
           {/* keyframes nhấp nháy xi-nhan (sync BLINK_PERIOD 0.55s với vehicle.ts) */}
           <style>{`@keyframes blinkSignal { 50% { opacity: 0.12; } }`}</style>
 
-          {/* 🚗 MODERN COCKPIT OVERLAY (Buồng lái xe thể thao + Khung kính lái + Vô-lăng) */}
-          {(!rule?.camMode || rule.camMode === 'cabin') && (
-            <ModernCockpit
-              speedKmh={rule?.speedKmh ?? 0}
-              rpm={rule?.rpm ?? 850}
-              gear={rule?.gear ?? 'D'}
-              speedLimit={rule?.speedLimit ?? 50}
-              signal={rule?.signal}
-              steerAngle={rule?.steerAngle ?? 0}
-              camMode={rule?.camMode ?? 'cabin'}
-              headYaw={rule?.headYaw ?? 0}
-              headPitch={rule?.headPitch ?? 0}
-              streetName={rule?.streetName}
-              onSelectGear={(g) => sceneHandle?.setGear?.(g)}
-              onToggleCam={() => {
-                window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyV' }));
-              }}
-              onToggleMirror={() => {
-                window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyM' }));
-              }}
-            />
+          {/* 🧭 BANNER GIÁM KHẢO DẪN ĐƯỜNG & TÌNH HUỐNG SÁT HẠCH (PRÜFER-ANWEISUNG HUD) */}
+          {rule?.activeStation && !rule?.examCompleted && (
+            <div style={{
+              position: 'absolute',
+              top: 98,
+              left: '50%',
+              transform: 'translateX(-50%)',
+              zIndex: 44,
+              width: 490,
+              maxWidth: 'calc(100vw - 640px)',
+              background: 'linear-gradient(180deg, rgba(10,16,29,0.92) 0%, rgba(5,9,18,0.95) 100%)',
+              border: '1.5px solid rgba(56,189,248,0.45)',
+              borderRadius: 14,
+              padding: '9px 14px',
+              boxShadow: '0 10px 28px rgba(0,0,0,0.75)',
+              color: '#f8fafc',
+              fontFamily: 'Inter, system-ui, sans-serif',
+              pointerEvents: 'none'
+            }}>
+              {/* Thanh tiến độ 6 trạm */}
+              <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: 6 }}>
+                <div style={{ display: 'flex', gap: 5, alignItems: 'center' }}>
+                  {EXAM_STATIONS.map((st) => {
+                    const done = st.index < rule.activeStation!.index;
+                    const active = st.index === rule.activeStation!.index;
+                    return (
+                      <span
+                        key={st.id}
+                        style={{
+                          width: 20, height: 18, borderRadius: 5,
+                          display: 'inline-flex', alignItems: 'center', justifyContent: 'center',
+                          fontSize: 10, fontWeight: 900,
+                          background: done ? '#10b981' : active ? '#38bdf8' : 'rgba(148,163,184,0.18)',
+                          color: done || active ? '#04101c' : '#94a3b8'
+                        }}
+                      >
+                        {done ? '✓' : st.index}
+                      </span>
+                    );
+                  })}
+                  <span style={{ marginLeft: 6, fontSize: 11, fontWeight: 800, color: '#7dd3fc' }}>
+                    {lang === 'de' ? rule.activeStation.titleDe : rule.activeStation.titleVi}
+                  </span>
+                </div>
+                <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
+                  <span style={{
+                    background: 'rgba(251,191,36,0.16)', color: '#fcd34d',
+                    border: '1px solid rgba(251,191,36,0.4)', borderRadius: 6,
+                    padding: '1px 7px', fontSize: 10, fontWeight: 800
+                  }}>
+                    {rule.activeStation.ruleTag}
+                  </span>
+                  {rule.stationDist !== undefined && (
+                    <span style={{
+                      background: 'rgba(56,189,248,0.2)', color: '#38bdf8',
+                      borderRadius: 6, padding: '1px 7px', fontSize: 11, fontWeight: 900
+                    }}>
+                      📍 {rule.stationDist} m
+                    </span>
+                  )}
+                </div>
+              </div>
+              <div style={{ fontSize: 12, lineHeight: 1.38, color: '#e2e8f0', marginBottom: 5 }}>
+                🔊 {lang === 'de' ? rule.activeStation.instructionDe : rule.activeStation.instructionVi}
+              </div>
+              <div style={{
+                display: 'inline-block',
+                background: 'rgba(16,185,129,0.16)',
+                border: '1px solid rgba(16,185,129,0.4)',
+                color: '#6ee7b7',
+                borderRadius: 6,
+                padding: '2px 9px',
+                fontSize: 11,
+                fontWeight: 800
+              }}>
+                🎯 {lang === 'de' ? rule.activeStation.actionHintDe : rule.activeStation.actionHintVi}
+              </div>
+            </div>
           )}
+
+          {/* 🏆 BẢNG TỔNG KẾT SÁT HẠCH KHI HOÀN THÀNH 6 TRẠM (PRÜFUNGSPROTOKOLL MODAL) */}
+          {rule?.examCompleted && (
+            <div style={{
+              position: 'absolute',
+              inset: 0,
+              zIndex: 80,
+              background: 'rgba(2,6,23,0.78)',
+              backdropFilter: 'blur(6px)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              pointerEvents: 'auto'
+            }}>
+              <div style={{
+                width: 480,
+                background: 'linear-gradient(180deg, #0f172a 0%, #090d16 100%)',
+                border: `2px solid ${rule.bestanden ? '#10b981' : '#ef4444'}`,
+                borderRadius: 20,
+                padding: '24px 28px',
+                color: '#f8fafc',
+                boxShadow: '0 24px 60px rgba(0,0,0,0.9)',
+                textAlign: 'center',
+                fontFamily: 'Inter, system-ui, sans-serif'
+              }}>
+                <div style={{ fontSize: 42, marginBottom: 8 }}>
+                  {rule.bestanden ? '🏆' : '⚠️'}
+                </div>
+                <h2 style={{ margin: '0 0 6px', fontSize: 22, color: rule.bestanden ? '#4ade80' : '#f87171' }}>
+                  {formatSummary(rule, lang)}
+                </h2>
+                <p style={{ margin: '0 0 16px', fontSize: 13, color: '#94a3b8' }}>
+                  {lang === 'de'
+                    ? 'Alle 6 Prüfungsstationen im Berliner Übungsparcours abgeschlossen!'
+                    : 'Bạn đã hoàn thành toàn bộ 6 trạm tình huống sát hạch thực hành!'}
+                </p>
+                <div style={{
+                  background: 'rgba(15,23,42,0.8)',
+                  border: '1px solid rgba(148,163,184,0.2)',
+                  borderRadius: 12,
+                  padding: '12px 16px',
+                  marginBottom: 18,
+                  textAlign: 'left',
+                  fontSize: 12
+                }}>
+                  <div>⏱ {lang === 'de' ? 'Prüfungszeit' : 'Thời gian hoàn thành'}: <b>{Math.floor(rule.elapsedTime / 60)}:{String(Math.floor(rule.elapsedTime % 60)).padStart(2, '0')}</b></div>
+                  <div style={{ color: '#f87171', marginTop: 4 }}>⛔ {lang === 'de' ? 'Schwere Fehler' : 'Lỗi nghiêm trọng'}: <b>{rule.violationsBySeverity.major.length}</b></div>
+                  <div style={{ color: '#fbbf24', marginTop: 4 }}>⚠ {lang === 'de' ? 'Leichte Fehler' : 'Lỗi nhẹ'}: <b>{rule.violationsBySeverity.minor.length}</b></div>
+                </div>
+                <button
+                  onClick={() => sceneHandle?.resetExam?.()}
+                  style={{
+                    background: 'linear-gradient(90deg, #0284c7 0%, #2563eb 100%)',
+                    color: '#ffffff',
+                    border: 'none',
+                    borderRadius: 10,
+                    padding: '10px 24px',
+                    fontSize: 14,
+                    fontWeight: 800,
+                    cursor: 'pointer',
+                    boxShadow: '0 6px 20px rgba(37,99,235,0.5)'
+                  }}
+                >
+                  🔄 {lang === 'de' ? 'Prüfung wiederholen' : 'Thực hành lại từ đầu'}
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* 🚗 MODERN COCKPIT OVERLAY (Tự động thích ứng cho cả Buồng lái, Kính lái thoáng & Góc nhìn thứ 3) */}
+          <ModernCockpit
+            speedKmh={rule?.speedKmh ?? 0}
+            rpm={rule?.rpm ?? 850}
+            gear={rule?.gear ?? 'D'}
+            speedLimit={rule?.speedLimit ?? 50}
+            signal={rule?.signal}
+            steerAngle={rule?.steerAngle ?? 0}
+            camMode={rule?.camMode ?? 'cabin'}
+            throttle={rule?.throttle ?? 0}
+            brake={rule?.brake ?? 0}
+            headYaw={rule?.headYaw ?? 0}
+            headPitch={rule?.headPitch ?? 0}
+            streetName={rule?.streetName}
+            onSelectGear={(g) => sceneHandle?.setGear?.(g)}
+            onToggleCam={() => sceneHandle?.cycleCameraMode?.()}
+            onToggleMirror={() => {
+              window.dispatchEvent(new KeyboardEvent('keydown', { code: 'KeyM' }));
+            }}
+          />
 
           {/* Mini-map: góc dưới-trái, thụt vào trong cột chữ A để không bao giờ bị cắt mép */}
           {sceneHandle && (
             <div style={{ position: 'absolute', bottom: 20, left: 46, zIndex: 45 }}>
               <MiniMap handle={sceneHandle} />
-            </div>
-          )}
-
-          {/* HUD phụ khi ở camera ngoài (outside/shoulder) */}
-          {rule?.camMode && rule.camMode !== 'cabin' && (
-            <div style={{
-              position: 'absolute', bottom: 24, right: 46,
-              background: 'linear-gradient(180deg, rgba(15,23,42,0.92) 0%, rgba(2,6,23,0.96) 100%)',
-              color: '#f1f5f9',
-              border: '1px solid rgba(148,163,184,0.35)', borderRadius: 16,
-              padding: '12px 20px', display: 'flex', alignItems: 'center', gap: 18,
-              boxShadow: '0 12px 32px rgba(0,0,0,0.7)', backdropFilter: 'blur(10px)',
-              pointerEvents: 'none', zIndex: 45
-            }}>
-              <div style={{
-                width: 44, height: 44, borderRadius: '50%', background: '#f8fafc',
-                border: `4px solid ${rule && (rule.speedKmh ?? 0) > (rule.speedLimit ?? 50) + 3 ? '#ef4444' : '#dc2626'}`,
-                display: 'flex', alignItems: 'center', justifyContent: 'center'
-              }}>
-                <span style={{ color: '#0f172a', fontWeight: 900, fontSize: 17 }}>
-                  {rule?.speedLimit ?? 50}
-                </span>
-              </div>
-              <div style={{ textAlign: 'center', minWidth: 90 }}>
-                <div style={{ display: 'flex', justifyContent: 'center', gap: 6, marginBottom: 4, pointerEvents: 'auto' }}>
-                  {(['P', 'R', 'N', 'D'] as const).map((g) => (
-                    <button
-                      key={g}
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        sceneHandle?.setGear?.(g);
-                      }}
-                      style={{
-                        fontSize: 12, fontWeight: 800, padding: '2px 7px', borderRadius: 4,
-                        background: rule?.gear === g ? '#38bdf8' : 'rgba(255,255,255,0.08)',
-                        color: rule?.gear === g ? '#0f172a' : '#94a3b8',
-                        border: 'none', cursor: 'pointer'
-                      }}
-                    >
-                      {g}
-                    </button>
-                  ))}
-                </div>
-                <div style={{ fontSize: 38, fontWeight: 900, lineHeight: 1, color: '#ffffff' }}>
-                  {rule?.speedKmh ?? 0}
-                </div>
-                <div style={{ fontSize: 11, color: '#94a3b8', fontWeight: 600 }}>km/h</div>
-              </div>
             </div>
           )}
           {/* Kết quả thi */}

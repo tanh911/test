@@ -19,17 +19,19 @@ export class TrafficLightController {
   readonly nodeId: string;
   private green: number;
   private yellow: number;
+  private redYellow = 1.5;
   private allRed: number;
   private armGroups = new Map<string, 0 | 1>();
+  private reflexTriggered = false;
 
-  constructor(nodeId: string, green = 15, yellow = 3, _redLegacy = 14) {
+  constructor(nodeId: string, green = 14, yellow = 3, _redLegacy = 14) {
     this.nodeId = nodeId;
     this.green = green;
     this.yellow = yellow;
-    this.allRed = 2; // all-red clearance giữa 2 nhóm hướng (StVO ~1-2 s)
+    this.allRed = 1.5; // all-red clearance giữa 2 nhóm hướng (StVO ~1.5 s)
     let h = 0;
     for (let i = 0; i < nodeId.length; i++) h = (h * 31 + nodeId.charCodeAt(i)) | 0;
-    const cycle = 2 * (this.green + this.yellow + this.allRed);
+    const cycle = 2 * (this.redYellow + this.green + this.yellow + this.allRed);
     this.timer = (h >>> 0) % cycle;
   }
 
@@ -38,20 +40,35 @@ export class TrafficLightController {
     this.armGroups.set(`${roadId}:${end}`, group);
   }
 
-  /** Pha của 1 nhóm hướng (0 hoặc 1) tại thời điểm hiện tại */
+  /** Pha của 1 nhóm hướng (0 hoặc 1) tại thời điểm hiện tại — chuẩn StVO: Đỏ -> Đỏ+Vàng (1.5s) -> Xanh -> Vàng (3s) -> Đỏ */
   phaseFor(group: 0 | 1): LightPhase {
-    const half = this.green + this.yellow + this.allRed;
+    const half = this.redYellow + this.green + this.yellow + this.allRed;
     const cycle = 2 * half;
     const t = this.timer % cycle;
     const tt = group === 0 ? t : (t + half) % cycle;
-    if (tt < this.green) return 'green';
-    if (tt < this.green + this.yellow) return 'yellow';
-    return 'red'; // vàng xong + all-red
+    if (tt < this.redYellow) return 'red_yellow';
+    if (tt < this.redYellow + this.green) return 'green';
+    if (tt < this.redYellow + this.green + this.yellow) return 'yellow';
+    return 'red';
   }
 
   /** Pha của approach cụ thể (road nào, tới node ở đầu nào) */
   phaseForArm(roadId: string, end: 'from' | 'to'): LightPhase {
     return this.phaseFor(this.armGroups.get(`${roadId}:${end}`) ?? 0);
+  }
+
+  /** Kích hoạt kịch bản phản xạ đèn vàng -> đỏ 1 lần khi xe người chơi tiến gần ngã tư (cách ~50m) */
+  triggerApproachReflex(roadId: string, end: 'from' | 'to'): void {
+    if (this.reflexTriggered) return;
+    this.reflexTriggered = true;
+    const grp = this.armGroups.get(`${roadId}:${end}`) ?? 0;
+    const cur = this.phaseFor(grp);
+    if (cur === 'green') {
+      const half = this.redYellow + this.green + this.yellow + this.allRed;
+      // Đặt đồng hồ vào đúng đầu pha Vàng (3s vàng -> ~8s đỏ -> 1.5s đỏ+vàng -> xanh)
+      const targetTt = this.redYellow + this.green;
+      this.timer = grp === 0 ? targetTt : (targetTt + half) % (2 * half);
+    }
   }
 
   /** Pha nhóm 0 — tương thích API cũ (MiniMap chấm đèn) */
@@ -64,7 +81,7 @@ export class TrafficLightController {
   }
 }
 
-// ── Tạo mesh đèn giao thông ──
+// ── Tạo mesh đèn giao thông chuẩn Đức (Cột đứng + Cần vươn Ausleger trên làn xe) ──
 export function createTrafficLightMesh(): THREE.Group {
   const group = new THREE.Group();
   group.name = 'trafficLightGroup';
@@ -72,11 +89,19 @@ export function createTrafficLightMesh(): THREE.Group {
   const darkMat = new THREE.MeshLambertMaterial({ color: 0x0f172a });
   const poleMat = new THREE.MeshLambertMaterial({ color: 0x334155 });
 
-  // Cột thép đèn tín hiệu 3.75 m
-  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.055, 0.07, 3.75, 10), poleMat);
-  pole.position.y = 1.875;
-  group.add(pole);
-  group.userData._pole = pole;
+  // Cột thép đứng 4.55 m + cần vươn ngang (Ausleger) vươn 2.05 m ra giữa làn đường
+  const poleGroup = new THREE.Group();
+  const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.06, 0.08, 4.55, 10), poleMat);
+  pole.position.y = 2.275;
+  poleGroup.add(pole);
+
+  const mastArm = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.055, 2.15, 8), poleMat);
+  mastArm.rotation.z = Math.PI / 2;
+  mastArm.position.set(1.05, 4.42, 0);
+  poleGroup.add(mastArm);
+
+  group.add(poleGroup);
+  group.userData._pole = poleGroup;
 
   // Hộp đèn (3 đèn dọc) trên đỉnh cột
   const boxGeo = new THREE.BoxGeometry(0.28, 0.85, 0.22);
@@ -204,10 +229,12 @@ async function upgradeLightWithModel(group: THREE.Group): Promise<void> {
     gruen: []
   };
 
-  const attachSignalHead = (yPos: number, scale: number) => {
+  const haloGeo = new THREE.CircleGeometry(0.115, 16);
+
+  const attachSignalHead = (xPos: number, yPos: number, scale: number) => {
     const head = proto.clone(true);
     head.scale.setScalar(scale);
-    head.position.set(0, yPos, 0.045);
+    head.position.set(xPos, yPos, 0.045);
     head.traverse(o => {
       const mesh = o as THREE.Mesh;
       if (!mesh.isMesh) return;
@@ -224,12 +251,28 @@ async function upgradeLightWithModel(group: THREE.Group): Promise<void> {
         mesh.material = cloneMat(mesh.material);
       }
     });
+
+    // Đĩa quang học phát sáng (Halo Lens) giúp tài xế nhận diện màu đèn từ xa 80m rõ nét dưới nắng
+    const makeHalo = (dy: number, list: THREE.MeshLambertMaterial[]) => {
+      const hm = new THREE.MeshLambertMaterial({ color: 0x111111, emissive: 0x000000 });
+      list.push(hm);
+      const disc = new THREE.Mesh(haloGeo, hm);
+      disc.position.set(0, dy, 0.21);
+      head.add(disc);
+    };
+    makeHalo(0.28, glbMats.rot);
+    makeHalo(0.0, glbMats.gelb);
+    makeHalo(-0.28, glbMats.gruen);
+
     group.add(head);
   };
 
-  // Hộp đèn chính trên cao (3.22m) + hộp đèn phụ ngang tầm mắt (1.85m, chuẩn Đức Niedrigsignalgeber)
-  attachSignalHead(3.22, 1.0);
-  attachSignalHead(1.85, 0.65);
+  // 1. Hộp đèn cần vươn trên cao giữa làn đường (Ausleger-Signalgeber: x = +1.92m vươn ra tâm làn xe, y = 4.12m)
+  attachSignalHead(1.92, 4.12, 1.15);
+  // 2. Hộp đèn chính trên cột (y = 3.35m)
+  attachSignalHead(0, 3.35, 1.0);
+  // 3. Hộp đèn phụ ngang tầm mắt tài xế (Niedrigsignalgeber: y = 1.92m)
+  attachSignalHead(0, 1.92, 0.68);
 
   group.userData._glbMats = glbMats;
   applyLightVisuals([group]);

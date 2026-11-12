@@ -132,6 +132,25 @@ export class NPCController {
     let placed = 0;
     let attempts = 0;
     const priorityTarget = Math.min(10, Math.floor(count * 0.45));
+
+    // Nếu là bản đồ Sa hình Sát hạch (có đường r_uni_return dẫn vào ngã tư Rechts vor links n_rvl),
+    // đặt sẵn 1 xe tình huống từ nhánh bên phải tiến ra để người chơi luyện phản xạ nhường đường bên phải!
+    const rvlRightRoad = this.map.roads.find(r => r.id === 'r_uni_return');
+    if (rvlRightRoad && placed < count) {
+      const lenRvl = roadLength(rvlRightRoad);
+      const sRvl = Math.max(10, lenRvl - 26); // Cách ngã tư n_rvl (0,90) khoảng 26m bên phải
+      const npcRvl = this.makeNpc(rvlRightRoad, sRvl, 1, placed);
+      npcRvl.speed = 0;
+      npcRvl.targetSpeed = 7.2; // ~26 km/h
+      (npcRvl as NpcCar & { _rvlHold?: boolean })._rvlHold = true;
+      const laneOffRvl = 0.5 * rvlRightRoad.laneWidth;
+      const p0 = this.pose(rvlRightRoad, sRvl, 1, laneOffRvl);
+      npcRvl.group.position.set(p0.x, 0, p0.z);
+      npcRvl.group.rotation.y = p0.ry;
+      this.npcs.push(npcRvl);
+      placed++;
+    }
+
     while (placed < count && attempts < count * 14 && roads.length) {
       attempts++;
       const pool = (placed < priorityTarget && nearbyRoads.length > 0) ? nearbyRoads : roads;
@@ -362,34 +381,60 @@ export class NPCController {
       }
       if (npc.signal) npc.signalT += dt;
 
-      // ── 2. tích phân tốc độ ──
+      // ── 2. tích phân tốc độ (hỗ trợ kịch bản phản xạ Rechts vor links tại n_rvl) ──
+      const rvlNpc = npc as NpcCar & { _rvlHold?: boolean };
+      if (rvlNpc._rvlHold) {
+        if (input.player && Math.hypot(input.player.x - 0, input.player.z - 90) < 52) {
+          rvlNpc._rvlHold = false; // Người chơi tiến đến cách ngã tư 52m -> xe bên phải bắt đầu lăn bánh ra!
+        } else {
+          target = 0;
+          npc.waiting = true;
+        }
+      }
+
       if (npc.speed < target) npc.speed = Math.min(target, npc.speed + ACCEL * dt);
       else npc.speed = Math.max(target, npc.speed - BRAKE * dt);
 
-      // ── 3. di chuyển + chuyển road ──
+      // ── 3. di chuyển + chuyển road sớm 4.2m trước tâm nút giao để bo cua mượt không giật ──
       npc.s += npc.dir * npc.speed * dt;
-      if (npc.s > len || npc.s < 0) {
-        // tái dùng quyết định đã latch để đèn khớp với đường NPC thực sự đi vào
+      const turnMargin = 4.2;
+      if ((npc.dir > 0 && npc.s > len - turnMargin) || (npc.dir < 0 && npc.s < turnMargin)) {
         const next = npc.nextChoice !== undefined ? npc.nextChoice : this.pickNextRoad(road, nodeAheadId, npc.dir);
         if (next) {
           npc.roadId = next.road.id;
           npc.dir = next.dir;
-          // vào road mới từ đầu node
-          npc.s = npc.dir > 0 ? 2 : this.len(npc.roadId) - 2;
+          const nextLen = this.len(npc.roadId);
+          npc.s = npc.dir > 0 ? Math.min(turnMargin, nextLen * 0.25) : Math.max(nextLen - turnMargin, nextLen * 0.75);
           npc.signalHold = BLINK_HOLD;
         } else {
           npc.dir = (npc.dir * -1) as 1 | -1;
-          npc.s = Math.max(0.5, Math.min(len - 0.5, npc.s));
+          npc.s = Math.max(1.0, Math.min(len - 1.0, npc.s));
           npc.signalHold = BLINK_HOLD;
         }
         npc.signalT = 0;
-        npc.nextChoice = undefined; // latch lại cho segment mới
+        npc.nextChoice = undefined;
       }
 
-      // ── 4. pose ──
-      const p = this.pose(road, npc.s, npc.dir, laneOff);
-      npc.group.position.set(p.x, 0, p.z);
-      npc.group.rotation.y = p.ry;
+      // ── 4. pose (dùng đúng road hiện tại sau khi chuyển + nội suy bo góc mượt mà) ──
+      const activeRoad = roadById(this.map, npc.roadId) ?? road;
+      const activeSingleOneway = activeRoad.lanesBackward === 0 && activeRoad.lanesForward === 1;
+      const activeLaneOff = activeSingleOneway ? 0 : 0.5 * activeRoad.laneWidth;
+      const p = this.pose(activeRoad, npc.s, npc.dir, activeLaneOff);
+
+      const posBlend = Math.min(1, 9.5 * dt);
+      const curX = npc.group.position.x;
+      const curZ = npc.group.position.z;
+      if (Math.hypot(p.x - curX, p.z - curZ) > 18) {
+        npc.group.position.set(p.x, 0, p.z);
+        npc.group.rotation.y = p.ry;
+      } else {
+        npc.group.position.x = curX + (p.x - curX) * posBlend;
+        npc.group.position.z = curZ + (p.z - curZ) * posBlend;
+        let dAng = p.ry - npc.group.rotation.y;
+        while (dAng > Math.PI) dAng -= Math.PI * 2;
+        while (dAng < -Math.PI) dAng += Math.PI * 2;
+        npc.group.rotation.y += dAng * Math.min(1, 8.0 * dt);
+      }
       // ── 5. xi-nhan nhấp nháy (chỉ rẽ mới có draw call) ──
       const blinkOn = npc.signal !== null && (npc.signalT % BLINK_PERIOD) < BLINK_PERIOD / 2;
       for (const lamp of npc.signalLamps) {

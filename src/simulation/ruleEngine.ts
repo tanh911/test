@@ -37,6 +37,8 @@ export interface PlayerState {
   stopped?: boolean;
   /** đang trong vùng zebra/crosswalk — dùng để check nhường ped */
   inCrosswalk?: boolean;
+  /** có xe NPC từ bên phải đang tiến vào ngã tư đồng cấp (Rechts vor links) */
+  rightPriorityThreat?: boolean;
 }
 
 const TOLERANCE_KMH = 3;
@@ -179,11 +181,11 @@ export class RuleEngine {
       const distToJunction = dir > 0 ? len - nearS : nearS;
       const key = `${road.id}:${nodeId}:row`;
       // đang tiếp cận junction (cách < APPROACH_JUNCTION) và chưa kiểm tra
-      if (distToJunction < APPROACH_JUNCTION && distToJunction > 2 && !this.rowChecked.has(key)) {
-        // Tìm xe NPC khác đang đến cùng junction từ đường cắt ngang
-        // Đơn giản hóa: nếu player đến giao lộ right_before_left/priority_road mà không giảm tốc
-        // → coi như có nguy cơ vi phạm ưu tiên (đơn giản hóa cho MVP)
-        this.rowChecked.add(key);
+      if (distToJunction < 8.5 && distToJunction > 1.5 && !this.rowChecked.has(key)) {
+        if (rule === 'right_before_left' && p.rightPriorityThreat && p.speed * 3.6 > 10) {
+          this.add('right_of_way', 'major', 'Không nhường đường bên phải (Rechts vor links)', p);
+          this.rowChecked.add(key);
+        }
       }
       // rời xa junction → reset
       if (distToJunction > APPROACH_JUNCTION) {

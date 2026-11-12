@@ -12,6 +12,7 @@ import { buildingRects } from './collisions';
 import { RuleEngine, type Violation } from '../simulation/ruleEngine';
 import { nodeById } from './mapLoader';
 import type { LightPhase } from './trafficLights';
+import { EXAM_STATIONS, EXAM_ROUTE_WAYPOINTS, type ExamStation } from '../data/maps/examParcours';
 
 export interface SimStats {
   drawCalls: number;
@@ -34,13 +35,18 @@ export interface RuleState {
   steerAngle?: number;
   rpm?: number;
   speedLimit?: number;
-  camMode?: 'cabin' | 'outside' | 'mirror' | 'shoulder';
+  camMode?: 'cabin' | 'hood' | 'outside' | 'mirror' | 'shoulder';
   throttle?: number;
   brake?: number;
   headYaw?: number;
   headPitch?: number;
   /** tên phố hiện tại (road gần nhất) — hiển thị trên cụm đồng hồ */
   streetName?: string;
+  /** Trạm tình huống sát hạch hiện tại (Parcours 1/6 .. 6/6) */
+  activeStation?: ExamStation | null;
+  stationDist?: number;
+  stationsTotal?: number;
+  examCompleted?: boolean;
 }
 
 // 🗺️ MiniMap (Prompt 10): top-down quanh player, đọc mỗi frame riêng
@@ -87,6 +93,10 @@ export interface SimSceneHandle {
   getRuleState: () => RuleState | null;
   /** đổi số P R N D */
   setGear?: (g: 'P' | 'R' | 'N' | 'D') => void;
+  /** đổi góc nhìn camera (cabin -> hood -> outside) */
+  cycleCameraMode?: () => void;
+  /** khởi động lại bài thi từ điểm xuất phát */
+  resetExam?: () => void;
   /** dữ liệu mini-map (player-centered top-down) — đọc mỗi frame từ RAF của MiniMap */
   getMapState: () => MapState;
   /** tọa độ debug để report lỗi: x/z (m), ô chunk 100 m, node giao lộ + road gần nhất */
@@ -262,8 +272,8 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   let fps = 0;
   let fpsFrames = 0;
   let fpsLast = performance.now();
-  // Camera mode: 'cabin' (mặc định), 'outside' (third-person), 'mirror', 'shoulder'
-  let camMode: 'cabin' | 'outside' | 'mirror' | 'shoulder' = 'cabin';
+  // Camera mode: 'cabin' (mặc định), 'hood' (nắp capo thoáng), 'outside' (third-person), 'mirror', 'shoulder'
+  let camMode: 'cabin' | 'hood' | 'outside' | 'mirror' | 'shoulder' = 'cabin';
   let shoulderHold = 0; // thời gian giữ phím C (giây)
   let keyMPrev = false;
   let keyVPrev = false;
@@ -272,7 +282,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   // 🚙 Drive mode: WASD lái xe (dùng chung `keys` module), camera ghế lái
   let vehicle: VehicleHandle | null = null;
   let npcs: NPCController | null = null;
-  let peds: PedestrianController | null = null;
+  const peds: PedestrianController | null = world.pedestrians;
   let ruleEngine: RuleEngine | null = null;
   const npcCollisions: string[] = [];
   const staticRects = buildingRects(map);
@@ -284,6 +294,82 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   let isMouseLooking = false;
   let lastMouseX = 0;
   let lastMouseY = 0;
+
+  // 🎯 Hệ thống Dẫn đường Sa hình Sát hạch (Prüfungs-Parcours Guidance)
+  const isParcours = map.roads.some(r => r.id === 'r_uni_return');
+  let currentStationIdx = 0;
+  let examCompleted = false;
+  const routeGuidesGroup = new THREE.Group();
+  routeGuidesGroup.name = 'parcours_route_guides';
+
+  if (isParcours) {
+    // 1. Vẽ dải mũi tên Chevron dẫn đường màu xanh cyan trên làn phải dọc lộ trình
+    const chevMat = new THREE.MeshBasicMaterial({
+      color: 0x38bdf8,
+      transparent: true,
+      opacity: 0.72,
+      side: THREE.DoubleSide
+    });
+    const chevShape = new THREE.Shape();
+    chevShape.moveTo(0, 0.85);
+    chevShape.lineTo(0.75, -0.45);
+    chevShape.lineTo(0.42, -0.65);
+    chevShape.lineTo(0, 0.15);
+    chevShape.lineTo(-0.42, -0.65);
+    chevShape.lineTo(-0.75, -0.45);
+    chevShape.closePath();
+    const chevGeo = new THREE.ShapeGeometry(chevShape);
+    chevGeo.rotateX(-Math.PI / 2);
+
+    for (let wi = 0; wi < EXAM_ROUTE_WAYPOINTS.length - 1; wi++) {
+      const [ax, az] = EXAM_ROUTE_WAYPOINTS[wi];
+      const [bx, bz] = EXAM_ROUTE_WAYPOINTS[wi + 1];
+      const dx = bx - ax, dz = bz - az;
+      const segLen = Math.hypot(dx, dz) || 1;
+      const h = Math.atan2(dx, dz);
+      const rx = -Math.cos(h), rz = Math.sin(h);
+      const laneOff = 1.75; // Tâm làn phải
+      for (let d = 10; d < segLen - 10; d += 14) {
+        const cx = ax + (dx / segLen) * d + rx * laneOff;
+        const cz = az + (dz / segLen) * d + rz * laneOff;
+        const m = new THREE.Mesh(chevGeo, chevMat);
+        m.position.set(cx, 0.035, cz);
+        m.rotation.y = h + Math.PI;
+        routeGuidesGroup.add(m);
+      }
+    }
+
+    // 2. Vẽ Ô Đỗ Xe Về Đích (Ziel-Parkbucht) màu xanh ngọc phát sáng tại Trạm 6 (x=64, z=88.25 - làn phải đường Universitätsstraße)
+    const finishGroup = new THREE.Group();
+    const bayFillMat = new THREE.MeshBasicMaterial({
+      color: 0x10b981,
+      transparent: true,
+      opacity: 0.36,
+      side: THREE.DoubleSide
+    });
+    const bayBorderMat = new THREE.MeshBasicMaterial({ color: 0x34d399, side: THREE.DoubleSide });
+    const bayFill = new THREE.Mesh(new THREE.PlaneGeometry(7.2, 3.0), bayFillMat);
+    bayFill.rotation.x = -Math.PI / 2;
+    bayFill.position.set(64, 0.04, 88.25);
+    finishGroup.add(bayFill);
+
+    // 4 cọc tiêu phát sáng ở 4 góc ô đỗ đích
+    const pillarGeo = new THREE.CylinderGeometry(0.08, 0.08, 1.35, 10);
+    for (const [px, pz] of [[60.4, 86.8], [67.6, 86.8], [60.4, 89.7], [67.6, 89.7]]) {
+      const post = new THREE.Mesh(pillarGeo, bayBorderMat);
+      post.position.set(px, 0.68, pz);
+      finishGroup.add(post);
+    }
+    routeGuidesGroup.add(finishGroup);
+    scene.add(routeGuidesGroup);
+  }
+
+  const cycleCamera = () => {
+    const order: Array<'cabin' | 'hood' | 'outside'> = ['cabin', 'hood', 'outside'];
+    const idx = order.indexOf(camMode as 'cabin' | 'hood' | 'outside');
+    camMode = order[(idx + 1) % order.length];
+    vehicle?.setCameraMode(camMode);
+  };
 
   if (driveMode) {
     camera.rotation.order = 'YXZ';
@@ -300,7 +386,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
       lastMouseY = e.clientY;
     };
     const onMouseMove = (e: MouseEvent) => {
-      if (isMouseLooking && camMode === 'cabin') {
+      if (isMouseLooking && (camMode === 'cabin' || camMode === 'hood')) {
         const dx = e.clientX - lastMouseX;
         const dy = e.clientY - lastMouseY;
         headYaw -= dx * 0.005;
@@ -318,11 +404,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
 
     createVehicle(scene, map).then(v => { vehicle = v; v.setCameraMode(camMode); });
     ruleEngine = new RuleEngine(map, world.controllers);
-    // NPC traffic + người đi bộ (nạp GLB nền, không chặn render)
+    // NPC traffic (bản đồ Parcours tinh gọn chỉ cần 14 xe NPC lưu thông mượt quanh các ngã tư)
     npcs = new NPCController(map, scene);
-    npcs.init(world.controllers, 36);
-    peds = new PedestrianController(scene, map);
-    peds.init();
+    npcs.init(world.controllers, isParcours ? 14 : 32);
   }
 
   const tick = (now: number) => {
@@ -348,9 +432,39 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
             break;
           }
         }
-        // NPC + người đi bộ + rule engine
+        // NPC + rule engine (pedestrians đã được world.update(dt) cập nhật)
         npcs?.update(dt, { player: { x: vehicle.state.x, z: vehicle.state.z }, controllers: world.controllers, collisions: npcCollisions });
-        peds?.update(dt);
+
+        // ── Kịch bản Sa hình Sát hạch (Prüfungs-Parcours): cập nhật trạm tình huống & kích hoạt phản xạ đèn ──
+        if (isParcours && !examCompleted) {
+          const st = EXAM_STATIONS[currentStationIdx];
+          if (st) {
+            const distToSt = Math.hypot(vehicle.state.x - st.x, vehicle.state.z - st.z);
+            if (currentStationIdx < EXAM_STATIONS.length - 1) {
+              if (distToSt < 12.5) {
+                currentStationIdx++;
+              }
+            } else {
+              // Trạm 6 (Về đích): dừng trong ô đỗ màu xanh và về số P
+              if (distToSt < st.triggerRadius && Math.abs(vehicle.state.speed) < 0.25 && vehicle.state.gear === 'P') {
+                examCompleted = true;
+              }
+            }
+          }
+          // Khi tiến gần ngã tư đèn giao thông n_ampel (0, 260) trong khoảng 52m -> kích hoạt phản xạ Vàng -> Đỏ 1 lần
+          if (Math.hypot(vehicle.state.x - 0, vehicle.state.z - 260) < 52) {
+            const ampelCtrl = world.controllers.find(c => c.nodeId === 'n_ampel');
+            ampelCtrl?.triggerApproachReflex('r_zebra_ampel', 'to');
+          }
+        }
+
+        // Kiểm tra xe NPC bên phải tại ngã tư đồng cấp n_rvl (0, 90)
+        const rightPriorityThreat = (npcs?.npcs ?? []).some(n =>
+          n.roadId === 'r_uni_return' &&
+          n.speed > 0.8 &&
+          Math.hypot(n.group.position.x - 0, n.group.position.z - 90) < 22
+        );
+
         // ── số: 1=P, 2=R, 3=N, 4=D (hỗ trợ cả Digit và Numpad) ──
         let gear: 'P' | 'R' | 'N' | 'D' | undefined;
         if (keys.has('Digit1') || keys.has('Numpad1')) gear = 'P';
@@ -364,7 +478,8 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           speed: vehicle.state.speed,
           signal: vehicle.signal, // phục vụ vi phạm 'nosignal' (quên xi-nhan khi rẽ)
           stopped: Math.abs(vehicle.state.speed) < 0.15, // xe đã dừng hẳn (dùng cho stop sign)
-          inCrosswalk: peds ? peds.isPedNearCrosswalk(vehicle.state.x, vehicle.state.z) : false
+          inCrosswalk: peds ? peds.isPedNearCrosswalk(vehicle.state.x, vehicle.state.z) : false,
+          rightPriorityThreat
         }, npcCollisions);
         vehicle?.update(dt, {
           throttle: keys.has('KeyW') ? 1 : 0,
@@ -375,7 +490,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           signalRight: keys.has('KeyE'),
           boost: keys.has('ShiftLeft') || keys.has('ShiftRight')
         });
-        // ── Camera mode: M = gương, C giữ = qua vai, V = camera ngoài ──
+        // ── Camera mode: M = gương, C giữ = qua vai, V = chuyển đổi Buồng lái -> Kính lái (Hood) -> Góc nhìn thứ 3 ──
         if (keys.has('KeyM') && !keyMPrev) {
           camMode = camMode === 'cabin' ? 'mirror' : 'cabin';
           vehicle?.setCameraMode(camMode);
@@ -384,8 +499,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           keyMPrev = false;
         }
         if (keys.has('KeyV') && !keyVPrev) {
-          camMode = camMode === 'outside' ? 'cabin' : 'outside';
-          vehicle?.setCameraMode(camMode);
+          cycleCamera();
           keyVPrev = true;
         } else if (!keys.has('KeyV')) {
           keyVPrev = false;
@@ -399,40 +513,37 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         }
         // Áp dụng camera theo mode
         if (camMode === 'outside') {
-          // Camera bên ngoài, phía sau xe
-          const dist = 6;
-          const h = vehicle.state.heading + Math.PI;
+          // Camera góc nhìn thứ 3 phía sau xe (Chase Cam chuẩn xác theo vector hướng chạy (sin h, cos h))
+          const dist = 6.2;
+          const h = vehicle.state.heading;
           camera.position.set(
             vehicle.state.x - Math.sin(h) * dist,
-            3,
+            2.95,
             vehicle.state.z - Math.cos(h) * dist
           );
-          camera.lookAt(vehicle.state.x, 1, vehicle.state.z);
+          camera.lookAt(
+            vehicle.state.x + Math.sin(h) * 10,
+            1.1,
+            vehicle.state.z + Math.cos(h) * 10
+          );
         } else if (camMode === 'mirror') {
-          // Gương phía sau: camera nhạy về phía sau xe
-          const dist = 1.5;
-          const h = vehicle.state.heading + Math.PI;
+          // Gương phía sau: nhìn ngược về phía sau xe
+          const h = vehicle.state.heading;
           camera.position.set(
-            vehicle.state.x - Math.sin(h) * dist,
-            1.2,
-            vehicle.state.z - Math.cos(h) * dist
+            vehicle.state.x - Math.sin(h) * 1.2,
+            1.3,
+            vehicle.state.z - Math.cos(h) * 1.2
           );
-          camera.lookAt(vehicle.state.x + Math.sin(h) * 10, 1, vehicle.state.z + Math.cos(h) * 10);
+          camera.lookAt(vehicle.state.x - Math.sin(h) * 25, 1.0, vehicle.state.z - Math.cos(h) * 25);
         } else if (camMode === 'shoulder') {
           // Qua vai phải
-          const dist = 2;
-          const h = vehicle.state.heading + Math.PI;
-          const rx = Math.cos(h) * 1.2;
-          const rz = Math.sin(h) * 1.2;
-          camera.position.set(
-            vehicle.state.x - Math.sin(h) * dist + rx,
-            2,
-            vehicle.state.z - Math.cos(h) * dist + rz
-          );
-          camera.lookAt(vehicle.state.x + Math.sin(h) * 8, 1.5, vehicle.state.z + Math.cos(h) * 8);
+          const h = vehicle.state.heading;
+          const rx = -Math.cos(h) * 0.6;
+          const rz = Math.sin(h) * 0.6;
+          camera.position.set(vehicle.state.x + rx, 1.32, vehicle.state.z + rz);
+          camera.lookAt(vehicle.state.x + rx * 8 - Math.sin(h) * 4, 1.15, vehicle.state.z + rz * 8 - Math.cos(h) * 4);
         } else {
-          // Cabin (mặc định)
-          // Liếc nhìn trái / phải bằng phím mũi tên hoặc Z/X (quan sát ngã tư StVO Blickführung)
+          // Cabin (mặc định) hoặc Hood (kính lái thoáng không táp-lô che)
           let glanceYaw = 0;
           if (keys.has('ArrowLeft') || keys.has('KeyZ')) glanceYaw = 1.15; // ~66° trái
           else if (keys.has('ArrowRight') || keys.has('KeyX')) glanceYaw = -1.15; // ~66° phải
@@ -440,24 +551,31 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           if (glanceYaw !== 0) {
             headYaw += (glanceYaw - headYaw) * Math.min(1, 10 * dt);
           } else if (!isMouseLooking) {
-            // Tự động về vị trí nhìn thẳng mượt mà
             headYaw += (0 - headYaw) * Math.min(1, 6 * dt);
             headPitch += (0 - headPitch) * Math.min(1, 6 * dt);
           }
 
-          // Động học rung lắc cabin theo tốc độ, gia tốc và góc đánh lái
           const steerAngle = vehicle.steerAngle || 0;
           const speedNorm = Math.min(1, Math.abs(vehicle.state.speed) / 18);
           const roll = -steerAngle * speedNorm * 0.06;
-          const pitchSquat = keys.has('KeyS') ? -0.025 : (keys.has('KeyW') ? 0.015 : 0);
+          const pitchSquat = keys.has('KeyS') ? -0.022 : (keys.has('KeyW') ? 0.014 : 0);
 
-          // Dynamic FOV theo tốc độ: cảm giác tốc độ sống động
           camera.fov = 66 + Math.min(10, (Math.abs(vehicle.state.speed) / 25) * 8);
           camera.updateProjectionMatrix();
 
-          const sp = vehicle.seatPose();
-          camera.position.set(sp.x, sp.y, sp.z);
-          camera.rotation.set(-0.005 + headPitch + pitchSquat, sp.yaw + headYaw, roll);
+          if (camMode === 'hood') {
+            const h = vehicle.state.heading;
+            camera.position.set(
+              vehicle.state.x + Math.sin(h) * 0.42,
+              1.38,
+              vehicle.state.z + Math.cos(h) * 0.42
+            );
+            camera.rotation.set(-0.02 + headPitch + pitchSquat, h + Math.PI + headYaw, roll);
+          } else {
+            const sp = vehicle.seatPose();
+            camera.position.set(sp.x, sp.y + 0.05, sp.z);
+            camera.rotation.set(-0.012 + headPitch + pitchSquat, sp.yaw + headYaw, roll);
+          }
         }
       } else {
         // chờ GLB load — camera tạm tại spawn
@@ -488,11 +606,15 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     const screenW = renderer.domElement.clientWidth;
     const screenH = renderer.domElement.clientHeight;
 
+    // Trong góc nhìn cabin/hood, ẩn thân xe low-poly để thanh nóc xe 3D không cắt ngang giữa kính chắn gió
+    if (driveMode && vehicle) {
+      vehicle.group.visible = camMode === 'outside' || camMode === 'shoulder';
+    }
     renderer.setScissorTest(false);
     renderer.setViewport(0, 0, screenW * pr, screenH * pr);
     renderer.render(scene, camera);
 
-    if (driveMode && vehicle && camMode === 'cabin') {
+    if (driveMode && vehicle && (camMode === 'cabin' || camMode === 'hood')) {
       const h = vehicle.state.heading;
       const cRect = renderer.domElement.getBoundingClientRect();
 
@@ -646,6 +768,22 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     setGear: (g: 'P' | 'R' | 'N' | 'D') => {
       vehicle?.setGear(g);
     },
+    cycleCameraMode: () => {
+      cycleCamera();
+    },
+    resetExam: () => {
+      if (!vehicle) return;
+      const sp = spawnFromMap(map);
+      vehicle.state.x = sp.x;
+      vehicle.state.z = sp.z;
+      vehicle.state.heading = sp.heading;
+      vehicle.state.speed = 0;
+      vehicle.state.gear = 'D';
+      vehicle.syncPose();
+      ruleEngine = new RuleEngine(map, world.controllers);
+      currentStationIdx = 0;
+      examCompleted = false;
+    },
     getRuleState: (): RuleState | null => {
       if (!ruleEngine || !vehicle) return null;
       const speedKmh = Math.max(0, Math.round(vehicle.state.speed * 3.6));
@@ -658,6 +796,10 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         const gearSpeed = speedKmh < 24 ? speedKmh : speedKmh < 45 ? speedKmh - 20 : speedKmh < 68 ? speedKmh - 40 : speedKmh - 62;
         rpm = Math.min(6200, Math.max(900, 900 + Math.round(gearSpeed * 85)));
       }
+      const activeStation = isParcours ? (EXAM_STATIONS[currentStationIdx] ?? null) : null;
+      const stationDist = activeStation
+        ? Math.round(Math.hypot(vehicle.state.x - activeStation.x, vehicle.state.z - activeStation.z))
+        : undefined;
       return {
         violations: ruleEngine.violations.slice(-5),
         bestanden: ruleEngine.bestanden,
@@ -676,7 +818,11 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         headYaw,
         headPitch,
         // tên phố hiện tại cho cụm đồng hồ (road gần nhất)
-        streetName: nearestRoadAt(map, vehicle.state.x, vehicle.state.z)?.road.name
+        streetName: nearestRoadAt(map, vehicle.state.x, vehicle.state.z)?.road.name,
+        activeStation,
+        stationDist,
+        stationsTotal: isParcours ? EXAM_STATIONS.length : undefined,
+        examCompleted
       };
     },
     // 🗺️ mini-map: gom snapshot mỗi frame từ RAF riêng của MiniMap — không dùng chung RAF render

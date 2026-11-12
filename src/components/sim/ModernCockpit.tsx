@@ -8,6 +8,8 @@ export interface ModernCockpitProps {
   signal?: 'left' | 'right' | null;
   steerAngle?: number; // radians (-0.55 to +0.55)
   camMode?: string;
+  throttle?: number;
+  brake?: number;
   headYaw?: number;
   headPitch?: number;
   /** tên phố hiện tại (road gần nhất từ OSM Berlin) — hiển thị trên MFD */
@@ -36,9 +38,17 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
   speedLimit = 50,
   signal = null,
   steerAngle = 0,
+  camMode = 'cabin',
+  throttle = 0,
+  brake = 0,
   streetName,
   onSelectGear
 }) => {
+  const isFullCabin = camMode === 'cabin';
+  const showMirrors = camMode === 'cabin' || camMode === 'hood';
+  const swayX = (-steerAngle * 13).toFixed(1);
+  const diveY = (brake * 5.5 - throttle * 2.5).toFixed(1);
+  const rollDeg = (-steerAngle * 1.15).toFixed(2);
   // Góc quay vô-lăng (độ)
   const steerDeg = useMemo(() => {
     const rawDeg = (steerAngle * 180) / Math.PI;
@@ -78,7 +88,8 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
           left: 0,
           width: '100%',
           height: '100%',
-          pointerEvents: 'none'
+          pointerEvents: 'none',
+          display: isFullCabin ? 'block' : 'none'
         }}
         viewBox="0 0 1920 1080"
         preserveAspectRatio="none"
@@ -143,7 +154,8 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
           flexDirection: 'column',
           alignItems: 'center',
           pointerEvents: 'none',
-          zIndex: 35
+          zIndex: 35,
+          opacity: showMirrors ? 1 : 0
         }}
       >
         {/* Cụm ngàm nhôm treo gương vào kính lái */}
@@ -214,7 +226,8 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
           outline: '1.5px solid #3b4963',
           boxShadow: '0 12px 32px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.22)',
           pointerEvents: 'none',
-          zIndex: 32
+          zIndex: 32,
+          opacity: showMirrors ? 1 : 0
         }}
       >
         <div
@@ -257,7 +270,8 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
           outline: '1.5px solid #3b4963',
           boxShadow: '0 12px 32px rgba(0,0,0,0.9), inset 0 0 0 1px rgba(255,255,255,0.22)',
           pointerEvents: 'none',
-          zIndex: 32
+          zIndex: 32,
+          opacity: showMirrors ? 1 : 0
         }}
       >
         <div
@@ -299,7 +313,8 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
           transform: 'rotate(14deg)',
           boxShadow: '0 6px 14px rgba(0,0,0,0.8)',
           pointerEvents: 'none',
-          zIndex: 31
+          zIndex: 31,
+          display: isFullCabin ? 'block' : 'none'
         }}
       />
       <div
@@ -314,11 +329,12 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
           transform: 'rotate(-14deg)',
           boxShadow: '0 6px 14px rgba(0,0,0,0.8)',
           pointerEvents: 'none',
-          zIndex: 31
+          zIndex: 31,
+          display: isFullCabin ? 'block' : 'none'
         }}
       />
 
-      {/* ── 5. THÂN TÁP-LÔ DƯỚI (LOWER DASHBOARD BINNACLE) ── */}
+      {/* ── 5. THÂN TÁP-LÔ DƯỚI (LOWER DASHBOARD BINNACLE) — Có quán tính nghiêng/nhún đồng bộ với xe 3D ── */}
       <div
         style={{
           position: 'absolute',
@@ -327,11 +343,20 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
           bottom: 0,
           height: '38%',
           minHeight: 270,
-          pointerEvents: 'none'
+          pointerEvents: 'none',
+          transform: isFullCabin ? `translate3d(${swayX}px, ${diveY}px, 0) rotate(${rollDeg}deg)` : 'none',
+          transition: 'transform 0.06s ease-out'
         }}
       >
         <svg
-          style={{ width: '100%', height: '100%', position: 'absolute', bottom: 0, left: 0 }}
+          style={{
+            width: '100%',
+            height: '100%',
+            position: 'absolute',
+            bottom: 0,
+            left: 0,
+            display: isFullCabin ? 'block' : 'none'
+          }}
           viewBox="0 0 1920 400"
           preserveAspectRatio="none"
         >
@@ -461,9 +486,9 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
         <div
           style={{
             position: 'absolute',
-            left: '44%',
-            bottom: '45%',
-            transform: 'translateX(-50%)',
+            left: isFullCabin ? '44%' : '50%',
+            bottom: isFullCabin ? '45%' : 12,
+            transform: isFullCabin ? 'translateX(-50%)' : 'translateX(-50%) scale(0.86)',
             width: 604,
             height: 170,
             background: 'linear-gradient(180deg, #0e1117 0%, #050608 100%)',
@@ -783,7 +808,8 @@ export const ModernCockpit: React.FC<ModernCockpitProps> = ({
             width: 390,
             height: 390,
             pointerEvents: 'none',
-            zIndex: 15
+            zIndex: 15,
+            display: isFullCabin ? 'block' : 'none'
           }}
         >
           <div
