@@ -261,7 +261,7 @@ export const SimDevPage = () => {
           {rule?.activeStation && !rule?.examCompleted && (
             <div style={{
               position: 'absolute',
-              top: 98,
+              top: rule.camMode === 'outside' ? 14 : 98,
               left: '50%',
               transform: 'translateX(-50%)',
               zIndex: 44,

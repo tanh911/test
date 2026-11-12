@@ -16,6 +16,7 @@ export interface NpcCar {
   speed: number;
   targetSpeed: number;
   group: THREE.Group;
+  wheels: THREE.Object3D[];
   collisionAt: number;    // thời điểm va chạm gần nhất (để rate-limit)
   waiting: boolean;
   signal: 'left' | 'right' | null;  // xi-nhan đang bật (null = tắt)
@@ -84,7 +85,7 @@ export class NPCController {
     void this.nodeOf;
   }
 
-  /** Nạp 4 loại GLB rồi spawn — gọi 1 lần sau khi tạo controller */
+  /** Nạp 6 loại GLB xe 3D thực tế rồi spawn — gọi 1 lần sau khi tạo controller */
   async init(controllers: TrafficLightController[], count = 8): Promise<void> {
     for (const c of controllers) this.lightByNode.set(c.nodeId, c);
     const loader = new GLTFLoader();
@@ -92,28 +93,39 @@ export class NPCController {
       '/simv2/car_npc_sedan_red.glb',
       '/simv2/car_npc_kombi_grey.glb',
       '/simv2/car_npc_suv_blue.glb',
-      '/simv2/car_npc_transporter_white.glb'
+      '/simv2/car_npc_transporter_white.glb',
+      '/simv2/car_npc_police.glb',
+      '/simv2/car_npc_van.glb'
     ];
     for (const u of urls) {
       try {
         const gltf = await loader.loadAsync(u);
-        // ── Scale xe NPC vừa làn 3 m: sedan/kombi/suv ~1.8 m, transporter ~2.0 m ──
-        const pre = new THREE.Box3().setFromObject(gltf.scene);
+        const wrapper = new THREE.Group();
+        // Mô hình Kenney Car Kit có mặt trước hướng +Z -> xoay π để đồng bộ quy ước mặt trước -Z
+        gltf.scene.rotation.y = Math.PI;
+        wrapper.add(gltf.scene);
+
+        const pre = new THREE.Box3().setFromObject(wrapper);
         const preSize = pre.getSize(new THREE.Vector3());
         if (preSize.x > 0.5) {
-          const targetW = u.includes('transporter') ? 2.0 : 1.8;
+          const targetW = (u.includes('transporter') || u.includes('van')) ? 1.92 : 1.78;
           const fit = targetW / preSize.x;
-          if (Math.abs(fit - 1) > 0.05) gltf.scene.scale.setScalar(fit);
+          if (Math.abs(fit - 1) > 0.05) wrapper.scale.setScalar(fit);
         }
-        gltf.scene.traverse(o => {
+        wrapper.updateMatrixWorld(true);
+        const post = new THREE.Box3().setFromObject(wrapper);
+        gltf.scene.position.y -= post.min.y / wrapper.scale.y;
+
+        wrapper.traverse(o => {
           if ((o as THREE.Mesh).isMesh) {
             const mesh = o as THREE.Mesh;
             mesh.castShadow = true;
+            mesh.receiveShadow = true;
             const mats = Array.isArray(mesh.material) ? mesh.material : [mesh.material];
             for (const m of mats) m.side = THREE.FrontSide;
           }
         });
-        this.templates.push(gltf.scene);
+        this.templates.push(wrapper);
       } catch {
         // thiếu asset → bỏ qua loại này
       }
@@ -182,6 +194,11 @@ export class NPCController {
     group.name = `npc_${idx}`;
     this.group.add(group);
     const lamps = attachBlinkers(group);
+    const wheels: THREE.Object3D[] = [];
+    for (const wn of ['wheel-front-left', 'wheel-front-right', 'wheel-back-left', 'wheel-back-right']) {
+      const wObj = group.getObjectByName(wn);
+      if (wObj) wheels.push(wObj);
+    }
     return {
       roadId: road.id,
       s,
@@ -189,6 +206,7 @@ export class NPCController {
       speed: NPC_SPEED_LIMIT * 0.6,
       targetSpeed: NPC_SPEED_LIMIT * (0.75 + Math.random() * 0.25),
       group,
+      wheels,
       collisionAt: -10,
       waiting: false,
       signal: null,
@@ -434,6 +452,13 @@ export class NPCController {
         while (dAng > Math.PI) dAng -= Math.PI * 2;
         while (dAng < -Math.PI) dAng += Math.PI * 2;
         npc.group.rotation.y += dAng * Math.min(1, 8.0 * dt);
+      }
+      // ── 4b. Quay 4 bánh xe NPC theo vận tốc thực ──
+      if (npc.speed > 0.05 && npc.wheels.length > 0) {
+        const dRoll = (npc.speed * dt) / 0.30;
+        for (const w of npc.wheels) {
+          w.rotation.x = (w.rotation.x + dRoll) % (Math.PI * 2);
+        }
       }
       // ── 5. xi-nhan nhấp nháy (chỉ rẽ mới có draw call) ──
       const blinkOn = npc.signal !== null && (npc.signalT % BLINK_PERIOD) < BLINK_PERIOD / 2;

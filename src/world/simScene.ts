@@ -272,8 +272,8 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   let fps = 0;
   let fpsFrames = 0;
   let fpsLast = performance.now();
-  // Camera mode: 'cabin' (mặc định), 'hood' (nắp capo thoáng), 'outside' (third-person), 'mirror', 'shoulder'
-  let camMode: 'cabin' | 'hood' | 'outside' | 'mirror' | 'shoulder' = 'cabin';
+  // Camera mode: 'outside' (mặc định hiển thị mô hình xe 3D GLB thật), 'cabin' (buồng lái + 3 gương), 'hood' (nắp capo 3D), 'mirror', 'shoulder'
+  let camMode: 'cabin' | 'hood' | 'outside' | 'mirror' | 'shoulder' = 'outside';
   let shoulderHold = 0; // thời gian giữ phím C (giây)
   let keyMPrev = false;
   let keyVPrev = false;
@@ -288,6 +288,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   const staticRects = buildingRects(map);
   let headYaw = 0;
   let headPitch = 0;
+  let chaseCamYaw = spawnFromMap(map).heading;
   const rearCam = new THREE.PerspectiveCamera(42, 310 / 74, 0.5, 320);
   const leftMirrorCam = new THREE.PerspectiveCamera(44, 188 / 108, 0.3, 250);
   const rightMirrorCam = new THREE.PerspectiveCamera(44, 182 / 104, 0.3, 250);
@@ -513,20 +514,31 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
         }
         // Áp dụng camera theo mode
         if (camMode === 'outside') {
-          // Camera góc nhìn thứ 3 phía sau xe (Chase Cam chuẩn xác theo vector hướng chạy (sin h, cos h))
-          const dist = 6.2;
+          // Camera góc nhìn thứ 3 phía sau xe có đàn hồi (Spring-Damper Chase Cam):
+          // khi đánh lái, camera đuổi theo góc xe mượt mà giúp nhìn rõ thân xe 3D nghiêng vào cua và bánh trước bẻ lái!
           const h = vehicle.state.heading;
+          let dCamYaw = h - chaseCamYaw;
+          while (dCamYaw > Math.PI) dCamYaw -= Math.PI * 2;
+          while (dCamYaw < -Math.PI) dCamYaw += Math.PI * 2;
+          chaseCamYaw += dCamYaw * Math.min(1, 5.8 * dt);
+
+          const spdAbs = Math.abs(vehicle.state.speed);
+          const dist = 5.05 + Math.min(0.75, spdAbs * 0.04);
+          camera.fov = 58 + Math.min(9, (spdAbs / 25) * 8);
+          camera.updateProjectionMatrix();
+
           camera.position.set(
-            vehicle.state.x - Math.sin(h) * dist,
-            2.95,
-            vehicle.state.z - Math.cos(h) * dist
+            vehicle.state.x - Math.sin(chaseCamYaw) * dist,
+            1.78,
+            vehicle.state.z - Math.cos(chaseCamYaw) * dist
           );
           camera.lookAt(
-            vehicle.state.x + Math.sin(h) * 10,
-            1.1,
-            vehicle.state.z + Math.cos(h) * 10
+            vehicle.state.x + Math.sin(h) * 3.4,
+            0.42 + (vehicle.bodyPitch || 0) * 3.0,
+            vehicle.state.z + Math.cos(h) * 3.4
           );
         } else if (camMode === 'mirror') {
+          chaseCamYaw = vehicle.state.heading;
           // Gương phía sau: nhìn ngược về phía sau xe
           const h = vehicle.state.heading;
           camera.position.set(
@@ -536,6 +548,7 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           );
           camera.lookAt(vehicle.state.x - Math.sin(h) * 25, 1.0, vehicle.state.z - Math.cos(h) * 25);
         } else if (camMode === 'shoulder') {
+          chaseCamYaw = vehicle.state.heading;
           // Qua vai phải
           const h = vehicle.state.heading;
           const rx = -Math.cos(h) * 0.6;
@@ -543,7 +556,8 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           camera.position.set(vehicle.state.x + rx, 1.32, vehicle.state.z + rz);
           camera.lookAt(vehicle.state.x + rx * 8 - Math.sin(h) * 4, 1.15, vehicle.state.z + rz * 8 - Math.cos(h) * 4);
         } else {
-          // Cabin (mặc định) hoặc Hood (kính lái thoáng không táp-lô che)
+          chaseCamYaw = vehicle.state.heading;
+          // Cabin (mặc định) hoặc Hood (nhìn qua nắp capo 3D thật)
           let glanceYaw = 0;
           if (keys.has('ArrowLeft') || keys.has('KeyZ')) glanceYaw = 1.15; // ~66° trái
           else if (keys.has('ArrowRight') || keys.has('KeyX')) glanceYaw = -1.15; // ~66° phải
@@ -556,25 +570,32 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           }
 
           const steerAngle = vehicle.steerAngle || 0;
-          const speedNorm = Math.min(1, Math.abs(vehicle.state.speed) / 18);
-          const roll = -steerAngle * speedNorm * 0.06;
-          const pitchSquat = keys.has('KeyS') ? -0.022 : (keys.has('KeyW') ? 0.014 : 0);
+          // Phản hồi hệ thống treo mượt mà (Suspension Pitch & Roll) + Blickführung (tự động liếc nhẹ theo hướng đánh lái)
+          const pitchSquat = vehicle.bodyPitch || 0;
+          const roll = vehicle.bodyRoll || 0;
+          const cornerLookYaw = steerAngle * 0.16;
 
-          camera.fov = 66 + Math.min(10, (Math.abs(vehicle.state.speed) / 25) * 8);
+          camera.fov = 64 + Math.min(10, (Math.abs(vehicle.state.speed) / 25) * 8);
           camera.updateProjectionMatrix();
 
           if (camMode === 'hood') {
             const h = vehicle.state.heading;
             camera.position.set(
-              vehicle.state.x + Math.sin(h) * 0.42,
-              1.38,
-              vehicle.state.z + Math.cos(h) * 0.42
+              vehicle.state.x + Math.sin(h) * 0.18,
+              1.24,
+              vehicle.state.z + Math.cos(h) * 0.18
             );
-            camera.rotation.set(-0.02 + headPitch + pitchSquat, h + Math.PI + headYaw, roll);
+            camera.rotation.set(-0.02 + headPitch + pitchSquat, h + Math.PI + headYaw + cornerLookYaw, roll);
           } else {
-            const sp = vehicle.seatPose();
-            camera.position.set(sp.x, sp.y + 0.05, sp.z);
-            camera.rotation.set(-0.012 + headPitch + pitchSquat, sp.yaw + headYaw, roll);
+            const h = vehicle.state.heading;
+            const rx = -Math.cos(h) * -0.26; // LHD driver offset
+            const rz = Math.sin(h) * -0.26;
+            camera.position.set(
+              vehicle.state.x + Math.sin(h) * 0.14 + rx,
+              1.24,
+              vehicle.state.z + Math.cos(h) * 0.14 + rz
+            );
+            camera.rotation.set(-0.015 + headPitch + pitchSquat, h + Math.PI + headYaw + cornerLookYaw, roll);
           }
         }
       } else {
@@ -606,9 +627,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     const screenW = renderer.domElement.clientWidth;
     const screenH = renderer.domElement.clientHeight;
 
-    // Trong góc nhìn cabin/hood, ẩn thân xe low-poly để thanh nóc xe 3D không cắt ngang giữa kính chắn gió
+    // Hiển thị mô hình xe 3D ở mọi góc nhìn lái chính (Sau xe, Qua vai, Nắp capo 3D, và Buồng lái nhìn ra nắp capo)
     if (driveMode && vehicle) {
-      vehicle.group.visible = camMode === 'outside' || camMode === 'shoulder';
+      vehicle.group.visible = camMode !== 'mirror';
     }
     renderer.setScissorTest(false);
     renderer.setViewport(0, 0, screenW * pr, screenH * pr);

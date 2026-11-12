@@ -4,6 +4,7 @@
 // Convention map: heading h → hướng chạy (sin h, cos h); GLB xe mặt −Z → rotation.y = h + π.
 import * as THREE from 'three';
 import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
+import { DRACOLoader } from 'three/examples/jsm/loaders/DRACOLoader.js';
 import type { GameMap, MapRoad } from './mapLoader';
 import { roadById, pointAtS, roadPointAt } from './mapLoader';
 import { roadHalfWidth, roadSkipZones, roadsAtNode } from './roadMesh';
@@ -84,6 +85,10 @@ export interface VehicleHandle {
   readonly steerAngle: number;
   readonly throttle: number;
   readonly brake: number;
+  /** độ chúc/ngóc đầu xe theo hệ thống treo (rad, âm = chúi mũi khi phanh) */
+  readonly bodyPitch: number;
+  /** độ nghiêng thân xe khi vào cua theo lực ly tâm (rad) */
+  readonly bodyRoll: number;
   update: (dt: number, input: VehicleInput) => void;
   /** áp lại pose từ state (sau va chạm đẩy vị trí) */
   syncPose: () => void;
@@ -91,8 +96,8 @@ export interface VehicleHandle {
   seatPose: () => { x: number; y: number; z: number; yaw: number };
   /** đổi số P R N D */
   setGear: (g: 'P' | 'R' | 'N' | 'D') => void;
-  /** cập nhật hiển thị chi tiết theo camera mode (ẩn gương ngoài khi ở cabin) */
-  setCameraMode: (mode: 'cabin' | 'outside' | 'mirror' | 'shoulder') => void;
+  /** cập nhật hiển thị chi tiết theo camera mode (ẩn gương ngoài khi ở cabin/hood) */
+  setCameraMode: (mode: 'cabin' | 'hood' | 'outside' | 'mirror' | 'shoulder') => void;
   dispose: () => void;
   /** Gán hàm xử lý sự kiện xe (signal_left/right/off) */
   onEvent?: (fn: VehicleEventHandler) => void;
@@ -119,8 +124,21 @@ export function spawnFromMap(map: GameMap): { x: number; z: number; heading: num
 
 export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<VehicleHandle> {
   const loader = new GLTFLoader();
-  const gltf = await loader.loadAsync('/simv2/car_player.glb');
+  const dracoLoader = new DRACOLoader();
+  dracoLoader.setDecoderPath('/draco/');
+  loader.setDRACOLoader(dracoLoader);
+
+  let gltf;
+  try {
+    gltf = await loader.loadAsync('/simv2/car_real_player.glb');
+  } catch {
+    gltf = await loader.loadAsync('/simv2/car_player.glb');
+  }
+
   const group = gltf.scene;
+  group.rotation.order = 'YXZ';
+  const brakeLightMats: THREE.MeshStandardMaterial[] = [];
+
   group.traverse(o => {
     if ((o as THREE.Mesh).isMesh) {
       const m = o as THREE.Mesh;
@@ -129,30 +147,92 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
       const mats = Array.isArray(m.material) ? m.material : [m.material];
       for (const mat of mats) {
         mat.side = THREE.FrontSide;
-        if (mat.name === 'paint_player') {
-          const mstd = mat as THREE.MeshStandardMaterial;
-          mstd.color.set('#253041'); // Xám kim loại sang trọng (Metallic Graphite)
-          mstd.roughness = 0.26;
-          mstd.metalness = 0.70;
+        const mstd = mat as THREE.MeshStandardMaterial;
+        if (mat.name === 'Body_Color' || mat.name === 'paint_player') {
+          mstd.color.set('#1d4ed8'); // Xanh Sapphire ánh kim Đức (Bavarian Metallic Blue)
+          mstd.roughness = 0.20;
+          mstd.metalness = 0.68;
+        } else if (mat.name === 'Glass_Gray' || mat.name === 'Projector_Glass' || mat.name === 'window') {
+          mstd.color.set('#0f172a');
+          mstd.transparent = true;
+          mstd.opacity = 0.28;
+          mstd.roughness = 0.08;
+          mstd.metalness = 0.15;
+          mstd.depthWrite = false;
+        } else if (mat.name === 'Taillight_Glass' || m.name === 'lights_red') {
+          mstd.color.set('#dc2626');
+          mstd.emissive = new THREE.Color(0xff1111);
+          mstd.emissiveIntensity = 0.45;
+          if (!brakeLightMats.includes(mstd)) brakeLightMats.push(mstd);
+        } else if (mat.name === 'metal_chrome' || mat.name === 'metal_gray') {
+          mstd.roughness = 0.18;
+          mstd.metalness = 0.85;
+        } else if (mat.name === 'Tires' || mat.name === 'tire') {
+          mstd.color.set('#18181b');
+          mstd.roughness = 0.82;
+          mstd.metalness = 0.08;
         }
       }
     }
   });
   group.name = 'vehicle_player';
 
-  // Scale xe vừa làn 3 m: bề ngang chuẩn xe con Đức ~1.75 m (GLB gốc có thể to/nhỏ)
+  // Thiết lập khớp xoay trục lái (steerPivot) và trục lăn bánh (spinPivot) cho 4 bánh xe thật
+  const frontSteerPivots: THREE.Group[] = [];
+  const wheelSpinPivots: THREE.Group[] = [];
+  for (const wName of ['wheel_fl', 'wheel_fr', 'wheel_rl', 'wheel_rr']) {
+    const wObj = group.getObjectByName(wName);
+    if (wObj && wObj.parent) {
+      const steerPivot = new THREE.Group();
+      steerPivot.name = `${wName}_steer`;
+      steerPivot.position.copy(wObj.position);
+
+      const spinPivot = new THREE.Group();
+      spinPivot.name = `${wName}_spin`;
+
+      wObj.parent.add(steerPivot);
+      steerPivot.add(spinPivot);
+      wObj.position.set(0, 0, 0);
+      spinPivot.add(wObj);
+
+      if (wName === 'wheel_fl' || wName === 'wheel_fr') {
+        frontSteerPivots.push(steerPivot);
+      }
+      wheelSpinPivots.push(spinPivot);
+    }
+  }
+
+  // Vô lăng 3D bên trong buồng lái xe thật
+  const steeringWheelObj = group.getObjectByName('steering_wheel');
+  const steeringWheelInitQuat = steeringWheelObj ? steeringWheelObj.quaternion.clone() : null;
+  const steerColAxis = new THREE.Vector3(0, 1, 0);
+  const steerRotQuat = new THREE.Quaternion();
+
+  // Scale xe chuẩn kích thước thực tế trên làn đường Đức (~1.82 m rộng) và đặt lốp chạm đúng mặt nhựa đường (y = 0)
   const preBox = new THREE.Box3().setFromObject(group);
   const preSize = preBox.getSize(new THREE.Vector3());
   if (preSize.x > 0.5) {
-    const fit = 1.75 / preSize.x;
-    if (Math.abs(fit - 1) > 0.05) group.scale.setScalar(fit);
+    const fit = 1.82 / preSize.x;
+    if (Math.abs(fit - 1) > 0.03) group.scale.setScalar(fit);
   }
+  group.updateMatrixWorld(true);
+  const groundBox = new THREE.Box3().setFromObject(group);
+  const baseY = -groundBox.min.y;
 
   const spawn = spawnFromMap(map);
   const state: VehicleState = { x: spawn.x, z: spawn.z, heading: spawn.heading, speed: 0, gear: 'D', t: 0 };
   let steerAngle = 0; // dương = trái (A)
+  let steerHoldTime = 0;
+  let lastSteerDir = 0;
+  let smoothThrottle = 0;
+  let smoothBrake = 0;
   let lastThrottle = 0;
   let lastBrake = 0;
+  let wheelRoll = 0;
+  let bodyPitch = 0;
+  let bodyRoll = 0;
+  let hasStartedDriving = false;
+  let autoHold = true; // giữ phanh đứng yên ở vạch xuất phát / đèn đỏ cho đến khi nhấp ga W
 
   const lamps = attachBlinkers(group);
   let signal: 'left' | 'right' | null = null;
@@ -164,8 +244,8 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
   const emitEvent = (ev: VehicleEvent) => { eventHandler?.(ev); };
 
   const applyPose = () => {
-    group.position.set(state.x, 0, state.z);
-    group.rotation.y = state.heading + Math.PI;
+    group.position.set(state.x, baseY, state.z);
+    group.rotation.set(bodyPitch, state.heading + Math.PI, bodyRoll);
   };
   applyPose();
   scene.add(group);
@@ -185,104 +265,163 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
     get brake() {
       return lastBrake;
     },
+    get bodyPitch() {
+      return bodyPitch;
+    },
+    get bodyRoll() {
+      return bodyRoll;
+    },
     onEvent(fn: VehicleEventHandler) {
       eventHandler = fn;
     },
     update(dt: number, input: VehicleInput) {
-      // ── lái: input.steer −1 = A (trái, δ↑), +1 = D (phải, δ↓) ──
-      // Độ nhạy đánh lái linh hoạt: nhạy hơn ở tốc độ chậm để dễ vào cua ngã tư
-      const steerSpeedFactor = Math.max(0.65, 1.2 - 0.5 * (Math.abs(state.speed) / 15));
-      const effectiveSteerRate = STEER_RATE * steerSpeedFactor;
+      // ── 1. Hệ thống đánh lái lũy tiến (Progressive EPS Steering) ──
+      // Nhấp nhẹ phím A/D -> chỉnh làn cực mượt; giữ phím A/D -> đánh lái nhanh để ôm cua 90°
+      const spd = Math.abs(state.speed);
+      const steerSpeedFactor = Math.max(0.52, 1.15 - 0.55 * (spd / 16));
+      const dynamicMaxSteer = MAX_STEER * Math.max(0.50, 1.0 - 0.45 * (spd / 18));
+
       if (input.steer !== 0) {
+        if (input.steer === lastSteerDir) {
+          steerHoldTime = Math.min(0.5, steerHoldTime + dt);
+        } else {
+          steerHoldTime = 0;
+          lastSteerDir = input.steer;
+        }
+        // Độ nhạy tăng mượt từ 42% (nhấp chỉnh làn) lên 100% sau 0.22 giây giữ phím
+        const progressiveCurve = 0.42 + 0.58 * Math.min(1, steerHoldTime / 0.22);
+        const effectiveSteerRate = STEER_RATE * steerSpeedFactor * progressiveCurve;
         steerAngle += -input.steer * effectiveSteerRate * dt;
       } else {
-        steerAngle -= Math.sign(steerAngle) * Math.min(Math.abs(steerAngle), STEER_CENTER * dt);
+        steerHoldTime = 0;
+        lastSteerDir = 0;
+        // Lực tự trả lái (Caster / Ackermann self-aligning torque) tỷ lệ thuận với tốc độ xe
+        const returnFactor = Math.max(0.32, Math.min(1.25, 0.28 + spd / 5.8));
+        const returnStep = STEER_CENTER * returnFactor * dt;
+        if (Math.abs(steerAngle) <= returnStep) {
+          steerAngle = 0;
+        } else {
+          steerAngle -= Math.sign(steerAngle) * returnStep;
+        }
       }
-      steerAngle = Math.max(-MAX_STEER, Math.min(MAX_STEER, steerAngle));
+      steerAngle = Math.max(-dynamicMaxSteer, Math.min(dynamicMaxSteer, steerAngle));
 
-      // ── dọc: ga / phanh / lùi chuẩn xe số tự động (P, R, N, D) ──
+      // ── 2. Độ trễ bàn đạp Ga / Phanh & Hộp số tự động Đức (P, R, N, D + Kriechmodus + Auto-Hold) ──
       state.t += dt;
       lastThrottle = input.throttle;
       lastBrake = input.brake;
+      smoothThrottle += (input.throttle - smoothThrottle) * Math.min(1, 10.5 * dt);
+      smoothBrake += (input.brake - smoothBrake) * Math.min(1, 14.0 * dt);
 
       if (input.gear) {
         state.gear = input.gear;
       }
+      if (input.throttle > 0) {
+        hasStartedDriving = true;
+        autoHold = false;
+      }
 
       let a = 0;
-      const currentAccel = input.boost ? ACCEL * 1.5 : ACCEL;
+      const currentAccel = input.boost ? ACCEL * 1.45 : ACCEL;
+      const CREEP_SPEED = 1.45; // ~5.2 km/h (Kriechmodus chuẩn xe số tự động khi nhả phanh)
 
       if (state.gear === 'P') {
-        // Số P: Khóa bánh, phanh đỗ, xe đứng yên hoàn toàn
         state.speed = 0;
         a = 0;
+        autoHold = true;
       } else if (state.gear === 'N') {
-        // Số N: Mo, không có lực kéo động cơ, trôi tự do và phanh
         if (input.brake > 0) {
-          a = -Math.sign(state.speed) * input.brake * BRAKE;
+          a = -Math.sign(state.speed) * (0.45 + 0.55 * smoothBrake) * BRAKE;
         } else {
           a = -DRAG * state.speed * 1.2;
         }
         state.speed += a * dt;
         if (input.brake > 0 && Math.abs(state.speed) < 0.1) state.speed = 0;
       } else if (state.gear === 'D') {
-        // Số D: Lái tiến
-        // W = Ga tiến (tốc độ > 0)
-        // S = Phanh dừng xe (tốc độ về 0 và đứng yên, KHÔNG BAO GIỜ LÙI KHI Ở SỐ D)
         if (state.speed < 0) state.speed = 0;
 
         if (input.brake > 0) {
           if (state.speed > 0.05) {
-            a = -input.brake * BRAKE;
+            // Phanh êm ở đầu hành trình bàn đạp và ăn mạnh dần khi giữ S
+            a = -(0.45 + 0.55 * smoothBrake) * BRAKE;
           } else {
             state.speed = 0;
             a = 0;
+            autoHold = true; // Kích hoạt Auto-Hold giữ xe đứng yên khi đã phanh dừng hẳn
           }
         } else if (input.throttle > 0) {
-          a = input.throttle * currentAccel - DRAG * state.speed;
+          a = smoothThrottle * currentAccel - DRAG * state.speed;
+        } else if (hasStartedDriving && !autoHold) {
+          // Nhả ga & nhả phanh khi đang lăn bánh: phanh động cơ (Engine Braking) êm ái về tốc độ bò Kriechmodus (~5 km/h)
+          if (state.speed > CREEP_SPEED + 0.1) {
+            a = -(0.85 + DRAG * state.speed * 1.35);
+          } else if (state.speed < CREEP_SPEED - 0.05) {
+            a = 1.25;
+          } else {
+            a = 0;
+          }
         } else {
-          a = -DRAG * state.speed * 1.5;
+          state.speed = 0;
+          a = 0;
         }
 
         state.speed = Math.max(0, Math.min(MAX_SPEED_FWD, state.speed + a * dt));
-        if (input.throttle === 0 && state.speed < 0.08) state.speed = 0;
       } else if (state.gear === 'R') {
-        // Số R: Lùi xe (bấm phím 2 hoặc chọn R để lùi)
-        // W = Đạp ga lùi (tốc độ âm: từ 0 tới MAX_SPEED_REV)
-        // S = Đạp phanh lùi (hãm tốc độ lùi về 0)
         if (state.speed > 0) state.speed = 0;
 
         if (input.brake > 0) {
           if (state.speed < -0.05) {
-            a = input.brake * BRAKE; // gia tốc dương để hãm lùi về 0
+            a = (0.45 + 0.55 * smoothBrake) * BRAKE;
           } else {
             state.speed = 0;
             a = 0;
+            autoHold = true;
           }
         } else if (input.throttle > 0) {
-          const revAccel = ACCEL * 0.75;
-          a = -input.throttle * revAccel - DRAG * state.speed;
+          const revAccel = ACCEL * 0.72;
+          a = -smoothThrottle * revAccel - DRAG * state.speed;
         } else {
-          a = -DRAG * state.speed * 1.5;
+          a = -DRAG * state.speed * 1.8 - Math.sign(state.speed) * 0.65;
         }
 
         state.speed = Math.max(MAX_SPEED_REV, Math.min(0, state.speed + a * dt));
         if (input.throttle === 0 && Math.abs(state.speed) < 0.08) state.speed = 0;
       }
 
-      // ── bicycle model ──
+      // ── 3. Kinematic Bicycle Model + Hệ thống treo (Suspension Pitch & Roll) ──
+      const yawRate = Math.abs(state.speed) > 0.01 ? (state.speed / WHEELBASE) * Math.tan(steerAngle) : 0;
       if (Math.abs(state.speed) > 0.01) {
-        state.heading += (state.speed / WHEELBASE) * Math.tan(steerAngle) * dt;
+        state.heading += yawRate * dt;
         state.x += Math.sin(state.heading) * state.speed * dt;
         state.z += Math.cos(state.heading) * state.speed * dt;
       }
 
-      // ── xi-nhan do người chơi điều khiển: Q trái, E phải, bấm lại tắt ──
-      // Máy trạng thái:
-      //   IDLE       → người bật Q/E → SIGNAL_ON
-      //   SIGNAL_ON  → vô lăng vượt ±15° → TURNING
-      //   TURNING    → vô lăng quay về dưới ±15° → IDLE (signal tắt)
-      // Người bật lại cùng nút → tắt ngay (IDLE).
+      // Tính độ chúc đầu xe (Pitch) theo gia tốc dọc a và độ nghiêng thân xe (Roll) theo gia tốc hướng tâm v * yawRate
+      const targetPitch = Math.max(-0.028, Math.min(0.020, a * 0.0032));
+      const lateralAccel = state.speed * yawRate;
+      const targetRoll = Math.max(-0.048, Math.min(0.048, -lateralAccel * 0.0065));
+      bodyPitch += (targetPitch - bodyPitch) * Math.min(1, 8.5 * dt);
+      bodyRoll += (targetRoll - bodyRoll) * Math.min(1, 7.5 * dt);
+
+      // ── 4. Chuyển động 4 bánh xe (Steer + Spin), Vô lăng 3D & Đèn phanh ──
+      const tireRadius = 0.34;
+      wheelRoll = (wheelRoll + (state.speed * dt) / tireRadius) % (Math.PI * 2);
+      for (const fp of frontSteerPivots) {
+        fp.rotation.y = steerAngle;
+      }
+      for (const sp of wheelSpinPivots) {
+        sp.rotation.x = -wheelRoll;
+      }
+      if (steeringWheelObj && steeringWheelInitQuat) {
+        steerRotQuat.setFromAxisAngle(steerColAxis, -steerAngle * 2.6);
+        steeringWheelObj.quaternion.copy(steeringWheelInitQuat).multiply(steerRotQuat);
+      }
+      const isBrakingOrHeld = input.brake > 0 || (Math.abs(state.speed) < 0.08 && state.gear !== 'P');
+      for (const bMat of brakeLightMats) {
+        bMat.emissiveIntensity = isBrakingOrHeld ? 2.5 : 0.42;
+      }
+
+      // ── 5. Xi-nhan do người chơi điều khiển: Q trái, E phải, bấm lại tắt ──
       if (input.signalLeft && !signalLeftPrev) {
         if (signalState === 'SIGNAL_ON' && signal === 'left') {
           signal = null;
@@ -308,7 +447,6 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
       signalLeftPrev = !!input.signalLeft;
       signalRightPrev = !!input.signalRight;
 
-      // Tự tắt khi vô lăng quay về dưới ngưỡng sau khi đã rẽ vượt ngưỡng.
       const STEER_TURN_THRESHOLD = 0.26; // ~15°
       if (signalState === 'SIGNAL_ON' && Math.abs(steerAngle) > STEER_TURN_THRESHOLD) {
         signalState = 'TURNING';
@@ -320,7 +458,6 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
       }
       if (signal) signalT += dt;
 
-      // ── đèn nhấp nháy (chỉ rẽ mới có draw call) ──
       const blinkOn = signal !== null && (signalT % BLINK_PERIOD) < BLINK_PERIOD / 2;
       for (const lamp of lamps) {
         lamp.visible = blinkOn && (lamp.userData._blinkerSide as string) === signal;
@@ -334,10 +471,10 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
     },
 
     seatPose() {
-      // ghế lái LHD: glTF local (−0.32 = trái, mắt 1.20, z −0.12)
-      const lx = -0.32;
-      const ly = 1.20;
-      const lz = -0.12;
+      // ghế lái LHD chuẩn của mô hình xe 3D
+      const lx = -0.34;
+      const ly = 1.18;
+      const lz = -0.08;
       const s = Math.sin(state.heading + Math.PI);
       const c = Math.cos(state.heading + Math.PI);
       const wx = state.x + lx * c + lz * s;
@@ -349,7 +486,7 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
       state.gear = g;
     },
 
-    setCameraMode(mode: 'cabin' | 'outside' | 'mirror' | 'shoulder') {
+    setCameraMode(mode: 'cabin' | 'hood' | 'outside' | 'mirror' | 'shoulder') {
       const isCabin = mode === 'cabin';
       const mirror = group.getObjectByName('body_4');
       if (mirror) mirror.visible = !isCabin;
@@ -360,10 +497,10 @@ export async function createVehicle(scene: THREE.Scene, map: GameMap): Promise<V
     },
 
     dispose() {
+      dracoLoader.dispose();
       scene.remove(group);
       group.traverse(o => {
         const m = o as THREE.Mesh;
-        // đèn xi-nhan dùng geo/mat chia sẻ cấp module → KHÔNG dispose (khớp npc.ts)
         if (m.userData?._blinkerSide) return;
         if (m.isMesh) {
           m.geometry?.dispose();
