@@ -1,7 +1,7 @@
 // 🗺️ osmConverter.ts — chuyển dữ liệu OpenStreetMap sang GameMap simulator
 // Cách dùng: gọi Overpass API để lấy JSON, rồi truyền vào parseOSMToGameMap().
 // Schema đầu ra khớp GameMap trong mapLoader.ts.
-import type { GameMap, MapRoad, MapNode, MapIntersection, MapBuilding, MapProp, MapSign } from '../../world/mapLoader';
+import type { GameMap, MapRoad, MapNode, MapIntersection, MapBuilding, MapProp, MapSign } from '../../src/world/mapLoader';
 
 interface OSMNode {
   id: number;

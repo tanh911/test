@@ -1,12 +1,12 @@
-// 🌉 add_bridge_flags.mjs — đánh dấu road có bridge=yes từ OSM ways:
-//   road.sample point cách polyline bridge-way ≤ 8m → road.bridge = true
-// (ưu tiên tag OSM — feedback: water-crossing detect làm fallback)
-// Chạy: node scripts/add_bridge_flags.mjs
+﻿// ðŸŒ‰ add_bridge_flags.mjs â€” Ä‘Ã¡nh dáº¥u road cÃ³ bridge=yes tá»« OSM ways:
+//   road.sample point cÃ¡ch polyline bridge-way â‰¤ 8m â†’ road.bridge = true
+// (Æ°u tiÃªn tag OSM â€” feedback: water-crossing detect lÃ m fallback)
+// Cháº¡y: node scripts/add_bridge_flags.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const mapPath = join(root, 'src/data/maps/berlin-mitte-clean.json');
 const osmPath = join(root, 'scripts/osm_pbf_extracted_stadt.json');
 
@@ -43,8 +43,8 @@ function distToPolyline(px, pz, pts) {
 }
 
 let flagged = 0;
-// FALLBACK (user đề xuất): road băng qua polygon nước (map.waters, polyline gốc)
-// cũng đánh dấu bridge=true — các bridge way OSM đã bị osm_to_roadgraph bỏ mất
+// FALLBACK (user Ä‘á» xuáº¥t): road bÄƒng qua polygon nÆ°á»›c (map.waters, polyline gá»‘c)
+// cÅ©ng Ä‘Ã¡nh dáº¥u bridge=true â€” cÃ¡c bridge way OSM Ä‘Ã£ bá»‹ osm_to_roadgraph bá» máº¥t
 function distToWater(px, pz) {
   let best = Infinity;
   for (const w of map.waters || []) {
@@ -60,7 +60,7 @@ function distToWater(px, pz) {
 }
 for (const r of map.roads) {
   const inWater = r.points.filter(p => distToWater(p[0], p[1]) < 20).length;
-  if (inWater >= 2 && !r.bridge) { r.bridge = true; flagged++; console.log('  🌉 (water fallback)', r.id, r.name || ''); continue; }
+  if (inWater >= 2 && !r.bridge) { r.bridge = true; flagged++; console.log('  ðŸŒ‰ (water fallback)', r.id, r.name || ''); continue; }
 }
 for (const r of map.roads) {
   const n = r.points.length;
@@ -70,7 +70,7 @@ for (const r of map.roads) {
     samples.push(r.points[fi]);
   }
   const hit = bridgePolys.some(bp => samples.some(s => distToPolyline(s[0], s[1], bp.pts) < 8));
-  if (hit) { r.bridge = true; flagged++; console.log('  🌉', r.id, r.name || ''); }
+  if (hit) { r.bridge = true; flagged++; console.log('  ðŸŒ‰', r.id, r.name || ''); }
   else if (r.bridge) delete r.bridge;
 }
 writeFileSync(mapPath, JSON.stringify(map, null, 2), 'utf8');

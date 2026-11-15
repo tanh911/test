@@ -1,10 +1,10 @@
-// 🔍 diag_berlin_signs.mjs — chẩn đoán khoảng cách snap WFS→road graph theo từng đường
-// Chạy: node scripts/diag_berlin_signs.mjs
+﻿// ðŸ” diag_berlin_signs.mjs â€” cháº©n Ä‘oÃ¡n khoáº£ng cÃ¡ch snap WFSâ†’road graph theo tá»«ng Ä‘Æ°á»ng
+// Cháº¡y: node scripts/diag_berlin_signs.mjs
 import { readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const mapPath = join(root, 'src/data/maps/berlin-mitte-clean.json');
 const cachePath = join(root, 'scripts/berlin_signs_wfs_cache.json');
 
@@ -17,7 +17,7 @@ const toXY = (lat, lon) => [
 const map = JSON.parse(readFileSync(mapPath, 'utf8'));
 const masts = JSON.parse(readFileSync(cachePath, 'utf8'));
 
-// bbox từng road → lọc sớm
+// bbox tá»«ng road â†’ lá»c sá»›m
 const roads = map.roads.map((r) => {
   const xs = r.points.map((p) => p[0]), zs = r.points.map((p) => p[1]);
   return { r, minX: Math.min(...xs), maxX: Math.max(...xs), minZ: Math.min(...zs), maxZ: Math.max(...zs) };
@@ -36,13 +36,13 @@ function snap(x, z) {
       const t = Math.max(0, Math.min(l, (x - ax) * tx + (z - az) * tz));
       const px = ax + tx * t, pz = az + tz * t;
       const d = Math.hypot(x - px, z - pz);
-      if (!best || d < best.d) best = { d, name: r.name || '(không tên)', roadId: r.id };
+      if (!best || d < best.d) best = { d, name: r.name || '(khÃ´ng tÃªn)', roadId: r.id };
     }
   }
   return best;
 }
 
-// gom theo tên đường WFS
+// gom theo tÃªn Ä‘Æ°á»ng WFS
 const byStreet = new Map();
 for (const f of masts) {
   let [lon, lat] = f.geometry.coordinates;
@@ -64,10 +64,10 @@ const rows = [...byStreet.entries()]
   })
   .sort((a, b) => b.n - a.n);
 
-console.log('Đường (WFS)              | n cột | p50 snap | ≤12m');
+console.log('ÄÆ°á»ng (WFS)              | n cá»™t | p50 snap | â‰¤12m');
 for (const r of rows.slice(0, 35)) {
   console.log(
-    `${r.st.padEnd(24)} | ${String(r.n).padStart(5)} | ${Number.isFinite(r.med) ? r.med.toFixed(1).padStart(8) : '  —'.padStart(8)} | ${String(r.within12).padStart(5)}`
+    `${r.st.padEnd(24)} | ${String(r.n).padStart(5)} | ${Number.isFinite(r.med) ? r.med.toFixed(1).padStart(8) : '  â€”'.padStart(8)} | ${String(r.within12).padStart(5)}`
   );
 }
 const all = masts.map((f) => {
@@ -77,6 +77,6 @@ const all = masts.map((f) => {
   return snap(x, z)?.d ?? Infinity;
 });
 const okAll = all.filter((d) => d !== Infinity).sort((a, b) => a - b);
-console.log(`\nTổng: ${all.length} cột, snap được: ${okAll.length}`);
+console.log(`\nTá»•ng: ${all.length} cá»™t, snap Ä‘Æ°á»£c: ${okAll.length}`);
 const pct = (q) => okAll[Math.floor(q * (okAll.length - 1))];
 for (const q of [0.1, 0.25, 0.5, 0.75, 0.9]) console.log(`  p${q * 100}: ${pct(q).toFixed(1)} m`);

@@ -1,8 +1,8 @@
 // 🇩🇪 muenchenReal.ts — map Munich Altstadt từ OSM thật (GeoJSON overpass-turbo)
 // Đủ lớn cho 1 đoạn bài thi Stadtfahrt: đường chính, zona 30, giao lộ, vòng xuyến nhỏ.
-import type { GameMap } from '../../world/mapLoader';
+import type { GameMap } from '../../src/world/mapLoader';
 import { parseOSMToGameMap } from './osmConverter';
-import muenchenGeoJson from './muenchen-altstadt-real.json';
+import muenchenGeoJson from '../../src/data/maps/muenchen-altstadt-real.json';
 
 interface GeoJSONFeature {
   type: 'Feature';

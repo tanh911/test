@@ -1,19 +1,19 @@
-// 📐 fix_road_widths.mjs — sửa lanes/laneWidth cho berlin-mitte-clean.json từ tag OSM thật
-// (scripts/osm_pbf_extracted_stadt.json). Bản đồ hiện có 90 road 3 m (1 làn) kể cả Unter
-// den Linden (OSM: oneway=yes, lanes 2-3, width 11-14.5 m) → nhìn như ngõ, xe không vừa.
-// Quy tắc (mirror StVO/OSM):
-//   • oneway=yes  → lanesForward = lanes (mặc định primary/secondary: 2, residential: 1)
-//   • hai chiều   → forward = ceil(lanes/2), backward = floor(lanes/2); mặc định 1/1
-//   • laneWidth = width_tag/lanes nếu có width, không thì 3.2 (residential) / 3.4 (tertiary)
+﻿// ðŸ“ fix_road_widths.mjs â€” sá»­a lanes/laneWidth cho berlin-mitte-clean.json tá»« tag OSM tháº­t
+// (scripts/osm_pbf_extracted_stadt.json). Báº£n Ä‘á»“ hiá»‡n cÃ³ 90 road 3 m (1 lÃ n) ká»ƒ cáº£ Unter
+// den Linden (OSM: oneway=yes, lanes 2-3, width 11-14.5 m) â†’ nhÃ¬n nhÆ° ngÃµ, xe khÃ´ng vá»«a.
+// Quy táº¯c (mirror StVO/OSM):
+//   â€¢ oneway=yes  â†’ lanesForward = lanes (máº·c Ä‘á»‹nh primary/secondary: 2, residential: 1)
+//   â€¢ hai chiá»u   â†’ forward = ceil(lanes/2), backward = floor(lanes/2); máº·c Ä‘á»‹nh 1/1
+//   â€¢ laneWidth = width_tag/lanes náº¿u cÃ³ width, khÃ´ng thÃ¬ 3.2 (residential) / 3.4 (tertiary)
 //     / 3.5 (primary/secondary); clamp [3.0, 3.75]
-//   • Mức tối ưu lái được: one-way ≥ 3.4 m, hai chiều ≥ 6.4 m
-// Match road ↔ way: tên (bỏ hoa/token ß→ss) + khoảng cách hình học gần nhất.
-// Chạy: node scripts/fix_road_widths.mjs
+//   â€¢ Má»©c tá»‘i Æ°u lÃ¡i Ä‘Æ°á»£c: one-way â‰¥ 3.4 m, hai chiá»u â‰¥ 6.4 m
+// Match road â†” way: tÃªn (bá» hoa/token ÃŸâ†’ss) + khoáº£ng cÃ¡ch hÃ¬nh há»c gáº§n nháº¥t.
+// Cháº¡y: node scripts/fix_road_widths.mjs
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const mapPath = join(root, 'src/data/maps/berlin-mitte-clean.json');
 const osmPath = join(root, 'scripts/osm_pbf_extracted_stadt.json');
 const backupPath = join(root, 'scripts/berlin_map_before_width_fix.json');
@@ -23,12 +23,12 @@ const osm = JSON.parse(readFileSync(osmPath, 'utf8'));
 
 if (!existsSync(backupPath)) {
   writeFileSync(backupPath, JSON.stringify(map, null, 2), 'utf8');
-  console.log('Backup map →', backupPath);
+  console.log('Backup map â†’', backupPath);
 }
 
-const norm = (s) => (s || '').toLowerCase().replaceAll('ß', 'ss').replaceAll('▀', 'ss').replace(/\s+/g, ' ').trim();
+const norm = (s) => (s || '').toLowerCase().replaceAll('ÃŸ', 'ss').replaceAll('â–€', 'ss').replace(/\s+/g, ' ').trim();
 
-// polyline của way trong hệ tọa độ map (nodes là lat/lon → quy đổi CÙNG GỐC như osm_to_roadgraph)
+// polyline cá»§a way trong há»‡ tá»a Ä‘á»™ map (nodes lÃ  lat/lon â†’ quy Ä‘á»•i CÃ™NG Gá»C nhÆ° osm_to_roadgraph)
 const R = 6371000, refLat = 52.5170, refLon = 13.3888;
 const toXY = (lat, lon) => [
   ((lon - refLon) * Math.PI) / 180 * R * Math.cos((refLat * Math.PI) / 180),
@@ -46,7 +46,7 @@ for (const w of osm.ways || []) {
   waysByStreet.get(name).push({ tags: w.tags, pts });
 }
 
-// khoảng cách điểm→polyline
+// khoáº£ng cÃ¡ch Ä‘iá»ƒmâ†’polyline
 function distToPoly(x, z, pts) {
   let best = Infinity;
   for (let i = 0; i < pts.length - 1; i++) {
@@ -76,7 +76,7 @@ function deriveWidths(tags) {
   const widthTag = num(tags.width);
   if (lanes === null && (lanesF !== null || lanesB !== null)) lanes = (lanesF || 0) + (lanesB || 0);
 
-  // mặc định theo class nếu OSM không ghi
+  // máº·c Ä‘á»‹nh theo class náº¿u OSM khÃ´ng ghi
   if (lanes === null) {
     if (oneWay) lanes = hw === 'primary' || hw === 'secondary' ? 2 : 1;
     else lanes = hw === 'primary' || hw === 'secondary' ? 4 : 2;
@@ -88,7 +88,7 @@ function deriveWidths(tags) {
     else { lanesF = Math.ceil(lanes / 2); lanesB = Math.max(0, Math.floor(lanes / 2)); }
   }
   let total = lanesF + lanesB;
-  // mức tối thiểu lái được
+  // má»©c tá»‘i thiá»ƒu lÃ¡i Ä‘Æ°á»£c
   if (oneWay && total * laneW < 3.4) laneW = 3.4 / total;
   if (!oneWay && total * laneW < 6.4) laneW = 6.4 / total;
   laneW = Math.min(3.75, Math.max(3.0, +laneW.toFixed(2)));
@@ -106,8 +106,8 @@ for (const r of map.roads) {
       const d = wayDist(r.points, cand.pts);
       if (!best || d < best.d) best = { d, tags: cand.tags };
     }
-    // way trong extraction là CHORD thô (chỉ còn node giao lộ) — có thể lệch 40 m+
-    // → ngưỡng nới 65 m, chỉ dùng để nhận TAGS cùng tên đường, không dùng hình học
+    // way trong extraction lÃ  CHORD thÃ´ (chá»‰ cÃ²n node giao lá»™) â€” cÃ³ thá»ƒ lá»‡ch 40 m+
+    // â†’ ngÆ°á»¡ng ná»›i 65 m, chá»‰ dÃ¹ng Ä‘á»ƒ nháº­n TAGS cÃ¹ng tÃªn Ä‘Æ°á»ng, khÃ´ng dÃ¹ng hÃ¬nh há»c
     if (best && best.d < 65) tags = best.tags;
     if (tags) matchedWay++;
   }
@@ -115,15 +115,15 @@ for (const r of map.roads) {
   if (tags) nw = deriveWidths(tags);
   else {
     fallback++;
-    // không match được: nếu đang 3 m 1 làn → coi như ngõ hai chiều 6.4 m (an toàn để lái)
+    // khÃ´ng match Ä‘Æ°á»£c: náº¿u Ä‘ang 3 m 1 lÃ n â†’ coi nhÆ° ngÃµ hai chiá»u 6.4 m (an toÃ n Ä‘á»ƒ lÃ¡i)
     const w = (r.lanesForward + r.lanesBackward) * r.laneWidth;
     nw = w <= 3.2 && r.lanesBackward === 0
       ? { lanesForward: 1, lanesBackward: 1, laneWidth: 3.2 }
       : null;
   }
   if (!nw) continue;
-  const old = `${r.lanesForward}/${r.lanesBackward}×${r.laneWidth}`;
-  const neu = `${nw.lanesForward}/${nw.lanesBackward}×${nw.laneWidth}`;
+  const old = `${r.lanesForward}/${r.lanesBackward}Ã—${r.laneWidth}`;
+  const neu = `${nw.lanesForward}/${nw.lanesBackward}Ã—${nw.laneWidth}`;
   if (old !== neu) {
     r.lanesForward = nw.lanesForward;
     r.lanesBackward = nw.lanesBackward;
@@ -134,18 +134,18 @@ for (const r of map.roads) {
 
 writeFileSync(mapPath, JSON.stringify(map, null, 2), 'utf8');
 
-// thống kê sau sửa
+// thá»‘ng kÃª sau sá»­a
 const dist = {};
 for (const r of map.roads) {
   const w = (r.lanesForward + r.lanesBackward) * r.laneWidth;
   dist[w] = (dist[w] || 0) + 1;
 }
 console.log(`
-────────────────────────────────────────
-Roads đổi width          : ${changed}/${map.roads.length}
-  ├ match được OSM way   : ${matchedWay}
-  └ fallback heuristic   : ${fallback}
-Phân bố width sau sửa    : ${Object.entries(dist).sort((a, b) => a[0] - b[0]).map(([w, n]) => `${w}m×${n}`).join('  ')}
-────────────────────────────────────────
-Tiếp: node scripts/import_berlin_signs.mjs && npx vitest run src/world/roadAudit.test.ts
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+Roads Ä‘á»•i width          : ${changed}/${map.roads.length}
+  â”œ match Ä‘Æ°á»£c OSM way   : ${matchedWay}
+  â”” fallback heuristic   : ${fallback}
+PhÃ¢n bá»‘ width sau sá»­a    : ${Object.entries(dist).sort((a, b) => a[0] - b[0]).map(([w, n]) => `${w}mÃ—${n}`).join('  ')}
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+Tiáº¿p: node scripts/import_berlin_signs.mjs && npx vitest run src/world/roadAudit.test.ts
 `);

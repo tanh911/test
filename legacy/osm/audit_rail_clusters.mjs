@@ -1,15 +1,15 @@
-// 🚆 audit_rail_clusters.mjs — P1.1: gom track thành cụm (union-find),
-// đo elev/cụm, xác nhận/bác bỏ giả thuyết "một cụm nhiều elev khác nhau".
-// Chạy: node scripts/audit_rail_clusters.mjs
+﻿// ðŸš† audit_rail_clusters.mjs â€” P1.1: gom track thÃ nh cá»¥m (union-find),
+// Ä‘o elev/cá»¥m, xÃ¡c nháº­n/bÃ¡c bá» giáº£ thuyáº¿t "má»™t cá»¥m nhiá»u elev khÃ¡c nhau".
+// Cháº¡y: node scripts/audit_rail_clusters.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const map = JSON.parse(readFileSync(join(root, 'src/data/maps/berlin-mitte-clean.json'), 'utf8'));
 const rails = map.rails || [];
 
-// ── Khoảng cách giữa 2 polyline (min dist giữa các sample 5m) ──
+// â”€â”€ Khoáº£ng cÃ¡ch giá»¯a 2 polyline (min dist giá»¯a cÃ¡c sample 5m) â”€â”€
 function resamplePts(points, step = 5) {
   const out = [];
   for (let i = 1; i < points.length; i++) {
@@ -36,20 +36,20 @@ function distPolyPoly(ptsA, ptsB) {
   return best;
 }
 
-// ── Union-find ──
+// â”€â”€ Union-find â”€â”€
 const parent = rails.map((_, i) => i);
 function find(i) { while (parent[i] !== i) { parent[i] = parent[parent[i]]; i = parent[i]; } return i; }
 function union(a, b) { parent[find(a)] = find(b); }
 
-// ── Ghép cặp: 2 rail song song trong < 8m cho > 30% chiều dài ngắn hơn ──
+// â”€â”€ GhÃ©p cáº·p: 2 rail song song trong < 8m cho > 30% chiá»u dÃ i ngáº¯n hÆ¡n â”€â”€
 const resampled = rails.map(r => resamplePts(r.points, 8));
 for (let i = 0; i < rails.length; i++) {
   for (let j = i + 1; j < rails.length; j++) {
     if (find(i) === find(j)) continue;
-    // nhanh: AABB cách xa > 30m skip
+    // nhanh: AABB cÃ¡ch xa > 30m skip
     const ai = resampled[i], aj = resampled[j];
     let minD = Infinity;
-    // sample thưa hơn cho tốc độ
+    // sample thÆ°a hÆ¡n cho tá»‘c Ä‘á»™
     const aThin = ai.filter((_, k) => k % 2 === 0);
     const bThin = aj.filter((_, k) => k % 2 === 0);
     for (const p of aThin) {
@@ -58,13 +58,13 @@ for (let i = 0; i < rails.length; i++) {
         if (dd < minD) minD = dd;
       }
     }
-    // chiều dài ngắn hơn
+    // chiá»u dÃ i ngáº¯n hÆ¡n
     const lenI = rails[i].points.reduce((s, p, k) => k ? s + Math.hypot(p[0] - rails[i].points[k-1][0], p[1] - rails[i].points[k-1][1]) : 0, 0);
     const lenJ = rails[j].points.reduce((s, p, k) => k ? s + Math.hypot(p[0] - rails[j].points[k-1][0], p[1] - rails[j].points[k-1][1]) : 0, 0);
     const shorter = Math.min(lenI, lenJ);
-    // > 30% chiều dài ngắn hơn nằm trong 8m → cùng cụm
+    // > 30% chiá»u dÃ i ngáº¯n hÆ¡n náº±m trong 8m â†’ cÃ¹ng cá»¥m
     if (minD < 8) {
-      // tính % sample của rail ngắn hơn cách rail kia < 8m
+      // tÃ­nh % sample cá»§a rail ngáº¯n hÆ¡n cÃ¡ch rail kia < 8m
       const src = lenI < lenJ ? ai : aj;
       const dst = lenI < lenJ ? aj : ai;
       let near = 0;
@@ -78,7 +78,7 @@ for (let i = 0; i < rails.length; i++) {
   }
 }
 
-// ── Gom cụm ──
+// â”€â”€ Gom cá»¥m â”€â”€
 const clusters = new Map();
 for (let i = 0; i < rails.length; i++) {
   const root_ = find(i);
@@ -86,7 +86,7 @@ for (let i = 0; i < rails.length; i++) {
   clusters.get(root_).push(i);
 }
 
-console.log(`═══ P1.1: ${rails.length} rails → ${clusters.size} cụm ═══\n`);
+console.log(`â•â•â• P1.1: ${rails.length} rails â†’ ${clusters.size} cá»¥m â•â•â•\n`);
 
 const clusterData = [];
 let ci = 0;
@@ -106,20 +106,20 @@ for (const [root_, members] of clusters) {
     railIds: members.map(i => rails[i].id),
   };
   clusterData.push(info);
-  const elevStr = elevs.length > 1 ? `⚠️ NHIỀU ELEV: [${elevs.join(', ')}]` : `elev=${elevs[0]}`;
-  console.log(`Cụm ${ci}: ${members.length} track · ${elevStr} · ${types.join('/')} · ${Math.round(totalLen)}m · ${names.slice(0,2).join(', ') || '(không tên)'}`);
+  const elevStr = elevs.length > 1 ? `âš ï¸ NHIá»€U ELEV: [${elevs.join(', ')}]` : `elev=${elevs[0]}`;
+  console.log(`Cá»¥m ${ci}: ${members.length} track Â· ${elevStr} Â· ${types.join('/')} Â· ${Math.round(totalLen)}m Â· ${names.slice(0,2).join(', ') || '(khÃ´ng tÃªn)'}`);
 }
 
-// Đếm cụm nhiều elev
+// Äáº¿m cá»¥m nhiá»u elev
 const multiElev = clusterData.filter(c => c.elevs.length > 1).length;
-console.log(`\nCụm nhiều elev: ${multiElev}/${clusters.size}`);
+console.log(`\nCá»¥m nhiá»u elev: ${multiElev}/${clusters.size}`);
 if (multiElev > 0) {
-  console.log('  → GIẢ THUYẾT XÁC NHẬN: có cụm chứa track ở nhiều độ cao khác nhau');
+  console.log('  â†’ GIáº¢ THUYáº¾T XÃC NHáº¬N: cÃ³ cá»¥m chá»©a track á»Ÿ nhiá»u Ä‘á»™ cao khÃ¡c nhau');
   for (const c of clusterData.filter(c => c.elevs.length > 1)) {
-    console.log(`    Cụm ${c.clusterId}: elevs=[${c.elevs.join(',')}] tracks=${c.tracks}`);
+    console.log(`    Cá»¥m ${c.clusterId}: elevs=[${c.elevs.join(',')}] tracks=${c.tracks}`);
   }
 } else {
-  console.log('  → Mỗi cụm 1 elev duy nhất — không cần tách cụm');
+  console.log('  â†’ Má»—i cá»¥m 1 elev duy nháº¥t â€” khÃ´ng cáº§n tÃ¡ch cá»¥m');
 }
 
 // Dump cho P1.2
@@ -127,4 +127,4 @@ writeFileSync(join(root, 'scripts', 'rail_clusters.json'), JSON.stringify({
   clusters: clusterData,
   assignments: rails.map((r, i) => ({ railId: r.id, clusterId: find(i) })),
 }), 'utf8');
-console.log('Dump → scripts/rail_clusters.json');
+console.log('Dump â†’ scripts/rail_clusters.json');

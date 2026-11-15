@@ -1,7 +1,7 @@
 // 🇩🇪 berlinMitte.ts — generator mô phỏng khu vực Mitte, Berlin (dựa trên cấu trúc thực tế)
 // Vòng xuyến Alexanderplatz ở trung tâm, đường Unter den Linden (50 km/h) đi ngang,
 // zona Tempo-30 ở khu vực sinh hoạt góc dưới-trái.
-import type { GameMap, MapRoad, MapSign, MapIntersection, MapNode } from '../../world/mapLoader';
+import type { GameMap, MapRoad, MapSign, MapIntersection, MapNode } from '../../src/world/mapLoader';
 
 const SPACING = 100;
 const GRID = 7; // 7×7 node = 600m × 600m

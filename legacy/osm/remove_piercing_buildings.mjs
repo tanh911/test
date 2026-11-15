@@ -1,11 +1,11 @@
-// 🏗️ remove_piercing_buildings.mjs — xóa buildings xuyên qua rail viaduct deck
-// Idempotent: chạy nhiều lần không thay đổi kết quả
-// Chạy: node scripts/remove_piercing_buildings.mjs
+﻿// ðŸ—ï¸ remove_piercing_buildings.mjs â€” xÃ³a buildings xuyÃªn qua rail viaduct deck
+// Idempotent: cháº¡y nhiá»u láº§n khÃ´ng thay Ä‘á»•i káº¿t quáº£
+// Cháº¡y: node scripts/remove_piercing_buildings.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const map = JSON.parse(readFileSync(join(root, 'src/data/maps/berlin-mitte-clean.json'), 'utf8'));
 const roads = new Map(map.roads.map(r => [r.id, r]));
 
@@ -38,7 +38,7 @@ for (const b of map.buildings) {
   const half = (road.lanesForward + road.lanesBackward) * road.laneWidth / 2;
   const sd = b.side === 'right' ? 1 : -1;
   const off = half + 2.0 + 2.25; // building center: half + 2 + depth/2
-  // Tính normal từ road points tại midS
+  // TÃ­nh normal tá»« road points táº¡i midS
   const rp = road.points;
   let nx = 0, nz = 1;
   let acc = 0;

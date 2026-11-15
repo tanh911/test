@@ -1,17 +1,17 @@
-// 🪧 add_signs.mjs — sinh signs[] cho berlin-mitte-clean.json từ intersections/roads
-// Quy tắc StVO:
-//   • priority_road junction: nhánh KHÔNG main → Z.205 (Vorfahrt gewähren) + shark teeth
-//     (vạch do roadMarkings vẽ theo road.priority); nhánh main → Z.306 (Vorfahrtstraße)
-//   • đường một chiều: Z.220 (Einbahnstraße) ở đầu vào chiều luật + Z.267 (Verbot der
-//     Einfahrt, flip) ở đầu ngược — chỉ khi đầu đó là intersection
-//   • Z.274 (value) khi tiến vào đoạn 30 km/h từ giao lộ có nhánh 50 km/h
-// Chạy: node scripts/add_signs.mjs
+﻿// ðŸª§ add_signs.mjs â€” sinh signs[] cho berlin-mitte-clean.json tá»« intersections/roads
+// Quy táº¯c StVO:
+//   â€¢ priority_road junction: nhÃ¡nh KHÃ”NG main â†’ Z.205 (Vorfahrt gewÃ¤hren) + shark teeth
+//     (váº¡ch do roadMarkings váº½ theo road.priority); nhÃ¡nh main â†’ Z.306 (VorfahrtstraÃŸe)
+//   â€¢ Ä‘Æ°á»ng má»™t chiá»u: Z.220 (EinbahnstraÃŸe) á»Ÿ Ä‘áº§u vÃ o chiá»u luáº­t + Z.267 (Verbot der
+//     Einfahrt, flip) á»Ÿ Ä‘áº§u ngÆ°á»£c â€” chá»‰ khi Ä‘áº§u Ä‘Ã³ lÃ  intersection
+//   â€¢ Z.274 (value) khi tiáº¿n vÃ o Ä‘oáº¡n 30 km/h tá»« giao lá»™ cÃ³ nhÃ¡nh 50 km/h
+// Cháº¡y: node scripts/add_signs.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
 import * as THREE from 'three';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const mapPath = join(root, 'src/data/maps/berlin-mitte-clean.json');
 const map = JSON.parse(readFileSync(mapPath, 'utf8'));
 
@@ -19,17 +19,17 @@ const roadsById = new Map(map.roads.map((r) => [r.id, r]));
 const signs = [];
 const seen = new Set();
 const seen274 = new Set();
-const seen267 = new Set(); // (roadId|type|s rounded) chống trùng
+const seen267 = new Set(); // (roadId|type|s rounded) chá»‘ng trÃ¹ng
 function addSign(type, roadId, s, side, value, flip) {
   const road = roadsById.get(roadId);
   if (!road) return;
   const len = roadCurveOf(road).length;
   if (s < 2 || s > len - 2) return;
-  // chống trùng: cùng road, cùng type, lệch < 3 m → bỏ
+  // chá»‘ng trÃ¹ng: cÃ¹ng road, cÃ¹ng type, lá»‡ch < 3 m â†’ bá»
   const key = `${roadId}|${type}|${Math.round(s / 3)}`;
   if (seen.has(key)) return;
-  // Biển không được đứng trên lòng đường (của road khác tại ngã tư nhọn):
-  // lùi dọc đường 2 m/bước tối đa 12 m tới khi vị trí thoáng
+  // Biá»ƒn khÃ´ng Ä‘Æ°á»£c Ä‘á»©ng trÃªn lÃ²ng Ä‘Æ°á»ng (cá»§a road khÃ¡c táº¡i ngÃ£ tÆ° nhá»n):
+  // lÃ¹i dá»c Ä‘Æ°á»ng 2 m/bÆ°á»›c tá»‘i Ä‘a 12 m tá»›i khi vá»‹ trÃ­ thoÃ¡ng
   const sideNum = side === 'right' ? 1 : -1; // signPosClear can so +-1, khong nhan chuoi!
   const stepDir = s < len * 0.5 ? 2 : -2;
   let sTry = s;
@@ -57,8 +57,8 @@ for (const r of map.roads) {
 }
 const polylineLen = (pts) => pts.reduce((acc, p, i) => (i ? acc + Math.hypot(p[0] - pts[i - 1][0], p[1] - pts[i - 1][1]) : 0), 0);
 
-// Nội suy Catmull-Rom Y HỆT mapLoader.roadCurve (centripetal, step 2 m) — polyline
-// lệch vài mét trên road cong làm biển đâm vào lòng đường (bug audit bắt được)
+// Ná»™i suy Catmull-Rom Y Há»†T mapLoader.roadCurve (centripetal, step 2 m) â€” polyline
+// lá»‡ch vÃ i mÃ©t trÃªn road cong lÃ m biá»ƒn Ä‘Ã¢m vÃ o lÃ²ng Ä‘Æ°á»ng (bug audit báº¯t Ä‘Æ°á»£c)
 const curveCache = new Map();
 function roadCurveOf(road) {
   let c = curveCache.get(road.id);
@@ -75,7 +75,7 @@ function roadCurveOf(road) {
       pts.push({ x: p.x, z: p.z, nx: -t.z, nz: t.x });
     }
     if (!isFinite(length) || pts.length < 2) {
-      // fallback tuyến tính — road dị thường (trùng điểm/NaN) vẫn đặt được biển
+      // fallback tuyáº¿n tÃ­nh â€” road dá»‹ thÆ°á»ng (trÃ¹ng Ä‘iá»ƒm/NaN) váº«n Ä‘áº·t Ä‘Æ°á»£c biá»ƒn
       console.warn('curve fallback cho road', road.id);
       length = road.points.reduce((acc, p, i) => (i ? acc + Math.hypot(p[0] - road.points[i - 1][0], p[1] - road.points[i - 1][1]) : 0), 0);
       pts.length = 0;
@@ -106,7 +106,7 @@ function roadCurveAt(road, s) {
   return { x, z, nx: nx / nl, nz: nz / nl, tx: nz / nl, tz: -nx / nl };
 }
 
-// ── Building strips (bản copy buildingStrips của buildings.ts) — né nhà khi đặt biển ──
+// â”€â”€ Building strips (báº£n copy buildingStrips cá»§a buildings.ts) â€” nÃ© nhÃ  khi Ä‘áº·t biá»ƒn â”€â”€
 const BUILDING_DEPTH = 9;
 function buildingStripsLocal(b) {
   const road = roadsById.get(b.roadId);
@@ -141,13 +141,13 @@ for (const b of map.buildings) {
   if (st) allStrips.push(...st);
 }
 
-// Tâm biển (world) có nằm trên lòng đường nào không? — như pointInAnyRoad của trafficLights
+// TÃ¢m biá»ƒn (world) cÃ³ náº±m trÃªn lÃ²ng Ä‘Æ°á»ng nÃ o khÃ´ng? â€” nhÆ° pointInAnyRoad cá»§a trafficLights
 function signPosClear(type, roadId, s, side) {
   const road = roadsById.get(roadId);
   if (!road) return { clear: false, x: 0, z: 0 };
   const p = roadCurveAt(road, s);
   const half = ((road.lanesForward + road.lanesBackward) * road.laneWidth) / 2;
-  // pháp tuyến flow: (nx,nz) là PHẢI flow (khớp RoadPoint của mapLoader)
+  // phÃ¡p tuyáº¿n flow: (nx,nz) lÃ  PHáº¢I flow (khá»›p RoadPoint cá»§a mapLoader)
   const off = half + 1.2;
   const x = p.x + p.nx * side * off;
   const z = p.z + p.nz * side * off;
@@ -163,14 +163,14 @@ function signPosClear(type, roadId, s, side) {
       }
     }
   }
-  // trong nhà?
+  // trong nhÃ ?
   for (const [a, b2, c, d] of allStrips) {
     if (x > a - 0.2 && x < c + 0.2 && z > b2 - 0.2 && z < d + 0.2) return { clear: false, x, z };
   }
   return { clear: true, x, z };
 }
 
-// Kiểm tra đường đôi có dải phân cách (2 nhánh one-way ngược chiều cùng tuyến phố, vd Dorotheenstraße, Unter den Linden, Friedrichstraße)
+// Kiá»ƒm tra Ä‘Æ°á»ng Ä‘Ã´i cÃ³ dáº£i phÃ¢n cÃ¡ch (2 nhÃ¡nh one-way ngÆ°á»£c chiá»u cÃ¹ng tuyáº¿n phá»‘, vd DorotheenstraÃŸe, Unter den Linden, FriedrichstraÃŸe)
 function isDividedTwinRoad(road) {
   const c1 = roadCurveAt(road, roadCurveOf(road).length * 0.5);
   for (const r2 of map.roads) {
@@ -179,7 +179,7 @@ function isDividedTwinRoad(road) {
     const c2 = roadCurveAt(r2, roadCurveOf(r2).length * 0.5);
     const dist = Math.hypot(c1.x - c2.x, c1.z - c2.z);
     const dot = c1.tx * c2.tx + c1.tz * c2.tz;
-    // Cùng tên phố có nhánh ngược chiều trong bán kính 120 m, hoặc đường đôi song song ngược chiều trong 28 m
+    // CÃ¹ng tÃªn phá»‘ cÃ³ nhÃ¡nh ngÆ°á»£c chiá»u trong bÃ¡n kÃ­nh 120 m, hoáº·c Ä‘Æ°á»ng Ä‘Ã´i song song ngÆ°á»£c chiá»u trong 28 m
     if (road.name && r2.name === road.name && dist < 120 && dot < -0.35) return true;
     if (dist < 28 && dot < -0.7 && r2.lanesBackward === 0 && road.lanesBackward === 0) return true;
   }
@@ -196,10 +196,10 @@ for (const ix of map.intersections) {
     const half = ((road.lanesForward + road.lanesBackward) * road.laneWidth) / 2;
     const len = roadCurveOf(road).length;
     const margin = Math.min(len * 0.3, half + 3.2);
-    const sEnd = len - margin; // điểm gần nút to (approach chiều xuôi / entrance chiều ngược)
-    const sFrom = margin;      // điểm gần nút from (entrance chiều xuôi / approach chiều ngược)
+    const sEnd = len - margin; // Ä‘iá»ƒm gáº§n nÃºt to (approach chiá»u xuÃ´i / entrance chiá»u ngÆ°á»£c)
+    const sFrom = margin;      // Ä‘iá»ƒm gáº§n nÃºt from (entrance chiá»u xuÃ´i / approach chiá»u ngÆ°á»£c)
 
-    // ── priority_road: Z.205 / Z.306 theo priority của từng road (đặt cho xe ĐANG TIẾN VÀO nút) ──
+    // â”€â”€ priority_road: Z.205 / Z.306 theo priority cá»§a tá»«ng road (Ä‘áº·t cho xe ÄANG TIáº¾N VÃ€O nÃºt) â”€â”€
     if (ix.rule === 'priority_road') {
       const isMain = road.priority === 'main';
       if (road.to === ix.nodeId && road.lanesForward > 0) {
@@ -210,7 +210,7 @@ for (const ix of map.intersections) {
       }
     }
 
-    // ── Z.274: đặt tại ĐẦU VÀO đoạn đường giới hạn tốc độ thấp hơn (vd Tempo 30) ──
+    // â”€â”€ Z.274: Ä‘áº·t táº¡i Äáº¦U VÃ€O Ä‘oáº¡n Ä‘Æ°á»ng giá»›i háº¡n tá»‘c Ä‘á»™ tháº¥p hÆ¡n (vd Tempo 30) â”€â”€
     if (road.speedLimit < maxLimit && !seen274.has(road.id)) {
       if (road.from === ix.nodeId && road.lanesForward > 0) {
         addSign('274', road.id, sFrom, 'right', road.speedLimit);
@@ -220,7 +220,7 @@ for (const ix of map.intersections) {
       }
     }
 
-    // ── Một chiều thật sự (không phải đường đôi 2 chiều tách làn): Z.220 + Z.267 ──
+    // â”€â”€ Má»™t chiá»u tháº­t sá»± (khÃ´ng pháº£i Ä‘Æ°á»ng Ä‘Ã´i 2 chiá»u tÃ¡ch lÃ n): Z.220 + Z.267 â”€â”€
     if (!isDividedTwinRoad(road)) {
       const oneWayForward = road.lanesBackward === 0 && road.lanesForward > 0;
       const oneWayBackward = road.lanesForward === 0 && road.lanesBackward > 0;
@@ -239,4 +239,4 @@ map.signs = signs;
 writeFileSync(mapPath, JSON.stringify(map, null, 2) + '\n');
 const byType = {};
 for (const s of signs) byType[s.type] = (byType[s.type] || 0) + 1;
-console.log(`Đã sinh ${signs.length} biển →`, JSON.stringify(byType));
+console.log(`ÄÃ£ sinh ${signs.length} biá»ƒn â†’`, JSON.stringify(byType));

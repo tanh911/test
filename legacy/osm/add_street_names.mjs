@@ -1,15 +1,15 @@
-// 🏷️ add_street_names.mjs — gắn tên phố thật (OSM Berlin) vào từng road của
-// berlin-mitte-clean.json. Match hình học: mỗi road → named way gần nhất.
-// Chạy: node scripts/add_street_names.mjs
+﻿// ðŸ·ï¸ add_street_names.mjs â€” gáº¯n tÃªn phá»‘ tháº­t (OSM Berlin) vÃ o tá»«ng road cá»§a
+// berlin-mitte-clean.json. Match hÃ¬nh há»c: má»—i road â†’ named way gáº§n nháº¥t.
+// Cháº¡y: node scripts/add_street_names.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const mapPath = join(root, 'src/data/maps/berlin-mitte-clean.json');
 const osmPath = join(root, 'scripts/osm_pbf_extracted_stadt.json');
 
-// ── gốc toạ độ của map (khớp scripts/osm_to_roadgraph.py) ──
+// â”€â”€ gá»‘c toáº¡ Ä‘á»™ cá»§a map (khá»›p scripts/osm_to_roadgraph.py) â”€â”€
 const R = 6371000, refLat = 52.5170, refLon = 13.3888;
 
 const map = JSON.parse(readFileSync(mapPath, 'utf8'));
@@ -51,6 +51,6 @@ for (const r of map.roads) {
 }
 
 writeFileSync(mapPath, JSON.stringify(map, null, 2) + '\n');
-console.log(`Đã gắn tên: ${named} road chắc chắn, ${weak} road sai số thấp (nhãn tham khảo) / tổng ${map.roads.length}`);
+console.log(`ÄÃ£ gáº¯n tÃªn: ${named} road cháº¯c cháº¯n, ${weak} road sai sá»‘ tháº¥p (nhÃ£n tham kháº£o) / tá»•ng ${map.roads.length}`);
 const uniq = [...new Set(map.roads.map((r) => r.name).filter(Boolean))];
-console.log(`Số phố khác nhau: ${uniq.length}`);
+console.log(`Sá»‘ phá»‘ khÃ¡c nhau: ${uniq.length}`);

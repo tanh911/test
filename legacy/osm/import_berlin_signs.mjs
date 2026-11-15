@@ -1,26 +1,26 @@
-// 🪧 import_berlin_signs.mjs — đổ biển báo THỰC (WFS GDI-Berlin "Straßenbefahrung") vào
-// berlin-mitte-clean.json, thay signs[] sinh giả (add_signs.mjs) + HOÀN THIỆN biển luật thi.
-// Nguồn: https://gdi.berlin.de/services/wfs/strassenbefahrung — layer aa_verkehrszeichen,
-// license dl-de-zero-2.0 (≈ CC0), khảo sát 2014/2015. Mỗi cột (mast) có vkz_zeiche =
-// danh sách mã StVO gộp 1 cột — khớp cơ chế bucket của sim (≤3 bảng/cột, ≤1.6 m).
+﻿// ðŸª§ import_berlin_signs.mjs â€” Ä‘á»• biá»ƒn bÃ¡o THá»°C (WFS GDI-Berlin "StraÃŸenbefahrung") vÃ o
+// berlin-mitte-clean.json, thay signs[] sinh giáº£ (add_signs.mjs) + HOÃ€N THIá»†N biá»ƒn luáº­t thi.
+// Nguá»“n: https://gdi.berlin.de/services/wfs/strassenbefahrung â€” layer aa_verkehrszeichen,
+// license dl-de-zero-2.0 (â‰ˆ CC0), kháº£o sÃ¡t 2014/2015. Má»—i cá»™t (mast) cÃ³ vkz_zeiche =
+// danh sÃ¡ch mÃ£ StVO gá»™p 1 cá»™t â€” khá»›p cÆ¡ cháº¿ bucket cá»§a sim (â‰¤3 báº£ng/cá»™t, â‰¤1.6 m).
 //
-// Chiến lược HYBRID (road graph chỉ phủ ~1/3 đường phố thật):
-//   1) Biển THỰC: snap masts vào road gần nhất (≤12 m) — sai vị trí thì bỏ, không đoán.
-//   2) Biển HOÀN THIỆN (synthetic): 306/205 tại junction priority_road + 267 tại đường
-//      một chiều — CHỈ nơi data thật không có (bảo đảm luật thi, passing roadAudit.test).
-// Không có azimuth (lage=99 hết) → side tính hình học, flip theo chiều:
-//   flip=false → phục vụ chiều from→to (sim vẽ mặt quay ngược flow), flip=true → chiều ngược.
-// Chạy: node scripts/import_berlin_signs.mjs
+// Chiáº¿n lÆ°á»£c HYBRID (road graph chá»‰ phá»§ ~1/3 Ä‘Æ°á»ng phá»‘ tháº­t):
+//   1) Biá»ƒn THá»°C: snap masts vÃ o road gáº§n nháº¥t (â‰¤12 m) â€” sai vá»‹ trÃ­ thÃ¬ bá», khÃ´ng Ä‘oÃ¡n.
+//   2) Biá»ƒn HOÃ€N THIá»†N (synthetic): 306/205 táº¡i junction priority_road + 267 táº¡i Ä‘Æ°á»ng
+//      má»™t chiá»u â€” CHá»ˆ nÆ¡i data tháº­t khÃ´ng cÃ³ (báº£o Ä‘áº£m luáº­t thi, passing roadAudit.test).
+// KhÃ´ng cÃ³ azimuth (lage=99 háº¿t) â†’ side tÃ­nh hÃ¬nh há»c, flip theo chiá»u:
+//   flip=false â†’ phá»¥c vá»¥ chiá»u fromâ†’to (sim váº½ máº·t quay ngÆ°á»£c flow), flip=true â†’ chiá»u ngÆ°á»£c.
+// Cháº¡y: node scripts/import_berlin_signs.mjs
 import { readFileSync, writeFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const mapPath = join(root, 'src/data/maps/berlin-mitte-clean.json');
 const cachePath = join(root, 'scripts/berlin_signs_wfs_cache.json');
 const backupPath = join(root, 'scripts/berlin_signs_synthetic_backup.json');
 
-// ── Quy đổi lat/lon → mét local: CÙNG GỐC với osm_to_roadgraph.py / add_water.mjs ──
+// â”€â”€ Quy Ä‘á»•i lat/lon â†’ mÃ©t local: CÃ™NG Gá»C vá»›i osm_to_roadgraph.py / add_water.mjs â”€â”€
 const R = 6371000, refLat = 52.5170, refLon = 13.3888;
 const toXY = (lat, lon) => [
   ((lon - refLon) * Math.PI) / 180 * R * Math.cos((refLat * Math.PI) / 180),
@@ -29,32 +29,32 @@ const toXY = (lat, lon) => [
 
 const WFS = 'https://gdi.berlin.de/services/wfs/strassenbefahrung';
 const PAGE = 1000;
-const MAX_SNAP = 12;   // m — quá xa road coi như biển của con đường không có trong graph
+const MAX_SNAP = 12;   // m â€” quÃ¡ xa road coi nhÆ° biá»ƒn cá»§a con Ä‘Æ°á»ng khÃ´ng cÃ³ trong graph
 const BUILDING_DEPTH = 9;  // = buildings.ts
 const SWEEP_STEP = 3;      // = buildings.ts
 
-// ── Bảng mã StVO → MapSign.type (chỉ import loại sim có SIGN_DEFS) ──
+// â”€â”€ Báº£ng mÃ£ StVO â†’ MapSign.type (chá»‰ import loáº¡i sim cÃ³ SIGN_DEFS) â”€â”€
 const SIM_TYPES = new Set(['205','206','301','306','102','274','274.1','220','267','283','286','314','350','101','138','215']);
 function mapCode(raw) {
   const c = raw.trim();
-  if (!c || c === 'SZ') return null;               // SZ = ký hiệu không xác định
-  if (/^1\d{3}/.test(c)) return null;              // 10xx = Zusatzzeichen (bảng phụ dưới biển chính)
-  if (/^e\d/i.test(c)) return null;                // e600… = mã điện/thiết bị
+  if (!c || c === 'SZ') return null;               // SZ = kÃ½ hiá»‡u khÃ´ng xÃ¡c Ä‘á»‹nh
+  if (/^1\d{3}/.test(c)) return null;              // 10xx = Zusatzzeichen (báº£ng phá»¥ dÆ°á»›i biá»ƒn chÃ­nh)
+  if (/^e\d/i.test(c)) return null;                // e600â€¦ = mÃ£ Ä‘iá»‡n/thiáº¿t bá»‹
   const base = c.split('-')[0];
-  if (base === '274' && c.includes('.')) {         // 274.1 (Zone-Anfang); 274.2 (Ende) sim không có def
+  if (base === '274' && c.includes('.')) {         // 274.1 (Zone-Anfang); 274.2 (Ende) sim khÃ´ng cÃ³ def
     return c.startsWith('274.1') ? { type: '274.1' } : null;
   }
-  if (base === '274') {                            // 274-30 → value 30
+  if (base === '274') {                            // 274-30 â†’ value 30
     const v = parseInt(c.split('-')[1], 10);
     return Number.isFinite(v) && v >= 3 && v <= 130 ? { type: '274', value: v } : null;
   }
-  if (SIM_TYPES.has(base)) return { type: base };  // 283-10 / 314-20 / 220-10 / 286-30… → loại gốc
+  if (SIM_TYPES.has(base)) return { type: base };  // 283-10 / 314-20 / 220-10 / 286-30â€¦ â†’ loáº¡i gá»‘c
   return null;
 }
 
 async function fetchSigns() {
   if (existsSync(cachePath)) {
-    console.log('Dùng cache WFS:', cachePath);
+    console.log('DÃ¹ng cache WFS:', cachePath);
     return JSON.parse(readFileSync(cachePath, 'utf8'));
   }
   const dLat = (674 / R) * 180 / Math.PI;
@@ -68,7 +68,7 @@ async function fetchSigns() {
     if (!res.ok) throw new Error(`WFS HTTP ${res.status}`);
     const d = await res.json();
     out.push(...(d.features || []));
-    process.stdout.write(`\r  WFS: ${out.length}/${d.totalFeatures ?? '?'} cột`);
+    process.stdout.write(`\r  WFS: ${out.length}/${d.totalFeatures ?? '?'} cá»™t`);
     if (out.length >= (d.totalFeatures ?? 0) || !(d.features || []).length) break;
   }
   process.stdout.write('\n');
@@ -76,7 +76,7 @@ async function fetchSigns() {
   return out;
 }
 
-// ── Geometry helpers — đôi xứng với mapLoader.ts / roadAudit.test.ts ──
+// â”€â”€ Geometry helpers â€” Ä‘Ã´i xá»©ng vá»›i mapLoader.ts / roadAudit.test.ts â”€â”€
 function prepRoads(map) {
   return map.roads.map((r) => {
     const seg = [];
@@ -110,19 +110,19 @@ function snap(roads, x, z) {
       const px = g.ax + g.tx * t, pz = g.az + g.tz * t;
       const d = Math.hypot(x - px, z - pz);
       if (!best || d < best.dist) {
-        const cross = g.tx * (z - pz) - g.tz * (x - px); // >0: cùng phía right-vector (-tz,tx) của sim
+        const cross = g.tx * (z - pz) - g.tz * (x - px); // >0: cÃ¹ng phÃ­a right-vector (-tz,tx) cá»§a sim
         best = { road: rr.road, len: rr.len, dist: d, s: g.s0 + t, side: cross > 0 ? 'right' : 'left', px, pz, tx: g.tx, tz: g.tz };
       }
     }
   }
   return best;
 }
-// Building strips: ĐỌC TỪ DUMP RUNTIME (src/world/dumpStrips.test.ts dùng chính
-// buildings.ts) — parity tuyệt đối với runtime, hết lệch polyline-vs-curve làm
-// skip sai 125 cột hợp lệ (bug coverage 43%).
+// Building strips: Äá»ŒC Tá»ª DUMP RUNTIME (src/world/dumpStrips.test.ts dÃ¹ng chÃ­nh
+// buildings.ts) â€” parity tuyá»‡t Ä‘á»‘i vá»›i runtime, háº¿t lá»‡ch polyline-vs-curve lÃ m
+// skip sai 125 cá»™t há»£p lá»‡ (bug coverage 43%).
 const stripsRuntime = JSON.parse(readFileSync(join(root, 'scripts/strips_dump.json'), 'utf8'));
 const curvesRuntime = JSON.parse(readFileSync(join(root, 'scripts/curves_dump.json'), 'utf8'));
-/** roadPointAt đúng như mapLoader (nội suy giữa curve samples đã dump) */
+/** roadPointAt Ä‘Ãºng nhÆ° mapLoader (ná»™i suy giá»¯a curve samples Ä‘Ã£ dump) */
 function roadPointAtEq(roadId, s) {
   const c = curvesRuntime[roadId];
   if (!c) return null;
@@ -158,7 +158,7 @@ function polyPointAt(pts, s) {
   const l = Math.hypot(dx, dz) || 1;
   return { x: pts[pts.length - 1][0], z: pts[pts.length - 1][1], tx: dx / l, tz: dz / l, heading: Math.atan2(dx / l, dz / l) };
 }
-// Kiểm tra vị trí đứng của cột biển (giống audit): không giữa đường (road khác) / trong nhà
+// Kiá»ƒm tra vá»‹ trÃ­ Ä‘á»©ng cá»§a cá»™t biá»ƒn (giá»‘ng audit): khÃ´ng giá»¯a Ä‘Æ°á»ng (road khÃ¡c) / trong nhÃ 
 function posClear(roads, strips, x, z) {
   for (const rr of roads) {
     if (distToRoad([rr], x, z) < halfWidth(rr.road) - 0.3) return false;
@@ -169,13 +169,13 @@ function posClear(roads, strips, x, z) {
   return true;
 }
 
-// ── Main ──
+// â”€â”€ Main â”€â”€
 const map = JSON.parse(readFileSync(mapPath, 'utf8'));
-console.log(`Map: ${map.roads.length} roads, hiện có ${map.signs.length} signs`);
+console.log(`Map: ${map.roads.length} roads, hiá»‡n cÃ³ ${map.signs.length} signs`);
 
 if (!existsSync(backupPath)) {
   writeFileSync(backupPath, JSON.stringify(map.signs, null, 2), 'utf8');
-  console.log('Backup signs cũ →', backupPath);
+  console.log('Backup signs cÅ© â†’', backupPath);
 }
 
 const masts = await fetchSigns();
@@ -183,19 +183,19 @@ const roads = prepRoads(map);
 const roadsById = new Map(map.roads.map((r) => [r.id, r]));
 const strips = stripsRuntime;
 
-// ── 1. Biển THỰC ──
+// â”€â”€ 1. Biá»ƒn THá»°C â”€â”€
 const realSigns = [];
 const stats = {
   mastsTotal: masts.length, mastsUsed: 0, mastsNoCode: 0, mastsTooFar: 0,
   skippedClash: 0, signs: 0, byType: new Map(), flipTrue: 0, snapDists: [],
 };
 const seen = new Set();
-const normName = (s) => (s || '').toLowerCase().replaceAll('ß', 'ss').replace(/\s+/g, ' ').trim();
+const normName = (s) => (s || '').toLowerCase().replaceAll('ÃŸ', 'ss').replace(/\s+/g, ' ').trim();
 let nameMatch = 0, nameChecked = 0;
 
 for (const f of masts) {
   const p = f.properties || {};
-  let [lon, lat] = f.geometry.coordinates; // server trả lon,lat (verify: 13.4 lon < 52.5 lat)
+  let [lon, lat] = f.geometry.coordinates; // server tráº£ lon,lat (verify: 13.4 lon < 52.5 lat)
   if (lat < lon) [lon, lat] = [lat, lon];
   const [x, z] = toXY(lat, lon);
 
@@ -203,12 +203,12 @@ for (const f of masts) {
   if (!codes.length) { stats.mastsNoCode++; continue; }
 
   const hit = snap(roads, x, z);
-  // Biển thật đứng ở CURB: cột cách tim đường quá xa (quảng trường/pedestrian
-  // zone rộng) = snap nhầm road → bỏ (tránh biển đứng giữa sânoplaza)
+  // Biá»ƒn tháº­t Ä‘á»©ng á»Ÿ CURB: cá»™t cÃ¡ch tim Ä‘Æ°á»ng quÃ¡ xa (quáº£ng trÆ°á»ng/pedestrian
+  // zone rá»™ng) = snap nháº§m road â†’ bá» (trÃ¡nh biá»ƒn Ä‘á»©ng giá»¯a sÃ¢noplaza)
   if (!hit || hit.dist > MAX_SNAP || hit.dist > halfWidth(hit.road) + 6 || hit.len < 5 || hit.s < 1.5 || hit.s > hit.len - 1.5) { stats.mastsTooFar++; continue; }
 
-  // s theo CHIỀU DÀI CURVE (runtime) — tìm sample curve gần điểm snap, dùng MỘT
-  // s duy nhất cho cả posClear lẫn sign.s (tránh check chỗ này render chỗ khác)
+  // s theo CHIá»€U DÃ€I CURVE (runtime) â€” tÃ¬m sample curve gáº§n Ä‘iá»ƒm snap, dÃ¹ng Má»˜T
+  // s duy nháº¥t cho cáº£ posClear láº«n sign.s (trÃ¡nh check chá»— nÃ y render chá»— khÃ¡c)
   const half = halfWidth(hit.road);
   const cRt = curvesRuntime[hit.road.id];
   let sCurve = hit.s;
@@ -227,8 +227,8 @@ for (const f of masts) {
   if (!posClear(roads, strips, sx, sz)) { stats.skippedClash++; continue; }
   if (sCurve < 1.5 || sCurve > cRt.length - 1.5) { stats.skippedClash++; continue; }
 
-  // Đường một chiều: mọi biển phục vụ chiều duy nhất; hai chiều: biển bên trái from→to
-  // là "bên phải" của chiều ngược → flip
+  // ÄÆ°á»ng má»™t chiá»u: má»i biá»ƒn phá»¥c vá»¥ chiá»u duy nháº¥t; hai chiá»u: biá»ƒn bÃªn trÃ¡i fromâ†’to
+  // lÃ  "bÃªn pháº£i" cá»§a chiá»u ngÆ°á»£c â†’ flip
   const fwd = hit.road.lanesForward > 0, bwd = hit.road.lanesBackward > 0;
   const flip = fwd && !bwd ? false : !fwd && bwd ? true : hit.side === 'left';
 
@@ -251,10 +251,10 @@ for (const f of masts) {
   }
 }
 
-// ── 2. HOÀN THIỆN biển luật thi (synthetic, chỉ nơi thật không phủ) ──
+// â”€â”€ 2. HOÃ€N THIá»†N biá»ƒn luáº­t thi (synthetic, chá»‰ nÆ¡i tháº­t khÃ´ng phá»§) â”€â”€
 const hasSignNear = (roadId, type, s, tol = 15) =>
   realSigns.some((sg) => sg.roadId === roadId && sg.type === type && Math.abs(sg.s - s) < tol);
-// thử đặt tại s, dịch 2 m/bước (±12 m) tới khi vị trí thoáng
+// thá»­ Ä‘áº·t táº¡i s, dá»‹ch 2 m/bÆ°á»›c (Â±12 m) tá»›i khi vá»‹ trÃ­ thoÃ¡ng
 function placeSynthetic(type, roadId, s, side, flip, value) {
   const road = roadsById.get(roadId);
   if (!road) return null;
@@ -283,9 +283,9 @@ for (const ix of map.intersections) {
   const touching = map.roads.filter((r) => r.from === ix.nodeId || r.to === ix.nodeId);
   const already = realSigns.some((sg) => (sg.type === '205' || sg.type === '306') && touching.some((r) => r.id === sg.roadId));
   if (already) continue;
-  // 306 trên nhánh main (đầu nối vào junction); thiếu thì 205 trên nhánh nhường đường.
-  // Biển chiếu về xe đang tiến tới junction: junction ở `to` → flip=false/side right;
-  // junction ở `from` → xe đi ngược flow, side phải của HỌ = trái hình học → flip=true/side left.
+  // 306 trÃªn nhÃ¡nh main (Ä‘áº§u ná»‘i vÃ o junction); thiáº¿u thÃ¬ 205 trÃªn nhÃ¡nh nhÆ°á»ng Ä‘Æ°á»ng.
+  // Biá»ƒn chiáº¿u vá» xe Ä‘ang tiáº¿n tá»›i junction: junction á»Ÿ `to` â†’ flip=false/side right;
+  // junction á»Ÿ `from` â†’ xe Ä‘i ngÆ°á»£c flow, side pháº£i cá»§a Há»Œ = trÃ¡i hÃ¬nh há»c â†’ flip=true/side left.
   let placed = null;
   for (const r of touching.filter((r) => r.priority === 'main')) {
     const atTo = r.to === ix.nodeId;
@@ -304,11 +304,11 @@ for (const ix of map.intersections) {
 for (const r of map.roads) {
   const oneWay = r.lanesBackward === 0 || r.lanesForward === 0;
   if (!oneWay) continue;
-  const wrongEnd = r.lanesBackward === 0 ? r.to : r.from; // đầu NGƯỢC chiều luật
+  const wrongEnd = r.lanesBackward === 0 ? r.to : r.from; // Ä‘áº§u NGÆ¯á»¢C chiá»u luáº­t
   if (!nodeIsIx.has(wrongEnd)) continue;
   if (realSigns.some((sg) => sg.roadId === r.id && sg.type === '267')) continue;
-  // 267 chiếu về xe đi ngược luật — đứng bên phải CỦA HỌ:
-  // one-way forward (ngược chiều = đi -flow) → flip=true, side left; backward → flip=false, side right
+  // 267 chiáº¿u vá» xe Ä‘i ngÆ°á»£c luáº­t â€” Ä‘á»©ng bÃªn pháº£i Cá»¦A Há»Œ:
+  // one-way forward (ngÆ°á»£c chiá»u = Ä‘i -flow) â†’ flip=true, side left; backward â†’ flip=false, side right
   const len = polyLen(r.points);
   const placed = r.lanesBackward === 0
     ? placeSynthetic('267', r.id, len - 6, 'left', true)
@@ -319,20 +319,20 @@ for (const r of map.roads) {
 map.signs = [...realSigns, ...synthetic];
 writeFileSync(mapPath, JSON.stringify(map, null, 2), 'utf8');
 
-// ── 3. Báo cáo ──
+// â”€â”€ 3. BÃ¡o cÃ¡o â”€â”€
 const pct = (arr, q) => arr.slice().sort((a, b) => a - b)[Math.floor(q * (arr.length - 1))];
 console.log(`
-────────────────────────────────────────────
-Cột biển WFS trong vùng map : ${stats.mastsTotal}
-  ├ dùng được               : ${stats.mastsUsed}
-  ├ không còn mã hợp lệ     : ${stats.mastsNoCode}  (SZ / chỉ Zusatzzeichen)
-  ├ quá xa road (>12 m)     : ${stats.mastsTooFar}  (đường không có trong graph)
-  └ vị trí đè road/nhà      : ${stats.skippedClash}
-Biển THỰC đã đặt            : ${stats.signs}  (flip=true: ${stats.flipTrue})
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+Cá»™t biá»ƒn WFS trong vÃ¹ng map : ${stats.mastsTotal}
+  â”œ dÃ¹ng Ä‘Æ°á»£c               : ${stats.mastsUsed}
+  â”œ khÃ´ng cÃ²n mÃ£ há»£p lá»‡     : ${stats.mastsNoCode}  (SZ / chá»‰ Zusatzzeichen)
+  â”œ quÃ¡ xa road (>12 m)     : ${stats.mastsTooFar}  (Ä‘Æ°á»ng khÃ´ng cÃ³ trong graph)
+  â”” vá»‹ trÃ­ Ä‘Ã¨ road/nhÃ       : ${stats.skippedClash}
+Biá»ƒn THá»°C Ä‘Ã£ Ä‘áº·t            : ${stats.signs}  (flip=true: ${stats.flipTrue})
   ${[...stats.byType.entries()].sort((a, b) => b[1] - a[1]).map(([t, n]) => `${t}:${n}`).join('  ')}
-Biển HOÀN THIỆN (luật thi)  : ${synthetic.length}  { 306:${synAdded['306']}  205:${synAdded['205']}  267:${synAdded['267']} }
-TỔNG signs trong map        : ${map.signs.length}
+Biá»ƒn HOÃ€N THIá»†N (luáº­t thi)  : ${synthetic.length}  { 306:${synAdded['306']}  205:${synAdded['205']}  267:${synAdded['267']} }
+Tá»”NG signs trong map        : ${map.signs.length}
 Snap distance p50/p90       : ${pct(stats.snapDists, .5).toFixed(1)} m / ${pct(stats.snapDists, .9).toFixed(1)} m
-Tên road khớp strasse WFS   : ${nameMatch}/${nameChecked} = ${((nameMatch / Math.max(1, nameChecked)) * 100).toFixed(0)}%
-────────────────────────────────────────────
-Tiếp: npx vitest run src/world/roadAudit.test.ts src/world/map-clean.test.ts`);
+TÃªn road khá»›p strasse WFS   : ${nameMatch}/${nameChecked} = ${((nameMatch / Math.max(1, nameChecked)) * 100).toFixed(0)}%
+â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
+Tiáº¿p: npx vitest run src/world/roadAudit.test.ts src/world/map-clean.test.ts`);

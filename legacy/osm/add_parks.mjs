@@ -1,11 +1,11 @@
-// 🌳 add_parks.mjs — bake polygon công viên (leisure=park/garden OSM) vào
-// berlin-mitte-clean.json (parks: [{id,name,points}]) — CÙNG GỐC 52.5170/13.3888
-// Chạy: node scripts/add_parks.mjs
+﻿// ðŸŒ³ add_parks.mjs â€” bake polygon cÃ´ng viÃªn (leisure=park/garden OSM) vÃ o
+// berlin-mitte-clean.json (parks: [{id,name,points}]) â€” CÃ™NG Gá»C 52.5170/13.3888
+// Cháº¡y: node scripts/add_parks.mjs
 import { readFileSync, writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 
-const root = join(dirname(fileURLToPath(import.meta.url)), '..');
+const root = join(dirname(fileURLToPath(import.meta.url)), '..', '..');
 const mapPath = join(root, 'src/data/maps/berlin-mitte-clean.json');
 const osmPath = join(root, 'scripts/osm_pbf_extracted_stadt.json');
 
@@ -27,7 +27,7 @@ for (const pk of osm.parks || []) {
       return [Math.round(x * 100) / 100, Math.round(z * 100) / 100];
     });
   if (pts.length < 3) continue;
-  // bỏ nếu toàn bộ ngoài map (x/z ±750)
+  // bá» náº¿u toÃ n bá»™ ngoÃ i map (x/z Â±750)
   const inside = pts.some(([x, z]) => x > -750 && x < 750 && z > -750 && z < 750);
   if (!inside) continue;
   parks.push({ id: String(pk.id), name: pk.tags?.name || '', points: pts });
