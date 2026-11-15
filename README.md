@@ -1,89 +1,70 @@
-# 🚗 Führerschein AI - Học Lý Thuyết Lái Xe Đức Song Ngữ Đức - Việt
+# 🚗 Führerschein AI & 3D Driving Simulator (StVO)
 
-**Führerschein AI** là ứng dụng web di động (Mobile-First Web App) được thiết kế đặc biệt giúp cộng đồng người Việt tại Đức ôn tập và tự tin thi đỗ bằng lái xe ô tô hạng B (**Klasse B**). Ứng dụng kết hợp giao diện song ngữ Đức - Việt thông minh cùng với **Trí Tuệ Nhân Tạo (AI)** đóng vai trò như một gia sư cá nhân hỗ trợ dịch nghĩa từ vựng, phân tích tình huống giao thông và giải thích chi tiết luật đường bộ Đức (StVO).
-
----
-
-## 🌟 Tính Năng Nổi Bật (Hauptmerkmale)
-
-### 1. 📖 Chế Độ Học Tập Song Ngữ (Bilinguales Lernen)
-- **Văn bản song ngữ**: Tất cả câu hỏi lý thuyết chuẩn (bao gồm câu hỏi chữ, biển báo và hình vẽ tình huống) đều hiển thị song ngữ Đức - Việt. Bạn có thể bật/tắt dịch nghĩa chỉ với 1 chạm.
-- **Xử lý đáp án phức tạp**: Mô phỏng chính xác luật thi của Đức, cho phép chọn **nhiều đáp án đúng** trong một câu hỏi.
-- **Tra cứu từ vựng tại chỗ (Bilinguales Glossar)**: Mỗi câu hỏi đều đính kèm danh sách từ vựng kỹ thuật cốt lõi (ví dụ: *die Vorfahrt* -> quyền ưu tiên, *anhalten* -> dừng lại) giúp bạn tích lũy từ vựng tiếng Đức chuyên ngành nhanh chóng.
-- **Phát âm tiếng Đức (Text-to-Speech)**: Nhấn biểu tượng loa để nghe giọng đọc chuẩn của câu hỏi bằng tiếng Đức.
-
-### 2. 🤖 Gia Sư AI Thông Minh (AI Lernassistent)
-- **Phân tích chi tiết**: Nút **Hỏi AI Trợ Lý** phân tích lỗi sai, giải thích lý do vì sao lựa chọn này đúng/sai và chỉ ra các điều luật đường bộ Đức cụ thể (StVO).
-- **Hỏi đáp tự do**: Ô chat cho phép bạn nhắn tin hỏi thêm bất kỳ câu hỏi phụ nào khác (ví dụ: *"Tại sao câu này không được vượt xe đạp?"*, *"Luật này áp dụng ngoài đô thị như thế nào?"*).
-- **Chế độ hoạt động kép**:
-  - **Trực tuyến (Real-time AI)**: Nhập **Gemini API Key** trong phần Cài đặt để trò chuyện trực tiếp với mô hình **Gemini 2.5 Flash** tiên tiến nhất.
-  - **Ngoại tuyến (Offline Simulator)**: Nếu không có API Key, ứng dụng sử dụng hệ thống phản hồi tự động chất lượng cao dựa trên cơ sở dữ liệu câu hỏi để đảm bảo bạn vẫn được giải thích cặn kẽ.
-
-### 3. ⏱️ Mô Phỏng Thi Thử Như Thật (Prüfungssimulation)
-- **Đề thi chuẩn ngẫu nhiên**: Tạo đề thi gồm 10 câu hỏi ngẫu nhiên được lựa chọn từ ngân hàng đề thi chính thức.
-- **Đếm ngược thời gian**: 30 phút đếm ngược tạo áp lực phòng thi thực tế.
-- **Tính điểm phạt (Fehlerpunkte)**:
-  - Tính điểm phạt chuẩn (từ 2 đến 5 điểm phạt cho mỗi câu làm sai).
-  - Đỗ khi tổng số điểm phạt **≤ 10**.
-  - **Lỗi trượt lập tức**: Trượt ngay nếu làm sai **hai câu 5 điểm phạt** (dù tổng điểm phạt bằng 10).
-- **Bảng phân tích lỗi sai**: Xem lại chi tiết từng câu trong bài làm, so sánh đáp án bạn chọn và đáp án đúng, kèm giải thích tiếng Việt.
-
-### 4. 📊 Đăng Nhập & Lưu Trữ Tiến Độ (Fortschritt & Historie)
-- **Đăng ký / Đăng nhập**: Dữ liệu lưu trữ cục bộ bảo mật qua `localStorage`, cho phép nhiều tài khoản học chung trên một thiết bị.
-- **Thống kê học tập**: Theo dõi số câu đã làm, tỷ lệ trả lời đúng và lịch sử các lần thi thử để đánh giá mức độ sẵn sàng đi thi thật.
-- **Lưu câu hỏi yêu thích (Bookmarks)**: Lưu trữ các câu hỏi khó để ôn tập lại riêng bất kỳ lúc nào.
-
-### 5. 📱 Thiết Kế Tối Ưu Cho Di Động (Mobile-First Design)
-- Ứng dụng được tối ưu hóa 100% cho màn hình cảm ứng di động.
-- Trên màn hình máy tính (Desktop), ứng dụng tự động hiển thị trong một **khung giả lập điện thoại thông minh cực kỳ cao cấp** (notch camera, bo góc mịn màng và hiệu ứng bóng đổ) giúp bạn dễ dàng trải nghiệm.
+Ứng dụng web học lý thuyết song ngữ Đức - Việt và mô phỏng thực hành lái xe 3D theo luật giao thông đường bộ Đức (**StVO**) cho hạng bằng **Klasse B**.
 
 ---
 
-## 🛠️ Công Nghệ Sử Dụng (Technologie-Stack)
+## 🌿 Nhánh Làm Việc Hiện Tại (Git Branches & Tags)
 
-1. **React 19 & Vite**: Framework phát triển nhanh, mượt mà và tối ưu hiệu năng.
-2. **Vanilla CSS**: Hệ thống CSS tùy biến cao cấp, hỗ trợ hoàn hảo Glassmorphism, Dark Mode và hiệu ứng chuyển cảnh mượt mà.
-3. **Lucide React**: Bộ icon phong cách tối giản hiện đại.
-4. **Google Gemini API**: Tích hợp gọi trực tiếp Gemini 2.5 Flash phục vụ Q&A.
+- **Nhánh làm việc chính (Active Branch)**: `feat/city-map-de` — Chuẩn bị và xây dựng bản đồ đô thị Đức khai báo (`city.json`) từ Road Profiles (RASt 06) và các mẫu nút giao chuẩn StVO.
+- **Nhánh lưu trữ OSM Berlin**: `archive/osm-berlin` (kèm tag `osm-berlin-final` tại commit `83ebc06`) — Lưu trữ nguyên trạng bản đồ Berlin-Mitte trích xuất từ OpenStreetMap và kết quả thử nghiệm autopilot Giai đoạn 0.
+- **Nhánh phát triển trước đó**: `simulator-dev`.
 
 ---
 
-## 🚀 Hướng Dẫn Cài Đặt & Chạy Ứng Dụng (Installation & Ausführung)
+## 📂 Cấu Trúc Thư Mục (Repository Structure)
 
-Làm theo các bước sau để khởi chạy ứng dụng trên máy tính của bạn:
-
-### Bước 1: Di chuyển vào thư mục dự án
-Mở terminal và di chuyển vào thư mục ứng dụng:
-```bash
-cd "C:\Users\Tuan Anh\.gemini\antigravity\scratch\viet-de-fuhrerschein"
+```text
+├── api/                        # Serverless API endpoints (Vercel): /api/send-email (Resend)
+├── docs/                       # Tài liệu kỹ thuật & kiến trúc
+│   ├── MAP_SCHEMA.md           # Đặc tả schema GameMap v1 và các trường dữ liệu
+│   └── screenshots/            # Ảnh chụp màn hình kiểm thử (QA / Cockpit / Junctions)
+├── legacy/
+│   └── osm/                    # [DEPRECATED] Các script nhập, vá và audit dữ liệu OSM cũ
+├── public/                     # Tài sản tĩnh (GLB 3D models trong /simv2, Draco decoder, ảnh câu hỏi)
+├── scratch/                    # Tệp nháp, script thử nghiệm 1 lần (được loại khỏi Vitest suite)
+├── scripts/                    # Công cụ QA tự động (run_autopilot, drone_scan, road_drive_scan...)
+│                               # và các file cache dữ liệu đang được bộ test đọc
+└── src/
+    ├── art/                    # Bảng màu chuẩn (palette.ts)
+    ├── components/             # Giao diện React (Lernen, Pruefung, SimDevPage, MiniMap, ModernCockpit)
+    ├── data/
+    │   └── maps/               # Nguồn dữ liệu bản đồ (examParcours.ts, bigMap.ts, berlin-mitte-clean.json)
+    ├── lib/                    # Cấu hình Firebase & Auth
+    ├── services/               # Dịch vụ phía client (emailService.js gọi qua /api/send-email)
+    ├── simulation/             # RuleEngine chấm điểm lỗi thực hành theo chuẩn Fahrprüfung (StVO)
+    └── world/                  # Engine 3D Three.js:
+                                # - mapLoader, worldBuilder, chunkBuilder, chunkManager
+                                # - roadMesh, sidewalk, roadMarkings, buildings, terrain
+                                # - trafficSigns, trafficLights, props
+                                # - vehicle, collisions, npc, pedestrianController, autopilot
+                                # - Bộ kiểm thử bất biến hình học & hành vi (*.test.ts)
 ```
 
-### Bước 2: Khởi động máy chủ phát triển (Development Server)
-Dự án đã được cài đặt đầy đủ các thư viện phụ thuộc. Chỉ cần chạy lệnh sau để khởi động:
+---
+
+## 🚀 Hướng Dẫn Chạy & Kiểm Thử (Development & Testing)
+
+### 1. Khởi động máy chủ phát triển (Dev Server)
 ```bash
 npm run dev
 ```
+- Ứng dụng học lý thuyết & thi thử: `http://localhost:3000/`
+- Trình mô phỏng lái xe 3D (`/sim-dev`):
+  - Sa hình thực hành 6 trạm (mặc định khi lái): `http://localhost:3000/sim-dev?drive=1`
+  - Bản đồ đô thị lớn (bay tự do): `http://localhost:3000/sim-dev?map=berlin`
+  - Bản đồ lưới kiểm thử streaming 3km×3km: `http://localhost:3000/sim-dev?map=stadt&drive=1`
 
-### Bước 3: Truy cập ứng dụng
-Sau khi khởi chạy thành công, terminal sẽ hiển thị địa chỉ cục bộ. Mở trình duyệt và truy cập:
-👉 **[http://localhost:5173/](http://localhost:5173/)**
-
-Để biên dịch bản production (Build production bundle):
+### 2. Chạy bộ kiểm thử tự động (Vitest Suite)
 ```bash
-npm run build
+# Chạy toàn bộ test suite (mặc định loại trừ scratch/** và legacy/**)
+npm test
+
+# Chạy riêng bài kiểm toán hình học mặt đường & vỉa hè (nặng CPU)
+npx vitest run src/world/roadAudit.test.ts
 ```
 
----
-
-## 🔑 Hướng dẫn lấy Gemini API Key miễn phí
-
-Để kích hoạt tính năng trò chuyện AI trực tuyến chất lượng cao nhất:
-1. Truy cập **[Google AI Studio](https://aistudio.google.com/)**.
-2. Đăng nhập bằng tài khoản Google.
-3. Click chọn **Get API Key** ở cột bên trái.
-4. Sao chép đoạn mã API Key (bắt đầu bằng `AIzaSy...`).
-5. Vào tab **Cài đặt** trên ứng dụng **Führerschein AI**, dán mã vào ô tương ứng rồi nhấn **Lưu cấu hình**.
-
----
-
-Chúc bạn ôn tập tốt và sớm sở hữu bằng lái xe Đức! **Viel Erfolg!** 🚗💨
+### 3. Cấu hình Biến Môi Trường (`.env`)
+Sao chép `.env.example` thành `.env` và điền thông tin:
+- Các biến `VITE_FIREBASE_*`: Cấu hình Firebase Client.
+- `RESEND_API_KEY` & `RESEND_FROM_EMAIL`: **Chỉ dùng ở phía Server** (`api/send-email.js`), tuyệt đối không thêm tiền tố `VITE_`.
