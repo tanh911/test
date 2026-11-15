@@ -12,15 +12,15 @@ function apiServerPlugin() {
           req.on('end', async () => {
             try {
               const { to, subject, html, from } = JSON.parse(body || '{}');
-              const apiKey = process.env.VITE_RESEND_API_KEY || process.env.RESEND_API_KEY || '';
+              const apiKey = process.env.RESEND_API_KEY || '';
               if (!apiKey) {
                 res.statusCode = 400;
                 res.setHeader('Content-Type', 'application/json');
-                res.end(JSON.stringify({ error: 'Chưa cấu hình VITE_RESEND_API_KEY trong file .env!' }));
+                res.end(JSON.stringify({ error: 'Chưa cấu hình RESEND_API_KEY trong file .env!' }));
                 return;
               }
 
-              const rawFrom = from || process.env.VITE_RESEND_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'no-reply@fuhrerscheinvide.site';
+              const rawFrom = from || process.env.RESEND_FROM_EMAIL || 'no-reply@fuhrerscheinvide.site';
               const matchEmail = rawFrom.match(/([a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,})/);
               const fromAddress = matchEmail ? matchEmail[1] : 'no-reply@fuhrerscheinvide.site';
 

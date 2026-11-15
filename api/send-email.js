@@ -41,13 +41,13 @@ export default async function handler(req, res) {
   try {
     const body = typeof req.body === 'string' ? JSON.parse(req.body) : req.body;
     const { to, subject, html, from, replyTo } = body || {};
-    const apiKey = process.env.RESEND_API_KEY || process.env.VITE_RESEND_API_KEY || '';
+    const apiKey = process.env.RESEND_API_KEY || '';
 
     if (!apiKey) {
       return res.status(400).json({ error: 'Chưa cấu hình RESEND_API_KEY trên server!' });
     }
 
-    const rawFrom = from || process.env.VITE_RESEND_FROM_EMAIL || process.env.RESEND_FROM_EMAIL || 'no-reply@fuhrerscheinvide.site';
+    const rawFrom = from || process.env.RESEND_FROM_EMAIL || 'no-reply@fuhrerscheinvide.site';
     const cleanFrom = getFormattedFrom(rawFrom);
 
     const resendRes = await fetch('https://api.resend.com/emails', {

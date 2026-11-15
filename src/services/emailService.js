@@ -2,12 +2,11 @@
  * Service gửi email thông báo khi người dùng đăng nhập hệ thống qua Resend API
  */
 
-// Đọc API Key & Email người nhận từ file .env (hoặc cấu hình)
-const RESEND_API_KEY = import.meta.env.VITE_RESEND_API_KEY || '';
+// Đọc danh sách Email người nhận thông báo từ cấu hình môi trường (KHÔNG nhúng RESEND_API_KEY vào client)
 const NOTIFICATION_RECIPIENTS = import.meta.env.VITE_NOTIFICATION_EMAILS
   ? import.meta.env.VITE_NOTIFICATION_EMAILS.split(',').map(e => e.trim())
   : [];
-const RESEND_FROM_EMAIL = import.meta.env.VITE_RESEND_FROM_EMAIL || 'no-reply@fuhrerscheinvide.site';
+const DEFAULT_FROM_EMAIL = 'no-reply@fuhrerscheinvide.site';
 
 function getFormattedFrom(str) {
   if (!str) return 'Fuhrerschein Viet-Duc <no-reply@fuhrerscheinvide.site>';
@@ -36,11 +35,11 @@ function getFormattedFrom(str) {
 }
 
 /**
- * Dispatch email via internal API /api/send-email first (to avoid browser CORS & adblocker NetworkError),
- * falling back to direct Resend fetch if the API endpoint is unavailable.
+ * Dispatch email exclusively via internal server API /api/send-email
+ * (Resend API key is kept strictly on the server, never exposed in client bundle).
  */
 async function dispatchResendEmail({ to, subject, html, from, replyTo }) {
-  const cleanFrom = getFormattedFrom(from || RESEND_FROM_EMAIL);
+  const cleanFrom = getFormattedFrom(from || DEFAULT_FROM_EMAIL);
   const payload = {
     to: Array.isArray(to) ? to : [to],
     subject,
@@ -49,7 +48,6 @@ async function dispatchResendEmail({ to, subject, html, from, replyTo }) {
     replyTo: replyTo || 'supportsplitvie@gmail.com'
   };
 
-  // 1. Thử gửi qua API Route nội bộ /api/send-email (Tránh hoàn toàn CORS & Adblocker trên trình duyệt)
   try {
     const apiRes = await fetch('/api/send-email', {
       method: 'POST',
@@ -57,47 +55,14 @@ async function dispatchResendEmail({ to, subject, html, from, replyTo }) {
       body: JSON.stringify(payload)
     });
 
-    if (apiRes.ok || apiRes.status !== 404) {
-      const data = await apiRes.json();
-      if (!apiRes.ok) {
-        const errMsg = data.message || data.error?.message || data.error || JSON.stringify(data);
-        return { success: false, error: errMsg };
-      }
-      return { success: true, data };
-    }
-  } catch (apiErr) {
-    console.warn('[EmailService] API route /api/send-email not available, falling back to direct fetch...', apiErr);
-  }
-
-  // 2. Fallback sang fetch trực tiếp Resend nếu không gọi được API nội bộ
-  if (!RESEND_API_KEY) {
-    return { success: false, error: 'Chưa cấu hình VITE_RESEND_API_KEY trong file .env!' };
-  }
-
-  try {
-    const response = await fetch('https://api.resend.com/emails', {
-      method: 'POST',
-      headers: {
-        'Authorization': `Bearer ${RESEND_API_KEY}`,
-        'Content-Type': 'application/json',
-      },
-      body: JSON.stringify({
-        from: payload.from,
-        to: payload.to,
-        subject: payload.subject,
-        html: payload.html,
-        reply_to: payload.replyTo
-      }),
-    });
-
-    const data = await response.json();
-    if (!response.ok) {
-      const errMsg = data.message || data.error?.message || JSON.stringify(data);
+    const data = await apiRes.json().catch(() => ({}));
+    if (!apiRes.ok) {
+      const errMsg = data.message || data.error?.message || data.error || `HTTP ${apiRes.status}`;
       return { success: false, error: errMsg };
     }
     return { success: true, data };
-  } catch (err) {
-    return { success: false, error: err.message };
+  } catch (apiErr) {
+    return { success: false, error: apiErr.message || 'Không thể kết nối tới /api/send-email' };
   }
 }
 
