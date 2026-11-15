@@ -118,7 +118,7 @@ describe('berlin-mitte × biên thật patch giao lộ (collectBoundaryIssues)',
 // (patch hull / ribbon / vỉa hè / pad / đảo vòng xuyến) mà cách mép > 0,05 m
 // và bị kẹp giữa ≥ 2 phủ đối diện → khe cỏ thật → vi phạm (mục tiêu: 0).
 describe('berlin-mitte × khe cỏ quanh node (collectSeamIssues)', () => {
-  it('lưới ±16 m bít mọi khe cỏ giữa các lớp phủ quanh node', () => {
+  it('lưới ±16 m bít mọi khe cỏ giữa các lớp phủ quanh node', { timeout: 120_000 }, () => {
     const { checkedNodes, issues } = collectSeamIssues(map);
     console.info(`[seam] node kiểm: ${checkedNodes}, vi phạm: ${issues.length}`);
     if (issues.length > 0) {

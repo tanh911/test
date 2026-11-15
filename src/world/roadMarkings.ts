@@ -6,7 +6,7 @@ import { roadPointAt, roadLength } from './mapLoader';
 import type { Quad } from './roadMesh';
 import { junctionHalfExtent } from './roadMesh';
 
-export const MARKING_Y = 0.01;
+export const MARKING_Y = 0.02;
 const DASH_ON = 3;
 const DASH_OFF = 6;
 const MARK_W = 0.12;
@@ -88,7 +88,7 @@ function centerDashes(road: MapRoad, skip: Array<[number, number]>, stopZones: A
   const len = roadLength(road);
   const all = [...skip, ...stopZones];
   let s = 2;
-  while (s + DASH_ON < len) {
+  while (s + DASH_ON < len - 1.5) { // M6: dash cuối cách mép road ≥ 1.5m
     if (!inZones(s, all) && !inZones(s + DASH_ON, all)) {
       const midS = s + DASH_ON / 2;
       const pMid = roadPointAt(road, midS);
@@ -298,10 +298,14 @@ export function roadMarkingQuads(map: GameMap, road: MapRoad, skip: Array<[numbe
     // priority_road: nhánh KHÔNG main → Vorfahrt gewähren (shark teeth, khớp Z.205)
     if (!kind && ix.rule === 'priority_road' && road.priority !== 'main') kind = 'yield';
     if (kind && longEnough) {
+      // M1 fix: stop line ĐỨNG TRƯỚC zebra (xa junction hơn zebra near edge + 1.5m gap)
+      // Thứ tự từ junction: junction edge → zebra (1m gap) → stop line (1.5m gap) → đường
+      const zebraEdgeOffset = ZEBRA_LEN + 1.0; // zebra near edge cách junction edge 1m
+      const stopOffset = zebraEdgeOffset + 1.5; // stop line cách zebra near edge 1.5m
       if (road.to === ix.nodeId) {
-        approaches.push({ stopS: len - half - STOP_LINE_DIST, side: 1, kind });
+        approaches.push({ stopS: len - half - stopOffset, side: 1, kind });
       } else if (road.from === ix.nodeId && road.lanesBackward > 0) {
-        approaches.push({ stopS: half + STOP_LINE_DIST, side: -1, kind });
+        approaches.push({ stopS: half + stopOffset, side: -1, kind });
       }
     }
     if (ix.crosswalks.includes(road.id) && longEnough) {
@@ -310,8 +314,11 @@ export function roadMarkingQuads(map: GameMap, road: MapRoad, skip: Array<[numbe
     }
   }
 
-  // vùng né vạch đứt: quanh mỗi vạch dừng (dừng đứt TRƯỚC Haltlinie)
+  // vùng né vạch đứt: quanh mỗi vạch dừng + zebra (M3 fix — dashes không xuyên zebra)
   const stopZones: Array<[number, number]> = approaches.map(a => [a.stopS - 1.2, a.stopS + 1.2] as [number, number]);
+  if (zebraCenter !== null) {
+    stopZones.push([zebraCenter - ZEBRA_LEN / 2 - 0.5, zebraCenter + ZEBRA_LEN / 2 + 0.5] as [number, number]);
+  }
 
   const siblings = findAcuteSiblings(road, map);
   quads.push(...edgeLines(road, half, skip, siblings));

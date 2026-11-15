@@ -8,7 +8,8 @@
     "build": "vite build",
     "lint": "oxlint",
     "preview": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "autopilot": "node scripts/run_autopilot.mjs"
   },
   "dependencies": {
     "canvas-confetti": "^1.9.4",

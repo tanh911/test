@@ -24,13 +24,37 @@ export const SimDevPage = () => {
   const isParcoursMode = driveMode && !rawOsm && !stadtMap && !bigMap;
 
   useEffect(() => {
-    if (!containerRef.current || handleRef.current) return;
+    const containerEl = containerRef.current;
+    if (!containerEl || handleRef.current) return;
+    let cancelled = false;
+    let cleanup: (() => void) | null = null;
+    void (async () => {
+    // PHẦN 9 harness: seed RNG trước khi dựng world (NPC spawn/choice deterministic)
+    const apSeed = params?.get('seed');
+    if (params?.get('autopilot') === '1' && apSeed) {
+      let s = parseInt(apSeed, 10) >>> 0;
+      Math.random = () => {
+        s = (s + 0x6D2B79F5) | 0;
+        let t = s;
+        t = Math.imul(t ^ (t >>> 15), t | 1);
+        t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+        return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+      };
+    }
+    let apOpts: { route: import('../world/autopilot').AutopilotRoute } | undefined;
+    if (params?.get('autopilot') === '1' && driveMode) {
+      try {
+        const resp = await fetch('/qa-autopilot/route.json');
+        if (resp.ok) apOpts = { route: await resp.json() };
+      } catch { /* thiếu route.json → chạy thường */ }
+    }
+    if (cancelled) return;
     const mapJson = isParcoursMode ? generateExamParcoursMap()
       : stadtMap ? generateStadtMap()
       : berlinMap ? berlinMitteMap
       : bigMap ? generateBigMap()
       : testCrossingMap;
-    const handle = createSimScene(containerRef.current, mapJson, { drive: driveMode });
+    const handle = createSimScene(containerEl, mapJson, { drive: driveMode, autopilot: apOpts });
     handleRef.current = handle;
     // Khi bay tự do trên map lớn: đặt camera cao/xa hơn để nhìn toàn bộ bản đồ
     if ((stadtMap || berlinMap) && !driveMode) {
@@ -46,12 +70,14 @@ export const SimDevPage = () => {
     if (!bigMap && !stadtMap && !berlinMap && !driveMode) {
       loadDemoAssets(handle.scene, handle.map).then(d => { demo = d; });
     }
-    return () => {
+    cleanup = () => {
       demo?.dispose();
       handle.dispose();
       handleRef.current = null;
       delete (window as unknown as { __simScene?: SimSceneHandle }).__simScene;
     };
+    })();
+    return () => cleanup?.();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 

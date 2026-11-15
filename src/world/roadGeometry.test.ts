@@ -186,8 +186,10 @@ describe('G1-4 vạch dừng/răng cưa 2 đầu', () => {
     });
     expect(stops.length).toBe(2);
     const xs = stops.map(q => (q.a[0] + q.c[0]) / 2).sort((x, y) => x - y);
-    expect(xs[0]).toBeCloseTo(4.8, 1);   // approach từ đầu from: half + 2, tâm dày 0.4
-    expect(xs[1]).toBeCloseTo(95.2, 1);  // approach đầu to: len − half − 2
+    // M1 fix: stop line 5.5m từ mép nút (half + ZEBRA_LEN 3 + 1.0 + 1.5) — cách zebra
+    // near edge (1–4m từ mép) 1.5m, KHÔNG còn chồng vạch kẻ trên vằn bò (chữ "H")
+    expect(xs[0]).toBeCloseTo(8.3, 1);   // approach đầu from: half + 5.5, tâm dày 0.4
+    expect(xs[1]).toBeCloseTo(91.7, 1);  // approach đầu to: len − half − 5.5
   });
 
   it('vạch dừng đầu from nằm trên nửa −n (z < 0), đầu to nửa +n (z > 0)', () => {

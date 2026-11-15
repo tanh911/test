@@ -77,7 +77,7 @@ export const EXAM_STATIONS: ExamStation[] = [
     instructionVi: 'Đoạn đường cho phép 50 km/h. Cuối đường có biển STOP (Z.206): Bắt buộc dừng hẳn (0 km/h) trước vạch dừng, bật xi-nhan phải (E) và rẽ phải vào đại lộ Friedrichstraße.',
     instructionDe: 'Tempo 50 erlaubt. Am Ende Stoppschild (Z.206): Vollständig anhalten (0 km/h), rechts blinken (E) und rechts in die Friedrichstraße abbiegen.',
     ruleTag: 'Stoppschild Z.206 (§41 StVO)',
-    x: 130,
+    x: -130,
     z: 260,
     triggerRadius: 18,
     actionHintVi: 'Dừng hẳn 0 km/h tại vạch STOP • Xi-nhan phải [E] • Rẽ phải',
@@ -91,7 +91,7 @@ export const EXAM_STATIONS: ExamStation[] = [
     instructionVi: 'Giảm tốc về 30 km/h. Nhường xe đang ở trong vòng xuyến, rẽ phải vào vòng và BẬT XI-NHAN PHẢI (phím E) để ra ở lối thứ nhất (Universitätsstraße).',
     instructionDe: 'Auf 30 km/h reduzieren. Fahrzeugen im Kreis Vorfahrt gewähren, einfahren und bei der 1. Ausfahrt RECHTS BLINKEN (Taste E).',
     ruleTag: 'Kreisverkehr (§8 Abs. 1a StVO)',
-    x: 130,
+    x: -130,
     z: 90,
     triggerRadius: 20,
     actionHintVi: 'Nhường xe trong vòng • Bật xi-nhan phải [E] khi ra lối 1',
@@ -105,8 +105,8 @@ export const EXAM_STATIONS: ExamStation[] = [
     instructionVi: 'Bật xi-nhan phải (E), đưa xe dừng gọn vào Ô ĐỖ XE MÀU XANH bên lề phải (biển P) và bấm phím 1 (về số P) để hoàn thành bài thi!',
     instructionDe: 'Rechts blinken (E), in der GRÜNEN PARKBUCHT am rechten Rand anhalten und Taste 1 (Parkstufe P) drücken!',
     ruleTag: 'Parken & Sicherung (§12 StVO)',
-    x: 64,
-    z: 88.25,
+    x: -64,
+    z: 91.75,
     triggerRadius: 9.5,
     actionHintVi: 'Dừng trong ô xanh • Bấm phím [1] về số P để kết thúc',
     actionHintDe: 'In grüner Bucht halten • Taste [1] (Gang P) drücken'
@@ -119,31 +119,31 @@ export const EXAM_ROUTE_WAYPOINTS: Array<[number, number]> = [
   [0, 90],
   [0, 175],
   [0, 260],
-  [130, 260],
-  [130, 90],
-  [64, 90]
+  [-130, 260],
+  [-130, 90],
+  [-64, 90]
 ];
 
 export function generateExamParcoursMap(): GameMap {
   const nodes: GameMap['nodes'] = [
-    // Trục Tây (Georgenstraße): Nam -> Bắc
+    // Trục chính xuất phát (Georgenstraße): Nam -> Bắc (+Z, bên phải là -X)
     { id: 'n_start', x: 0, z: -30, type: 'end' },
     { id: 'n_rvl', x: 0, z: 90, type: 'intersection' },
     { id: 'n_zebra', x: 0, z: 175, type: 'intersection' },
     { id: 'n_ampel', x: 0, z: 260, type: 'intersection' },
 
-    // Trục Đông (Friedrichstraße): Bắc -> Nam
-    { id: 'n_stop', x: 130, z: 260, type: 'intersection' },
-    { id: 'n_round', x: 130, z: 90, type: 'intersection' },
+    // Trục phải (Friedrichstraße, x = -130): Bắc -> Nam (-Z)
+    { id: 'n_stop', x: -130, z: 260, type: 'intersection' },
+    { id: 'n_round', x: -130, z: 90, type: 'intersection' },
 
     // Các nhánh phụ tạo lưu lượng giao thông cắt ngang tại các ngã tư
-    { id: 'n_rvl_w', x: -85, z: 90, type: 'end' },
-    { id: 'n_ampel_w', x: -85, z: 260, type: 'end' },
+    { id: 'n_rvl_w', x: 85, z: 90, type: 'end' },
+    { id: 'n_ampel_w', x: 85, z: 260, type: 'end' },
     { id: 'n_ampel_n', x: 0, z: 345, type: 'end' },
-    { id: 'n_fried_n', x: 130, z: 345, type: 'end' },
-    { id: 'n_stop_e', x: 215, z: 260, type: 'end' },
-    { id: 'n_round_e', x: 215, z: 90, type: 'end' },
-    { id: 'n_round_s', x: 130, z: 5, type: 'end' }
+    { id: 'n_fried_n', x: -130, z: 345, type: 'end' },
+    { id: 'n_stop_e', x: -215, z: 260, type: 'end' },
+    { id: 'n_round_e', x: -215, z: 90, type: 'end' },
+    { id: 'n_round_s', x: -130, z: 5, type: 'end' }
   ];
 
   const makeRoad = (
@@ -178,21 +178,21 @@ export function generateExamParcoursMap(): GameMap {
     makeRoad('r_rvl_zebra', 'Georgenstraße', 'n_rvl', 'n_zebra', [[0, 90], [0, 175]], 30, 'equal'),
     // 3. Trạm 2 -> Trạm 3 (Ampelkreuzung)
     makeRoad('r_zebra_ampel', 'Georgenstraße', 'n_zebra', 'n_ampel', [[0, 175], [0, 260]], 30, 'equal'),
-    // 4. Trạm 3 -> Trạm 4 (Dorotheenstraße 50 km/h -> STOP)
-    makeRoad('r_ampel_stop', 'Dorotheenstraße', 'n_ampel', 'n_stop', [[0, 260], [130, 260]], 50, 'stop'),
-    // 5. Trạm 4 -> Trạm 5 (Đại lộ Friedrichstraße -> Vòng xuyến)
-    makeRoad('r_stop_round', 'Friedrichstraße', 'n_stop', 'n_round', [[130, 260], [130, 90]], 50, 'main'),
-    // 6. Trạm 5 -> Trạm 6 -> Trạm 1 (Universitätsstraße: Đích đỗ xe & Nhánh phải của Rechts vor links)
-    makeRoad('r_uni_return', 'Universitätsstraße', 'n_round', 'n_rvl', [[130, 90], [0, 90]], 30, 'equal'),
+    // 4. Trạm 3 -> Trạm 4 (Dorotheenstraße 50 km/h -> Rẽ phải sang -X -> STOP)
+    makeRoad('r_ampel_stop', 'Dorotheenstraße', 'n_ampel', 'n_stop', [[0, 260], [-130, 260]], 50, 'stop'),
+    // 5. Trạm 4 -> Trạm 5 (Đại lộ Friedrichstraße -> Rẽ phải về Nam -> Vòng xuyến)
+    makeRoad('r_stop_round', 'Friedrichstraße', 'n_stop', 'n_round', [[-130, 260], [-130, 90]], 50, 'main'),
+    // 6. Trạm 5 -> Trạm 6 -> Trạm 1 (Universitätsstraße: Đích đỗ xe & Nhánh PHẢI của Rechts vor links tại n_rvl!)
+    makeRoad('r_uni_return', 'Universitätsstraße', 'n_round', 'n_rvl', [[-130, 90], [0, 90]], 30, 'equal'),
 
     // Các nhánh giao cắt tạo dòng xe NPC thực tế tại từng ngã tư
-    makeRoad('r_rvl_w', 'Universitätsstraße', 'n_rvl_w', 'n_rvl', [[-85, 90], [0, 90]], 30, 'equal'),
-    makeRoad('r_ampel_w', 'Dorotheenstraße', 'n_ampel_w', 'n_ampel', [[-85, 260], [0, 260]], 50, 'main'),
+    makeRoad('r_rvl_w', 'Universitätsstraße Ost', 'n_rvl', 'n_rvl_w', [[0, 90], [85, 90]], 30, 'equal'),
+    makeRoad('r_ampel_w', 'Dorotheenstraße Ost', 'n_ampel_w', 'n_ampel', [[85, 260], [0, 260]], 50, 'main'),
     makeRoad('r_ampel_n', 'Georgenstraße Nord', 'n_ampel', 'n_ampel_n', [[0, 260], [0, 345]], 30, 'equal'),
-    makeRoad('r_fried_n', 'Friedrichstraße Nord', 'n_fried_n', 'n_stop', [[130, 345], [130, 260]], 50, 'main'),
-    makeRoad('r_stop_e', 'Dorotheenstraße Ost', 'n_stop', 'n_stop_e', [[130, 260], [215, 260]], 50, 'give_way'),
-    makeRoad('r_round_e', 'Clara-Zetkin-Straße', 'n_round', 'n_round_e', [[130, 90], [215, 90]], 30, 'give_way'),
-    makeRoad('r_round_s', 'Friedrichstraße Süd', 'n_round', 'n_round_s', [[130, 90], [130, 5]], 30, 'give_way')
+    makeRoad('r_fried_n', 'Friedrichstraße Nord', 'n_fried_n', 'n_stop', [[-130, 345], [-130, 260]], 50, 'main'),
+    makeRoad('r_stop_e', 'Dorotheenstraße West', 'n_stop', 'n_stop_e', [[-130, 260], [-215, 260]], 50, 'give_way'),
+    makeRoad('r_round_e', 'Clara-Zetkin-Straße', 'n_round', 'n_round_e', [[-130, 90], [-215, 90]], 30, 'give_way'),
+    makeRoad('r_round_s', 'Friedrichstraße Süd', 'n_round', 'n_round_s', [[-130, 90], [-130, 5]], 30, 'give_way')
   ];
 
   const intersections: MapIntersection[] = [
@@ -284,8 +284,8 @@ export function generateExamParcoursMap(): GameMap {
     { roadId: 'r_stop_round', side: 'right', s: 82, length: 44, floors: 4, style: 'backstein', seed: 115 },
     { roadId: 'r_stop_round', side: 'left', s: 82, length: 44, floors: 4, style: 'altbau', seed: 116 },
 
-    { roadId: 'r_uni_return', side: 'left', s: 28, length: 36, floors: 4, style: 'altbau', seed: 117 },
-    { roadId: 'r_uni_return', side: 'left', s: 70, length: 34, floors: 3, style: 'neubau', seed: 118 },
+    { roadId: 'r_uni_return', side: 'left', s: 28, length: 32, floors: 4, style: 'altbau', seed: 117 },
+    { roadId: 'r_uni_return', side: 'left', s: 66, length: 22, floors: 3, style: 'neubau', seed: 118 },
     { roadId: 'r_uni_return', side: 'right', s: 24, length: 28, floors: 4, style: 'backstein', seed: 119 },
 
     { roadId: 'r_rvl_w', side: 'right', s: 16, length: 42, floors: 4, style: 'altbau', seed: 120 },

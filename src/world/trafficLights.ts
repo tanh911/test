@@ -6,6 +6,7 @@ import { GLTFLoader } from 'three/examples/jsm/loaders/GLTFLoader.js';
 import type { GameMap, MapIntersection } from './mapLoader';
 import { nodeById } from './mapLoader';
 import { chunkKeyFor } from './chunkBuilder';
+import { buildingStrips } from './buildings';
 
 export type LightPhase = 'red' | 'red_yellow' | 'green' | 'yellow';
 
@@ -278,6 +279,250 @@ async function upgradeLightWithModel(group: THREE.Group): Promise<void> {
   applyLightVisuals([group]);
 }
 
+
+function angDiffOf(a: number, b: number): number {
+  let d = Math.abs(a - b);
+  if (d > Math.PI) d = 2 * Math.PI - d;
+  return d;
+}
+
+// ── PLAN thuần geometry (testable): tính approach + nhóm pha + vị trí + yaw
+// cho MỌI approach của 1 nút có đèn. placeTrafficLights chỉ consume kết quả.
+export interface LightPlan {
+  roadId: string;
+  end: 'from' | 'to';
+  group: 0 | 1;
+  ang: number;
+  fx: number; fz: number;      // flow hướng VÀO node
+  pos: { x: number; z: number } | null; // null = không tìm được chỗ thoáng
+  yaw: number;                  // mặt đèn hướng về xe đang tới
+  /** true: đặt bên TRÁI luồng (fallback khi bên phải kín hết — đèn far-side) */
+  leftFallback?: boolean;
+  /** true: 2 approach gần trùng vị trí (<2 m) — GỘP CHUNG 1 CỘT (arm này không
+   *  tạo mesh, đăng ký nhóm theo arm dẫn) — như cột đèn thật phục vụ 2 làn */
+  sharedPole?: boolean;
+  unresolved?: boolean;
+}
+export function planLightsForIntersection(ix: MapIntersection, map: GameMap): {
+  arms: LightPlan[];
+  approaches: number;
+} {
+  const node = nodeById(map, ix.nodeId);
+  if (!node) return { arms: [], approaches: 0 };
+
+  type Ap = { fx: number; fz: number; road: typeof map.roads[number]; end: 'from' | 'to'; ang: number };
+  const allAp: Ap[] = [];
+  for (const rd of map.roads) {
+    if (rd.from !== ix.nodeId && rd.to !== ix.nodeId) continue;
+    const n = rd.points.length;
+    if (rd.to === ix.nodeId) {
+      const dx = rd.points[n - 1][0] - rd.points[n - 2][0];
+      const dz = rd.points[n - 1][1] - rd.points[n - 2][1];
+      const l = Math.hypot(dx, dz) || 1;
+      allAp.push({ fx: dx / l, fz: dz / l, road: rd, end: 'to', ang: Math.atan2(dz / l, dx / l) });
+    }
+    if (rd.from === ix.nodeId && rd.lanesBackward > 0) {
+      const dx = rd.points[0][0] - rd.points[1][0];
+      const dz = rd.points[0][1] - rd.points[1][1];
+      const l = Math.hypot(dx, dz) || 1;
+      allAp.push({ fx: dx / l, fz: dz / l, road: rd, end: 'from', ang: Math.atan2(dz / l, dx / l) });
+    }
+  }
+  allAp.sort((a, b) => a.ang - b.ang);
+
+  // ── PRE-CLUSTER: arm gần trùng hướng (Δang < 20° — 2 làn/đường song song sắp
+  // vào node) gộp thành 1 LOGICAL arm để tô màu (chúng phải CÙNG nhóm — gộp sau
+  // khi tô màu sẽ vỡ màu các arm kề — bug n13).
+  const clusters: Array<Array<number>> = [];
+  for (let i = 0; i < allAp.length; i++) {
+    const last = clusters[clusters.length - 1];
+    if (last && angDiffOf(allAp[i].ang, allAp[last[0]].ang) < 0.35) last.push(i);
+    else clusters.push([i]);
+  }
+  const L = clusters.length;
+
+  // ── 2-COLORING trên LOGICAL arms: cạnh = cặp cluster KỀ nhau (gap < 110°)
+  // PHẢI khác nhóm. Odd-cycle → gỡ cạnh gap lớn nhất (unresolved).
+  const groupsL: Array<0 | 1> = new Array(L).fill(0);
+  const adj: Array<Array<number>> = [];
+  for (let i = 0; i < L; i++) adj.push([]);
+  for (let i = 0; i < L; i++) {
+    for (let j = i + 1; j < L; j++) {
+      const g = angDiffOf(allAp[clusters[i][0]].ang, allAp[clusters[j][0]].ang);
+      if (g < 1.92) { adj[i].push(j); adj[j].push(i); }
+    }
+  }
+  const colorComponent = (startIdx: number): boolean => {
+    const queue = [startIdx];
+    const seen = new Set([startIdx]);
+    groupsL[startIdx] = 0;
+    while (queue.length) {
+      const u = queue.shift()!;
+      for (const v of adj[u]) {
+        if (seen.has(v)) continue;
+        groupsL[v] = groupsL[u] === 0 ? 1 : 0;
+        seen.add(v);
+        queue.push(v);
+      }
+    }
+    for (const u of seen) {
+      for (const v of adj[u]) {
+        if (groupsL[u] === groupsL[v]) return false;
+      }
+    }
+    return true;
+  };
+  const unresolvedL = new Set<number>();
+  {
+    const seenAll = new Set<number>();
+    for (let i = 0; i < L; i++) {
+      if (seenAll.has(i)) continue;
+      const comp: number[] = [];
+      const stack = [i];
+      seenAll.add(i);
+      while (stack.length) {
+        const u = stack.pop()!;
+        comp.push(u);
+        for (const v of adj[u]) if (!seenAll.has(v)) { seenAll.add(v); stack.push(v); }
+      }
+      if (comp.length < 2) continue;
+      if (!colorComponent(comp[0])) {
+        let guard = 0;
+        while (!colorComponent(comp[0]) && guard++ < L) {
+          // gỡ cạnh gap LỚN NHẤT trong component (cặp ít xung đột nhất)
+          let w2: [number, number] | null = null, wg2 = -1;
+          for (const u of comp) {
+            for (const v of adj[u]) {
+              if (u >= v) continue;
+              const g = angDiffOf(allAp[clusters[u][0]].ang, allAp[clusters[v][0]].ang);
+              if (g > wg2) { wg2 = g; w2 = [u, v]; }
+            }
+          }
+          if (!w2) break;
+          unresolvedL.add(w2[0]); unresolvedL.add(w2[1]);
+          adj[w2[0]] = adj[w2[0]].filter((x) => x !== w2[1]);
+          adj[w2[1]] = adj[w2[1]].filter((x) => x !== w2[0]);
+        }
+      }
+    }
+  }
+
+  // ── Vị trí đặt đèn cho từng arm (phải trước, trái fallback) ──
+  const allStrips: Array<[number, number, number, number]> = [];
+  {
+    const node = nodeById(map, ix.nodeId)!;
+    for (const b of map.buildings) {
+      const st = buildingStrips(map, { ...b, depthOff: 0 });
+      if (st) for (const [a, b2, c, d] of st) {
+        // chỉ giữ strips quanh node (tránh quét toàn map mỗi candidate)
+        const mx = (a + c) / 2 - node.x, mz = (b2 + d) / 2 - node.z;
+        if (Math.hypot(mx, mz) < 60) allStrips.push([a, b2, c, d]);
+      }
+    }
+  }
+  const buildingStripsForNode = allStrips;
+  const arms: LightPlan[] = [];
+  const placedPositions: Array<{ x: number; z: number }> = [];
+  for (let ci = 0; ci < L; ci++) {
+    for (const ai of clusters[ci]) {
+      const ap = allAp[ai];
+      const rd = ap.road;
+      const half = (rd.lanesForward + rd.lanesBackward) * rd.laneWidth / 2;
+      const n = rd.points.length;
+      const len = (() => {
+        let l = 0;
+        for (let i = 1; i < n; i++) l += Math.hypot(rd.points[i][0] - rd.points[i - 1][0], rd.points[i][1] - rd.points[i - 1][1]);
+        return l;
+      })();
+      const atTo = ap.end === 'to';
+      let pos: { x: number; z: number } | null = null;
+      let lastCand: { x: number; z: number } | null = null;
+      let leftFallbackFlag = false;
+      for (let back = 0; back <= 40 && !pos; back += 2) {
+        const s = atTo ? Math.max(half + 1, len - half - 1 - back) : Math.min(Math.max(len - half - 1, half + 1), half + 1 + back);
+        let rem = s, ax = rd.points[0][0], az = rd.points[0][1], px = ax, pz = az, tx = 0, tz = 1;
+        for (let i = 1; i < n; i++) {
+          const bx = rd.points[i][0], bz = rd.points[i][1];
+          const seg = Math.hypot(bx - ax, bz - az) || 1;
+          if (rem <= seg) {
+            const t = rem / seg;
+            px = ax + (bx - ax) * t; pz = az + (bz - az) * t;
+            tx = (bx - ax) / seg; tz = (bz - az) / seg;
+            break;
+          }
+          rem -= seg; ax = bx; az = bz;
+        }
+        const sgn = atTo ? 1 : -1;
+        const fx = tx * sgn, fz = tz * sgn;
+        const rnx = -fz, rnz = fx;
+        const sideSigns: number[] = [1, -1];
+        for (const sSide of sideSigns) {
+          const candX = px + rnx * sSide * (half + 1.6);
+          const candZ = pz + rnz * sSide * (half + 1.6);
+          if (pos) break;
+          lastCand = { x: candX, z: candZ };
+          let clear = true;
+          for (const r2 of map.roads) {
+            const h2 = (r2.lanesForward + r2.lanesBackward) * r2.laneWidth / 2;
+            const pts2 = r2.points;
+            for (let k = 1; k < pts2.length; k++) {
+              const vx = pts2[k][0] - pts2[k - 1][0], vz = pts2[k][1] - pts2[k - 1][1];
+              const l2 = vx * vx + vz * vz || 1;
+              const t2 = Math.max(0, Math.min(1, ((candX - pts2[k - 1][0]) * vx + (candZ - pts2[k - 1][1]) * vz) / l2));
+              if (Math.hypot(candX - (pts2[k - 1][0] + t2 * vx), candZ - (pts2[k - 1][1] + t2 * vz)) < h2 + 0.35) {
+                clear = false;
+                break;
+              }
+            }
+            if (!clear) break;
+          }
+          // không trong nhà (building strips runtime)
+          if (clear) {
+            for (const [sa, sb, sc, sd] of buildingStripsForNode) {
+              if (candX > sa && candX < sc && candZ > sb && candZ < sd) { clear = false; break; }
+            }
+          }
+          // tránh đèn ĐÃ ĐẶT (≥3 m) — không tụ tập 1 góc
+          for (const pp of placedPositions) {
+            if (Math.hypot(candX - pp.x, candZ - pp.z) < 3) { clear = false; break; }
+          }
+          if (clear) {
+            pos = { x: candX, z: candZ };
+            if (sSide === -1) leftFallbackFlag = true;
+          }
+        }
+      }
+      if (!pos) {
+        pos = lastCand ?? { x: node.x + ap.fx * (half + 4), z: node.z + ap.fz * (half + 4) };
+      }
+      placedPositions.push(pos);
+      const yaw = Math.atan2(-ap.fx, -ap.fz) - 0.10;
+      const plan: LightPlan = {
+        roadId: rd.id, end: ap.end, group: groupsL[ci], ang: ap.ang,
+        fx: ap.fx, fz: ap.fz, pos, yaw, leftFallback: leftFallbackFlag,
+      };
+      if (unresolvedL.has(ci)) plan.unresolved = true;
+      arms.push(plan);
+    }
+  }
+
+  // ── GỘP CỘT CHỈ KHI CÙNG NHÓM (2 approach gần trùng + cùng pha = 1 cột phục
+  // vụ 2 làn như đèn thật); khác nhóm → GIỮ 2 CỘT (đã tránh ≥3 m ở trên)
+  for (let i = 0; i < arms.length; i++) {
+    if (!arms[i].pos) continue;
+    for (let j = i + 1; j < arms.length; j++) {
+      if (!arms[j].pos || arms[j].sharedPole) continue;
+      if (arms[i].group !== arms[j].group) continue;
+      const d = Math.hypot(arms[i].pos!.x - arms[j].pos!.x, arms[i].pos!.z - arms[j].pos!.z);
+      if (d < 2) {
+        arms[j].sharedPole = true;
+        arms[j].pos = null;
+      }
+    }
+  }
+  return { arms, approaches: allAp.length };
+}
+
 // ── Đặt đèn tự động từ intersections[] có trafficLight ──
 // Mỗi approach (luồng xe ĐẾN node) = 1 đèn đứng bên PHẢI luồng, mặt quay về xe đang tới.
 // Trả lightsByCell: đèn gắn theo chunk cell → chunkManager nạp/hủy theo camera (G5).
@@ -290,114 +535,32 @@ export function placeTrafficLights(scene: THREE.Scene, map: GameMap): {
   const lightsByCell = new Map<string, THREE.Group[]>();
   const allLightGroups: THREE.Group[] = [];
 
+  function roadsByIdOf(m: GameMap): Map<string, GameMap['roads'][number]> {
+    const mm = new Map();
+    for (const r of m.roads) mm.set(r.id, r);
+    return mm;
+  }
+  const rById = roadsByIdOf(map);
   for (const ix of map.intersections as MapIntersection[]) {
     if (!ix.trafficLight) continue;
     const node = nodeById(map, ix.nodeId);
     if (!node) continue;
+    const { arms: plans } = planLightsForIntersection(ix, map);
     const controller = new TrafficLightController(ix.nodeId, ix.trafficLight.greenSeconds, ix.trafficLight.yellowSeconds, ix.trafficLight.redSeconds);
     controllers.push(controller);
-
-    // Mỗi road chạm node → 2 approach (chiều xuôi và chiều ngược nếu 2 chiều).
-    // Gom approach trước, sắp theo GÓC xoay quanh node → nhóm = idx % 2:
-    // các hướng ĐỐI DIỆN cùng nhóm (Bắc-Nam cùng xanh), kề nhau khác nhóm.
-    type Ap = { fx: number; fz: number; laneOff: number; road: typeof map.roads[number]; end: 'from' | 'to'; ang: number };
-    const allAp: Ap[] = [];
-    for (const rd of map.roads) {
-      const touches = rd.from === ix.nodeId || rd.to === ix.nodeId;
-      if (!touches) continue;
-      const n = rd.points.length;
-      if (rd.to === ix.nodeId) {
-        const dx = rd.points[n - 1][0] - rd.points[n - 2][0];
-        const dz = rd.points[n - 1][1] - rd.points[n - 2][1];
-        const l = Math.hypot(dx, dz) || 1;
-        const fx = dx / l, fz = dz / l;
-        allAp.push({ fx, fz, laneOff: (rd.lanesForward - 0.5) * rd.laneWidth, road: rd, end: 'to', ang: Math.atan2(fz, fx) });
-      }
-      if (rd.from === ix.nodeId && rd.lanesBackward > 0) {
-        const dx = rd.points[0][0] - rd.points[1][0];
-        const dz = rd.points[0][1] - rd.points[1][1];
-        const l = Math.hypot(dx, dz) || 1;
-        const fx = dx / l, fz = dz / l;
-        allAp.push({ fx, fz, laneOff: (rd.lanesBackward - 0.5) * rd.laneWidth, road: rd, end: 'from', ang: Math.atan2(fz, fx) });
-      }
-    }
-    allAp.sort((a, b) => a.ang - b.ang);
-    for (let ai = 0; ai < allAp.length; ai++) {
-      const ap = allAp[ai];
-      const group = (ai % 2) as 0 | 1;
-      controller.registerArm(ap.road.id, ap.end, group);
-      const rd = ap.road;
-      {
-        void ap.laneOff;
-        const half = (rd.lanesForward + rd.lanesBackward) * rd.laneWidth / 2;
-        const tl = createTrafficLightMesh();
-        // ── Đặt đèn ĐI DỌC con đường tiếp cận (không bao giờ vào giữa ngã tư):
-        // bắt đầu ngay mép junction (reach), lùi dọc road 2 m/bước tối đa 16 m;
-        // mỗi vị trí = tim road + lệch PHẢI luồng (half + 1.6). Điểm phải thoáng
-        // MỌI corridor road +0.5 m (như rule đặt biển). ──
-        const n = rd.points.length;
-        const len = (() => {
-          let l = 0;
-          for (let i = 1; i < n; i++) l += Math.hypot(rd.points[i][0] - rd.points[i - 1][0], rd.points[i][1] - rd.points[i - 1][1]);
-          return l;
-        })();
-        const atTo = ap.end === 'to';
-        const reach = half + 1;
-        let lx = 0, lz = 0, placed = false;
-        for (let back = 0; back <= 16 && !placed; back += 2) {
-          const s = atTo ? Math.max(half + 1, len - half - 1 - back) : Math.min(len - half - 1, half + 1 + back);
-          // nội suy polyline tới s
-          let rem = s, ax = rd.points[0][0], az = rd.points[0][1], px = ax, pz = az, tx = 0, tz = 1;
-          for (let i = 1; i < n; i++) {
-            const bx = rd.points[i][0], bz = rd.points[i][1];
-            const seg = Math.hypot(bx - ax, bz - az) || 1;
-            if (rem <= seg) {
-              const t = rem / seg;
-              px = ax + (bx - ax) * t; pz = az + (bz - az) * t;
-              tx = (bx - ax) / seg; tz = (bz - az) / seg;
-              break;
-            }
-            rem -= seg; ax = bx; az = bz;
-          }
-          // flow vào node: atTo → flow hướng tăng s (tx,tz); from → hướng giảm (−tx,−tz)
-          const sgn = atTo ? 1 : -1;
-          const fx = tx * sgn, fz = tz * sgn;
-          const rnx = -fz, rnz = fx;
-          const candX = px + rnx * (half + 1.6);
-          const candZ = pz + rnz * (half + 1.6);
-          // thoáng mọi corridor (mép asphalt + 0.5 m)?
-          let clear = true;
-          for (const r2 of map.roads) {
-            const h2 = (r2.lanesForward + r2.lanesBackward) * r2.laneWidth / 2;
-            const pts2 = r2.points;
-            for (let k = 1; k < pts2.length; k++) {
-              const vx = pts2[k][0] - pts2[k - 1][0], vz = pts2[k][1] - pts2[k - 1][1];
-              const l2 = vx * vx + vz * vz || 1;
-              const t2 = Math.max(0, Math.min(1, ((candX - pts2[k - 1][0]) * vx + (candZ - pts2[k - 1][1]) * vz) / l2));
-              if (Math.hypot(candX - (pts2[k - 1][0] + t2 * vx), candZ - (pts2[k - 1][1] + t2 * vz)) < h2 + 0.5) {
-                clear = false;
-                break;
-              }
-            }
-            if (!clear) break;
-          }
-          if (clear) {
-            lx = candX;
-            lz = candZ;
-            placed = true;
-            // Xoay mặt đèn hướng thẳng về làn xe đang tiến tới (hơi nghiêng 6° vào tâm làn để tài xế nhìn trực diện)
-            tl.rotation.y = Math.atan2(-fx, -fz) - 0.10;
-          }
-        }
-        if (!placed) continue;
-        tl.position.set(lx, 0, lz);
-        tl.userData.controller = controller;
-        tl.userData._groupIdx = group;
-        allLightGroups.push(tl);
-        const cellKey = chunkKeyFor(lx, lz);
-        if (!lightsByCell.has(cellKey)) lightsByCell.set(cellKey, []);
-        lightsByCell.get(cellKey)!.push(tl);
-      }
+    for (const plan of plans) {
+      controller.registerArm(plan.roadId, plan.end, plan.group);
+      if (!plan.pos) continue; // không tìm được chỗ thoáng
+      const tl = createTrafficLightMesh();
+      tl.position.set(plan.pos.x, 0, plan.pos.z);
+      tl.rotation.y = plan.yaw;
+      tl.userData.controller = controller;
+      tl.userData._groupIdx = plan.group;
+      allLightGroups.push(tl);
+      const cellKey = chunkKeyFor(plan.pos.x, plan.pos.z);
+      if (!lightsByCell.has(cellKey)) lightsByCell.set(cellKey, []);
+      lightsByCell.get(cellKey)!.push(tl);
+      void rById;
     }
   }
 

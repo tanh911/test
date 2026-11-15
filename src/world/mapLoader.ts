@@ -116,6 +116,18 @@ export interface GameMap {
   spawns: { player: MapSpawn };
   /** mặt nước — Berlin-Mitte có sông Spree cắt ngang, bridge roads bắc qua */
   waters?: MapWater[];
+  /** Polygon công viên (leisure=park/garden OSM) — phủ cỏ */
+  parks?: Array<{ id: string; name?: string; points: [number, number][] }>;
+  railClusters?: Array<{ railId: string; clusterId: number }>;
+  /** Railway OSM (S-Bahn/tram — KHÔNG gồm subway ngầm) — render ray, không vào road graph */
+  rails?: Array<{
+    id: string; name?: string;
+    railway: 'rail' | 'light_rail' | 'tram';
+    layer?: number; bridge?: boolean;
+    elev: number;
+    clusterId?: number; // 8 = viaduct nổi (Stadtbahn thật ~8m; thông thủy >4.5m StVO; ray/ballast overlay mỏng), 0 = mặt đất (tram)
+    points: [number, number][];
+  }>;
 }
 
 export function loadGameMap(json: unknown): GameMap {

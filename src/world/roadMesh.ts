@@ -135,6 +135,33 @@ export interface JunctionResult {
   sidewalkQuads: Quad[];
   curbQuads: Quad[];
   poly: Array<[number, number]>;
+  /** độ sâu cut từng arm theo THỨ TỰ connectedRoads đầu vào (m) — mouth thật
+   *  của polygon, test boundary dùng để dựng mô hình miệng khớp runtime */
+  armCuts: number[];
+}
+
+type Pt2 = [number, number];
+/** 2 đoạn thẳng có cắt nhau (không tính chạm共用 đầu mút)? orientation test */
+function segCross(a1: Pt2, a2: Pt2, b1: Pt2, b2: Pt2): boolean {
+  const o = (p: Pt2, q: Pt2, r: Pt2): number =>
+    (q[0] - p[0]) * (r[1] - p[1]) - (q[1] - p[1]) * (r[0] - p[0]);
+  const d1 = o(b1, b2, a1), d2 = o(b1, b2, a2);
+  const d3 = o(a1, a2, b1), d4 = o(a1, a2, b2);
+  if (((d1 > 1e-9 && d2 < -1e-9) || (d1 < -1e-9 && d2 > 1e-9)) &&
+      ((d3 > 1e-9 && d4 < -1e-9) || (d3 < -1e-9 && d4 > 1e-9))) return true;
+  return false;
+}
+
+/** Đa giác có TỰ CẮT? (so đoạn không kề nhau, bỏ cặp chia sẻ đỉnh) */
+function hasSelfIntersection(poly: Array<[number, number]>): boolean {
+  const n = poly.length;
+  for (let i = 0; i < n; i++) {
+    for (let j = i + 2; j < n; j++) {
+      if (i === 0 && j === n - 1) continue;
+      if (segCross(poly[i], poly[(i + 1) % n], poly[j], poly[(j + 1) % n])) return true;
+    }
+  }
+  return false;
 }
 
 /** Điểm nằm trong đa giác (ray casting) — dùng lọc strip vỉa hè gập vào lòng đường */
@@ -167,7 +194,7 @@ export function buildJunctionMesh(
   const curbQuads: Quad[] = [];
 
   if (connectedRoads.length < 2) {
-    return { asphaltQuads, sidewalkQuads, curbQuads, poly: [] };
+    return { asphaltQuads, sidewalkQuads, curbQuads, poly: [], armCuts: [] };
   }
 
   type Arm = {
@@ -193,14 +220,17 @@ export function buildJunctionMesh(
     const ang = ((Math.atan2(-dirZ, dirX) % (Math.PI * 2)) + Math.PI * 2) % (Math.PI * 2);
     // Pháp tuyến bên phải khi đi từ node ra ngoài theo dir: quay 90 độ CW quanh +Y -> [-dirZ, dirX]
     const norm: [number, number] = [-dirZ, dirX];
-    const len = roadLength(road);
-    let d = isMultiArm ? Math.max(5.5, maxW * 1.5) : half + 0.75;
-
-    // Check acute gore (< 60 độ)
+    // ⚠️ Polygon junction dùng cut SÂU (công thức cũ + gore acute): polygon là lớp
+    // asphalt CÙNG chất liệu đè lên ribbon (y=0.002 > y=0) — phần chồng vô hình,
+    // không tạo blob. Ribbon cut (junctionCutExtent) mới là thứ phải compact
+    // (K = half + 0.75) — blob ảnh 2026-11 do ribbon bị cắt LÙI 5.5 m + gore
+    // trong khi polygon chỉ phủ tới K → hở wedge giữa 2 lớp. Cut compact áp cho
+    // polygon làm polygon TỰ CẮT ở ngã 5/nhánh nhọn (regression junctionMesh 3/4/5).
+    let d = half + 0.75; // ⚠️ COMPACT — khớp ĐÚNG ribbon cut (junctionCutExtent). Công thức sâu cũ max(5.5,maxW×1.5)=10.5m làm polygon junction TRÀN 2.5× bề rộng ribbon → giao lộ thành quảng trường (bug ảnh user). Hull fallback + crossing guard xử lý acute.
     for (const other of connectedRoads) {
       if (other.road.id === road.id) continue;
       const dot = dirX * other.dirX + dirZ * other.dirZ;
-      if (dot > 0.5) {
+      if (dot > 0.64) { // CHỈ gore cho cặp acute <50° — không tràn
         const oHalf = roadHalfWidth(other.road);
         const angDiff = Math.acos(Math.max(-1, Math.min(1, dot)));
         const sinHalf = Math.sin(angDiff / 2);
@@ -208,7 +238,9 @@ export function buildJunctionMesh(
         d = Math.max(d, goreD);
       }
     }
-    d = Math.min(d, len * 0.45);
+    // Cap theo dài road nhưng KHÔNG thấp hơn K (= half + 0.75) — polygon ngắn hơn
+    // miệng ribbon sẽ hở vòng 0.8 m giữa polygon và ribbon (node road ngắn n104).
+    d = Math.min(d, Math.max(half + 0.75, roadLength(road) * 0.45));
 
     const px = nodeX + dirX * d;
     const pz = nodeZ + dirZ * d;
@@ -232,6 +264,7 @@ export function buildJunctionMesh(
     out2: [number, number];
   };
   const curbEdges: CurbEdge[] = [];
+  const acceptedCornerSegs: Array<[Pt2, Pt2]> = [];
 
   for (let i = 0; i < N; i++) {
     const A = arms[i];
@@ -254,17 +287,39 @@ export function buildJunctionMesh(
       const t = (-rx * dBz + rz * dBx) / det;
       const u = (-rx * dAz + rz * dAx) / det;
 
+      // Nhận MỌI giao điểm phía trước (t,u ≥ 0) — góc nhọn cho spike dài-thanh
+      // (đúng hình học ngã Y), góc tù cho chóp pointed tự nhiên. Clamp/bulge
+      // làm polygon TỰ CẮT (regression junctionMesh test 3/4/5) → bỏ.
+      // Chỉ chặn giao điểm phi lý (> 6·Kmax — gần song song), rơi về chamfer.
       if (t >= 0.0 && u >= 0.0) {
         const cx = A.L[0] - dAx * t;
         const cz = A.L[1] - dAz * t;
-        const midX = (A.L[0] + B.R[0]) / 2;
-        const midZ = (A.L[1] + B.R[1]) / 2;
-        const distToChord = Math.hypot(cx - midX, cz - midZ);
-
-        if (distToChord <= 6.0) {
+        const Kmax = Math.max(A.half, B.half) + 0.75;
+        if (Math.hypot(cx - nodeX, cz - nodeZ) <= 6 * Kmax) {
           cornerPt = [cx, cz];
         }
       }
+    }
+
+    // ⚠️ Guard đơn giản hình học: 2 đoạn góc mới (L_A→corner→R_B) không được
+    // cắt miệng nhánh khác / corner đã nhận — nếu cắt → chamfer thay vì fold.
+    if (cornerPt) {
+      const segsNew: Array<[Pt2, Pt2]> = [[A.L, cornerPt], [cornerPt, B.R]];
+      let cross = false;
+      for (let j = 0; j < N && !cross; j++) {
+        if (j === i || j === (i + 1) % N) continue; // miệng A, B kề góc — share đỉnh
+        const M = arms[j];
+        if (segCross(segsNew[0][0], segsNew[0][1], M.R, M.L) ||
+            segCross(segsNew[1][0], segsNew[1][1], M.R, M.L)) cross = true;
+      }
+      for (const [c1, c2] of acceptedCornerSegs && acceptedCornerSegs.length ? acceptedCornerSegs : []) {
+        if (cross) break;
+        for (const [n1, n2] of segsNew) {
+          if (segCross(c1, c2, n1, n2)) { cross = true; break; }
+        }
+      }
+      if (cross) cornerPt = null;
+      else acceptedCornerSegs.push(...segsNew);
     }
 
     if (cornerPt) {
@@ -317,6 +372,36 @@ export function buildJunctionMesh(
         out1: A.L_out,
         out2: B.R_out
       });
+    }
+  }
+
+  // ⚠️ FALLBACK chống fold: khi road ngắn (cap len·0.45) + nhánh rộng/láng khiến
+  // 2 miệng cắt nhau, perimeter TỰ CẮT → thay bằng BAO LỒI của mọi điểm perimeter
+  // (luôn đơn giản). Polygon chỉ là underlay (ribbon+strip phủ trên) nên hull đủ.
+  // curbEdges dựng lại theo cạnh hull — strip góc chạy dọc mép hull.
+  if (hasSelfIntersection(perimeter)) {
+    // Hull chỉ từ MOUTH ENDPOINTS (±half tại cut) + node — KHÔNG gồm spike gore:
+    // hull có spike = blob tràn (bug n104). Polygon là underlay → compact đủ.
+    const mouthPts: Array<[number, number]> = [];
+    for (const a of arms) {
+      mouthPts.push(a.R, a.L);
+    }
+    mouthPts.push([nodeX, nodeZ]);
+    const hull = convexHull2D(mouthPts);
+    if (hull.length >= 3) {
+      perimeter.length = 0;
+      perimeter.push(...hull);
+      curbEdges.length = 0;
+      for (let k = 0; k < hull.length; k++) {
+        const h1 = hull[k], h2 = hull[(k + 1) % hull.length];
+        const mx = (h1[0] + h2[0]) / 2 - nodeX, mz = (h1[1] + h2[1]) / 2 - nodeZ;
+        const ml = Math.hypot(mx, mz) || 1;
+        curbEdges.push({
+          p1: h1, p2: h2,
+          out1: [h1[0] + (mx / ml) * SIDEWALK_W, h1[1] + (mz / ml) * SIDEWALK_W],
+          out2: [h2[0] + (mx / ml) * SIDEWALK_W, h2[1] + (mz / ml) * SIDEWALK_W]
+        });
+      }
     }
   }
 
@@ -408,58 +493,104 @@ export function buildJunctionMesh(
 
     const o1c = pushOutClear(outA);
     const o2c = pushOutClear(outB);
-    if (!o1c || !o2c) continue;
-    const out1f = o1c;
-    const out2f = o2c;
-    const cxf = (p1[0] + p2[0] + out1f[0] + out2f[0]) / 4;
-    const czf = (p1[1] + p2[1] + out1f[1] + out2f[1]) / 4;
-    if (
-      stripBad(p1n[0], p1n[1]) ||
-      stripBad(p2n[0], p2n[1]) ||
-      stripBad(cxf, czf)
-    ) {
-      continue;
-    }
-    // dùng out đã clamp cho mọi quad phía dưới
-    const out1 = out1f;
-    const out2 = out2f;
+    // Push fail (8 lần vẫn bad) → dùng out GỐC thay vì bỏ cả strip: bỏ strip để
+    // lại mép asphalt không curb tràn ra cỏ (vi phạm boundary n76/n125).
+    let out1 = o1c ?? outA;
+    let out2 = o2c ?? outB;
+    // ⚠️ CLAMP khoảng cách out so với mép trong (p1/p2): out bị đẩy xa (spike gore
+    // depth lớn / pushOutClear scale 3×) làm quad GIÃN thành mảnh vỡ khổng lồ
+    // (bug ảnh giao lộ X). Strip vỉa hè chuẩn rộng đúng SIDEWALK_W.
+    const clampOut = (pin: [number, number], pout: [number, number]): [number, number] => {
+      const dx = pout[0] - pin[0], dz = pout[1] - pin[1];
+      const l = Math.hypot(dx, dz) || 1;
+      const maxL = SIDEWALK_W * 1.6;
+      if (l <= maxL) return pout;
+      return [pin[0] + (dx / l) * maxL, pin[1] + (dz / l) * maxL];
+    };
+    out1 = clampOut(p1, out1);
+    out2 = clampOut(p2, out2);
 
-    // Mặt trên phẳng của vỉa hè — tách 2 tam giác, MỖI tam giác chuẩn hóa cross < 0
-    // (đảo cả quad trapezoid không đảm bảo dấu cross của tam giác đầu khi quad lõm)
-    const swTris: Array<Array<[number, number]>> = [
-      [p1, p2, out2],
-      [p1, out2, out1]
-    ];
-    for (const t of swTris) {
-      const c = (t[1][0] - t[0][0]) * (t[2][1] - t[0][1]) - (t[1][1] - t[0][1]) * (t[2][0] - t[0][0]);
-      if (c > 0) {
-        sidewalkQuads.push({
-          a: [t[0][0], SIDEWALK_H, t[0][1]],
-          b: [t[2][0], SIDEWALK_H, t[2][1]],
-          c: [t[1][0], SIDEWALK_H, t[1][1]],
-          d: [t[1][0], SIDEWALK_H, t[1][1]]
-        });
-      } else {
-        sidewalkQuads.push({
-          a: [t[0][0], SIDEWALK_H, t[0][1]],
-          b: [t[1][0], SIDEWALK_H, t[1][1]],
-          c: [t[2][0], SIDEWALK_H, t[2][1]],
-          d: [t[2][0], SIDEWALK_H, t[2][1]]
-        });
+    // ⚠️ Phát strip theo mẫu: mỗi sample TỰ CO chiều rộng (walk từ mép trong ra
+    // tới khi chạm corridor asphalt nhánh kề) — không còn drop cả run vì pout
+    // đâm vào đường kề (mép trần không curb → vi phạm boundary n76/n125).
+    const SAMP = 8;
+    const lerp = (a: [number, number], b: [number, number], t: number): [number, number] =>
+      [a[0] + (b[0] - a[0]) * t, a[1] + (b[1] - a[1]) * t];
+    const pinAt = (t: number): [number, number] => lerp(p1n, p2n, t);
+    const dirAt = (t: number): [number, number] => {
+      const pin = pinAt(t);
+      const praw = lerp(out1, out2, t);
+      let dx = praw[0] - pin[0], dz = praw[1] - pin[1];
+      const l = Math.hypot(dx, dz) || 1;
+      return [dx / l, dz / l];
+    };
+    const widthAt = (pin: [number, number], dir: [number, number]): number => {
+      for (let st = 5; st >= 1; st--) {
+        const w = (st / 5) * SIDEWALK_W;
+        if (!stripBad(pin[0] + dir[0] * w, pin[1] + dir[1] * w)) return w;
+      }
+      return 0;
+    };
+    interface StripSample { pin: [number, number]; pout: [number, number]; w: number; }
+    const samples: StripSample[] = [];
+    for (let i = 0; i <= SAMP; i++) {
+      const t = i / SAMP;
+      const pin = pinAt(t);
+      const dir = dirAt(t);
+      const w = widthAt(pin, dir);
+      samples.push({ pin, pout: [pin[0] + dir[0] * w, pin[1] + dir[1] * w], w });
+    }
+    let i0 = -1;
+    for (let i = 0; i <= SAMP + 1; i++) {
+      const stop = i > SAMP || samples[i].w <= 0.3;
+      if (i <= SAMP && samples[i].w > 0.3 && i0 < 0) i0 = i;
+      if (i0 >= 0 && stop) {
+        const iStart = i0;
+        const lastGood = Math.min(i - 1, SAMP);
+        i0 = -1;
+        if (lastGood < iStart) continue;
+        const q1 = samples[iStart].pin, q2 = samples[lastGood].pin;
+        const w1 = samples[iStart].pout, w2 = samples[lastGood].pout;
+        if (Math.hypot(q2[0] - q1[0], q2[1] - q1[1]) > 0.15) {
+          // Mặt trên vỉa hè — 2 tam giác chuẩn hóa cross < 0
+          const swTris: Array<Array<[number, number]>> = [
+            [q1, q2, w2],
+            [q1, w2, w1]
+          ];
+          for (const t of swTris) {
+            const c = (t[1][0] - t[0][0]) * (t[2][1] - t[0][1]) - (t[1][1] - t[0][1]) * (t[2][0] - t[0][0]);
+            if (c > 0) {
+              sidewalkQuads.push({
+                a: [t[0][0], SIDEWALK_H, t[0][1]],
+                b: [t[2][0], SIDEWALK_H, t[2][1]],
+                c: [t[1][0], SIDEWALK_H, t[1][1]],
+                d: [t[1][0], SIDEWALK_H, t[1][1]]
+              });
+            } else {
+              sidewalkQuads.push({
+                a: [t[0][0], SIDEWALK_H, t[0][1]],
+                b: [t[1][0], SIDEWALK_H, t[1][1]],
+                c: [t[2][0], SIDEWALK_H, t[2][1]],
+                d: [t[2][0], SIDEWALK_H, t[2][1]]
+              });
+            }
+          }
+          // Curb đứng cho đoạn này
+          curbQuads.push({
+            a: [q2[0], 0, q2[1]],
+            b: [q2[0], SIDEWALK_H, q2[1]],
+            c: [q1[0], SIDEWALK_H, q1[1]],
+            d: [q1[0], 0, q1[1]]
+          });
+        }
       }
     }
-
-    // Mặt curb đứng — normal quay về PHẦ ĐƯỜNG (ngược hướng outward) để nhìn từ xe thấy mặt curb
-    curbQuads.push({
-      a: [p2[0], 0, p2[1]],
-      b: [p2[0], SIDEWALK_H, p2[1]],
-      c: [p1[0], SIDEWALK_H, p1[1]],
-      d: [p1[0], 0, p1[1]]
-    });
   }
 
   const poly: Array<[number, number]> = perimeter.map(([x, z]) => [x - nodeX, z - nodeZ]);
-  return { asphaltQuads, sidewalkQuads, curbQuads, poly };
+  const cutByRoad = new Map(arms.map((a) => [a.road.id, a.d]));
+  const armCuts = connectedRoads.map(({ road }) => cutByRoad.get(road.id) ?? roadHalfWidth(road) + 0.75);
+  return { asphaltQuads, sidewalkQuads, curbQuads, poly, armCuts };
 }
 
 export function junctionPatchQuads(
@@ -610,7 +741,9 @@ export function junctionHalfExtent(map: GameMap, nodeId: string): number {
  *  của chính road đó (patch miệng K = half + 0.75, patch ở y=0.005 đè nhẹ lên
  *  ribbon y=0) → không khe, không xương cá, không z-fight.
  *  Với vòng xuyến (Kreisverkehr): extent lớn hơn (junctionHalfExtent + 4) để
- *  để trống lane ring + island. */
+ *  để trống lane ring + island.
+ *  ⚠️ ĐỒNG BỘ với buildJunctionMesh (arm cut d = K) — mọi lớp junction phải
+ *  dùng CÙNG một extent, tránh blob tràn hoặc khe hở (bug ảnh chụp 2026-11). */
 export function junctionCutExtent(road: MapRoad, end: 'from' | 'to', map: GameMap): number {
   const nodeId = road[end];
   const node = map.nodes.find((n) => n.id === nodeId);
@@ -619,32 +752,7 @@ export function junctionCutExtent(road: MapRoad, end: 'from' | 'to', map: GameMa
   if (ix?.rule === 'roundabout') return junctionHalfExtent(map, nodeId) + 4;
   const connected = roadsAtNode(map, nodeId);
   if (connected.length < 2) return 0;
-  const half = roadHalfWidth(road);
-  const maxW = Math.max(...connected.map(c => roadHalfWidth(c.road)));
-  const isMultiArm = connected.length >= 3;
-  let d = isMultiArm ? Math.max(5.5, maxW * 1.5) : half + 0.75;
-
-  // Kiểm tra nếu nhánh này nằm trong cặp góc nhọn (< 36 độ) -> mở rộng d tới điểm gore
-  const pts = road.points;
-  const myDirX = end === 'from' ? (pts[1][0] - pts[0][0]) : (pts[pts.length - 2][0] - pts[pts.length - 1][0]);
-  const myDirZ = end === 'from' ? (pts[1][1] - pts[0][1]) : (pts[pts.length - 2][1] - pts[pts.length - 1][1]);
-  const myLen = Math.hypot(myDirX, myDirZ) || 1;
-  const ndx = myDirX / myLen, ndz = myDirZ / myLen;
-
-  for (const other of connected) {
-    if (other.road.id === road.id) continue;
-    const dot = ndx * other.dirX + ndz * other.dirZ;
-    if (dot > 0.5) { // góc < ~60 độ
-      const otherHalf = roadHalfWidth(other.road);
-      const ang = Math.acos(Math.max(-1, Math.min(1, dot)));
-      const sinHalf = Math.sin(ang / 2);
-      const goreD = (half + otherHalf + 0.2) / (2 * Math.max(0.08, sinHalf));
-      d = Math.max(d, goreD);
-    }
-  }
-
-  const len = roadLength(road);
-  return Math.min(d, len * 0.45);
+  return roadHalfWidth(road) + 0.75;
 }
 
 export function roadSkipZones(road: MapRoad, map: GameMap): Array<[number, number]> {
@@ -700,7 +808,10 @@ export function junctionBackgroundQuads(
   for (const { road } of connectedRoads) {
     kMax = Math.max(kMax, roadHalfWidth(road));
   }
-  const r = kMax * 1.25; // 1.25 x K_max: che het khe o goc giua cac nhanh
+  // 2.4 x K_max: đĩa nền phủ SẠCH các wedge giữa vai đường các nhánh quanh node
+  // (khe cỏ 0.3-0.7 m giữa shoulder↔shoulder). Nằm y=-0.012 DƯỚI mọi lớp → chỉ
+  // hiện ở đúng những chỗ trống, trông như apron nhựa cũ quanh ngã tư.
+  const r = kMax * 2.4;
   const PATCH_Y = -0.005; // gan mat duong (ribbon y=0), khong tao hamm toi
   const segs = 32;
   const quads: Quad[] = [];

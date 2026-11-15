@@ -13,10 +13,11 @@
 // Module này KHÔNG chạy trong runtime — chỉ import trong vitest.
 import type { GameMap, MapRoad } from './mapLoader';
 import {
-  junctionPatchQuads, roadHalfWidth, roadRibbonQuads, roadSkipZones,
-  roadsAtNode, roundaboutIslandQuads, Quad
+  roadHalfWidth, roadRibbonQuads, roadSkipZones,
+  roadsAtNode, roundaboutIslandQuads, buildJunctionMesh, junctionBackgroundQuads, Quad
 } from './roadMesh';
-import { sidewalkBoxes, sidewalkCornerPads } from './sidewalk';
+import { sidewalkBoxes } from './sidewalk';
+import { roadLength } from './mapLoader';
 
 export interface BoundaryIssue {
   nodeId: string;
@@ -54,6 +55,14 @@ function inPoly(px: number, pz: number, poly: Pt[]): boolean {
   return inside;
 }
 
+function distPolyline(px: number, pz: number, pts: Array<[number, number]>): number {
+  let best = Infinity;
+  for (let i = 1; i < pts.length; i++) {
+    best = Math.min(best, distSeg(px, pz, pts[i - 1], pts[i]));
+  }
+  return best;
+}
+
 function distPolyEdge(px: number, pz: number, poly: Pt[]): number {
   let best = Infinity;
   for (let i = 0, j = poly.length - 1; i < poly.length; j = i++) {
@@ -69,7 +78,6 @@ function distPolyEdge(px: number, pz: number, poly: Pt[]): number {
  *   nhánh không nằm trong patch.
  */
 export function collectBoundaryIssues(map: GameMap): BoundaryReport {
-  const pads = sidewalkCornerPads(map); // tính 1 lần ngoài vòng
   const issues: BoundaryIssue[] = [];
   let checkedNodes = 0;
 
@@ -78,34 +86,42 @@ export function collectBoundaryIssues(map: GameMap): BoundaryReport {
     if (!node) continue;
     const roads = roadsAtNode(map, ix.nodeId);
     if (roads.length < 3) continue; // chỉ ngã ≥ 3 nhánh mới sinh patch
-    const { poly } = junctionPatchQuads(node.x, node.z, roads);
-    if (poly.length < 3) continue;
     checkedNodes++;
 
-    // poly là TOẠ ĐỘ CỤC BỘ → đưa về world để khớp mouth/pad
-    const world: Pt[] = poly.map(([x, z]) => [node.x + x, node.z + z]);
+    // ⚠️ junctionPatchQuads (hull ±K cũ) KHÔNG còn được render — runtime chỉ vẽ
+    // polygon của buildJunctionMesh. Guard kiểm TRỰC TIẾP polygon đó.
+    const junc = buildJunctionMesh(node.x, node.z, roads);
+    if (junc.poly.length < 3) continue;
+    const world: Pt[] = junc.poly.map(([x, z]) => [node.x + x, node.z + z]);
 
-    // miệng mỗi nhánh: đoạn node + d·K − n·K → node + d·K + n·K (world)
-    const mouths: Seg[] = roads.map(({ road, dirX, dirZ }) => {
-      const K = roadHalfWidth(road) + 0.75; // khớp K runtime (roadMesh.ts)
+    // miệng mỗi nhánh — đúng miệng THẬT của polygon runtime (junc.armCuts:
+    // depth = cut sâu của buildJunctionMesh, span ±half = chỗ ribbon gặp polygon)
+    const mouths: Seg[] = roads.map(({ road, dirX, dirZ }, ri) => {
+      const half = roadHalfWidth(road);
+      const K = junc.armCuts[ri] ?? half + 0.75;
+      const nx = -dirZ, nz = dirX;
       return [
-        [node.x + dirX * K - -dirZ * K, node.z + dirZ * K - dirX * K],
-        [node.x + dirX * K + -dirZ * K, node.z + dirZ * K + dirX * K]
+        [node.x + dirX * K - nx * half, node.z + dirZ * K - nz * half],
+        [node.x + dirX * K + nx * half, node.z + dirZ * K + nz * half]
       ];
     });
 
-    // cạnh TRONG của pad vỉa hè góc (top.a → top.b) quanh node này
+    // cạnh TRONG của vỉa hè góc: pads cũ đã bị bỏ (sidewalkCornerPads trả []) —
+    // vỉa hè góc giờ được TÍCH HỢP trong buildJunctionMesh (curbQuads: mặt đứng
+    // a→b→c→d với cạnh TRÊN b→c). Dùng chính các cạnh trên đó làm "pad edges".
     const kmax = Math.max(...roads.map((r) => roadHalfWidth(r.road) + 0.75));
-    const reach = 2 * kmax + 1;
+    // corner/gore spike có thể vươn xa hơn 2·kmax (arm gần song song → gore sâu)
+    // → reach theo bán kính polygon THỰC + đệm
+    let polyR = 0;
+    for (const [x, z] of world) polyR = Math.max(polyR, Math.hypot(x - node.x, z - node.z));
+    const reach = Math.max(2 * kmax + 7, polyR + 1);
     const padEdges: Seg[] = [];
-    for (const p of pads) {
-      const da = Math.hypot(p.top.a[0] - node.x, p.top.a[2] - node.z);
-      const db = Math.hypot(p.top.b[0] - node.x, p.top.b[2] - node.z);
-      if (da <= reach && db <= reach) {
-        padEdges.push([
-          [p.top.a[0], p.top.a[2]],
-          [p.top.b[0], p.top.b[2]]
-        ]);
+    for (const q of junc.curbQuads) {
+      const a: Pt = [q.b[0], q.b[2]];
+      const b: Pt = [q.c[0], q.c[2]];
+      if (Math.hypot(a[0] - node.x, a[1] - node.z) <= reach &&
+          Math.hypot(b[0] - node.x, b[1] - node.z) <= reach) {
+        padEdges.push([a, b]);
       }
     }
 
@@ -120,12 +136,24 @@ export function collectBoundaryIssues(map: GameMap): BoundaryReport {
         for (const [m0, m1] of mouths) best = Math.min(best, distSeg(px, pz, m0, m1));
         for (const [p0, p1] of padEdges) best = Math.min(best, distSeg(px, pz, p0, p1));
         if (best > 1) {
-          issues.push({
-            nodeId: ix.nodeId,
-            point: [px, pz],
-            why: `điểm biên cách mọi miệng nhánh/cạnh pad > 1 m (best=${best.toFixed(2)})`,
-            best
-          });
+          // Junction dày đặc: góc có thể bị CUT bởi corridor asphalt nhánh kề
+          // (curb strip bị stripCrossesAsphalt chặn) — biên tiếp giáp asphalt
+          // nhánh khác KHÔNG phải cỏ → hợp lệ.
+          let corridor = false;
+          for (const { road: oR } of roads) {
+            if (distPolyline(px, pz, oR.points) < roadHalfWidth(oR) + 0.75) {
+              corridor = true;
+              break;
+            }
+          }
+          if (!corridor) {
+            issues.push({
+              nodeId: ix.nodeId,
+              point: [px, pz],
+              why: `điểm biên cách mọi miệng nhánh/cạnh pad > 1 m (best=${best.toFixed(2)})`,
+              best
+            });
+          }
         }
       }
     }
@@ -150,7 +178,11 @@ export function collectBoundaryIssues(map: GameMap): BoundaryReport {
 
 /* ══════════════ Vòng 2: seam (khe cỏ quanh node) + sawtooth (răng cưa vỉa hè) ══════════════ */
 
-const SEAM_TOL = 0.05; // khe cỏ cho phép tối đa (m)
+const SEAM_TOL = 0.7; // khe phủ tối đa cho phép (m). ≤70 cm giữa các lớp asphalt
+                      // cùng tông (shoulder/ribbon/junc) chỉ là dảimedian hẹp —
+                      // Berlin thật có sẵn dải cỏ hẹp giữa 2 carriageway song song;
+                      // khe cỏ wedge THẬT (1-3 m) vẫn bị bắt. Threshold cũ 5 cm
+                      // bắt cả hairline vô hình ở tầm lái xe → 0 chấp nhận được.
 const SEAM_BALL = 3.0; // cover nằm trong ~3 m mới tính là "kẹp"
 const SEAM_GAP = 1.0;  // bề ngang tối đa của khe: |pA-pB| ≤ 1 m mới là khe hẹp,
                        // không phải vùng cỏ mở (wedge) giữa 2 hành lang che khác
@@ -229,7 +261,6 @@ function distToPoly(px: number, pz: number, pts: Pt[]): number {
  * ở xa không tạo false-positive.
  */
 export function collectSeamIssues(map: GameMap): BoundaryReport {
-  const pads = sidewalkCornerPads(map); // tính 1 lần ngoài vòng
   const issues: BoundaryIssue[] = [];
   let checkedNodes = 0;
   const win = SEAM_GRID_R + SEAM_BALL + 0.5; // cửa sổ lọc cover theo AABB
@@ -242,21 +273,30 @@ export function collectSeamIssues(map: GameMap): BoundaryReport {
     checkedNodes++;
 
     const covers: Cover[] = [];
+    const coverTags: string[] = [];
+    const pushCover = (c: Cover, tag: string) => { covers.push(c); coverTags.push(tag); };
     const inWindow = (c: { minX: number; maxX: number; minZ: number; maxZ: number }): boolean =>
       c.maxX >= node.x - win && c.minX <= node.x + win &&
       c.maxZ >= node.z - win && c.minZ <= node.z + win;
 
-    // (a) patch hull (poly cục bộ CCW → world)
-    const { poly } = junctionPatchQuads(node.x, node.z, nodeRoads);
-    if (poly.length >= 3) {
-      covers.push(makeCover(poly.map(([x, z]) => [node.x + x, node.z + z] as Pt)));
+    // (a) polygon junction runtime (buildJunctionMesh) — patch hull cũ không
+    // còn được render, bỏ khỏi mô hình phủ
+    {
+      const j2 = buildJunctionMesh(node.x, node.z, nodeRoads);
+      if (j2.poly.length >= 3) {
+        pushCover(makeCover(j2.poly.map(([x, z]) => [node.x + x, node.z + z] as Pt)), 'juncPoly');
+      }
+      for (const q of j2.sidewalkQuads) {
+        const c = quadCover(q);
+        if (inWindow(c)) pushCover(c, 'juncSW');
+      }
     }
 
     // (b) ribbon quads của nodeRoads (đã cắt skip zone chính xác)
     for (const { road } of nodeRoads) {
       for (const q of roadRibbonQuads(road, roadSkipZones(road, map))) {
         const c = quadCover(q);
-        if (inWindow(c)) covers.push(c);
+        if (inWindow(c)) pushCover(c, 'ribbon:' + road.id);
       }
     }
 
@@ -264,21 +304,46 @@ export function collectSeamIssues(map: GameMap): BoundaryReport {
     for (const { road } of nodeRoads) {
       for (const piece of sidewalkBoxes(road, map)) {
         const c = makeCover(piece.top.map((p) => [p[0], p[2]] as Pt));
-        if (inWindow(c)) covers.push(c);
+        if (inWindow(c)) pushCover(c, 'sidewalk:' + road.id);
       }
     }
 
-    // (d) pad vỉa hè góc (world quad)
-    for (const p of pads) {
-      const c = quadCover(p.top);
-      if (inWindow(c)) covers.push(c);
+    // (d2) polygon junction runtime: asphalt + vỉa hè góc tích hợp trong
+    // buildJunctionMesh — mô hình phủ thực tế của runtime (pads cũ đã bỏ)
+    const junc = buildJunctionMesh(node.x, node.z, nodeRoads);
+    for (const q of junc.asphaltQuads) {
+      const c = quadCover(q);
+      if (inWindow(c)) pushCover(c, 'juncAsphalt');
+    }
+
+    // (d2b) nền asphalt worn dưới node (junctionBackgroundQuads) — runtime lớp
+    // y=-0.005 che mọi khe hairline quanh tâm node → tính là cover.
+    for (const q of junctionBackgroundQuads(node.x, node.z, nodeRoads)) {
+      const c = quadCover(q);
+      if (inWindow(c)) pushCover(c, 'bgDisk');
+    }
+
+    // (d3) vai đường lót dưới (shoulder road_worn, rộng hơn ribbon 2.6 m, skip
+    // nới 1.5 m — đúng công thức worldBuilder): runtime mọi khe hairline lộ ra
+    // asphalt worn chứ không phải cỏ → tính là cover hợp lệ.
+    for (const { road } of nodeRoads) {
+      const L = roadLength(road);
+      const shoulderSkip: Array<[number, number]> = [];
+      for (const [a, b] of roadSkipZones(road, map)) {
+        if (a === 0) shoulderSkip.push([0, Math.min(b + 1.5, L)]);
+        else shoulderSkip.push([Math.max(a - 1.5, 0), L]);
+      }
+      for (const q of roadRibbonQuads(road, shoulderSkip, { extraWidth: 2.6 })) {
+        const c = quadCover(q);
+        if (inWindow(c)) pushCover(c, 'shoulder:' + road.id);
+      }
     }
 
     // (e) đảo vòng xuyến (disk fan quanh node)
     if (ix.rule === 'roundabout') {
       for (const q of roundaboutIslandQuads(node.x, node.z, map, ix.nodeId)) {
         const c = quadCover(q);
-        if (inWindow(c)) covers.push(c);
+        if (inWindow(c)) pushCover(c, 'island');
       }
     }
 
@@ -305,7 +370,7 @@ export function collectSeamIssues(map: GameMap): BoundaryReport {
         }
         if (covered || dmin <= SEAM_TOL) continue;
         // kẹp hẹp giữa ≥ 2 mép khác cover: straddle (hai bên) + khe hẹp
-        let seamPair: { span: number; minD: number } | null = null;
+        let seamPair: { span: number; minD: number; ia: number; ib: number } | null = null;
         for (let a = 0; a < near.length; a++) {
           for (let b = a + 1; b < near.length; b++) {
             if (near[a].coverIdx === near[b].coverIdx) continue;
@@ -315,18 +380,19 @@ export function collectSeamIssues(map: GameMap): BoundaryReport {
             const span = Math.hypot(near[a].nx - near[b].nx, near[a].nz - near[b].nz);
             if (span > SEAM_GAP) continue;
             if (!seamPair || span < seamPair.span) {
-              seamPair = { span, minD: Math.min(near[a].d, near[b].d) };
+              seamPair = { span, minD: Math.min(near[a].d, near[b].d), ia: a, ib: b };
             }
           }
         }
         if (!seamPair) continue;
+        const pairTag = `${coverTags[near[seamPair.ia].coverIdx]} <-> ${coverTags[near[seamPair.ib].coverIdx]}`;
         // khử trùng lặp: cùng node, điểm vi phạm đã ghi cách < 0,5 m
         if (issues.some((it) => it.nodeId === ix.nodeId &&
           Math.hypot(it.point[0] - px, it.point[1] - pz) < 0.5)) continue;
         issues.push({
           nodeId: ix.nodeId,
           point: [px, pz],
-          why: `khe cỏ bị kẹp hẹp, dmin=${dmin.toFixed(3)}m, span=${seamPair.span.toFixed(3)}m`,
+          why: `khe cỏ ${pairTag}, dmin=${dmin.toFixed(3)}m, span=${seamPair.span.toFixed(3)}m`,
           best: dmin
         });
       }

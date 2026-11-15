@@ -36,7 +36,17 @@ export class PedestrianController {
     scene.add(this.group);
   }
 
-  init(): void {
+  init(preTemplates?: THREE.Group[]): void {
+    if (preTemplates?.length) {
+      // Test/harness: template có sẵn, bỏ qua GLB loader
+      for (const t of preTemplates) {
+        const wrap = new THREE.Group();
+        wrap.add(t);
+        this.templates.push(wrap);
+      }
+      if (this.templates.length) this.spawnPeds();
+      return;
+    }
     const loader = new GLTFLoader();
     const urls = Array.from({ length: 8 }, (_, i) => `/simv2/ped_${i + 1}.glb`);
     Promise.all(urls.map(u => this.loadGLB(loader, u).catch(() => null))).then(loaded => {
@@ -45,7 +55,7 @@ export class PedestrianController {
           t.traverse(o => {
             const m = o as THREE.Mesh;
             if (m.isMesh) {
-              m.castShadow = true;
+              m.castShadow = false; // FPS: shadow pass 56 ped không đáng
               m.receiveShadow = true;
               const mats = Array.isArray(m.material) ? m.material : [m.material];
               for (const mat of mats) mat.side = THREE.FrontSide;
@@ -144,6 +154,11 @@ export class PedestrianController {
       if (d < radius) return true;
     }
     return false;
+  }
+
+  /** số ped đang sống (debug/test) */
+  count(): number {
+    return this.peds.length;
   }
 
   private makePed(road: MapRoad, s: number, dir: 1 | -1, side: 1 | -1, idx: number): Ped {

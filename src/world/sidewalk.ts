@@ -3,7 +3,7 @@
 // Chỗ zebra: hạ mặt (ramp) dài 1.5 m xuống 0.03 m để qua đường cho người đi bộ.
 // Pad góc giao lộ: ô vuông SW×SW nối vỉa hè 2 nhánh quanh góc (cùng màu/y → không z-fight nhìn thấy).
 import type { GameMap, MapRoad } from './mapLoader';
-import { roadLength, roadPointAt } from './mapLoader';
+import { roadCurve, roadLength, roadPointAt } from './mapLoader';
 import type { Quad } from './roadMesh';
 import { roadHalfWidth, roadSkipZones, roadsAtNode, junctionHalfExtent } from './roadMesh';
 
@@ -89,8 +89,10 @@ export function sidewalkBoxes(road: MapRoad, map: GameMap): SidewalkPiece[] {
     zebraCenters.push(atEnd ? len - half - 2.5 : half + 2.5);
   }
 
-  const siblings = findAcuteSiblings(road, map);
-  const step = 4;
+    const siblings = findAcuteSiblings(road, map);
+    // Bước 2 m (trước 4 m): chord 4 m trên road cong ăn sâu vào mép ribbon tới
+    // 6.7 cm (R=30) — vượt SAW_TOL 5 cm gây "răng cưa". 2 m → sag ≤ 1.7 cm.
+    const step = 2;
   for (const side of [-1, 1] as const) {
     if (side === -1 && road.sidewalk?.left === false) continue;
     if (side === 1 && road.sidewalk?.right === false) continue;
@@ -104,6 +106,31 @@ export function sidewalkBoxes(road: MapRoad, map: GameMap): SidewalkPiece[] {
       for (const off of [-2.5, -1.5, 1.5, 2.5]) {
         const pt = zc + off;
         if (pt > startS && pt < endS) sampleSet.add(pt);
+      }
+    }
+    // Chèn ĐỈNH ribbon vào lưới piece — piece không được vắt qua góc ribbon
+    // (chord cắt góc → sag giữa piece). innerAt phía dưới dùng lại dãy này.
+    const ribStep = roadCurve(road).step;
+    const ribbonS: number[] = [];
+    {
+      const vis: Array<[number, number]> = [];
+      let cur = 0;
+      for (const [a2, b2] of skip) {
+        if (b2 <= 0 || a2 >= len) continue;
+        if (a2 > cur) vis.push([cur, Math.min(a2, len)]);
+        cur = Math.max(cur, b2);
+      }
+      if (cur < len) vis.push([cur, len]);
+      for (const [va, vb] of vis) {
+        ribbonS.push(va);
+        for (let s2 = Math.ceil(va / ribStep) * ribStep; s2 < vb - 1e-6; s2 += ribStep) {
+          if (s2 <= va + 1e-6) continue;
+          ribbonS.push(s2);
+        }
+        ribbonS.push(vb);
+      }
+      for (const rs of ribbonS) {
+        if (rs > startS + 1e-6 && rs < endS - 1e-6) sampleSet.add(rs);
       }
     }
     const samplePoints = Array.from(sampleSet).sort((a, b) => a - b);
@@ -130,6 +157,47 @@ export function sidewalkBoxes(road: MapRoad, map: GameMap): SidewalkPiece[] {
       return SIDEWALK_H;
     };
 
+    // effW tính theo ĐIỂM SAMPLE dùng chung (không phải theo piece) — width
+    // liên tục giữa các piece liền kề, hết "bậc thang" tạo khe tam giác giữa
+    // 2 piece vỉa hè (seam sidewalk↔sidewalk).
+    const effWAt = new Map<number, number>();
+    const culledAt = new Map<number, boolean>();
+    for (const s of sList) {
+      const inner = roadPointAt(road, s);
+      const ix = inner.x + inner.nx * side * half;
+      const iz = inner.z + inner.nz * side * half;
+      let effW = SIDEWALK_W;
+      let culled = false;
+      for (const sib of siblings) {
+        if (sib.facingSide !== side) continue;
+        const oHalf = roadHalfWidth(sib.other);
+        const d = distToRoad(ix, iz, sib.other);
+        if (d < oHalf + 0.2) { culled = true; break; }
+        const clear = d - oHalf;
+        if (clear < 0.5) { culled = true; break; }
+        effW = Math.min(effW, Math.max(0.3, clear - 0.15));
+      }
+      effWAt.set(s, effW);
+      culledAt.set(s, culled);
+    }
+
+    // ── innerAt: mép trong vỉa hè nằm ĐÚNG TRÊN polyline mép ribbon ──
+    // Ribbon (roadRibbonQuads) sample theo dãy s: [va, grid 2m trong khoảng, vb].
+    // Điểm offset bằng pháp tuyến nội suy tại s off-grid PHÍNH ra khỏi chord
+    // nối 2 đỉnh ribbon (7-15 cm trên đường cong) → răng cưa. Giải pháp: corner
+    // vỉa hè = nội suy TUYẾN TÍNH giữa 2 đỉnh ribbon kề (chord) → gap = 0.
+    const innerAt = (s: number, sd: number): [number, number] => {
+      const cl = Math.max(0, Math.min(len, s));
+      let i = 0;
+      while (i < ribbonS.length - 2 && ribbonS[i + 1] < cl) i++;
+      const s0 = ribbonS[i], s1 = ribbonS[Math.min(i + 1, ribbonS.length - 1)];
+      const f = s1 > s0 + 1e-9 ? (cl - s0) / (s1 - s0) : 0;
+      const A = roadPointAt(road, s0), B = roadPointAt(road, s1);
+      const ax = A.x + A.nx * sd * half, az = A.z + A.nz * sd * half;
+      const bx = B.x + B.nx * sd * half, bz = B.z + B.nz * sd * half;
+      return [ax + (bx - ax) * f, az + (bz - az) * f];
+    };
+
     for (let i = 0; i < sList.length - 1; i++) {
       const s = sList[i];
       const nextS = sList[i + 1];
@@ -140,46 +208,21 @@ export function sidewalkBoxes(road: MapRoad, map: GameMap): SidewalkPiece[] {
       const isRamp = h0 === RAMP_H || h1 === RAMP_H;
       const hAvg = (h0 + h1) / 2;
 
-      // Điểm nội suy Curve (Catmull-Rom, đều theo cung) — trùng khít 100% với
-      // roadPointAt mà ribbon/markings dùng. pointWithNormalAtS (polyline gốc)
-      // làm vỉa hè hở khỏi mép đường tới 1.5 m trên road cong (răng cưa).
-      const inner0 = roadPointAt(road, s);
-      const inner1 = roadPointAt(road, nextS);
-      const ix0 = inner0.x + inner0.nx * side * half;
-      const iz0 = inner0.z + inner0.nz * side * half;
-      const ix1 = inner1.x + inner1.nx * side * half;
-      const iz1 = inner1.z + inner1.nz * side * half;
+      // Mép trong = điểm TRÊN chord mép ribbon (innerAt) → trùng khít tuyệt đối
+      const [ix0, iz0] = innerAt(s, side);
+      const [ix1, iz1] = innerAt(nextS, side);
 
-      let culled = false;
-      let effW0 = SIDEWALK_W;
-      let effW1 = SIDEWALK_W;
-
-      for (const sib of siblings) {
-        if (sib.facingSide === side) {
-          const oHalf = roadHalfWidth(sib.other);
-          const d0 = distToRoad(ix0, iz0, sib.other);
-          const d1 = distToRoad(ix1, iz1, sib.other);
-          // Nếu mép đường đã chạm hoặc nằm trong lòng đường đối diện
-          if (d0 < oHalf + 0.2 || d1 < oHalf + 0.2) {
-            culled = true;
-            break;
-          }
-          const clear0 = d0 - oHalf;
-          const clear1 = d1 - oHalf;
-          if (clear0 < 0.5 || clear1 < 0.5) {
-            culled = true;
-            break;
-          }
-          effW0 = Math.min(effW0, Math.max(0.3, clear0 - 0.15));
-          effW1 = Math.min(effW1, Math.max(0.3, clear1 - 0.15));
-        }
-      }
+      const culled = culledAt.get(s) === true || culledAt.get(nextS) === true;
+      const effW0 = effWAt.get(s) ?? SIDEWALK_W;
+      const effW1 = effWAt.get(nextS) ?? SIDEWALK_W;
 
       if (!culled) {
-        const ox0 = ix0 + inner0.nx * side * effW0;
-        const oz0 = iz0 + inner0.nz * side * effW0;
-        const ox1 = ix1 + inner1.nx * side * effW1;
-        const oz1 = iz1 + inner1.nz * side * effW1;
+        // outer: đẩy từ mép trong theo pháp tuyến curve tại s (inner0/inner1 cũ)
+        const n0 = roadPointAt(road, s), n1 = roadPointAt(road, nextS);
+        const ox0 = ix0 + n0.nx * side * effW0;
+        const oz0 = iz0 + n0.nz * side * effW0;
+        const ox1 = ix1 + n1.nx * side * effW1;
+        const oz1 = iz1 + n1.nz * side * effW1;
 
         const top: [number, number, number][] = side === 1
           ? [[ix0, h0, iz0], [ox0, h0, oz0], [ox1, h1, oz1], [ix1, h1, iz1]]

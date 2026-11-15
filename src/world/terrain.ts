@@ -5,7 +5,12 @@ import { palette } from '../art/palette';
 /** Mặt phẳng địa hình: nền cỏ ngoại ô (y = -0.055) + lớp đá lát quảng trường/sân trong Altstadt (y = -0.045).
  *  Cỏ là KHUNG 4 dải bao quanh plaza — KHÔNG chồng lấn: 2 mặt phẳng chồng nhau chỉ cách 1 cm
  *  sẽ z-fighting thành sọc moiré khi nhìn từ trên cao (depth precision ở 500 m chỉ còn ~5 cm). */
-export function createTerrain(scene: THREE.Scene, size = 5000): THREE.Group {
+export function createTerrain(
+  scene: THREE.Scene,
+  size = 5000,
+  /** footprint nước (outline ribbon sông) — ĐỤC LỖ trên plaza để nước sâu hiện ra */
+  waterHoles: Array<Array<[number, number]>> = []
+): THREE.Group {
   const group = new THREE.Group();
   group.name = 'terrain_group';
 
@@ -25,8 +30,35 @@ export function createTerrain(scene: THREE.Scene, size = 5000): THREE.Group {
     return mesh;
   };
 
-  // 1. Lớp đá lát quảng trường/phố đi bộ trong Altstadt (2600×2600, y = -0.045)
-  addStrip(plazaHalf * 2, plazaHalf * 2, 0, 0, 'terrain_altstadt_plaza', matPlaza);
+  // 1. Lớp đá lát Altstadt (2600×2600, y=-0.045) — CÓ LỖ footprint nước nếu có
+  //    (nước bị hạ xuống -1.5: không đục lỗ → plaza đè ẩn nước)
+  if (waterHoles.length) {
+    const shape = new THREE.Shape();
+    shape.moveTo(-plazaHalf, plazaHalf);
+    shape.lineTo(plazaHalf, plazaHalf);
+    shape.lineTo(plazaHalf, -plazaHalf);
+    shape.lineTo(-plazaHalf, -plazaHalf);
+    shape.closePath();
+    for (const hole of waterHoles) {
+      if (hole.length < 3) continue;
+      // ShapeGeometry: (x, y-shape) → rotateX(-π/2) → (x, 0, −y) → đưa điểm (x, −z)
+      const path = new THREE.Path();
+      const rev = hole.slice().reverse(); // hole ngược chiều outer
+      path.moveTo(rev[0][0], -rev[0][1]);
+      for (let i = 1; i < rev.length; i++) path.lineTo(rev[i][0], -rev[i][1]);
+      path.closePath();
+      shape.holes.push(path);
+    }
+    const geo = new THREE.ShapeGeometry(shape, 24);
+    geo.rotateX(-Math.PI / 2);
+    const plaza = new THREE.Mesh(geo, matPlaza);
+    plaza.position.y = -0.045;
+    plaza.receiveShadow = true;
+    plaza.name = 'terrain_altstadt_plaza';
+    group.add(plaza);
+  } else {
+    addStrip(plazaHalf * 2, plazaHalf * 2, 0, 0, 'terrain_altstadt_plaza', matPlaza);
+  }
   // 2. Nền cỏ 4 dải bao quanh — bắc/nam phủ hết chiều x, đông/tây lấp hai bên hông
   addStrip(size, frameDepth, 0, -(plazaHalf + frameDepth / 2), 'terrain_grass_north', matGrass);
   addStrip(size, frameDepth, 0, plazaHalf + frameDepth / 2, 'terrain_grass_south', matGrass);
@@ -35,6 +67,35 @@ export function createTerrain(scene: THREE.Scene, size = 5000): THREE.Group {
 
   scene.add(group);
   return group;
+}
+
+/** Outline ribbon của 1 mặt nước (edge trái đi xuôi + edge phải đi ngược) —
+ *  dùng làm HOLE trên plaza terrain. Điểm đầu-cuối nối khép kín. */
+export function waterOutline(points: Array<[number, number]>, halfWidth: number): Array<[number, number]> {
+  if (points.length < 2) return [];
+  // POLYLINE gốc (không CatmullRom — drift khỏi OSM làm hole lệch khỏi ribbon)
+  const cum: number[] = [0];
+  for (let i = 1; i < points.length; i++) {
+    cum.push(cum[i - 1] + Math.hypot(points[i][0] - points[i - 1][0], points[i][1] - points[i - 1][1]));
+  }
+  const total = cum[cum.length - 1];
+  const n = Math.max(4, Math.ceil(total / 6));
+  const left: Array<[number, number]> = [];
+  const right: Array<[number, number]> = [];
+  let seg = 0;
+  for (let k = 0; k <= n; k++) {
+    const s = (total * k) / n;
+    while (seg < points.length - 2 && s > cum[seg + 1]) seg++;
+    const segL = cum[seg + 1] - cum[seg] || 1;
+    const t = (s - cum[seg]) / segL;
+    const ax = points[seg][0], az = points[seg][1];
+    const bx = points[seg + 1][0], bz = points[seg + 1][1];
+    const nx = -(bz - az) / segL, nz = (bx - ax) / segL;
+    const px = ax + (bx - ax) * t, pz = az + (bz - az) * t;
+    left.push([px - nx * halfWidth, pz - nz * halfWidth]);
+    right.push([px + nx * halfWidth, pz + nz * halfWidth]);
+  }
+  return left.concat(right.reverse());
 }
 
 /** Trời gradient + vầng mặt trời + mây thủ tục (procedural clouds).

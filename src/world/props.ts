@@ -51,6 +51,11 @@ const CAR_COLORS: RGB[] = [
   hexRGB('#4a5a4a'), hexRGB('#7a4a3a'), hexRGB('#3a4a5a')
 ];
 
+// Tọa độ chóa đèn dọc trục +Z local (tâm chóa) — dùng chung cho geometry + audit hướng.
+// 1.06m: chân cột ở half+0.55 → càng vươn qua mép đường 0.51m (≥0.5m theo Phần 8.2),
+// chóa nằm trên mặt đường 0.51m (P2 ≥ 0.3m).
+export const LAMP_HEAD_Z = 1.06;
+
 /** Geometry gộp cho 1 loại prop — gốc tại (0,0,0), hướng +Z ra road */
 function makePropGeometry(type: MapProp['type']): THREE.BufferGeometry {
   const parts: THREE.BufferGeometry[] = [];
@@ -74,12 +79,12 @@ function makePropGeometry(type: MapProp['type']): THREE.BufferGeometry {
       const pole = new THREE.CylinderGeometry(0.06, 0.09, 5.0, 6);
       pole.translate(0, 2.5, 0);
       parts.push(colored(pole, METAL_DARK));
-      // càng ngắn + đầu đèn to → hết cảm giác "gậy chìa lơ lửng" nhìn từ trên cao
-      const arm = new THREE.BoxGeometry(0.09, 0.09, 1.0);
-      arm.translate(0, 4.9, 0.45);
+      // càng dài 1.25m (span −0.05..1.20) để chóa vươn qua mép đường ≥ 0.5m
+      const arm = new THREE.BoxGeometry(0.09, 0.09, 1.25);
+      arm.translate(0, 4.9, 0.575);
       parts.push(colored(arm, METAL_DARK));
       const head = new THREE.BoxGeometry(0.38, 0.14, 0.6);
-      head.translate(0, 4.86, 0.95);
+      head.translate(0, 4.86, LAMP_HEAD_Z);
       parts.push(colored(head, hexRGB('#f2e6b8'))); // chạm đèn màu sáng
       break;
     }
@@ -191,24 +196,37 @@ export interface PropsResult {
   dispose: () => void;
 }
 
-/** Đặt props từ map.props[] — mỗi loại 1 InstancedMesh */
-export function placeProps(scene: THREE.Scene, map: GameMap): PropsResult {
-  const group = new THREE.Group();
-  group.name = 'props_v2';
+export interface PropPlacement {
+  type: MapProp['type'];
+  roadId: string;
+  s: number;
+  side: 'left' | 'right';
+  x: number;
+  z: number;
+  yaw: number;
+  heading: number;  // flow heading của road tại s (auditderive pháp tuyến từ đây)
+  half: number;     // nửa rộng mặt đường (audit P2/P3)
+  off: number;      // offset từ tim đường tới chân prop
+  seedIdx: number;
+  skip?: string;    // lý do bị bỏ (thiếu road / đỗ cấm / đường hẹp / chìm nước)
+}
 
-  // gom theo loại
-  const byType = new Map<MapProp['type'], Array<{ x: number; z: number; yaw: number; seedIdx: number }>>();
+/** Tính placement TẤT CẢ props — HÀM DUY NHẤT placeProps và audit đều dùng
+ *  (1 nguồn sự thật cho vị trí + yaw, tránh drift khi audit reimplement). */
+export function computePropPlacements(map: GameMap): PropPlacement[] {
+  const out: PropPlacement[] = [];
   let idx = 0;
   for (const prop of map.props as MapProp[]) {
     const road = roadById(map, prop.roadId);
-    if (!road) continue;
+    const base = { type: prop.type, roadId: prop.roadId, s: prop.s, side: prop.side };
+    if (!road) { out.push({ ...base, x: 0, z: 0, yaw: 0, heading: 0, half: 0, off: 0, seedIdx: -1, skip: 'road-missing' }); continue; }
     // Xe đỗ tĩnh: chỉ đặt khi OSM cho phép đỗ ở bên đó VÀ đường đủ rộng để còn
     // làn chạy ≥ 3 m — không còn khối đen đứng chặn làn xe trên đường hẹp.
     if (prop.type === 'parked_car_static') {
       const parkSide = prop.side === 'right' ? road.parking?.right : road.parking?.left;
       const halfForPark = roadFullWidth(road) / 2;
-      if (!parkSide || parkSide === 'none') continue;
-      if (halfForPark - 1.7 < 3.0) continue; // phần còn lại cho làn chạy < 3 m → bỏ
+      if (!parkSide || parkSide === 'none') { out.push({ ...base, x: 0, z: 0, yaw: 0, heading: 0, half: halfForPark, off: 0, seedIdx: -1, skip: 'parking-not-allowed' }); continue; }
+      if (halfForPark - 1.7 < 3.0) { out.push({ ...base, x: 0, z: 0, yaw: 0, heading: 0, half: halfForPark, off: 0, seedIdx: -1, skip: 'road-too-narrow' }); continue; }
     }
     const pt = pointAtS(road, prop.s);
     const side = prop.side === 'right' ? 1 : -1;
@@ -220,18 +238,35 @@ export function placeProps(scene: THREE.Scene, map: GameMap): PropsResult {
     const rz = fx;
     const x = pt.x + rx * side * off;
     const z = pt.z + rz * side * off;
+    const half = roadFullWidth(road) / 2;
     // prop chìm trong sông (Spree/Spreekanal)? — bỏ, cây đèn không mọc dưới nước
     let inWater = false;
     for (const w of map.waters ?? []) {
       if (distToPolyline(x, z, w.points) < w.width / 2 + 0.8) { inWater = true; break; }
     }
-    if (inWater) continue;
-    // hướng prop: mặt +Z local quay về road → yaw = atan2(rx·side, rz·side)... parked car dọc đường
+    if (inWater) { out.push({ ...base, x, z, yaw: 0, heading: pt.heading, half, off, seedIdx: -1, skip: 'in-water' }); continue; }
+    // hướng prop: PHẦN 8 — geometry dựng dọc +Z local (arm đèn/chóa quay về road),
+    // yaw = atan2(−rx·side, −rz·side) đưa +Z local CHÍNH XÁC về phía tâm đường.
+    // (Bản cũ có +π lật ngược → 294/294 cột xoay ra cỏ, đo 8.1 trước khi sửa.)
     const yaw = prop.type === 'parked_car_static'
       ? Math.atan2(fx, fz)
-      : Math.atan2(-rx * side, -rz * side) + Math.PI;
-    if (!byType.has(prop.type)) byType.set(prop.type, []);
-    byType.get(prop.type)!.push({ x, z, yaw, seedIdx: idx++ });
+      : Math.atan2(-rx * side, -rz * side);
+    out.push({ type: prop.type, roadId: prop.roadId, s: prop.s, side: prop.side, x, z, yaw, heading: pt.heading, half, off, seedIdx: idx++ });
+  }
+  return out;
+}
+
+/** Đặt props từ map.props[] — mỗi loại 1 InstancedMesh */
+export function placeProps(scene: THREE.Scene, map: GameMap): PropsResult {
+  const group = new THREE.Group();
+  group.name = 'props_v2';
+
+  // gom theo loại (placement từ hàm duy nhất — audit dùng cùng nguồn)
+  const byType = new Map<MapProp['type'], Array<{ x: number; z: number; yaw: number; seedIdx: number }>>();
+  for (const p of computePropPlacements(map)) {
+    if (p.skip) continue;
+    if (!byType.has(p.type)) byType.set(p.type, []);
+    byType.get(p.type)!.push({ x: p.x, z: p.z, yaw: p.yaw, seedIdx: p.seedIdx });
   }
 
   for (const [type, items] of byType) {

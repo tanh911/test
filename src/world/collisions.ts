@@ -1,7 +1,9 @@
-// 💥 collisions.ts — va chạm khối tĩnh (AABB nhà) cho player (Protocol Prompt 10)
-// Nhà dựng dọc road: mặt tiền half+2.5, sâu 12 m → dựng AABB xấp xỉ (đường thẳng = chính xác).
+// 💥 collisions.ts — va chạm khối tĩnh (nhà) cho player (Protocol Prompt 10)
+// Nhà dựng dọc road: mặt tiền half+2.5, sâu 12 m. Va chạm dùng POINT-IN-QUAD trên 4 đỉnh
+// footprint thật — AABB 4-giới-hạn sai với nhà trên road CHÉO (AABB phủ cả lòng đường →
+// xe đóng băng oan; bug phát hiện bởi autopilot Phần 9 tại r152_right_35.6).
 // GỒM cả nhà gap-fill/courtyard do planCityBlockFill sinh (plan được cache trong buildings.ts
-// — allBuildingQuads đã tính rồi, aquí chỉ đọc lại) — xe không thể xuyên qua nhà fill mặt tiền.
+// — allBuildingQuads đã tính rồi, đây chỉ đọc lại) — xe không thể xuyên qua nhà fill mặt tiền.
 import type { GameMap } from './mapLoader';
 import { roadById, pointAtS } from './mapLoader';
 import { planCityBlockFill } from './buildings';
@@ -12,6 +14,21 @@ export interface BuildingRect {
   maxX: number;
   minZ: number;
   maxZ: number;
+  /** 4 đỉnh footprint thật (theo hướng road) — point-in-quad đúng cho nhà chéo */
+  corners: Array<{ x: number; z: number }>;
+}
+
+/** Point-in-quad (even-odd ray cast) + margin: test đúng hình học nhà chéo */
+export function pointInBuildingRect(r: BuildingRect, x: number, z: number, margin = 0): boolean {
+  // quick reject bằng AABB trước (kèm margin)
+  if (x < r.minX - margin || x > r.maxX + margin || z < r.minZ - margin || z > r.maxZ + margin) return false;
+  let inside = false;
+  const pts = r.corners;
+  for (let i = 0, j = pts.length - 1; i < pts.length; j = i++) {
+    const xi = pts[i].x, zi = pts[i].z, xj = pts[j].x, zj = pts[j].z;
+    if (((zi > z) !== (zj > z)) && (x < ((xj - xi) * (z - zi)) / (zj - zi) + xi)) inside = !inside;
+  }
+  return inside;
 }
 
 /** Dựng AABB cho mọi building trong map (nhà gốc + nhà fill) — gọi 1 lần khi init */
@@ -43,7 +60,8 @@ export function buildingRects(map: GameMap): BuildingRect[] {
       minX: Math.min(...corners.map(c => c.x)),
       maxX: Math.max(...corners.map(c => c.x)),
       minZ: Math.min(...corners.map(c => c.z)),
-      maxZ: Math.max(...corners.map(c => c.z))
+      maxZ: Math.max(...corners.map(c => c.z)),
+      corners,
     });
   }
   return out;

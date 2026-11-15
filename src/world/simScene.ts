@@ -2,7 +2,7 @@
 import * as THREE from 'three';
 import { palette } from '../art/palette';
 import { loadGameMap, type GameMap } from './mapLoader';
-import { createTerrain, createSkybox, applyFog } from './terrain';
+import { createTerrain, createSkybox, applyFog, waterOutline } from './terrain';
 import { buildWorld } from './worldBuilder';
 import { ChunkManager } from './chunkManager';
 import { createVehicle, spawnFromMap, type VehicleHandle } from './vehicle';
@@ -11,6 +11,8 @@ import { PedestrianController } from './pedestrianController';
 import { buildingRects } from './collisions';
 import { RuleEngine, type Violation } from '../simulation/ruleEngine';
 import { nodeById } from './mapLoader';
+import { AutopilotDriver } from './autopilot';
+import { pointInBuildingRect } from './collisions';
 import type { LightPhase } from './trafficLights';
 import { EXAM_STATIONS, EXAM_ROUTE_WAYPOINTS, type ExamStation } from '../data/maps/examParcours';
 
@@ -81,6 +83,8 @@ export interface PosDebug {
 export interface SimSceneOptions {
   /** chế độ lái xe: WASD điều khiển xe, camera cabin (mặc định: camera bay tự do) */
   drive?: boolean;
+  /** PHẦN 9 harness: autopilot lái theo route.json — không đổi behavior của game thường */
+  autopilot?: { route: import('./autopilot').AutopilotRoute; scenario?: import('./autopilot').AutopilotScenario };
 }
 
 export interface SimSceneHandle {
@@ -97,6 +101,18 @@ export interface SimSceneHandle {
   cycleCameraMode?: () => void;
   /** khởi động lại bài thi từ điểm xuất phát */
   resetExam?: () => void;
+  /** PHẦN 9 harness: điều khiển/đọc autopilot (chỉ tồn tại khi opts.autopilot được truyền) */
+  autopilot?: {
+    start: (scenario?: import('./autopilot').AutopilotScenario) => void;
+    pause: () => void;
+    resume: () => void;
+    readonly paused: boolean;
+    telemetry: () => import('./autopilot').AutopilotTelemetry | null;
+    consumeTriggeredCp: () => number | null;
+    setCam: (mode: 'cabin' | 'hood' | 'outside') => void;
+    setDebugCam: (m: 'none' | 'topdown') => void;
+    requestRender: () => void;
+  };
   /** dữ liệu mini-map (player-centered top-down) — đọc mỗi frame từ RAF của MiniMap */
   getMapState: () => MapState;
   /** tọa độ debug để report lỗi: x/z (m), ô chunk 100 m, node giao lộ + road gần nhất */
@@ -104,6 +120,11 @@ export interface SimSceneHandle {
   dispose: () => void;
   /** gọi mỗi frame từ host (React) — cập nhật camera bay/xe + render */
   update: (dt: number) => void;
+  /** GD0-v2 đường đọc: full violation list (harness phân loại đúng/oan) */
+  getViolations?: () => Array<{ type: string; severity: string; message: string; x: number; z: number; t: number }>;
+  /** debug/test: NPC + pedestrian đếm (Playwright assert) */
+  npcDebug?: { count: number } | null;
+  pedDebug?: { count: number } | null;
 }
 
 const keys = new Set<string>();
@@ -230,9 +251,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   const ambient = new THREE.AmbientLight(0xfff3e0, 0.62);
   scene.add(ambient);
   const sun = new THREE.DirectionalLight(0xffedd0, 2.6);
-  sun.position.set(140, 200, 90);
+  sun.position.set(110, 265, 75); // nắng cao hơn — bóng ngắn (feedback ảnh)
   sun.castShadow = true;
-  sun.shadow.mapSize.set(4096, 4096);
+  sun.shadow.mapSize.set(2048, 2048); // FPS: 2048 đủ sắc ở tầm lái, giảm 4× chi phí shadow pass
   sun.shadow.camera.left = -140;
   sun.shadow.camera.right = 140;
   sun.shadow.camera.top = 140;
@@ -244,7 +265,11 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
   scene.add(sun.target);
 
   // ── Terrain + sky + fog ──
-  createTerrain(scene);
+  // đục lỗ plaza theo footprint sông → nước sâu (-1.5m) hiện trong lỗ + kè đá
+  {
+    const waterHoles = (map.waters ?? []).map(w => waterOutline(w.points, w.width / 2 + 0.4));
+    createTerrain(scene, 5000, waterHoles);
+  }
   const skybox = createSkybox(scene);
   const fog = applyFog(scene); // fog động: near/far cập nhật theo độ cao camera mỗi frame
 
@@ -403,25 +428,55 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     window.addEventListener('mousemove', onMouseMove);
     window.addEventListener('mouseup', onMouseUp);
 
-    createVehicle(scene, map).then(v => { vehicle = v; v.setCameraMode(camMode); });
+    createVehicle(scene, map).then(v => {
+      vehicle = v;
+      v.setCameraMode(camMode);
+      if (ap) ap.attach(v); // PHẦN 9: gắn vehicle cho autopilot sau khi GLB load xong
+    });
     ruleEngine = new RuleEngine(map, world.controllers);
-    // NPC traffic (bản đồ Parcours tinh gọn chỉ cần 14 xe NPC lưu thông mượt quanh các ngã tư)
-    npcs = new NPCController(map, scene);
-    npcs.init(world.controllers, isParcours ? 14 : 32);
+  }
+  // NPC traffic LUÔN có (cả free-cam view) — bản đồ Parcours 14 xe, còn lại 32
+  npcs = new NPCController(map, scene);
+  npcs.init(world.controllers, isParcours ? 14 : 32);
+
+  // ── PHẦN 9 harness: autopilot (chỉ khi opts.autopilot + driveMode) ──
+  let ap: import('./autopilot').AutopilotDriver | null = null;
+  let apPaused = false;
+  let apFrame = 0;
+  let apForceRender = false;
+  let apTimer: ReturnType<typeof setTimeout> | null = null;
+  const apRenderEvery = 6; // render 1/n frame → sim nhanh ~n× realtime trong harness
+  if (opts.autopilot?.route && driveMode) {
+    ap = new AutopilotDriver(map, world.controllers, opts.autopilot.route);
+    if (opts.autopilot.scenario) ap.scenario = opts.autopilot.scenario;
   }
 
   const tick = (now: number) => {
-    const dt = Math.min(0.1, (now - last) / 1000);
+    // autopilot: dt CỐ ĐỊNH 0.1 (deterministic — quỹ đạo phụ thuộc số step, không phụ thuộc
+    // fps); paused = dt 0 → chunk stream + render vẫn chạy để chụp ảnh mà sim đứng yên.
+    const dt = ap ? (apPaused ? 0 : 0.1) : Math.min(0.1, (now - last) / 1000);
     last = now;
     // mây trôi chậm trên trời (uTime giây)
     const skyMat = skybox.material as THREE.ShaderMaterial;
     skyMat.uniforms.uTime.value = now / 1000;
+    // NPC free-cam: player "ảo" = vị trí camera chiếu xuống mặt đất
+    if (!driveMode && npcs) {
+      npcs.update(dt, { player: { x: camera.position.x, z: camera.position.z }, controllers: world.controllers, collisions: [] });
+    }
     if (driveMode) {
       if (vehicle) {
-        // va chạm công trình: dừng xe + ghi lỗi major (AABB nhà, radius 0.9)
+        const px = vehicle.state.x;
+        const pz = vehicle.state.z;
+        // va chạm công trình: dừng xe + ghi lỗi major. Point-in-quad + margin 0.9 (bán kính xe)
+        // — AABB 4-giới-hạn sai với nhà trên road chéo (xe bị đóng băng oan, bug Phần 9)
         for (const r of staticRects) {
-          if (vehicle.state.x > r.minX - 0.9 && vehicle.state.x < r.maxX + 0.9 &&
-              vehicle.state.z > r.minZ - 0.9 && vehicle.state.z < r.maxZ + 0.9) {
+          if (px > r.minX - 0.9 && px < r.maxX + 0.9 &&
+              pz > r.minZ - 0.9 && pz < r.maxZ + 0.9) {
+            if (!(pointInBuildingRect(r, px, pz, 0) || pointInBuildingRect(r, px - 0.9, pz, 0) ||
+                  pointInBuildingRect(r, px + 0.9, pz, 0) || pointInBuildingRect(r, px, pz - 0.9, 0) ||
+                  pointInBuildingRect(r, px, pz + 0.9, 0))) {
+              continue;
+            }
             const near = ruleEngine?.nearestRoad({ x: vehicle.state.x, z: vehicle.state.z, heading: vehicle.state.heading, speed: vehicle.state.speed });
             const half = near ? (near.road.lanesForward + near.road.lanesBackward) * near.road.laneWidth / 2 : 3;
             if (near && near.dist < half + 1.2) {
@@ -482,7 +537,11 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
           inCrosswalk: peds ? peds.isPedNearCrosswalk(vehicle.state.x, vehicle.state.z) : false,
           rightPriorityThreat
         }, npcCollisions);
-        vehicle?.update(dt, {
+        vehicle?.update(dt, ap ? (() => {
+          const inp = ap.update(dt);
+          ap.endStep(); // tắt pulse xi-nhan sau 1 frame
+          return inp;
+        })() : {
           throttle: keys.has('KeyW') ? 1 : 0,
           brake: keys.has('KeyS') ? 1 : 0,
           steer: keys.has('KeyD') ? 1 : keys.has('KeyA') ? -1 : 0,
@@ -617,6 +676,11 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     fog.far = Math.min(1400 + lift * 0.8, 1900);
     chunkMgr.setLoadRadius(Math.min(300 + camY * 1.5, 1000));
     chunkStats = chunkMgr.update(camera.position.x, camera.position.z);
+    // ── PHẦN 9 harness: camera top-down cho ảnh debug (chỉ khi autopilot bật debugCam) ──
+    if (ap?.debugCam === 'topdown' && vehicle) {
+      camera.position.set(vehicle.state.x, 34, vehicle.state.z);
+      camera.userData._setPose?.(0, -Math.PI / 2);
+    }
     // ── Shadow camera bám theo xe/camera: hết bóng biến mất ngoài 120 m từ gốc toạ độ ──
     const shadowFocusX = driveMode && vehicle ? vehicle.state.x : camera.position.x;
     const shadowFocusZ = driveMode && vehicle ? vehicle.state.z : camera.position.z;
@@ -631,6 +695,11 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     if (driveMode && vehicle) {
       vehicle.group.visible = camMode !== 'mirror';
     }
+    // ── PHẦN 9 harness: render-skip — sim chạy nhanh hơn realtime; render định kỳ hoặc
+    // khi harness yêu cầu (requestRender trước khi chụp). Game thường: render mỗi frame.
+    apFrame++;
+    const doRender = !ap || apForceRender || (apFrame % apRenderEvery === 0);
+    if (doRender) {
     renderer.setScissorTest(false);
     renderer.setViewport(0, 0, screenW * pr, screenH * pr);
     renderer.render(scene, camera);
@@ -712,6 +781,8 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
       vehicle.group.visible = true; // Hiện lại xe cho main view
       renderer.setScissorTest(false);
     }
+    } // ── hết doRender (render-skip harness) ──
+    if (apForceRender) apForceRender = false;
     // FPS trung bình trượt 1 giây
     fpsFrames++;
     const nowFps = performance.now();
@@ -720,9 +791,13 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
       fpsFrames = 0;
       fpsLast = nowFps;
     }
-    raf = requestAnimationFrame(tick);
+    // PHẦN 9 harness: tick bằng setTimeout ~30ms khi autopilot (rAF headless chỉ 1–2fps →
+    // sim quá chậm). dt sim là CỐ ĐỊNH khi ap bật → tốc độ loop KHÔNG ảnh hưởng determinism.
+    if (ap) apTimer = setTimeout(tick, 30);
+    else raf = requestAnimationFrame(tick);
   };
-  raf = requestAnimationFrame(tick);
+  if (ap) apTimer = setTimeout(tick, 30);
+  else raf = requestAnimationFrame(tick);
 
   const onResize = () => {
     const w = container.clientWidth;
@@ -778,6 +853,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
     renderer,
     map,
     get vehicle() { return vehicle; },
+    /** debug/test: NPC + pedestrian đếm (Playwright assert) */
+    get npcDebug() { return npcs ? { count: npcs.npcs.length } : null; },
+    get pedDebug() { return world.pedestrians ? { count: world.pedestrians.count() } : null; },
     getStats: (): SimStats => ({
       drawCalls: renderer.info.render.calls,
       triangles: renderer.info.render.triangles,
@@ -865,6 +943,9 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
       const lights = lightNodes.map(l => ({ x: l.x, z: l.z, phase: l.phase() }));
       return { player, npcs: npcDots, lights };
     },
+    // 📋 GD0-v2 đường đọc: DANH SÁCH VI PHẠM ĐẦY ĐỦ (getRuleState chỉ trả slice(-5)) — không đổi behavior
+    getViolations: (): Array<{ type: string; severity: string; message: string; x: number; z: number; t: number }> =>
+      ruleEngine ? ruleEngine.violations.map(v => ({ ...v })) : [],
     // 📍 tọa độ debug report lỗi — drive: vị trí xe; fly: vị trí camera
     getPosDebug: (): PosDebug => {
       const p = driveMode && vehicle
@@ -891,8 +972,26 @@ export function createSimScene(container: HTMLElement, mapJson: unknown, opts: S
       headingDeg = ((-headingDeg % 360) + 360) % 360;
       return { x: p.x, z: p.z, cell, node, road, roadName, headingDeg };
     },
+    // ── PHẦN 9 harness: autopilot hooks (chỉ có khi opts.autopilot truyền vào) ──
+    ...(ap ? {
+      autopilot: {
+        start: (scenario?: import('./autopilot').AutopilotScenario) => { ap?.start(scenario); apPaused = false; },
+        pause: () => { apPaused = true; },
+        resume: () => { apPaused = false; },
+        get paused() { return apPaused; },
+        telemetry: () => ap?.telemetry() ?? null,
+        consumeTriggeredCp: () => ap?.consumeTriggeredCp() ?? null,
+        setCam: (mode: 'cabin' | 'hood' | 'outside') => {
+          camMode = mode;
+          vehicle?.setCameraMode(mode);
+        },
+        setDebugCam: (m: 'none' | 'topdown') => { if (ap) ap.debugCam = m; },
+        requestRender: () => { apForceRender = true; },
+      },
+    } : {}),
     dispose: () => {
       cancelAnimationFrame(raf);
+      if (apTimer) clearTimeout(apTimer);
       window.removeEventListener('resize', onResize);
       window.removeEventListener('keydown', onDebugKey);
       vehicle?.dispose();

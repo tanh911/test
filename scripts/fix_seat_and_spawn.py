@@ -19,8 +19,8 @@ if idx_seat != -1:
         f.write(vc)
     print("Updated vehicle.ts seatPose.")
 
-# 2. Update spawns in muenchen-altstadt-clean.json
-mpath = r"c:\Users\Tuan Anh\.gemini\antigravity\scratch\viet-de-fuhrerschein\src\data\maps\muenchen-altstadt-clean.json"
+# 2. Update spawns in berlin-mitte-clean.json
+mpath = r"c:\Users\Tuan Anh\.gemini\antigravity\scratch\viet-de-fuhrerschein\src\data\maps\berlin-mitte-clean.json"
 with open(mpath, "r", encoding="utf-8") as f:
     m = json.load(f)
 
@@ -32,4 +32,4 @@ m["spawns"]["player"] = {
 
 with open(mpath, "w", encoding="utf-8") as f:
     json.dump(m, f, indent=2)
-print("Updated player spawn in muenchen-altstadt-clean.json.")
+print("Updated player spawn in berlin-mitte-clean.json.")

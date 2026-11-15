@@ -24,14 +24,27 @@ export interface NpcCar {
   signalHold: number;               // giữ đèn thêm sau khi đáy vào road mới (s)
   nextChoice?: { road: MapRoad; dir: 1 | -1 } | null; // rẽ latch 1 lần/segment (undefined = chưa latch)
   signalLamps: THREE.Mesh[];        // 4 đèn quad, userData._blinkerSide = trái/phải
+  heavy: boolean;                   // xe tải/transporter/van — gia tốc khởi hành thấp
+  reaction: number;                 // đếm ngược độ trễ phản xạ người lái khi khởi hành (s)
+  reactionArmed: boolean;           // đã cấp phản xạ cho episode dừng này (chống re-trigger)
+  lastAccel: number;                // gia tốc đã áp frame trước — dùng để giới hạn jerk
+  stopT: number;                    // thời gian đứng yên liên tục (s)
+  wasWaiting: boolean;              // frame trước có bị chặn (đèn/gap)?
 }
 
 const NPC_SPEED_LIMIT = 11;     // ~40 km/h nội thành
-const TURN_SPEED = 4.0;
-const ACCEL = 3.0;
-const BRAKE = 8.0;
-const STOP_GAP = 6;             // khoảng cách dừng sau xe trước
+const TURN_SPEED = 5.56;        // 20 km/h — tốc tối đa khi RẼ qua nút (Phần 7/7B)
+const STRAIGHT_JUNC = 8.33;     // 30 km/h — tốc tối đa khi ĐI THẲNG qua nút (Phần 7/7B)
+const ACCEL_CAR = 1.8;          // m/s² — gia tốc khởi hành xe con (xe thật 1.5–2.0)
+const ACCEL_HEAVY = 1.0;        // m/s² — transporter/van
+const JERK_ACC = 2.0;           // m/s³ khi VÀO GA (0→1.8 trong 0.9s — khởi hành êm)
+const JERK_BRK_SOFT = 3.0;      // m/s³ khi PHANH ÊM (P-tracking, nhả ga — comfort ~1.5–3)
+const JERK_BRK_HARD = 8.0;      // m/s³ khi PHANH KHẨN CẤP (đỗ dứt khoát sát vạch)
+const BRAKE = 8.0;              // m/s² phanh tối đa
+const STOP_GAP = 6.5;           // khoảng cách tâm-đối-tâm khi đứng (bumper ≈ 2.3m với xe 4.2m)
+const HEADWAY = 1.2;            // s — time-headway tối thiểu khi chạy (Phần 7B)
 const LOOK_AHEAD = 18;          // phạm vi nhìn xe trước
+const CAR_AHEAD_TOL = 4.5;      // m — vẫn xét xe trước đã hơi lướt qua mũi (chống đâm xuyên)
 const APPROACH_DIST = 25;       // bắt đầu giảm tốc đến junction
 const SIGNAL_DIST = 35;         // bật xi-nhan trước junction (m) — trước cả vùng giảm tốc
 const TURN_THRESHOLD = 0.35;    // chênh heading > ~20° = rẽ, ngược lại đi thẳng
@@ -86,8 +99,17 @@ export class NPCController {
   }
 
   /** Nạp 6 loại GLB xe 3D thực tế rồi spawn — gọi 1 lần sau khi tạo controller */
-  async init(controllers: TrafficLightController[], count = 8): Promise<void> {
+  async init(controllers: TrafficLightController[], count = 8, preTemplates?: THREE.Group[]): Promise<void> {
     for (const c of controllers) this.lightByNode.set(c.nodeId, c);
+    if (preTemplates?.length) {
+      // Test/harness: dùng template có sẵn, bỏ qua GLB loader
+      this.templates.push(...preTemplates);
+    }
+    if (preTemplates?.length) {
+      // spawn luôn với template có sẵn
+      this.spawnNpcs(count);
+      return;
+    }
     const loader = new GLTFLoader();
     const urls = [
       '/simv2/car_npc_sedan_red.glb',
@@ -131,7 +153,12 @@ export class NPCController {
       }
     }
     if (!this.templates.length) return;
+    this.spawnNpcs(count);
+  }
 
+  /** Spawn NPC quanh khu vực player (tách khỏi load GLB — test dùng được) */
+  private spawnNpcs(count: number): void {
+    {
     // Ưu tiên spawn 10 xe NPC quanh khu vực xuất phát của người chơi (20m..160m) để các ngã tư đèn đỏ có lưu thông thực tế ngay lập tức
     const playerSpawn = spawnFromMap(this.map);
     const roads = this.map.roads.filter(r => roadLength(r) > 24);
@@ -145,16 +172,21 @@ export class NPCController {
     let attempts = 0;
     const priorityTarget = Math.min(10, Math.floor(count * 0.45));
 
-    // Nếu là bản đồ Sa hình Sát hạch (có đường r_uni_return dẫn vào ngã tư Rechts vor links n_rvl),
-    // đặt sẵn 1 xe tình huống từ nhánh bên phải tiến ra để người chơi luyện phản xạ nhường đường bên phải!
+    // Nếu là bản đồ Sa hình Sát hạch (có đường r_uni_return dẫn vào ngã tư Rechts vor links n_rvl từ BÊN PHẢI),
+    // đặt sẵn 1 xe tình huống từ nhánh bên phải tiến ra cắt ngang ngã tư để người chơi thực hành nhường đường Rechts vor links!
     const rvlRightRoad = this.map.roads.find(r => r.id === 'r_uni_return');
+    const rvlStraightRoad = this.map.roads.find(r => r.id === 'r_rvl_w');
     if (rvlRightRoad && placed < count) {
       const lenRvl = roadLength(rvlRightRoad);
-      const sRvl = Math.max(10, lenRvl - 26); // Cách ngã tư n_rvl (0,90) khoảng 26m bên phải
-      const npcRvl = this.makeNpc(rvlRightRoad, sRvl, 1, placed);
+      const sRvl = Math.max(8, lenRvl - 19); // Cách ngã tư n_rvl (0,90) đúng 19m bên phải
+      const npcRvl = this.makeNpc(rvlRightRoad, sRvl, 1, placed) as NpcCar & { _rvlHold?: boolean; _rvlPriority?: boolean };
       npcRvl.speed = 0;
-      npcRvl.targetSpeed = 7.2; // ~26 km/h
-      (npcRvl as NpcCar & { _rvlHold?: boolean })._rvlHold = true;
+      npcRvl.targetSpeed = 6.2; // ~22 km/h tiến dứt khoát qua ngã tư theo quyền ưu tiên bên phải
+      npcRvl._rvlHold = true;
+      npcRvl._rvlPriority = true;
+      if (rvlStraightRoad) {
+        npcRvl.nextChoice = { road: rvlStraightRoad, dir: 1 };
+      }
       const laneOffRvl = 0.5 * rvlRightRoad.laneWidth;
       const p0 = this.pose(rvlRightRoad, sRvl, 1, laneOffRvl);
       npcRvl.group.position.set(p0.x, 0, p0.z);
@@ -186,6 +218,7 @@ export class NPCController {
       placed++;
     }
     this.ready = true;
+    }
   }
 
   private makeNpc(road: MapRoad, s: number, dir: 1 | -1, idx: number): NpcCar {
@@ -213,7 +246,14 @@ export class NPCController {
       signalT: 0,
       signalHold: 0,
       nextChoice: undefined,
-      signalLamps: lamps
+      signalLamps: lamps,
+      // template thứ tự urls: 0 sedan, 1 kombi, 2 suv, 3 transporter, 4 police, 5 van
+      heavy: idx % 6 === 3 || idx % 6 === 5,
+      reaction: 0,
+      reactionArmed: false,
+      lastAccel: 0,
+      stopT: 0,
+      wasWaiting: false
     };
   }
 
@@ -318,8 +358,9 @@ export class NPCController {
       const isSingleLaneOneway = road.lanesBackward === 0 && road.lanesForward === 1;
       const laneOff = isSingleLaneOneway ? 0 : 0.5 * road.laneWidth;
 
-      // ── 1. tốc độ mục tiêu ──
-      let target = npc.targetSpeed;
+      // ── 1. tốc độ mục tiêu: cá nhân + GIOI HẠN THEO speedLimit CỦA ROAD (Phần 7B) ──
+      const roadCap = Math.min(NPC_SPEED_LIMIT, (road.speedLimit ?? 50) / 3.6);
+      let target = Math.min(npc.targetSpeed, roadCap);
       npc.waiting = false;
 
       // đèn đỏ phía trước?
@@ -346,23 +387,57 @@ export class NPCController {
         const other = this.npcs[j];
         if (other.roadId !== npc.roadId || other.dir !== npc.dir) continue;
         const ds = (other.s - npc.s) * npc.dir;
-        if (ds > 0 && ds < LOOK_AHEAD) {
-          target = Math.min(target, Math.max(0, (ds - STOP_GAP) * 0.5 + other.speed * 0.8));
-          if (ds < STOP_GAP) npc.waiting = true;
+        if (ds > -CAR_AHEAD_TOL && ds < LOOK_AHEAD) {
+          // đứng: gap 6.5m tâm-đối-tâm (bumper ≥ 2m); chạy: gap ≥ 1.2s × tốc độ (time-headway).
+          // dsEff clamp ≥ 0.5: chướng ngại vật trước mũi xe (kể cả đã hơi lướt qua) vẫn ép target=0,
+          // không bao giờ "lái xuyên" qua xe trước khi ds đổi dấu.
+          const dsEff = Math.max(ds, 0.5);
+          const safeGap = Math.max(STOP_GAP, npc.speed * HEADWAY);
+          target = Math.min(target, Math.max(0, (dsEff - safeGap) * 0.5 + other.speed * 0.8));
+          if (ds > 0 && ds < STOP_GAP) npc.waiting = true;
         }
       }
+      const rvlNpc = npc as NpcCar & { _rvlHold?: boolean; _rvlPriority?: boolean };
+      const distJunction = npc.dir > 0 ? len - npc.s : npc.s;
+      const ixAhead = this.map.intersections.find(ix => ix.nodeId === nodeAheadId);
+      let hasRightOfWayOverPlayer = !!rvlNpc._rvlPriority;
+
+      // ── Quy tắc Rechts vor links (§8 StVO) tại mọi giao lộ đồng cấp ──
+      if (ixAhead?.rule === 'right_before_left' && input.player && distJunction < 18) {
+        const nodeObj = this.nodeOf(nodeAheadId);
+        if (nodeObj) {
+          const playerDistToNode = Math.hypot(input.player.x - nodeObj.x, input.player.z - nodeObj.z);
+          if (playerDistToNode < 26) {
+            const vNpcX = myPos.x - nodeObj.x;
+            const vNpcZ = myPos.z - nodeObj.z;
+            const vPlrX = input.player.x - nodeObj.x;
+            const vPlrZ = input.player.z - nodeObj.z;
+            const cross = vNpcX * vPlrZ - vNpcZ * vPlrX;
+            if (cross < -25 && distJunction < 12 && distJunction > 2.5) {
+              // Người chơi đang tiến đến từ BÊN PHẢI của xe NPC -> Xe NPC bắt buộc phanh nhường đường!
+              target = 0;
+              npc.waiting = true;
+            } else if (cross > 25) {
+              // Xe NPC tiến đến từ BÊN PHẢI của người chơi -> Xe NPC có quyền ưu tiên (Vorfahrt) đi qua!
+              hasRightOfWayOverPlayer = true;
+            }
+          }
+        }
+      }
+
       if (input.player) {
         const dx = input.player.x - myPos.x;
         const dz = input.player.z - myPos.z;
         const dist = Math.hypot(dx, dz);
-        if (dist < 9) {
-          // hướng flow tại npc — player ở TRƯỚC → dừng nhường
+        const yieldRadius = hasRightOfWayOverPlayer ? 3.5 : 9;
+        if (dist < yieldRadius) {
+          // hướng flow tại npc — player ở TRƯỚC → dừng nhường (trừ khi NPC đang có quyền ưu tiên Rechts vor links ở khoảng cách > 3.5m)
           const h = npc.dir > 0 ? pointAtS(road, npc.s).heading
             : pointAtS(road, npc.s).heading + Math.PI;
           const fwd = dx * Math.sin(h) + dz * Math.cos(h);
           if (fwd > 0) {
-            target = Math.min(target, Math.max(0, (dist - STOP_GAP + 3) * 0.5));
-            if (dist < STOP_GAP - 3) npc.waiting = true;
+            target = Math.min(target, Math.max(0, (dist - (hasRightOfWayOverPlayer ? 2.8 : STOP_GAP - 3)) * 0.5));
+            if (dist < (hasRightOfWayOverPlayer ? 3.2 : STOP_GAP - 3)) npc.waiting = true;
           }
         }
         // va chạm
@@ -372,10 +447,10 @@ export class NPCController {
         }
       }
 
-      // sắp đến junction → giảm tốc rẽ
-      const distJunction = npc.dir > 0 ? len - npc.s : npc.s;
-      if (distJunction < APPROACH_DIST && !npc.waiting) {
-        target = Math.min(target, TURN_SPEED);
+      // sắp đến junction → giới hạn tốc qua nút: RẼ ≤ 20 km/h, THẲNG ≤ 30 km/h (Phần 7/7B)
+      // (nếu là xe ưu tiên đi thẳng Rechts vor links thì giữ tốc độ ổn định qua ngã tư)
+      if (distJunction < APPROACH_DIST && !npc.waiting && !hasRightOfWayOverPlayer) {
+        target = Math.min(target, npc.signal !== null ? TURN_SPEED : STRAIGHT_JUNC);
       }
 
       // ── 1b. đèn xi-nhan: latch quyết định 1 lần/segment + phân loại trái/phải/thẳng ──
@@ -400,7 +475,6 @@ export class NPCController {
       if (npc.signal) npc.signalT += dt;
 
       // ── 2. tích phân tốc độ (hỗ trợ kịch bản phản xạ Rechts vor links tại n_rvl) ──
-      const rvlNpc = npc as NpcCar & { _rvlHold?: boolean };
       if (rvlNpc._rvlHold) {
         if (input.player && Math.hypot(input.player.x - 0, input.player.z - 90) < 52) {
           rvlNpc._rvlHold = false; // Người chơi tiến đến cách ngã tư 52m -> xe bên phải bắt đầu lăn bánh ra!
@@ -410,12 +484,61 @@ export class NPCController {
         }
       }
 
-      if (npc.speed < target) npc.speed = Math.min(target, npc.speed + ACCEL * dt);
-      else npc.speed = Math.max(target, npc.speed - BRAKE * dt);
+      // ── 2b. độ trễ phản xạ người lái khi khởi hành (Phần 7B): hàng xe xuất phát LẦN LƯỢT ──
+      // Trigger: (a) đèn vừa xanh/gap vừa mở (xe đầu hàng), hoặc (b) xe trước VỪA nhúc nhích
+      // (0.05 < v < 1.5 trong 12m) — không đợi gap mở, chặn luôn micro-creep của term v_l×0.8.
+      if (npc.speed < 0.05 && npc.waiting) npc.stopT += dt;
+      else if (npc.speed > 0.1) npc.stopT = 0;
+      const parked = npc.speed < 0.3 && npc.stopT > 1.2;
+      if (parked && !npc.reactionArmed && npc.reaction <= 0) {
+        const released = npc.wasWaiting && !npc.waiting; // vừa được thả (đèn xanh / gap mở)
+        let leaderTwitch = false;
+        for (const o of this.npcs) {
+          if (o === npc || o.roadId !== npc.roadId || o.dir !== npc.dir) continue;
+          const d = (o.s - npc.s) * npc.dir;
+          if (d > 0 && d < 12 && o.speed > 0.05 && o.speed < 1.5) { leaderTwitch = true; break; }
+        }
+        if (released || leaderTwitch) {
+          // xe sau giữ xe trước: trễ 0.8–1.4s; xe đầu hàng gặp xanh: 0.7–1.2s
+          npc.reaction = leaderTwitch ? 0.8 + Math.random() * 0.6 : 0.7 + Math.random() * 0.5;
+          npc.reactionArmed = true; // chỉ cấp 1 lần cho episode dừng này
+        }
+      }
+      if (npc.speed > 0.5) npc.reactionArmed = false; // đã lăn bánh thật → episode xong, cho phép cấp lại lần sau
+      npc.wasWaiting = npc.waiting;
+      if (npc.reaction > 0) {
+        npc.reaction -= dt;
+        target = 0;
+        npc.waiting = true;
+      }
+
+      // ── 2c. tích phân tốc độ: P-controller + giới hạn GIA TỐC và JERK (Phần 7B) ──
+      // xe thật: 0→30 km/h mất 4–6s (a ≈ 1.5–2.0 m/s²), jerk êm ~2–3 m/s³
+      const A_MAX = npc.heavy ? ACCEL_HEAVY : ACCEL_CAR;
+      const dtSafe = Math.max(dt, 1e-4);
+      const hardStop = target === 0 && npc.speed < 1.2;
+      // phanh đòi gain mạnh hơn ga (0.45s) — dừng kịp trước chướng ngại/vạch; ga giữ 0.6s êm
+      let aDes = (target - npc.speed) / (target < npc.speed ? 0.45 : 0.6);
+      aDes = Math.max(-BRAKE, Math.min(A_MAX, aDes));
+      if (hardStop) aDes = Math.min(aDes, -(npc.speed / 0.35 + 1.0)); // đỗ dứt khoát gần vạch
+      // phanh KHẨN CẤP khi demand sâu (dừng thật); nhả ga/hiệu chỉnh nhẹ dùng ramp êm 3 m/s³
+      const jerkBrk = (hardStop || aDes < -3) ? JERK_BRK_HARD : JERK_BRK_SOFT;
+      if (npc.speed < 0.05 && target < 0.05) {
+        // dưới 5 cm/s và không có target → co về 0 mượt (tránh spike jerk số học khi clamp v=0)
+        npc.speed = Math.max(0, npc.speed - 0.2 * dtSafe);
+        npc.lastAccel = 0;
+      } else {
+        const jerk = aDes > npc.lastAccel
+          ? (npc.lastAccel < 0 ? jerkBrk : JERK_ACC)    // tăng a: thoát phanh nhanh (theo mức phanh), vào ga êm
+          : jerkBrk;                                    // giảm a: phanh êm 3 / khẩn cấp 8
+        const a = npc.lastAccel + Math.max(-jerk * dtSafe, Math.min(jerk * dtSafe, aDes - npc.lastAccel));
+        npc.lastAccel = a;
+        npc.speed = Math.max(0, npc.speed + a * dtSafe); // KHÔNG clamp tốc — target giảm → phanh mượt qua jerk ramp
+      }
 
       // ── 3. di chuyển + chuyển road sớm 4.2m trước tâm nút giao để bo cua mượt không giật ──
       npc.s += npc.dir * npc.speed * dt;
-      const turnMargin = 4.2;
+      const turnMargin = rvlNpc._rvlPriority ? 0.5 : 4.2;
       if ((npc.dir > 0 && npc.s > len - turnMargin) || (npc.dir < 0 && npc.s < turnMargin)) {
         const next = npc.nextChoice !== undefined ? npc.nextChoice : this.pickNextRoad(road, nodeAheadId, npc.dir);
         if (next) {
@@ -429,6 +552,7 @@ export class NPCController {
           npc.s = Math.max(1.0, Math.min(len - 1.0, npc.s));
           npc.signalHold = BLINK_HOLD;
         }
+        rvlNpc._rvlPriority = false;
         npc.signalT = 0;
         npc.nextChoice = undefined;
       }

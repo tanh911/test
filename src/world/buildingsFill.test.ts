@@ -43,7 +43,10 @@ describe('planCityBlockFill — lấp gap dọc phố + hàng courtyard', () => 
   const plan = planCityBlockFill(map);
 
   it('sinh đủ lượng nhà fill trên map Berlin-Mitte', () => {
-    expect(plan.stats.front).toBe(1224);
+    // ⚠️ Không assert số CHÍNH XÁC: front phụ thuộc bề rộng đường — sau khi width
+    // được chuẩn hóa theo tag OSM thật (fix_road_widths.mjs), đường rộng hơn →
+    // ít gap mặt phố → 999 thay vì 1224 thời đường 3m. Ngưỡng giữ ý nghĩa density.
+    expect(plan.stats.front).toBeGreaterThanOrEqual(900);
     expect(plan.stats.gapFilled).toBeGreaterThanOrEqual(20); // gap fillable (block hẹp phần lớn đã kín 2 phía)
     expect(plan.stats.rowsAdded).toBeGreaterThan(500);       // 678 hàng courtyard — nguồn khối lượng chính
     expect(plan.rows.length).toBeGreaterThan(550);
