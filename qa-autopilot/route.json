@@ -1,0 +1,443 @@
+{
+  "seed": 1,
+  "spawn": {
+    "roadId": "r256",
+    "s": 135
+  },
+  "steps": [
+    {
+      "roadId": "r256",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n153"
+    },
+    {
+      "roadId": "r56",
+      "dir": 1,
+      "turnAtEnd": "right",
+      "viaNodeId": "n155"
+    },
+    {
+      "roadId": "r204",
+      "dir": 1,
+      "turnAtEnd": "right",
+      "viaNodeId": "n162"
+    },
+    {
+      "roadId": "r59",
+      "dir": 1,
+      "turnAtEnd": "left",
+      "viaNodeId": "n162"
+    },
+    {
+      "roadId": "r196",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n171"
+    },
+    {
+      "roadId": "r179",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n175"
+    },
+    {
+      "roadId": "r187",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n190"
+    },
+    {
+      "roadId": "r131",
+      "dir": 1,
+      "turnAtEnd": "left",
+      "viaNodeId": "n198"
+    },
+    {
+      "roadId": "r110",
+      "dir": 1,
+      "turnAtEnd": "left",
+      "viaNodeId": "n196"
+    },
+    {
+      "roadId": "r132",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n191"
+    },
+    {
+      "roadId": "r162",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n185"
+    },
+    {
+      "roadId": "r274",
+      "dir": 1,
+      "turnAtEnd": "left",
+      "viaNodeId": "n164"
+    },
+    {
+      "roadId": "r59",
+      "dir": 1,
+      "turnAtEnd": "left",
+      "viaNodeId": "n162"
+    },
+    {
+      "roadId": "r196",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n171"
+    },
+    {
+      "roadId": "r179",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n175"
+    },
+    {
+      "roadId": "r187",
+      "dir": 1,
+      "turnAtEnd": "right",
+      "viaNodeId": "n190"
+    },
+    {
+      "roadId": "r104",
+      "dir": 1,
+      "turnAtEnd": "right",
+      "viaNodeId": "n203"
+    },
+    {
+      "roadId": "r91",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n193"
+    },
+    {
+      "roadId": "r85",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n180"
+    },
+    {
+      "roadId": "r255",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n166"
+    },
+    {
+      "roadId": "r183",
+      "dir": -1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n163"
+    },
+    {
+      "roadId": "r216",
+      "dir": -1,
+      "turnAtEnd": "left",
+      "viaNodeId": "n158"
+    },
+    {
+      "roadId": "r217",
+      "dir": 1,
+      "turnAtEnd": "left",
+      "viaNodeId": "n158"
+    },
+    {
+      "roadId": "r216",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n163"
+    },
+    {
+      "roadId": "r183",
+      "dir": 1,
+      "turnAtEnd": "left",
+      "viaNodeId": "n166"
+    },
+    {
+      "roadId": "r39",
+      "dir": 1,
+      "turnAtEnd": "left",
+      "viaNodeId": "n147"
+    },
+    {
+      "roadId": "r5",
+      "dir": 1,
+      "turnAtEnd": "right",
+      "viaNodeId": "n129"
+    },
+    {
+      "roadId": "r153",
+      "dir": -1,
+      "turnAtEnd": "left",
+      "viaNodeId": "n117"
+    },
+    {
+      "roadId": "r3",
+      "dir": -1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n107"
+    },
+    {
+      "roadId": "r257",
+      "dir": 1,
+      "turnAtEnd": "right",
+      "viaNodeId": "n93"
+    },
+    {
+      "roadId": "r52",
+      "dir": -1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n84"
+    },
+    {
+      "roadId": "r55",
+      "dir": -1,
+      "turnAtEnd": "right",
+      "viaNodeId": "n75"
+    },
+    {
+      "roadId": "r240",
+      "dir": -1,
+      "turnAtEnd": "left",
+      "viaNodeId": "n108"
+    },
+    {
+      "roadId": "r242",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n82"
+    },
+    {
+      "roadId": "r245",
+      "dir": -1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n63"
+    },
+    {
+      "roadId": "r175",
+      "dir": -1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n62"
+    },
+    {
+      "roadId": "r174",
+      "dir": -1,
+      "turnAtEnd": "right",
+      "viaNodeId": "n59"
+    },
+    {
+      "roadId": "r173",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n59"
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": 1,
+      "type": "junction_plain",
+      "roadId": "r256",
+      "roadName": "Georgenstraße",
+      "s": 177.5,
+      "x": 252.43,
+      "z": 289.98,
+      "label": "nút không đèn 3 nhánh"
+    },
+    {
+      "id": 2,
+      "type": "junction_4arm",
+      "roadId": "r56",
+      "roadName": "Dorotheenstraße",
+      "s": 29,
+      "x": 280.41,
+      "z": 287.32,
+      "label": "nút 6 nhánh"
+    },
+    {
+      "id": 3,
+      "type": "junction_light",
+      "roadId": "r187",
+      "roadName": "Dorotheenstraße",
+      "s": 53.4,
+      "x": 449.99,
+      "z": 267.36,
+      "label": "nút đèn 5 nhánh"
+    },
+    {
+      "id": 4,
+      "type": "junction_light",
+      "roadId": "r110",
+      "roadName": "Dorotheenstraße",
+      "s": 18.1,
+      "x": 477.02,
+      "z": 234.47,
+      "label": "nút đèn 4 nhánh"
+    },
+    {
+      "id": 5,
+      "type": "junction_light",
+      "roadId": "r131",
+      "roadName": "Dorotheenstraße",
+      "s": 37.1,
+      "x": 483.46,
+      "z": 251.36,
+      "label": "nút đèn 4 nhánh"
+    },
+    {
+      "id": 6,
+      "type": "zebra",
+      "roadId": "r187",
+      "roadName": "Dorotheenstraße",
+      "s": 53.4,
+      "x": 449.99,
+      "z": 267.36,
+      "label": "zebra 3 facing"
+    },
+    {
+      "id": 7,
+      "type": "zebra",
+      "roadId": "r110",
+      "roadName": "Dorotheenstraße",
+      "s": 18.1,
+      "x": 477.02,
+      "z": 234.47,
+      "label": "zebra 2 facing"
+    },
+    {
+      "id": 8,
+      "type": "zebra",
+      "roadId": "r131",
+      "roadName": "Dorotheenstraße",
+      "s": 37.1,
+      "x": 483.46,
+      "z": 251.36,
+      "label": "zebra 3 facing"
+    },
+    {
+      "id": 9,
+      "type": "speed_sign",
+      "roadId": "r217",
+      "roadName": "Geschwister-Scholl-Straße",
+      "s": 69.5,
+      "x": 191.46,
+      "z": 528.06,
+      "label": "biển tốc 50"
+    },
+    {
+      "id": 10,
+      "type": "speed_sign",
+      "roadId": "r173",
+      "roadName": "Schadowstraße",
+      "s": 7.7,
+      "x": -327.21,
+      "z": -3.15,
+      "label": "biển tốc 274.1"
+    },
+    {
+      "id": 11,
+      "type": "bridge",
+      "roadId": "r104",
+      "roadName": "Bauhofstraße",
+      "s": 81.9,
+      "x": 497.83,
+      "z": 332.41,
+      "label": "cầu Bauhofstraße"
+    },
+    {
+      "id": 12,
+      "type": "viaduct_under",
+      "roadId": "r255",
+      "roadName": "Am Kupfergraben",
+      "s": 41.3,
+      "x": 395.02,
+      "z": 444.14,
+      "label": "chui viaduct"
+    },
+    {
+      "id": 13,
+      "type": "tram_cross",
+      "roadId": "r187",
+      "roadName": "Dorotheenstraße",
+      "s": 53.4,
+      "x": 449.96,
+      "z": 267.37,
+      "label": "tram cắt đường"
+    },
+    {
+      "id": 14,
+      "type": "tram_cross",
+      "roadId": "r274",
+      "roadName": "Dorotheenstraße",
+      "s": 29,
+      "x": 403.45,
+      "z": 267.57,
+      "label": "tram cắt đường"
+    },
+    {
+      "id": 15,
+      "type": "curve",
+      "roadId": "r59",
+      "roadName": "Hegelplatz",
+      "s": 10,
+      "x": 312.8,
+      "z": 280.36,
+      "label": "đoạn cong Hegelplatz"
+    },
+    {
+      "id": 16,
+      "type": "width_change",
+      "roadId": "r255",
+      "roadName": "Am Kupfergraben",
+      "s": 2,
+      "x": 420.99,
+      "z": 414.7,
+      "label": "đổi bề rộng 1→2 làn"
+    },
+    {
+      "id": 17,
+      "type": "width_change",
+      "roadId": "r240",
+      "roadName": "Georgenstraße",
+      "s": 223.5,
+      "x": -198.9,
+      "z": 377.7,
+      "label": "đổi bề rộng 2→1 làn"
+    },
+    {
+      "id": 18,
+      "type": "width_change",
+      "roadId": "r242",
+      "roadName": "Dorotheenstraße",
+      "s": 2,
+      "x": -65.53,
+      "z": 207.01,
+      "label": "đổi bề rộng 1→2 làn"
+    }
+  ],
+  "coverage": {
+    "required": {
+      "junction_light": 3,
+      "junction_4arm": 1,
+      "junction_plain": 1,
+      "bridge": 2,
+      "tram_cross": 2,
+      "speed_sign": 3,
+      "zebra": 3,
+      "curve": 1,
+      "viaduct_under": 1
+    },
+    "filled": {
+      "junction_light": 3,
+      "junction_4arm": 1,
+      "junction_plain": 1,
+      "bridge": 1,
+      "tram_cross": 2,
+      "speed_sign": 2,
+      "zebra": 3,
+      "curve": 1,
+      "viaduct_under": 1
+    }
+  }
+}

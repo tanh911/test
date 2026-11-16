@@ -1,0 +1,171 @@
+{
+  "seed": 20260501,
+  "spawn": {
+    "roadId": "r01_start",
+    "s": 20
+  },
+  "steps": [
+    {
+      "roadId": "r01_start",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n02_rvl"
+    },
+    {
+      "roadId": "r02_to_zebra",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n03_zebra"
+    },
+    {
+      "roadId": "r03_to_ampel",
+      "dir": 1,
+      "turnAtEnd": "right",
+      "viaNodeId": "n04_ampel"
+    },
+    {
+      "roadId": "r09_ampel_east",
+      "dir": 1,
+      "turnAtEnd": "left",
+      "viaNodeId": "n09_ampel_east"
+    },
+    {
+      "roadId": "r18_land_east_conn",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n16_land_east"
+    },
+    {
+      "roadId": "r20_land_east",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n10_land_gate"
+    },
+    {
+      "roadId": "r19_land_west",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n15_land_west"
+    },
+    {
+      "roadId": "r11_fried_north",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n05_stop"
+    },
+    {
+      "roadId": "r05_fried_main",
+      "dir": 1,
+      "turnAtEnd": "right",
+      "viaNodeId": "n06_round"
+    },
+    {
+      "roadId": "r06a_round_to_park",
+      "dir": 1,
+      "turnAtEnd": "straight",
+      "viaNodeId": "n18_uni_park"
+    }
+  ],
+  "checkpoints": [
+    {
+      "id": 1,
+      "type": "junction",
+      "roadId": "r01_start",
+      "roadName": "Georgenstraße Süd",
+      "s": 120,
+      "x": 0,
+      "z": 100,
+      "label": "n02_rvl"
+    },
+    {
+      "id": 2,
+      "type": "junction",
+      "roadId": "r02_to_zebra",
+      "roadName": "Georgenstraße Mitte",
+      "s": 90,
+      "x": 0,
+      "z": 190,
+      "label": "n03_zebra"
+    },
+    {
+      "id": 3,
+      "type": "junction",
+      "roadId": "r03_to_ampel",
+      "roadName": "Georgenstraße Nord",
+      "s": 90,
+      "x": 0,
+      "z": 280,
+      "label": "n04_ampel"
+    },
+    {
+      "id": 4,
+      "type": "junction",
+      "roadId": "r09_ampel_east",
+      "roadName": "Dorotheenstraße Ost",
+      "s": 140,
+      "x": 140,
+      "z": 280,
+      "label": "n09_ampel_east"
+    },
+    {
+      "id": 5,
+      "type": "junction",
+      "roadId": "r18_land_east_conn",
+      "roadName": "Invalidenstraße Ost",
+      "s": 90,
+      "x": 140,
+      "z": 370,
+      "label": "n16_land_east"
+    },
+    {
+      "id": 6,
+      "type": "junction",
+      "roadId": "r20_land_east",
+      "roadName": "Oranienburger Landstraße Ost",
+      "s": 150,
+      "x": 0,
+      "z": 420,
+      "label": "n10_land_gate"
+    },
+    {
+      "id": 7,
+      "type": "junction",
+      "roadId": "r19_land_west",
+      "roadName": "Oranienburger Landstraße West",
+      "s": 150,
+      "x": -130,
+      "z": 370,
+      "label": "n15_land_west"
+    },
+    {
+      "id": 8,
+      "type": "junction",
+      "roadId": "r11_fried_north",
+      "roadName": "Friedrichstraße Nord",
+      "s": 90,
+      "x": -130,
+      "z": 280,
+      "label": "n05_stop"
+    },
+    {
+      "id": 9,
+      "type": "junction",
+      "roadId": "r05_fried_main",
+      "roadName": "Friedrichstraße Mitte",
+      "s": 180,
+      "x": -130,
+      "z": 100,
+      "label": "n06_round"
+    },
+    {
+      "id": 10,
+      "type": "junction",
+      "roadId": "r06a_round_to_park",
+      "roadName": "Universitätsstraße West",
+      "s": 65,
+      "x": -65,
+      "z": 100,
+      "label": "n18_uni_park"
+    }
+  ]
+}

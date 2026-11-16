@@ -1,6 +1,8 @@
-// onewayAudit.test.ts — 🚧 PHẦN 11.3: guard nhất quán oneway (O1–O4 + O6 idempotency).
-// Một nguồn sự thật cho hướng = tag oneway OSM. O1b (graph oneway không có tag OSM) là
-// exceptions có chủ đích — cấu trúc graph oneway đôi, không revert.
+// onewayAudit.test.ts — 🚧 PHẦN 11.3: guard nhất quán oneway ĐẶC THÙ BERLIN OSM (O1, O4, O1b, O6-convergence).
+// Lưu ý (Bước 5A.3): Các bất biến oneway chung cho mọi GameMap (O2, O3, và kiểm tra
+// bề rộng oneway 1 làn >= 3.4m) đã được tách sang `src/world/mapIntegrityAudit.test.ts`.
+// File này giữ lại các bài kiểm tra đối chiếu trực tiếp với tag OSM (`osm_pbf_extracted_stadt.json`)
+// và danh sách ngoại lệ `O1B_EXCEPTIONS` / `r149` của Berlin.
 // Chạy: npx vitest run src/world/onewayAudit.test.ts
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -70,12 +72,9 @@ function buildRows(): AuditRow[] {
   });
 }
 
-// exceptions: graph oneway KHÔNG có tag OSM — cấu trúc graph oneway đôi có chủ đích
-// (Anton-Wilhelm-Amo / Jägerstraße / Mauerstraße / Wilhelmstraße / Taubenstraße thật sự
-// one-way ngoài đời; r259 carriageway cầu; r276 Reichstagufer) — đã đối chiếu với planner
 const O1B_EXCEPTIONS = new Set(['r37', 'r87', 'r99', 'r102', 'r103', 'r105', 'r115', 'r143', 'r146', 'r147', 'r203', 'r230', 'r231', 'r259', 'r276']);
 
-describe('🚧 PHẦN 11.3 — nhất quán oneway (O1–O4, O6)', () => {
+describe('🚧 PHẦN 11.3 — nhất quán oneway ĐẶC THÙ BERLIN OSM (O1, O4, O1b, O6)', () => {
   const rows = buildRows();
   const isTwoWay = (r: AuditRow) => r.graphOneway === 'no';
   const isFoneway = (r: AuditRow) => r.graphOneway === 'yes(dir=from→to)';
@@ -84,19 +83,6 @@ describe('🚧 PHẦN 11.3 — nhất quán oneway (O1–O4, O6)', () => {
   it('O1: 0 road hai chiều trong graph khi OSM oneway=yes/-1', () => {
     const bad = rows.filter(r => (r.osmOneway === 'yes' || r.osmOneway === '-1') && isTwoWay(r));
     console.info(`[O1] ${rows.length} roads · OSM oneway=${rows.filter(r => r.osmOneway === 'yes').length} · graph oneway=${rows.filter(r => !isTwoWay(r)).length} · O1 vi phạm: ${bad.length}`);
-    expect(bad).toEqual([]);
-  });
-
-  it('O2: 0 road hai chiều có biển 267 (trừ exception r149 — WFS thật, match OSM fail)', () => {
-    // r149 Universitätsstraße: cột WFS thật có 267, extract OSM thiếu way → không có bằng
-    // chứng hai chiều → giữ biển, ghi exception (xóa mù quáng làm guard B rớt 94.65%)
-    const bad = rows.filter(r => isTwoWay(r) && r.signs267.length > 0 && r.roadId !== 'r149');
-    expect(bad).toEqual([]);
-  });
-
-  it('O3: 0 biển 267 đặt ở đầu VÀO hợp pháp của oneway (F-oneway cấm to / B-oneway cấm from)', () => {
-    const bad = rows.filter(r => (isFoneway(r) && r.signs267.some(s => s.end === 'from')) ||
-      (isBoneway(r) && r.signs267.some(s => s.end === 'to')));
     expect(bad).toEqual([]);
   });
 
@@ -112,13 +98,7 @@ describe('🚧 PHẦN 11.3 — nhất quán oneway (O1–O4, O6)', () => {
     expect(unexcused).toEqual([]);
   });
 
-  it('O6: dữ liệu ĐÃ HỘI TỤ — fix_oneway không còn gì làm (1-lane oneway ≥3.4m, r149 exception tồn tại)', () => {
-    // fix_oneway.mjs đã chạy và hội tụ (verify thủ công 2 lần = 0 thay đổi). Test này assert
-    // trạng thái hội tụ trên data — không spawn process (path tiếng Việt có khoảng trắng).
-    const singleLane = (map.roads as GameMap['roads']).filter(r => r.lanesForward + r.lanesBackward === 1);
-    const narrow = singleLane.filter(r => r.laneWidth < 3.4);
-    console.info(`[O6] oneway 1 làn: ${singleLane.length} road · laneWidth <3.4m: ${narrow.length}`);
-    expect(narrow).toEqual([]);
+  it('O6: dữ liệu Berlin ĐÃ HỘI TỤ — r149 exception và oneway-fix-220 tồn tại', () => {
     const has149 = (map.signs as Array<{ type: string; roadId: string }>).some(s => s.type === '267' && s.roadId === 'r149');
     expect(has149).toBe(true);
     const new220 = (map.signs as Array<{ type: string; roadId: string; src?: string }>).filter(s => s.type === '220' && s.src === 'oneway-fix-220');

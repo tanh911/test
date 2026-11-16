@@ -1,0 +1,869 @@
+[
+  {
+    "type": "274",
+    "roadId": "r197",
+    "s": 26,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r246",
+    "s": 6.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "220",
+    "roadId": "r136",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r141",
+    "s": 6.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r206",
+    "s": 10.1,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "267",
+    "roadId": "r23",
+    "s": 177.8,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "220",
+    "roadId": "r24",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "220",
+    "roadId": "r66",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "267",
+    "roadId": "r244",
+    "s": 125.9,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r249",
+    "s": 12.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r273",
+    "s": 152.8,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "220",
+    "roadId": "r181",
+    "s": 7.7,
+    "side": "right"
+  },
+  {
+    "type": "267",
+    "roadId": "r136",
+    "s": 47.1,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "267",
+    "roadId": "r24",
+    "s": 137.8,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "267",
+    "roadId": "r33",
+    "s": 179.5,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "220",
+    "roadId": "r122",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "267",
+    "roadId": "r215",
+    "s": 20.5,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r262",
+    "s": 4.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "205",
+    "roadId": "r65",
+    "s": 6.2,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "306",
+    "roadId": "r218",
+    "s": 131.4,
+    "side": "right"
+  },
+  {
+    "type": "267",
+    "roadId": "r218",
+    "s": 129.2,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "267",
+    "roadId": "r25",
+    "s": 94.5,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "267",
+    "roadId": "r27",
+    "s": 66.9,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "220",
+    "roadId": "r244",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r22",
+    "s": 81.5,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "267",
+    "roadId": "r26",
+    "s": 79.3,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "220",
+    "roadId": "r27",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "220",
+    "roadId": "r77",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "267",
+    "roadId": "r122",
+    "s": 161.4,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "220",
+    "roadId": "r26",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "267",
+    "roadId": "r77",
+    "s": 11.7,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r142",
+    "s": 37.4,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r167",
+    "s": 6.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r97",
+    "s": 4.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r114",
+    "s": 4.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "220",
+    "roadId": "r114",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "267",
+    "roadId": "r124",
+    "s": 16.7,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "220",
+    "roadId": "r245",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "267",
+    "roadId": "r115",
+    "s": 141.4,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r116",
+    "s": 4.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "220",
+    "roadId": "r124",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "267",
+    "roadId": "r143",
+    "s": 100.7,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "205",
+    "roadId": "r161",
+    "s": 6.2,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "306",
+    "roadId": "r192",
+    "s": 90.1,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r192",
+    "s": 90.1,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "306",
+    "roadId": "r193",
+    "s": 7.7,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r193",
+    "s": 13.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "267",
+    "roadId": "r114",
+    "s": 85.4,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "220",
+    "roadId": "r265",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r211",
+    "s": 6.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "220",
+    "roadId": "r143",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r242",
+    "s": 125.7,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "267",
+    "roadId": "r245",
+    "s": 157.8,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r55",
+    "s": 34.7,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r89",
+    "s": 11.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r207",
+    "s": 28.8,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "220",
+    "roadId": "r115",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "267",
+    "roadId": "r265",
+    "s": 68.9,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "267",
+    "roadId": "r224",
+    "s": 18.3,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "220",
+    "roadId": "r225",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r53",
+    "s": 6.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "205",
+    "roadId": "r2",
+    "s": 6.2,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "306",
+    "roadId": "r134",
+    "s": 6.2,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r134",
+    "s": 6.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "306",
+    "roadId": "r191",
+    "s": 27.9,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r191",
+    "s": 27.9,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "220",
+    "roadId": "r38",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "306",
+    "roadId": "r134",
+    "s": 55.8,
+    "side": "right"
+  },
+  {
+    "type": "306",
+    "roadId": "r236",
+    "s": 94,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r153",
+    "s": 6.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r158",
+    "s": 6.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r285",
+    "s": 6.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "267",
+    "roadId": "r38",
+    "s": 124.4,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r227",
+    "s": 4.1,
+    "side": "left",
+    "value": 5,
+    "flip": true
+  },
+  {
+    "type": "220",
+    "roadId": "r282",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r283",
+    "s": 164.3,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r154",
+    "s": 9.4,
+    "side": "left",
+    "value": 5,
+    "flip": true
+  },
+  {
+    "type": "267",
+    "roadId": "r40",
+    "s": 83.2,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r148",
+    "s": 72.4,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "306",
+    "roadId": "r205",
+    "s": 23.9,
+    "side": "right"
+  },
+  {
+    "type": "306",
+    "roadId": "r256",
+    "s": 171.3,
+    "side": "right"
+  },
+  {
+    "type": "306",
+    "roadId": "r56",
+    "s": 24.4,
+    "side": "right"
+  },
+  {
+    "type": "205",
+    "roadId": "r57",
+    "s": 49,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r57",
+    "s": 49,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "205",
+    "roadId": "r58",
+    "s": 62.4,
+    "side": "right"
+  },
+  {
+    "type": "267",
+    "roadId": "r58",
+    "s": 60.2,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "306",
+    "roadId": "r186",
+    "s": 36.3,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r204",
+    "s": 4.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r205",
+    "s": 4.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r40",
+    "s": 6.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "220",
+    "roadId": "r40",
+    "s": 6.7,
+    "side": "right"
+  },
+  {
+    "type": "220",
+    "roadId": "r58",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r239",
+    "s": 36.7,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "205",
+    "roadId": "r59",
+    "s": 11.2,
+    "side": "right"
+  },
+  {
+    "type": "220",
+    "roadId": "r196",
+    "s": 6.2,
+    "side": "right"
+  },
+  {
+    "type": "306",
+    "roadId": "r204",
+    "s": 27.2,
+    "side": "right"
+  },
+  {
+    "type": "267",
+    "roadId": "r210",
+    "s": 40.8,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "306",
+    "roadId": "r274",
+    "s": 106.5,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r288",
+    "s": 369.7,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r64",
+    "s": 4.7,
+    "side": "right",
+    "value": 7
+  },
+  {
+    "type": "220",
+    "roadId": "r120",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r160",
+    "s": 4.7,
+    "side": "right",
+    "value": 7
+  },
+  {
+    "type": "274",
+    "roadId": "r51",
+    "s": 6.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r238",
+    "s": 4.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "267",
+    "roadId": "r120",
+    "s": 32.4,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "267",
+    "roadId": "r84",
+    "s": 23.3,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r255",
+    "s": 6.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r84",
+    "s": 4.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "220",
+    "roadId": "r84",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r274",
+    "s": 8.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r45",
+    "s": 4.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "306",
+    "roadId": "r132",
+    "s": 18.3,
+    "side": "right"
+  },
+  {
+    "type": "306",
+    "roadId": "r190",
+    "s": 18.1,
+    "side": "right"
+  },
+  {
+    "type": "306",
+    "roadId": "r133",
+    "s": 37.4,
+    "side": "right"
+  },
+  {
+    "type": "306",
+    "roadId": "r279",
+    "s": 72.9,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r70",
+    "s": 6.5,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "274",
+    "roadId": "r251",
+    "s": 6.2,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "267",
+    "roadId": "r231",
+    "s": 26.2,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "306",
+    "roadId": "r146",
+    "s": 35.7,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r250",
+    "s": 4.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "306",
+    "roadId": "r147",
+    "s": 8.2,
+    "side": "right"
+  },
+  {
+    "type": "306",
+    "roadId": "r165",
+    "s": 110.7,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r202",
+    "s": 4.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "220",
+    "roadId": "r202",
+    "s": 4.7,
+    "side": "right"
+  },
+  {
+    "type": "274",
+    "roadId": "r41",
+    "s": 219,
+    "side": "left",
+    "value": 30,
+    "flip": true
+  },
+  {
+    "type": "274",
+    "roadId": "r287",
+    "s": 4.7,
+    "side": "right",
+    "value": 30
+  },
+  {
+    "type": "205",
+    "roadId": "r272",
+    "s": 5.7,
+    "side": "left",
+    "flip": true
+  },
+  {
+    "type": "306",
+    "roadId": "r280",
+    "s": 68.9,
+    "side": "right"
+  }
+]

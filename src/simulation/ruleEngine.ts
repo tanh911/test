@@ -16,7 +16,8 @@ export type ViolationType =
   | 'right_of_way'   // rechts vor links / vorfahrtstraße
   | 'stop_sign'      // không dừng hẳn tại Haltlinie
   | 'roundabout'     // sai quy tắc vòng xuyến
-  | 'pedestrian';    // không nhường người đi bộ tại zebra
+  | 'pedestrian'     // không nhường người đi bộ tại zebra
+  | 'out_of_bounds'; // rời khỏi khu vực thi sát hạch
 
 export interface Violation {
   type: ViolationType;
@@ -51,14 +52,21 @@ const APPROACH_JUNCTION = 12;
 const PASS_STOP_LINE = 2;
 const RATE_LIMIT: Record<ViolationType, number> = {
   speed: 4, offroad: 6, redlight: 30, collision: 3, nosignal: 8,
-  right_of_way: 15, stop_sign: 15, roundabout: 15, pedestrian: 15
+  right_of_way: 15, stop_sign: 15, roundabout: 15, pedestrian: 15,
+  out_of_bounds: 10
 };
+
+export interface RuleEngineOptions {
+  /** Có kết thúc bài thi ngay khi xảy ra va chạm hay không (hỏi lại theo quyết định người dùng) */
+  endExamOnCollision?: boolean;
+}
 
 export class RuleEngine {
   violations: Violation[] = [];
   private lastAt: Record<ViolationType, number> = {
     speed: -99, offroad: -99, redlight: -99, collision: -99, nosignal: -99,
-    right_of_way: -99, stop_sign: -99, roundabout: -99, pedestrian: -99
+    right_of_way: -99, stop_sign: -99, roundabout: -99, pedestrian: -99,
+    out_of_bounds: -99
   };
   private elapsedTime = 0;
   /** junction đang tiếp cận (tránh double-count) */
@@ -71,9 +79,9 @@ export class RuleEngine {
   private rbtChecked = new Set<string>();
   currentSpeedLimit = 50;
   static instanceCounter = 0;
-  // ── phát hiện 'nosignal': tích lũy Δheading giữa các frame ──
-  private prevHeading: number | null = null;
-  private turnAccum = 0; // góc đổi hướng chưa có xi-nhan (rad, dương = trái)
+  // ── phát hiện 'nosignal': chỉ đánh giá khi xe chuyển road tại nút (góc >= 35°) hoặc đổi làn ──
+  private lastRoadId: string | null = null;
+  private lastRoadTravelHeading: number | null = null;
   // ── Chống đếm lặp lỗi tốc độ theo từng đợt (Episode-based Speeding Tracker) ──
   private activeSpeedViolation: Violation | null = null;
   private activeSpeedPeakKmh = 0;
@@ -81,13 +89,40 @@ export class RuleEngine {
   private belowLimitDuration = 0;
   private map: GameMap;
   private controllers: TrafficLightController[];
+  private mapBounds: { minX: number; maxX: number; minZ: number; maxZ: number };
+
+  // ── Cờ chống lặp va chạm (chỉ ghi 1 lần cho đến khi cách vật cản >= 1.5m) ──
+  private inCollisionContact = false;
+  private lastCollisionPos: { x: number; z: number } | null = null;
+  public examEnded = false;
+  readonly options: RuleEngineOptions;
 
   readonly instanceId = ++RuleEngine.instanceCounter;
-  constructor(map: GameMap, controllers: TrafficLightController[]) {
+  constructor(map: GameMap, controllers: TrafficLightController[] = [], options: RuleEngineOptions = {}) {
     this.map = map;
-    this.controllers = controllers;
-    const w = window as unknown as { __reCount?: number };
-    w.__reCount = (w.__reCount ?? 0) + 1;
+    this.controllers = controllers ?? [];
+    this.options = options;
+
+    // Sinh Bounding Box động từ toàn bộ nodes và roads của map (không hardcode)
+    let minX = Infinity, maxX = -Infinity, minZ = Infinity, maxZ = -Infinity;
+    for (const n of map.nodes) {
+      if (n.x < minX) minX = n.x;
+      if (n.x > maxX) maxX = n.x;
+      if (n.z < minZ) minZ = n.z;
+      if (n.z > maxZ) maxZ = n.z;
+    }
+    for (const r of map.roads) {
+      for (const pt of r.points) {
+        if (pt[0] < minX) minX = pt[0];
+        if (pt[0] > maxX) maxX = pt[0];
+        if (pt[1] < minZ) minZ = pt[1];
+        if (pt[1] > maxZ) maxZ = pt[1];
+      }
+    }
+    this.mapBounds = { minX, maxX, minZ, maxZ };
+
+    const w = typeof window !== 'undefined' ? (window as unknown as { __reCount?: number }) : undefined;
+    if (w) w.__reCount = (w.__reCount ?? 0) + 1;
   }
 
   get bestanden(): boolean {
@@ -145,25 +180,23 @@ export class RuleEngine {
   private checkStopSign(p: PlayerState, road: MapRoad, nearS: number, dir: 1 | -1): void {
     const len = roadCurve(road).length;
     const half = (road.lanesForward + road.lanesBackward) * road.laneWidth / 2;
-    for (const nodeId of [road.from, road.to]) {
-      const rule = this.ixRule(nodeId);
-      if (rule !== 'stop') continue;
-      const stopS = road.to === nodeId ? len - half - 2 : half + 2;
-      const distToStop = dir > 0 ? stopS - nearS : nearS - stopS;
-      const key = `${road.id}:${nodeId}:stop`;
-      // đã qua vạch dừng mà chưa dừng → vi phạm
-      if (distToStop < -PASS_STOP_LINE && !this.stopped(p) && !this.stopChecked.has(key)) {
-        this.add('stop_sign', 'major', 'Không dừng hẳn tại dấu Stop', p);
-        this.stopChecked.add(key);
-      }
-      // đang tiến về vạch (cách < 4m) → đánh dấu đã đến để lần sau kiểm tra
-      if (distToStop >= 0 && distToStop < 4) {
-        // nothing — chờ vượt vạch
-      }
-      // rời xa junction → reset
-      if (Math.abs(distToStop) > APPROACH_JUNCTION) {
-        this.stopChecked.delete(key);
-      }
+    // Chỉ xét nút ở PHÍA TRƯỚC theo hướng xe chạy (dir > 0 ? road.to : road.from)
+    const targetNodeId = dir > 0 ? road.to : road.from;
+    const rule = this.ixRule(targetNodeId);
+    if (rule !== 'stop') return;
+
+    const stopS = dir > 0 ? len - half - 2 : half + 2;
+    const distToStop = dir > 0 ? stopS - nearS : nearS - stopS;
+    const key = `${road.id}:${targetNodeId}:stop`;
+
+    // Cận dưới cho distToStop: chỉ ghi nhận khi xe vừa cắt qua vạch dừng trong phạm vi [-4.0m, -PASS_STOP_LINE]
+    if (distToStop < -PASS_STOP_LINE && distToStop > -4.0 && !this.stopped(p) && !this.stopChecked.has(key)) {
+      this.add('stop_sign', 'major', 'Không dừng hẳn tại dấu Stop', p);
+      this.stopChecked.add(key);
+    }
+    // rời xa junction → reset
+    if (Math.abs(distToStop) > APPROACH_JUNCTION) {
+      this.stopChecked.delete(key);
     }
   }
 
@@ -284,9 +317,7 @@ export class RuleEngine {
         this.add('offroad', 'minor', 'Rời mặt đường / lên vỉa hè', p);
       }
 
-      // ── stop sign ──
-      this.checkStopSign(p, near.road, near.s, 1);
-      // dirxim: tính hướng flow
+      // ── stop sign (chỉ gọi 1 lần theo hướng flow thực tế) ──
       const pt = pointAtS(near.road, near.s);
       const flowDot = Math.sin(pt.heading) * Math.sin(p.heading) + Math.cos(pt.heading) * Math.cos(p.heading);
       const dir: 1 | -1 = flowDot >= 0 ? 1 : -1;
@@ -302,71 +333,94 @@ export class RuleEngine {
       if (p.inCrosswalk && kmh > 2 && !this.stopped(p)) {
         this.add('pedestrian', 'major', 'Không nhường người đi bộ tại Zebrastreifen', p);
       }
-    }
 
-    // ── quên xi-nhan khi rẽ (Protocol mục 6): tích lũy Δheading; vượt ~26° mà không đèn → lỗi ──
-    if (this.prevHeading === null) {
-      this.prevHeading = p.heading; // frame đầu — chưa có Δ
-    } else if (kmh > 5) {
-      const dh = wrapHeadingDelta(p.heading - this.prevHeading);
-      if (p.signal) {
-        this.turnAccum = 0; // có xi-nhan → hành vi hợp lệ, xóa tích lũy
-      } else {
-        this.turnAccum += dh;
-        if (Math.abs(this.turnAccum) >= NOSIGNAL_TURN_RAD) {
-          this.add('nosignal', 'minor', 'Quên xi-nhan khi rẽ', p);
-          this.turnAccum = 0;
-        } else if (Math.abs(dh) < 0.002) {
-          this.turnAccum *= 0.92; // đi thẳng → tích lũy chậm về 0 (tránh cộng dồn qua nhiều frame)
+      // ── quên xi-nhan khi rẽ (StVO chưa đối chiếu): chỉ đánh giá khi xe chuyển road tại nút (góc giữa hai nhánh >= 35°) hoặc đổi làn, KHÔNG tích lũy góc dọc cùng một road ──
+      // Chỉ nhận diện xe đang chạy dọc theo road khi hướng xe tương đối khớp với trục đường (|flowDot| >= 0.5, tránh nhận nhầm đường cắt ngang ở tâm ngã tư)
+      if (Math.abs(flowDot) >= 0.5) {
+        const curTravelHeading = dir > 0 ? pt.heading : pt.heading + Math.PI;
+        if (this.lastRoadId !== null && this.lastRoadId !== near.road.id) {
+          if (this.lastRoadTravelHeading !== null) {
+            const turnAngleDeg = Math.abs(wrapHeadingDelta(curTravelHeading - this.lastRoadTravelHeading)) * 180 / Math.PI;
+            if (turnAngleDeg >= 35 && kmh > 5 && !p.signal) {
+              this.add('nosignal', 'minor', 'Quên xi-nhan khi rẽ', p);
+            }
+          }
         }
+        this.lastRoadId = near.road.id;
+        this.lastRoadTravelHeading = curTravelHeading;
       }
-    }
-    this.prevHeading = p.heading;
 
-    // ── đèn đỏ: road dưới player + junction phía trước ──
-    if (near) {
-      const road = near.road;
-      const len = roadCurve(road).length;
-      // player đi chiều nào trên road? dot(heading, hướng road tại s)
-      const pt = pointAtS(road, near.s);
-      const flowDot = Math.sin(pt.heading) * Math.sin(p.heading) + Math.cos(pt.heading) * Math.cos(p.heading);
-      const dir: 1 | -1 = flowDot >= 0 ? 1 : -1;
-      // junction phía TRƯỚC có controller?
-      for (const nodeId of [road.from, road.to]) {
-        const ctrl = this.controllers.find(c => c.nodeId === nodeId);
-        if (!ctrl) continue;
-        const junctionEnd = road.to === nodeId ? len : 0;
-        const half = (road.lanesForward + road.lanesBackward) * road.laneWidth / 2;
-        const stopS = road.to === nodeId ? len - half - 2 : half + 2;
+      // ── đèn đỏ: CHỈ xét junction ở PHÍA TRƯỚC theo hướng xe (dir > 0 ? road.to : road.from) ──
+      const len = roadCurve(near.road).length;
+      const targetNodeId = dir > 0 ? near.road.to : near.road.from;
+      const ctrl = this.controllers.find(c => c.nodeId === targetNodeId);
+      if (ctrl) {
+        const half = (near.road.lanesForward + near.road.lanesBackward) * near.road.laneWidth / 2;
+        const stopS = dir > 0 ? len - half - 2 : half + 2;
         const distToStop = dir > 0 ? stopS - near.s : near.s - stopS;
-        const key = `${road.id}:${nodeId}`;
+        const key = `${near.road.id}:${targetNodeId}`;
         // rời xa vạch → re-arm
         if (distToStop > 12 || distToStop < -12) {
           this.redArmed.delete(key);
-          continue;
+        } else {
+          const phase: LightPhase = ctrl.phaseForArm(near.road.id, dir > 0 ? 'to' : 'from');
+          // cắt vạch khi đỏ: đang tiến về vạch khi đỏ (armed), vượt stopS trong phạm vi [-6, 0), vẫn chạy
+          if (phase === 'red' && distToStop < 0 && distToStop > -6 && this.redArmed.has(key) && kmh > 5) {
+            this.add('redlight', 'major', 'Chạy đèn đỏ', p);
+            this.redArmed.delete(key);
+          } else if (phase === 'red' && distToStop >= 0 && distToStop < 12) {
+            // đang tiến về vạch khi đỏ → armed
+            if (kmh > 5) this.redArmed.add(key);
+          } else if (phase === 'green' || phase === 'yellow') {
+            this.redArmed.delete(key);
+          }
         }
-        const phase: LightPhase = ctrl.phaseForArm(road.id, nodeId === road.to ? 'to' : 'from');
-        // cắt vạch khi đỏ: đang tiến về vạch khi đỏ (armed), vượt stopS, vẫn chạy
-        if (phase === 'red' && distToStop < 0 && this.redArmed.has(key) && kmh > 5) {
-          this.add('redlight', 'major', 'Chạy đèn đỏ', p);
-          this.redArmed.delete(key);
-        } else if (phase === 'red' && distToStop >= 0 && distToStop < 12) {
-          // đang tiến về vạch khi đỏ → armed: nếu tiếp tục cắt thì là vi phạm
-          if (kmh > 5) this.redArmed.add(key);
-        } else if (phase === 'green' || phase === 'yellow') {
-          this.redArmed.delete(key);
-        }
-        void junctionEnd;
       }
     }
 
-    // ── va chạm (NPC hoặc công trình) ──
+    // ── va chạm (NPC hoặc công trình): 1 sự kiện ghi 1 lần + kiểm tra ai đâm ai ──
     if (collisions.length) {
-      for (const c of collisions) {
-        const msg = c === 'building' ? 'Va chạm công trình' : 'Va chạm với xe khác';
-        this.add('collision', 'major', msg, p);
+      if (this.lastCollisionPos) {
+        const distFromLast = Math.hypot(p.x - this.lastCollisionPos.x, p.z - this.lastCollisionPos.z);
+        if (distFromLast >= 1.5) {
+          this.inCollisionContact = false;
+        }
+      }
+      if (!this.inCollisionContact) {
+        for (const c of collisions) {
+          const isNpc = c.startsWith('npc') || c === 'npc';
+          let playerAtFault = true;
+          if (isNpc) {
+            // Nếu người chơi đang đứng yên (speed < 0.15) và không có nguy cơ vi phạm ưu tiên bên phải
+            if (Math.abs(p.speed) < 0.15 && !p.rightPriorityThreat) {
+              playerAtFault = false;
+            }
+          }
+          console.log(`[TRACE collision] atFault=${playerAtFault} isNpc=${isNpc} p.speed=${p.speed.toFixed(1)} rightPriorityThreat=${p.rightPriorityThreat} c=${c}`);
+          if (playerAtFault) {
+            const msg = c === 'building' ? 'Va chạm công trình' : 'Va chạm với xe khác';
+            this.add('collision', 'major', msg, p);
+            this.inCollisionContact = true;
+            this.lastCollisionPos = { x: p.x, z: p.z };
+            if (this.options?.endExamOnCollision) {
+              this.examEnded = true;
+            }
+            break;
+          }
+        }
       }
       collisions.length = 0;
+    } else if (this.inCollisionContact && this.lastCollisionPos) {
+      const distFromLast = Math.hypot(p.x - this.lastCollisionPos.x, p.z - this.lastCollisionPos.z);
+      if (distFromLast >= 1.5) {
+        this.inCollisionContact = false;
+      }
+    }
+
+    // ── rời khỏi khu vực thi sát hạch (out_of_bounds): bounding box sinh từ map + dung sai 10m ──
+    const b = this.mapBounds;
+    if (p.x < b.minX - 10 || p.x > b.maxX + 10 || p.z < b.minZ - 10 || p.z > b.maxZ + 10) {
+      this.add('out_of_bounds', 'major', 'Rời khỏi khu vực thi sát hạch', p);
     }
   }
 }

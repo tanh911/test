@@ -4,6 +4,7 @@ import { loadDemoAssets } from '../world/demoAssets';
 import { MiniMap } from './MiniMap';
 import { ModernCockpit } from './sim/ModernCockpit';
 import { generateBigMap, generateStadtMap } from '../data/maps/bigMap';
+import { generateCityMap, MINI_CITY_3_NODES, CITY_18_NODES } from '../data/maps/cityGenerator';
 import { generateExamParcoursMap, EXAM_STATIONS } from '../data/maps/examParcours';
 import berlinMitteMap from '../data/maps/berlin-mitte-clean.json';
 import testCrossingMap from '../data/maps/test_crossing.json';
@@ -18,10 +19,14 @@ export const SimDevPage = () => {
   const params = typeof window !== 'undefined' ? new URLSearchParams(window.location.search) : null;
   const bigMap = params?.get('big') === '1';
   const stadtMap = params?.get('map') === 'stadt';
+  const mini3Map = params?.get('map') === 'mini3';
   const berlinMap = params?.get('map') === 'berlin' || params?.get('map') === 'muenchen';
+  const parcoursMap = params?.get('map') === 'parcours';
+  // Mặc định là khu thi 18 nút chuẩn Đức (city.json) nếu không chọn bản đồ khác
+  const city18Map = params?.get('map') === 'city18' || params?.get('map') === 'city' || (!stadtMap && !berlinMap && !bigMap && !mini3Map && !parcoursMap);
   const rawOsm = params?.get('raw') === '1';
-  const driveMode = params?.get('drive') === '1';
-  const isParcoursMode = driveMode && !rawOsm && !stadtMap && !bigMap;
+  const driveMode = params?.get('drive') === '1' || (typeof window !== 'undefined' && window.location.pathname === '/simulation');
+  const isParcoursMode = parcoursMap;
 
   useEffect(() => {
     const containerEl = containerRef.current;
@@ -44,12 +49,15 @@ export const SimDevPage = () => {
     let apOpts: { route: import('../world/autopilot').AutopilotRoute } | undefined;
     if (params?.get('autopilot') === '1' && driveMode) {
       try {
-        const resp = await fetch('/qa-autopilot/route.json');
+        const routeFile = city18Map ? '/qa-autopilot/route-city18.json' : '/qa-autopilot/route.json';
+        const resp = await fetch(routeFile);
         if (resp.ok) apOpts = { route: await resp.json() };
       } catch { /* thiếu route.json → chạy thường */ }
     }
     if (cancelled) return;
-    const mapJson = isParcoursMode ? generateExamParcoursMap()
+    const mapJson = city18Map ? generateCityMap(CITY_18_NODES)
+      : mini3Map ? generateCityMap(MINI_CITY_3_NODES)
+      : isParcoursMode ? generateExamParcoursMap()
       : stadtMap ? generateStadtMap()
       : berlinMap ? berlinMitteMap
       : bigMap ? generateBigMap()
@@ -178,7 +186,9 @@ export const SimDevPage = () => {
           <b style={{ color: '#7dd3fc' }}>
             {isParcoursMode
               ? (lang === 'de' ? 'PRÜFUNGS-PARCOURS (6 STATIONEN)' : 'SA HÌNH PHẢN XẠ (6 TRẠM)')
-              : `SIM v2 · ${berlinMap ? 'BERLIN MITTE (OSM)' : stadtMap ? 'STADT 3km' : 'MAP'}`}
+              : city18Map
+                ? 'PRÜFUNGSSTADT 18 KNOTEN (DE)'
+                : `SIM v2 · ${berlinMap ? 'BERLIN MITTE (OSM)' : stadtMap ? 'STADT 3km' : 'MAP'}`}
           </b>
           <div style={{ display: 'flex', gap: 5, flexWrap: 'wrap' }}>
             {driveMode && (
@@ -208,21 +218,6 @@ export const SimDevPage = () => {
                   title="Khởi động lại lộ trình thi"
                 >
                   🔄 {lang === 'de' ? 'Neustart' : 'Thi lại'}
-                </button>
-                <button
-                  onClick={() => {
-                    const url = new URL(window.location.href);
-                    if (rawOsm) url.searchParams.delete('raw');
-                    else url.searchParams.set('raw', '1');
-                    window.location.href = url.toString();
-                  }}
-                  style={{
-                    background: 'rgba(168,85,247,0.18)', color: '#d8b4fe',
-                    border: '1px solid rgba(168,85,247,0.45)', borderRadius: 5,
-                    padding: '1px 7px', fontSize: 10, fontWeight: 700, cursor: 'pointer'
-                  }}
-                >
-                  {rawOsm ? '🎯 Sa hình 6 Trạm' : '🏙️ Map lớn OSM'}
                 </button>
               </>
             )}

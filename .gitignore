@@ -35,3 +35,5 @@ files.zip
 head-*.ts
 *.txt
 *.tsc
+
+qa-*/

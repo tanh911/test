@@ -1,0 +1,650 @@
+{
+  "version": 1,
+  "name": "de-pruefungsstadt-18nodes-v1",
+  "seed": 20260501,
+  "nodes": [
+    {
+      "id": "n01_start",
+      "x": 0,
+      "z": -20,
+      "kind": "intersection",
+      "template": "T2_T_JUNCTION_PRIOR",
+      "priorityEdges": [
+        "r01_start",
+        "r17_south_stub"
+      ]
+    },
+    {
+      "id": "n02_rvl",
+      "x": 0,
+      "z": 100,
+      "kind": "intersection",
+      "template": "T1_RVL_4WAY"
+    },
+    {
+      "id": "n03_zebra",
+      "x": 0,
+      "z": 190,
+      "kind": "intersection",
+      "template": "T6_ZEBRA_MIDBLOCK",
+      "crosswalkEdges": [
+        "r02_to_zebra",
+        "r03_to_ampel"
+      ]
+    },
+    {
+      "id": "n04_ampel",
+      "x": 0,
+      "z": 280,
+      "kind": "intersection",
+      "template": "T4_AMPEL_4WAY",
+      "priorityEdges": [
+        "r03_to_ampel",
+        "r10_to_land"
+      ],
+      "crosswalkEdges": [
+        "r03_to_ampel",
+        "r04_to_stop",
+        "r09_ampel_east",
+        "r10_to_land"
+      ]
+    },
+    {
+      "id": "n05_stop",
+      "x": -130,
+      "z": 280,
+      "kind": "intersection",
+      "template": "T3_STOP_CROSSING",
+      "priorityEdges": [
+        "r11_fried_north",
+        "r05_fried_main"
+      ],
+      "crosswalkEdges": [
+        "r04_to_stop",
+        "r13_to_oneway"
+      ]
+    },
+    {
+      "id": "n06_round",
+      "x": -130,
+      "z": 100,
+      "kind": "intersection",
+      "template": "T5_KREISVERKEHR",
+      "crosswalkEdges": [
+        "r05_fried_main",
+        "r06a_round_to_park"
+      ]
+    },
+    {
+      "id": "n07_west_end",
+      "x": -220,
+      "z": 100,
+      "kind": "intersection",
+      "template": "T2_T_JUNCTION_PRIOR",
+      "priorityEdges": [
+        "r15_west_chord",
+        "r07_west_stub"
+      ],
+      "crosswalkEdges": [
+        "r14b_oneway_out"
+      ]
+    },
+    {
+      "id": "n08_east_end",
+      "x": 100,
+      "z": 100,
+      "kind": "end"
+    },
+    {
+      "id": "n09_ampel_east",
+      "x": 140,
+      "z": 280,
+      "kind": "intersection",
+      "template": "T4_AMPEL_4WAY",
+      "priorityEdges": [
+        "r09_ampel_east",
+        "r16_east_stub"
+      ],
+      "crosswalkEdges": [
+        "r09_ampel_east",
+        "r18_land_east_conn"
+      ]
+    },
+    {
+      "id": "n10_land_gate",
+      "x": 0,
+      "z": 420,
+      "kind": "intersection",
+      "template": "T4_AMPEL_4WAY",
+      "priorityEdges": [
+        "r20_land_east",
+        "r19_land_west"
+      ],
+      "crosswalkEdges": [
+        "r10_to_land"
+      ]
+    },
+    {
+      "id": "n11_oneway_in",
+      "x": -220,
+      "z": 280,
+      "kind": "intersection",
+      "template": "T2_T_JUNCTION_PRIOR",
+      "priorityEdges": [
+        "r13_to_oneway",
+        "r15_west_chord"
+      ],
+      "crosswalkEdges": [
+        "r14a_oneway_in"
+      ]
+    },
+    {
+      "id": "n12_oneway_mid",
+      "x": -265,
+      "z": 190,
+      "kind": "end"
+    },
+    {
+      "id": "n13_south_west",
+      "x": -65,
+      "z": -20,
+      "kind": "end"
+    },
+    {
+      "id": "n14_east_stub",
+      "x": 230,
+      "z": 280,
+      "kind": "end"
+    },
+    {
+      "id": "n15_land_west",
+      "x": -130,
+      "z": 370,
+      "kind": "end"
+    },
+    {
+      "id": "n16_land_east",
+      "x": 140,
+      "z": 370,
+      "kind": "end"
+    },
+    {
+      "id": "n17_south_stub",
+      "x": 0,
+      "z": -100,
+      "kind": "end"
+    },
+    {
+      "id": "n18_uni_park",
+      "x": -65,
+      "z": 100,
+      "kind": "intersection",
+      "template": "T6_ZEBRA_MIDBLOCK",
+      "crosswalkEdges": [
+        "r06a_round_to_park",
+        "r06b_park_to_rvl"
+      ]
+    }
+  ],
+  "edges": [
+    {
+      "id": "r01_start",
+      "name": "Georgenstraße Süd",
+      "from": "n01_start",
+      "to": "n02_rvl",
+      "profile": "wohnstrasse_30"
+    },
+    {
+      "id": "r02_to_zebra",
+      "name": "Georgenstraße Mitte",
+      "from": "n02_rvl",
+      "to": "n03_zebra",
+      "profile": "sammelstrasse_rad_50"
+    },
+    {
+      "id": "r03_to_ampel",
+      "name": "Georgenstraße Nord",
+      "from": "n03_zebra",
+      "to": "n04_ampel",
+      "profile": "sammelstrasse_rad_50",
+      "poiSigns": [
+        {
+          "type": "138",
+          "s": 28,
+          "side": "right"
+        },
+        {
+          "type": "283",
+          "s": 46,
+          "side": "right"
+        }
+      ],
+      "poiProps": [
+        {
+          "type": "bench",
+          "s": 48,
+          "side": "right"
+        }
+      ]
+    },
+    {
+      "id": "r04_to_stop",
+      "name": "Dorotheenstraße West",
+      "from": "n04_ampel",
+      "to": "n05_stop",
+      "profile": "sammelstrasse_rad_50",
+      "priorityOverride": "stop"
+    },
+    {
+      "id": "r05_fried_main",
+      "name": "Friedrichstraße Mitte",
+      "from": "n05_stop",
+      "to": "n06_round",
+      "profile": "sammelstrasse_rad_50",
+      "priorityOverride": "main"
+    },
+    {
+      "id": "r06a_round_to_park",
+      "name": "Universitätsstraße West",
+      "from": "n06_round",
+      "to": "n18_uni_park",
+      "profile": "wohnstrasse_30",
+      "poiSigns": [
+        {
+          "type": "314",
+          "s": 38,
+          "side": "right"
+        }
+      ],
+      "poiProps": [
+        {
+          "type": "parkscheinautomat",
+          "s": 40,
+          "side": "right"
+        }
+      ]
+    },
+    {
+      "id": "r06b_park_to_rvl",
+      "name": "Universitätsstraße Ost",
+      "from": "n18_uni_park",
+      "to": "n02_rvl",
+      "profile": "wohnstrasse_30"
+    },
+    {
+      "id": "r07_west_stub",
+      "name": "Clara-Zetkin-Straße",
+      "from": "n07_west_end",
+      "to": "n06_round",
+      "profile": "wohnstrasse_30",
+      "waypoints": [
+        [
+          -210,
+          90
+        ],
+        [
+          -200,
+          80
+        ],
+        [
+          -180,
+          82
+        ],
+        [
+          -156,
+          100
+        ],
+        [
+          -143,
+          100
+        ]
+      ]
+    },
+    {
+      "id": "r08_rvl_east",
+      "name": "Am Kupfergraben",
+      "from": "n08_east_end",
+      "to": "n02_rvl",
+      "profile": "wohnstrasse_30"
+    },
+    {
+      "id": "r09_ampel_east",
+      "name": "Dorotheenstraße Ost",
+      "from": "n04_ampel",
+      "to": "n09_ampel_east",
+      "profile": "gewerbestrasse_bus_50"
+    },
+    {
+      "id": "r10_to_land",
+      "name": "Chausseestraße",
+      "from": "n04_ampel",
+      "to": "n10_land_gate",
+      "profile": "gewerbestrasse_bus_50",
+      "bridge": true
+    },
+    {
+      "id": "r11_fried_north",
+      "name": "Friedrichstraße Nord",
+      "from": "n15_land_west",
+      "to": "n05_stop",
+      "profile": "sammelstrasse_rad_50",
+      "priorityOverride": "main",
+      "bridge": true
+    },
+    {
+      "id": "r12_south_loop",
+      "name": "Französische Straße West",
+      "from": "n06_round",
+      "to": "n13_south_west",
+      "profile": "altstadt_pflaster_30",
+      "waypoints": [
+        [
+          -130,
+          87
+        ],
+        [
+          -130,
+          74
+        ],
+        [
+          -122,
+          10
+        ],
+        [
+          -91,
+          -20
+        ],
+        [
+          -78,
+          -20
+        ]
+      ]
+    },
+    {
+      "id": "r13_to_oneway",
+      "name": "Reinhardtstraße",
+      "from": "n05_stop",
+      "to": "n11_oneway_in",
+      "profile": "wohnstrasse_30",
+      "priorityOverride": "stop",
+      "waypoints": [
+        [
+          -143,
+          280
+        ],
+        [
+          -156,
+          280
+        ],
+        [
+          -180,
+          298
+        ],
+        [
+          -200,
+          300
+        ],
+        [
+          -210,
+          290
+        ]
+      ]
+    },
+    {
+      "id": "r14a_oneway_in",
+      "name": "Luisenstraße Nord (Einbahn)",
+      "from": "n11_oneway_in",
+      "to": "n12_oneway_mid",
+      "profile": "einbahnstrasse_30",
+      "waypoints": [
+        [
+          -233,
+          280
+        ],
+        [
+          -246,
+          280
+        ],
+        [
+          -265,
+          250
+        ],
+        [
+          -265,
+          216
+        ],
+        [
+          -265,
+          203
+        ]
+      ]
+    },
+    {
+      "id": "r14b_oneway_out",
+      "name": "Luisenstraße Süd (Einbahn)",
+      "from": "n12_oneway_mid",
+      "to": "n07_west_end",
+      "profile": "einbahnstrasse_30",
+      "waypoints": [
+        [
+          -265,
+          177
+        ],
+        [
+          -265,
+          164
+        ],
+        [
+          -265,
+          130
+        ],
+        [
+          -246,
+          100
+        ],
+        [
+          -233,
+          100
+        ]
+      ]
+    },
+    {
+      "id": "r15_west_chord",
+      "name": "Wilhelmstraße",
+      "from": "n11_oneway_in",
+      "to": "n07_west_end",
+      "profile": "wohnstrasse_30",
+      "waypoints": [
+        [
+          -210,
+          270
+        ],
+        [
+          -200,
+          260
+        ],
+        [
+          -192,
+          190
+        ],
+        [
+          -200,
+          120
+        ],
+        [
+          -210,
+          110
+        ]
+      ]
+    },
+    {
+      "id": "r16_east_stub",
+      "name": "Torstraße Ost",
+      "from": "n09_ampel_east",
+      "to": "n14_east_stub",
+      "profile": "gewerbestrasse_bus_50"
+    },
+    {
+      "id": "r17_south_stub",
+      "name": "Georgenstraße Südende",
+      "from": "n17_south_stub",
+      "to": "n01_start",
+      "profile": "wohnstrasse_30"
+    },
+    {
+      "id": "r18_land_east_conn",
+      "name": "Invalidenstraße Ost",
+      "from": "n09_ampel_east",
+      "to": "n16_land_east",
+      "profile": "sammelstrasse_rad_50",
+      "bridge": true
+    },
+    {
+      "id": "r19_land_west",
+      "name": "Oranienburger Landstraße West",
+      "from": "n10_land_gate",
+      "to": "n15_land_west",
+      "profile": "landstrasse_70",
+      "waypoints": [
+        [
+          -13,
+          420
+        ],
+        [
+          -26,
+          420
+        ],
+        [
+          -85,
+          435
+        ],
+        [
+          -130,
+          396
+        ],
+        [
+          -130,
+          383
+        ]
+      ]
+    },
+    {
+      "id": "r20_land_east",
+      "name": "Oranienburger Landstraße Ost",
+      "from": "n16_land_east",
+      "to": "n10_land_gate",
+      "profile": "landstrasse_70",
+      "waypoints": [
+        [
+          140,
+          383
+        ],
+        [
+          140,
+          396
+        ],
+        [
+          95,
+          435
+        ],
+        [
+          26,
+          420
+        ],
+        [
+          13,
+          420
+        ]
+      ]
+    },
+    {
+      "id": "r21_south_conn",
+      "name": "Französische Straße Ost",
+      "from": "n13_south_west",
+      "to": "n01_start",
+      "profile": "wohnstrasse_30"
+    }
+  ],
+  "waters": [
+    {
+      "id": "w_spree",
+      "name": "Spree",
+      "width": 26,
+      "points": [
+        [
+          -280,
+          335
+        ],
+        [
+          -130,
+          335
+        ],
+        [
+          0,
+          335
+        ],
+        [
+          140,
+          335
+        ],
+        [
+          260,
+          335
+        ]
+      ]
+    }
+  ],
+  "parks": [
+    {
+      "id": "p01_lustgarten",
+      "name": "Lustgarten am Spreeufer",
+      "points": [
+        [
+          20,
+          296
+        ],
+        [
+          120,
+          296
+        ],
+        [
+          120,
+          318
+        ],
+        [
+          20,
+          318
+        ]
+      ]
+    },
+    {
+      "id": "p02_stadtpark",
+      "name": "Großer Stadtpark",
+      "points": [
+        [
+          25,
+          130
+        ],
+        [
+          85,
+          130
+        ],
+        [
+          85,
+          240
+        ],
+        [
+          25,
+          240
+        ]
+      ]
+    }
+  ],
+  "spawns": {
+    "player": {
+      "roadId": "r01_start",
+      "s": 20,
+      "lane": 0
+    }
+  }
+}

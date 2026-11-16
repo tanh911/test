@@ -1,14 +1,11 @@
-// fullRoadAudit.test.ts — 🔍 AUDIT TOÀN BỘ ĐƯỜNG: biển báo đúng + lỗi đường.
-// Quét TẤT CẢ 288 road + TẤT CẢ signs + intersections/spawns/props/buildings:
-//   A1. BIỂN — từng biển: roadId/type/value/s/side hợp lệ, không trùng, không
-//       đứng giữa đường/trong nhà.
-//   A2. NGUỒN — không "biển ma": mỗi biển phải từ cột WFS thật (cache) hoặc
-//       synthetic luật thi (306/205 tại priority_road, 267 tại one-way).
-//   B.  COVERAGE — cột WFS hợp lệ snap được vào graph phải được đại diện ≥97%
-//       (loại trừ các cột bị skip HỢP LỆ: đè đường/nhà, sát mép road).
-//   C.  ĐƯỜNG — cấu trúc từng road + không chồng lấn lòng đường với road lạ.
-//   D.  LIÊN QUAN — intersections/spawns/props/buildings/waters trỏ đúng.
-//   E.  Bảng tổng hợp mọi đường (console).
+// fullRoadAudit.test.ts — 🔍 AUDIT ĐẶC THÙ BERLIN OSM (A2, B, E, F).
+// Lưu ý (Bước 5A.3): Các bài kiểm tra bất biến chung cho mọi GameMap (A1, C, D)
+// đã được tách sang `src/world/mapIntegrityAudit.test.ts` (nhận map làm tham số).
+// File này chỉ giữ lại 4 bài kiểm tra phụ thuộc trực tiếp vào dữ liệu Berlin OSM / WFS cache:
+//   A2. NGUỒN — mỗi biển trên Berlin phải từ cột WFS thật (cache) hoặc synthetic luật thi.
+//   B.  COVERAGE — cột WFS hợp lệ snap được vào graph phải được đại diện ≥95%.
+//   F.  ROAD ≠ RAILWAY — file extraction OSM o['ways'] phải có 0 railway way.
+//   E.  Bảng tổng hợp 288 đường Berlin-Mitte.
 // Chạy: npx vitest run src/world/fullRoadAudit.test.ts
 import { describe, expect, it } from 'vitest';
 import { readFileSync } from 'node:fs';
@@ -17,18 +14,15 @@ import type { GameMap, MapRoad, MapSign } from './mapLoader';
 import { loadGameMap, roadLength, roadPointAt, roadCurve } from './mapLoader';
 import { roadHalfWidth } from './roadMesh';
 import { buildingStrips } from './buildings';
-import { SIGN_DEFS } from './trafficSigns';
 
 const map: GameMap = loadGameMap(berlinMitteMap);
 
-// ── Quy đổi lat/lon → mét local (CÙNG GỐC với osm_to_roadgraph / import script) ──
 const R = 6371000, refLat = 52.5170, refLon = 13.3888;
 const toXY = (lat: number, lon: number): [number, number] => [
   ((lon - refLon) * Math.PI) / 180 * R * Math.cos((refLat * Math.PI) / 180),
   ((lat - refLat) * Math.PI) / 180 * R,
 ];
 
-// ── Mã StVO hợp lệ mà sim hỗ trợ (mirror import_berlin_signs.mjs) ──
 const SIM_TYPES = new Set(['205', '206', '301', '306', '102', '274', '274.1', '220', '267', '283', '286', '314', '350', '101', '138', '215']);
 function parseWfsCodes(raw: string): Array<{ type: string; value?: number }> {
   const out: Array<{ type: string; value?: number }> = [];
@@ -60,7 +54,7 @@ function distToPolyline(px: number, pz: number, pts: Array<[number, number]>): n
   }
   return best;
 }
-/** Vị trí world của biển theo ĐÚNG công thức sim (placeSigns: right vector = (nx,nz)) */
+
 function signWorldPos(sign: MapSign, road: MapRoad): XYPt {
   const pt = roadPointAt(road, sign.s);
   const half = roadHalfWidth(road);
@@ -69,14 +63,13 @@ function signWorldPos(sign: MapSign, road: MapRoad): XYPt {
 }
 interface XYPt { x: number; z: number; }
 
-// ── Snap cột WFS: trả {road, s, side, pos, excluded} — mirror import script ──
 interface SnapResult {
   road: MapRoad;
   dist: number;
   s: number;
   side: 'left' | 'right';
   pos: XYPt;
-  excluded: string | null; // lý do bị skip hợp lệ (clash/mép) — null nếu hợp lệ
+  excluded: string | null;
 }
 const stripsCache: Array<[number, number, number, number]> = (() => {
   const st: Array<[number, number, number, number]> = [];
@@ -95,10 +88,7 @@ function posClear(roads: MapRoad[], strips: Array<[number, number, number, numbe
   }
   return null;
 }
-function snapMast(map: GameMap, roadsById: Map<string, MapRoad>, x: number, z: number): SnapResult | null {
-  // ĐỒNG BỘ import_berlin_signs.mjs: snap POLYLINE → sCurve (sample curve gần
-  // nhất, round 0.1) → pos = roadPointAt(sCurve) + n·(half+1.2) — exclude theo
-  // posClear tại chính vị trí render đó
+function snapMast(map: GameMap, _roadsById: Map<string, MapRoad>, x: number, z: number): SnapResult | null {
   let best: { road: MapRoad; dist: number; px: number; pz: number; tx: number; tz: number } | null = null;
   for (const road of map.roads) {
     for (let i = 0; i < road.points.length - 1; i++) {
@@ -129,8 +119,6 @@ function snapMast(map: GameMap, roadsById: Map<string, MapRoad>, x: number, z: n
   const pos = { x: pt.x + pt.nx * sgn * (half + 1.2), z: pt.z + pt.nz * sgn * (half + 1.2) };
   const len = roadLength(best.road);
   let excluded: string | null = null;
-  // Biển thật đứng ở CURB: cột xa tim > half+6 (quảng trường/pedestrian zone) =
-  // snap nhầm road — import skip hợp lệ → test cũng không kỳ vọng
   if (best.dist > half + 6) excluded = 'quá xa curb (plaza)';
   if (len < 5 || sCurve < 1.5 || sCurve > len - 1.5) excluded = 'sát mép road';
   else if (!excluded) {
@@ -140,49 +128,9 @@ function snapMast(map: GameMap, roadsById: Map<string, MapRoad>, x: number, z: n
   return { road: best.road, dist: best.dist, s: sCurve, side, pos, excluded };
 }
 
-describe('🛣️ FULL ROAD AUDIT — tất cả đường + biển báo', () => {
+describe('🛣️ FULL ROAD AUDIT (BERLIN OSM SPECIFIC — A2, B, F, E)', () => {
   const roadsById = new Map(map.roads.map((r) => [r.id, r]));
-  const nodeIds = new Set(map.nodes.map((n) => n.id));
   const roadName = (r: MapRoad) => (r as unknown as { name?: string }).name || '—';
-
-  // ── A1. BIỂN: integrity từng biển ──
-  it('A1. Mỗi biển: roadId/type/value/s/side hợp lệ + không trùng + không đè đường/nhà', () => {
-    const issues: string[] = [];
-    const seen = new Set<string>();
-    for (const sign of map.signs as MapSign[]) {
-      const tag = `${sign.type}${sign.value ? '-' + sign.value : ''}@${sign.roadId}:${sign.s}`;
-      const road = roadsById.get(sign.roadId);
-      if (!road) { issues.push(`${tag}: roadId không tồn tại`); continue; }
-      if (!SIGN_DEFS[sign.type]) { issues.push(`${tag}: type ${sign.type} không có SIGN_DEFS`); continue; }
-      if (sign.type === '274' && (sign.value === undefined || sign.value < 3 || sign.value > 130)) {
-        issues.push(`${tag}: value tốc độ sai (${sign.value})`); continue;
-      }
-      if (sign.type !== '274' && sign.type !== '274.1' && sign.value !== undefined) {
-        issues.push(`${tag}: biển ${sign.type} không cần value=${sign.value}`);
-      }
-      if (sign.side !== 'left' && sign.side !== 'right') { issues.push(`${tag}: side sai`); continue; }
-      const len = roadLength(road);
-      if (!Number.isFinite(sign.s) || sign.s < 1.5 || sign.s > len - 1.5) {
-        issues.push(`${tag}: s=${sign.s} ngoài [1.5, ${len.toFixed(0)}]`); continue;
-      }
-      const key = `${sign.roadId}|${sign.type}|${sign.value ?? ''}|${sign.side}|${Math.round(sign.s / 2)}`;
-      if (seen.has(key)) { issues.push(`${tag}: trùng biển liền kề`); continue; }
-      seen.add(key);
-      const w = signWorldPos(sign, road);
-      let onRoad = '';
-      for (const r2 of map.roads) {
-        if (distToPolyline(w.x, w.z, r2.points) < roadHalfWidth(r2) - 0.3) { onRoad = r2.id; break; }
-      }
-      if (onRoad) { issues.push(`${tag}: cột đứng giữa lòng đường ${onRoad} @(${w.x.toFixed(0)},${w.z.toFixed(0)})`); continue; }
-      for (const [a, b, c, d] of stripsCache) {
-        if (w.x > a && w.x < c && w.z > b && w.z < d) {
-          issues.push(`${tag}: cột trong nhà @(${w.x.toFixed(0)},${w.z.toFixed(0)})`); break;
-        }
-      }
-    }
-    if (issues.length) console.info(`[A1] ${issues.length} biển lỗi:\n  ${issues.slice(0, 15).join('\n  ')}`);
-    expect(issues).toEqual([]);
-  });
 
   // ── A2. NGUỒN biển: không biển ma ──
   it('A2. Mỗi biển có nguồn: cột WFS thật gần đó HOẶC synthetic luật thi', () => {
@@ -223,11 +171,9 @@ describe('🛣️ FULL ROAD AUDIT — tất cả đường + biển báo', () =>
         if (oneWay) {
           const len = roadLength(road);
           const wrongEndS = road.lanesBackward === 0 ? len : 0;
-          // Phần 11.3: oneway B (to→from) — đầu cấm là 'from' (s≈0)
           synthetic = Math.abs(sign.s - wrongEndS) < 30;
         }
       } else if (sign.type === '220') {
-        // 220 (Einbahnstraße) ở đầu vào hợp pháp của oneway — nguồn: oneway-fix (Phần 11.2)
         const src = (sign as unknown as { src?: string }).src;
         if (src === 'oneway-fix-220' && (road.lanesBackward === 0 || road.lanesForward === 0)) synthetic = true;
       }
@@ -253,7 +199,7 @@ describe('🛣️ FULL ROAD AUDIT — tất cả đường + biển báo', () =>
       const codes = parseWfsCodes(f.properties?.vkz_zeiche || '');
       if (!codes.length) continue;
       const snap = snapMast(map, roadsById, x, z);
-      if (!snap || snap.dist > 12 || snap.excluded) continue; // không trong graph / skip hợp lệ
+      if (!snap || snap.dist > 12 || snap.excluded) continue;
       expected++;
       for (const code of codes) {
         const hit = (map.signs as MapSign[]).some((sg) => {
@@ -262,9 +208,7 @@ describe('🛣️ FULL ROAD AUDIT — tất cả đường + biển báo', () =>
           const r = roadsById.get(sg.roadId);
           if (!r) return false;
           const w = signWorldPos(sg, r);
-          // 18m (trước 15): Phần 11 chuẩn hóa làn oneway (laneWidth 3.0→3.4, half −1.3m) làm biển
-  // neo lại lệch ≤2.6m — cột WFS + quy định biển KHÔNG đổi, chỉ neo vị trí đổi
-  return Math.hypot(w.x - x, w.z - z) < 18 && Math.hypot(w.x - snap.pos.x, w.z - snap.pos.z) < 18;
+          return Math.hypot(w.x - x, w.z - z) < 18 && Math.hypot(w.x - snap.pos.x, w.z - snap.pos.z) < 18;
         });
         if (!hit) missing.push(`VZ ${code.type}${code.value ? '-' + code.value : ''} @(${x.toFixed(0)},${z.toFixed(0)}) snap ${snap.road.id} d=${snap.dist.toFixed(1)}m`);
       }
@@ -275,111 +219,7 @@ describe('🛣️ FULL ROAD AUDIT — tất cả đường + biển báo', () =>
     expect(coverage).toBeGreaterThanOrEqual(0.95);
   });
 
-  // ── C. ĐƯỜNG: cấu trúc + chồng lấn ──
-  it('C. Mỗi road: cấu trúc hợp lệ + không chồng lấn lòng đường với road lạ', () => {
-    const issues: string[] = [];
-    for (const r of map.roads as MapRoad[]) {
-      const tag = `${r.id} (${roadName(r)})`;
-      if (!nodeIds.has(r.from) || !nodeIds.has(r.to)) issues.push(`${tag}: node from/to không tồn tại`);
-      if (r.points.length < 2) issues.push(`${tag}: ít hơn 2 điểm`);
-      for (const [x, z] of r.points) {
-        if (!Number.isFinite(x) || !Number.isFinite(z)) { issues.push(`${tag}: tọa độ NaN`); break; }
-      }
-      const len = roadLength(r);
-      if (len < 4) issues.push(`${tag}: dài ${len.toFixed(1)} m < 4 m`);
-      const totalLanes = r.lanesForward + r.lanesBackward;
-      if (totalLanes < 1) issues.push(`${tag}: 0 làn`);
-      const width = totalLanes * r.laneWidth;
-      if (r.laneWidth < 2.8 || r.laneWidth > 3.75) issues.push(`${tag}: laneWidth ${r.laneWidth} ngoài [2.8, 3.75]`);
-      if (width < 3.3) issues.push(`${tag}: rộng ${width} m — xe không vừa`);
-      if (width > 30) issues.push(`${tag}: rộng bất thường ${width} m`);
-      if (![5, 10, 20, 30, 40, 50, 60, 70, 80, 100, 120, 130].includes(r.speedLimit)) {
-        issues.push(`${tag}: speedLimit ${r.speedLimit} lạ`);
-      }
-      if (!['main', 'give_way', 'stop', 'equal'].includes(r.priority)) issues.push(`${tag}: priority ${r.priority} lạ`);
-      if (!['asphalt', 'asphalt_worn', 'cobble'].includes(r.surface)) issues.push(`${tag}: surface ${r.surface} lạ`);
-      if (!r.sidewalk || typeof r.sidewalk.left !== 'boolean' || typeof r.sidewalk.right !== 'boolean') {
-        issues.push(`${tag}: thiếu flag sidewalk`);
-      }
-    }
-    // chồng lấn: cặp road KHÔNG chung node nhưng lòng đường trùng nhau
-    const roads = map.roads as MapRoad[];
-    for (let i = 0; i < roads.length; i++) {
-      const A = roads[i];
-      for (let j = i + 1; j < roads.length; j++) {
-        const B = roads[j];
-        if (A.from === B.from || A.from === B.to || A.to === B.from || A.to === B.to) continue;
-        const lenA = A.points.reduce((s, p, k) => k ? s + Math.hypot(p[0] - A.points[k - 1][0], p[1] - A.points[k - 1][1]) : 0, 0);
-        let hits = 0;
-        for (const f of [0.2, 0.4, 0.6, 0.8]) {
-          const target = lenA * f;
-          let acc = 0, px = A.points[0][0], pz = A.points[0][1];
-          for (let k = 1; k < A.points.length; k++) {
-            const segL = Math.hypot(A.points[k][0] - A.points[k - 1][0], A.points[k][1] - A.points[k - 1][1]);
-            if (acc + segL >= target) {
-              const t = segL > 0 ? (target - acc) / segL : 0;
-              px = A.points[k - 1][0] + (A.points[k][0] - A.points[k - 1][0]) * t;
-              pz = A.points[k - 1][1] + (A.points[k][1] - A.points[k - 1][1]) * t;
-              break;
-            }
-            acc += segL;
-          }
-          const dB = distToPolyline(px, pz, B.points);
-          if (dB < (roadHalfWidth(A) + roadHalfWidth(B)) * 0.5) hits++;
-        }
-        if (hits >= 2) issues.push(`${A.id} ↔ ${B.id}: lòng đường chồng lấn (${hits}/4 mẫu)`);
-      }
-    }
-    if (issues.length) console.info(`[C] ${issues.length} lỗi đường:\n  ${issues.slice(0, 20).join('\n  ')}`);
-    expect(issues).toEqual([]);
-  });
-
-  // ── D. Liên quan ──
-  it('D. Mọi tham chiếu roadId/nodeId ở intersections/spawns/props/buildings hợp lệ', () => {
-    const issues: string[] = [];
-    for (const ix of map.intersections) {
-      if (!nodeIds.has(ix.nodeId)) issues.push(`intersection ${ix.nodeId}: node không tồn tại`);
-      if (!['right_before_left', 'priority_road', 'yield', 'stop', 'traffic_light', 'roundabout'].includes(ix.rule)) {
-        issues.push(`intersection ${ix.nodeId}: rule ${ix.rule} lạ`);
-      }
-      for (const cw of ix.crosswalks) {
-        if (!roadsById.has(cw)) issues.push(`intersection ${ix.nodeId}: crosswalk road ${cw} không tồn tại`);
-      }
-      if (ix.trafficLight) {
-        const tl = ix.trafficLight;
-        if (tl.greenSeconds <= 0 || tl.yellowSeconds <= 0 || tl.redSeconds <= 0) {
-          issues.push(`intersection ${ix.nodeId}: chuỗi thời gian đèn sai`);
-        }
-      }
-    }
-    const spawnEntries = Object.entries(map.spawns as unknown as Record<string, { roadId: string; lane?: number; s?: number }>);
-    for (const [key, sp] of spawnEntries) {
-      if (!roadsById.has(sp.roadId)) issues.push(`spawn '${key}': road ${sp.roadId} không tồn tại`);
-      else {
-        const r = roadsById.get(sp.roadId)!;
-        const total = r.lanesForward + r.lanesBackward;
-        if (sp.lane !== undefined && (sp.lane < 0 || sp.lane >= total)) issues.push(`spawn '${key}': lane ${sp.lane} ngoài [0,${total})`);
-        if (sp.s !== undefined && (sp.s < 0 || sp.s > roadLength(r))) issues.push(`spawn '${key}': s ngoài đường`);
-      }
-    }
-    for (const pr of map.props ?? []) {
-      if (!roadsById.has(pr.roadId)) issues.push(`prop ${pr.type} road ${pr.roadId} không tồn tại`);
-    }
-    for (const b of map.buildings) {
-      if (!roadsById.has(b.roadId)) issues.push(`building road ${b.roadId} không tồn tại`);
-    }
-    for (const w of map.waters ?? []) {
-      if (w.points.length < 2) issues.push(`water ${w.id}: ít điểm`);
-    }
-    if (issues.length) console.info(`[D] ${issues.length} lỗi tham chiếu:\n  ${issues.slice(0, 15).join('\n  ')}`);
-    expect(issues).toEqual([]);
-  });
-
-  // ── F. ROAD ≠ RAILWAY (structural): osm_to_roadgraph CHỈ đọc highway ways
-  //    (o['ways'] phải 0 railway way) → road không thể sinh từ railway. Guard
-  //    fail nếu ai đó thêm railway way vào o['ways'] (bug gốc: 7 road S-Bahn
-  //    viaduct bị convert thành đường xe). Overlap 2D với railway KHÔNG fail —
-  //    viaduct 7.5m chạy TRÊN CAO đè lên phố là bình thường ở Mitte. ──
+  // ── F. ROAD ≠ RAILWAY (structural) ──
   it('F. Pipeline không convert railway thành road (o[ways] phải 0 railway way)', () => {
     let osm: { ways?: Array<{ id?: string; tags?: Record<string, string> }>; railways?: unknown[] } | null = null;
     try {
@@ -389,11 +229,10 @@ describe('🛣️ FULL ROAD AUDIT — tất cả đường + biển báo', () =>
     const railOnly = (osm?.ways || []).filter(w => w.tags && w.tags.railway && w.tags.highway === undefined);
     console.info(`[F] o[ways]: ${osm?.ways?.length ?? 0} ways · railway-tagged: ${railwayInWays.length} (rail-only: ${railOnly.length})`);
     expect(railwayInWays.length).toBe(0);
-    // cấu trúc dữ liệu: railways nằm riêng → rails render từ đây, không vào road graph
     expect((map.rails || []).length).toBeGreaterThan(50);
   });
 
-  // ── E. Bảng tổng hợp mọi đường ──  // ── E. Bảng tổng hợp mọi đường ──
+  // ── E. Bảng tổng hợp mọi đường ──
   it('E. Bảng tổng hợp 288 đường', () => {
     const lines: string[] = [];
     for (const r of map.roads as MapRoad[]) {
@@ -405,6 +244,6 @@ describe('🛣️ FULL ROAD AUDIT — tất cả đường + biển báo', () =>
       );
     }
     console.info(`[E] ${map.roads.length} đường:\n${lines.join('\n')}`);
-    expect(map.roads.length).toBe(288); // 7 road railway-nhầm đã khôi phục
+    expect(map.roads.length).toBe(288);
   });
 });

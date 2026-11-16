@@ -1,0 +1,275 @@
+{
+  "results": {
+    "A": [
+      {
+        "building": "r3@s=8 side=left floors=5 len=32m h=15m",
+        "rail": "22820560 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r3@s=8 side=left floors=5 len=32m h=15m",
+        "rail": "165409971 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r3@s=8 side=right floors=5 len=19m h=15m",
+        "rail": "22820560 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r3@s=8 side=right floors=5 len=19m h=15m",
+        "rail": "165409971 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r3@s=28.2 side=right floors=3 len=20m h=9m",
+        "rail": "22820560 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r3@s=28.2 side=right floors=3 len=20m h=9m",
+        "rail": "165409971 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r57@s=8 side=left floors=5 len=19m h=15m",
+        "rail": "144014228 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=8 side=right floors=3 len=28m h=9m",
+        "rail": "144014228 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r57@s=8 side=left floors=5 len=19m h=15m",
+        "rail": "144014233 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=8 side=right floors=3 len=28m h=9m",
+        "rail": "144014233 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r57@s=8 side=right floors=4 len=21m h=12m",
+        "rail": "144014228 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r157@s=8 side=left floors=4 len=26m h=12m",
+        "rail": "144014228 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r57@s=8 side=right floors=4 len=21m h=12m",
+        "rail": "144014233 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r157@s=8 side=left floors=4 len=26m h=12m",
+        "rail": "144014233 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r236@s=41.2 side=left floors=3 len=33m h=9m",
+        "rail": "195411594 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r236@s=41.2 side=left floors=3 len=33m h=9m",
+        "rail": "22820560 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r236@s=49.4 side=right floors=4 len=21m h=12m",
+        "rail": "22820560 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r236@s=28.2 side=right floors=3 len=20m h=9m",
+        "rail": "195411594 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r236@s=49.4 side=right floors=4 len=21m h=12m",
+        "rail": "195411594 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=37.2 side=right floors=4 len=29m h=12m",
+        "rail": "144014228 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=37.2 side=right floors=4 len=29m h=12m",
+        "rail": "144014233 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=37.2 side=right floors=4 len=29m h=12m",
+        "rail": "1340133914 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=67.4 side=right floors=5 len=30m h=15m",
+        "rail": "144014233 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=67.4 side=right floors=5 len=30m h=15m",
+        "rail": "1340133914 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=67.4 side=right floors=5 len=30m h=15m",
+        "rail": "207363168 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=67.4 side=right floors=5 len=30m h=15m",
+        "rail": "1340133915 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=67.4 side=right floors=5 len=30m h=15m",
+        "rail": "144014230 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=67.4 side=right floors=5 len=30m h=15m",
+        "rail": "1340133913 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=98.6 side=right floors=3 len=31m h=9m",
+        "rail": "144014230 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=98.6 side=right floors=3 len=31m h=9m",
+        "rail": "207363168 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r248@s=98.6 side=right floors=3 len=31m h=9m",
+        "rail": "1340133913 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r256@s=8 side=left floors=5 len=18m h=15m",
+        "rail": "167272512 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r256@s=27.2 side=left floors=3 len=19m h=9m",
+        "rail": "167272512 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      },
+      {
+        "building": "r256@s=8 side=right floors=3 len=25m h=9m",
+        "rail": "167272512 (tram) elev=0",
+        "cat": "A",
+        "isGen": true
+      }
+    ],
+    "B": [
+      {
+        "building": "r2@s=37.2 side=left floors=5 len=29m h=15m",
+        "rail": "25946663 (Berliner Stadtbahn) elev=8",
+        "cat": "B",
+        "isGen": true
+      },
+      {
+        "building": "r255@s=8 side=left floors=5 len=25m h=15m",
+        "rail": "32590897 (Berliner Stadtbahn) elev=6.5",
+        "cat": "B",
+        "isGen": true
+      },
+      {
+        "building": "r255@s=8 side=left floors=5 len=25m h=15m",
+        "rail": "32590899 (Berliner Stadtbahn) elev=6.5",
+        "cat": "B",
+        "isGen": true
+      },
+      {
+        "building": "r255@s=34.2 side=left floors=3 len=26m h=9m",
+        "rail": "32590899 (Berliner Stadtbahn) elev=6.5",
+        "cat": "B",
+        "isGen": true
+      },
+      {
+        "building": "r255@s=8 side=left floors=5 len=25m h=15m",
+        "rail": "32590901 (Berliner Stadtbahn) elev=6.5",
+        "cat": "B",
+        "isGen": true
+      },
+      {
+        "building": "r255@s=34.2 side=left floors=3 len=26m h=9m",
+        "rail": "32590901 (Berliner Stadtbahn) elev=6.5",
+        "cat": "B",
+        "isGen": true
+      },
+      {
+        "building": "r255@s=8 side=left floors=5 len=25m h=15m",
+        "rail": "32590903 (Berliner Stadtbahn) elev=6.5",
+        "cat": "B",
+        "isGen": true
+      },
+      {
+        "building": "r255@s=34.2 side=left floors=3 len=26m h=9m",
+        "rail": "32590903 (Berliner Stadtbahn) elev=6.5",
+        "cat": "B",
+        "isGen": true
+      },
+      {
+        "building": "r255@s=39.2 side=right floors=5 len=31m h=15m",
+        "rail": "32590901 (Berliner Stadtbahn) elev=6.5",
+        "cat": "B",
+        "isGen": true
+      },
+      {
+        "building": "r255@s=39.2 side=right floors=5 len=31m h=15m",
+        "rail": "32590903 (Berliner Stadtbahn) elev=6.5",
+        "cat": "B",
+        "isGen": true
+      }
+    ],
+    "C": []
+  },
+  "railSamples": 4351,
+  "overlaps": 926
+}
